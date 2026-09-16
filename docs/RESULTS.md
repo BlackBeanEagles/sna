@@ -38,10 +38,11 @@ magnitude below the 10⁵ the proposal projected — see Limitations.
 
 The raw adoption rate climbs from 0.159 to 0.227 (lift 1.42). Read alone, that
 looks like textbook complex contagion. But the timestamp-shuffled null climbs
-just as fast, and the **excess over the null decays monotonically to exactly
-zero**. Complex contagion predicts the opposite: reinforcement should make the
-excess *grow* with d. High-d players are simply high-volume players who adopt
-more of everything.
+just as fast, and the **ratio of observed to null falls from 1.178 to 0.999** —
+that is, the excess *above* the null vanishes. Complex contagion predicts the
+opposite: reinforcement should make the excess *grow* with d. High-d players
+are simply high-volume players who adopt more of everything: `corr(d, activity)
+= 0.44`, and median activity runs from 68 games at d = 1 to 189 at d ≥ 6.
 
 ### The decisive comparison agrees
 
@@ -64,9 +65,13 @@ Rating-and-activity matched controls, n = 61,376 pairs:
 | **Difference** | **+3.00 pp**, 95% CI [2.64, 3.36] |
 | Risk ratio | 1.29 |
 
-Beating the null at d = 1 with z = 20.1 says the first exposure carries the
-whole effect. That is simple contagion with a modest, tightly estimated
-effect size.
+This estimate uses one pair per exposed player-behaviour, so unlike the curve
+above it is **not affected by the trial-independence problem** documented
+below. It is the most robust number in the report — lead with it.
+
+Beating the null at d = 1 says the first exposure carries the effect. Quote the
+conservative per-spell figure for that (z = 8.9), not the per-exposure z = 20.1
+in the table above, which is inflated by repeated counting.
 
 ## Network structure (Objective 4)
 
