@@ -1,0 +1,9 @@
+chess
+pandas
+pyarrow
+networkx
+matplotlib
+scipy
+scikit-learn
+zstandard
+tqdm

@@ -1,0 +1,2 @@
+nodes,edges,density,components,communities,modularity,mean_degree,pre_adoption_exposures,within_community,across_community,share_within
+6881,173944,0.007349,1,5,0.4926,50.56,47268,34064,13204,0.7207

@@ -1,0 +1,211 @@
+{
+  "parse": {
+    "games": 249505,
+    "skipped": {
+      "rating_band": 2587133,
+      "speed": 1643553,
+      "no_eco": 977,
+      "no_rating": 25,
+      "rare_eco": 224268,
+      "low_activity": 64896
+    },
+    "players": 6881,
+    "span": [
+      "2015-12-31 23:00:34",
+      "2016-01-31 22:59:24"
+    ],
+    "openings": 40
+  },
+  "trials": {
+    "n": 223967,
+    "adoptions": 39661,
+    "rate": 0.1771
+  },
+  "network": {
+    "nodes": 6881,
+    "edges": 173944,
+    "density": 0.007349,
+    "components": 1,
+    "communities": 5,
+    "modularity": 0.4926,
+    "mean_degree": 50.56,
+    "pre_adoption_exposures": 47268,
+    "within_community": 34064,
+    "across_community": 13204,
+    "share_within": 0.7207
+  },
+  "early_adopters": {
+    "degree": {
+      "0": 60.7703,
+      "1": 84.2914
+    },
+    "kcore": {
+      "0": 28.3465,
+      "1": 30.8857
+    },
+    "betweenness": {
+      "0": 0.0003,
+      "1": 0.0006
+    },
+    "clustering": {
+      "0": 0.0705,
+      "1": 0.0687
+    }
+  },
+  "curve_by_d": [
+    {
+      "d": 1,
+      "n": 85771,
+      "adopted": 13679,
+      "rate": 0.1595,
+      "lo": 0.157,
+      "hi": 0.1619
+    },
+    {
+      "d": 2,
+      "n": 40895,
+      "adopted": 6474,
+      "rate": 0.1583,
+      "lo": 0.1548,
+      "hi": 0.1619
+    },
+    {
+      "d": 3,
+      "n": 24022,
+      "adopted": 4058,
+      "rate": 0.1689,
+      "lo": 0.1642,
+      "hi": 0.1737
+    },
+    {
+      "d": 4,
+      "n": 15556,
+      "adopted": 2826,
+      "rate": 0.1817,
+      "lo": 0.1757,
+      "hi": 0.1878
+    },
+    {
+      "d": 5,
+      "n": 10877,
+      "adopted": 2013,
+      "rate": 0.1851,
+      "lo": 0.1779,
+      "hi": 0.1925
+    },
+    {
+      "d": 6,
+      "n": 46846,
+      "adopted": 10611,
+      "rate": 0.2265,
+      "lo": 0.2227,
+      "hi": 0.2303
+    }
+  ],
+  "verdict": {
+    "raw_lift_d_last_over_first": 1.42,
+    "rate_d_min": 0.1595,
+    "rate_d_max": 0.2265,
+    "raw_curve_rises": true,
+    "separated_at_fixed_k": false,
+    "lift_over_null_at_min_d": 1.178,
+    "lift_over_null_at_max_d": 0.999,
+    "excess_over_null_grows_with_d": false,
+    "beats_null_anywhere": true,
+    "verdict": "simple contagion: exposure matters, but the rise in d is explained by the activity confound, not by reinforcement"
+  },
+  "null_comparison": [
+    {
+      "d": 1,
+      "n_real": 85771,
+      "rate_real": 0.1595,
+      "rate_null": 0.1354,
+      "rate_sd": 0.0012,
+      "lift_over_null": 1.1777,
+      "z_vs_null": 20.0712
+    },
+    {
+      "d": 2,
+      "n_real": 40895,
+      "rate_real": 0.1583,
+      "rate_null": 0.1418,
+      "rate_sd": 0.0014,
+      "lift_over_null": 1.1161,
+      "z_vs_null": 11.8807
+    },
+    {
+      "d": 3,
+      "n_real": 24022,
+      "rate_real": 0.1689,
+      "rate_null": 0.1562,
+      "rate_sd": 0.0014,
+      "lift_over_null": 1.0813,
+      "z_vs_null": 8.8959
+    },
+    {
+      "d": 4,
+      "n_real": 15556,
+      "rate_real": 0.1817,
+      "rate_null": 0.1692,
+      "rate_sd": 0.0013,
+      "lift_over_null": 1.0739,
+      "z_vs_null": 9.9286
+    },
+    {
+      "d": 5,
+      "n_real": 10877,
+      "rate_real": 0.1851,
+      "rate_null": 0.1781,
+      "rate_sd": 0.0022,
+      "lift_over_null": 1.0394,
+      "z_vs_null": 3.1662
+    },
+    {
+      "d": 6,
+      "n_real": 46846,
+      "rate_real": 0.2265,
+      "rate_null": 0.2267,
+      "rate_sd": 0.0015,
+      "lift_over_null": 0.9993,
+      "z_vs_null": -0.0979
+    }
+  ],
+  "matched_controls": {
+    "n_pairs": 61376,
+    "exposed_adoption_rate": 0.1335,
+    "control_adoption_rate": 0.1035,
+    "difference": 0.03,
+    "ci95": [
+      0.0264,
+      0.0336
+    ],
+    "risk_ratio": 1.29
+  },
+  "predictive": {
+    "n_train": 156778,
+    "n_test": 67189,
+    "split_at": "2016-01-13 11:40:21",
+    "auc_baseline": 0.5255,
+    "auc_network": 0.5289,
+    "auc_gain": 0.0034,
+    "network_coefficients": {
+      "popularity": 0.0,
+      "rating": -0.046,
+      "activity": 0.1667,
+      "k": -0.004,
+      "d": 0.088,
+      "sd": -0.1077,
+      "degree": -0.0081,
+      "kcore": 0.2525,
+      "betweenness": -0.0544
+    }
+  },
+  "animation": {
+    "behaviour": "A00/B",
+    "gif": "E:\\sna_data\\results\\figures\\diffusion.gif",
+    "panels": "E:\\sna_data\\results\\figures\\diffusion_panels.png",
+    "nodes_drawn": "400",
+    "adopters": "394"
+  },
+  "runtime_seconds": 1982.3
+}

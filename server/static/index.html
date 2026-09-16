@@ -1,0 +1,1356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contagion Pipeline — Live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  color-scheme: light dark;
+  --ground:#f5f4f8; --surface:#fdfcff; --surface-2:#eeecf4;
+  --ink:#1a1722; --ink-2:#5c5670; --muted:#8d87a0;
+  --rule:#e2dfeb; --rule-strong:#c9c4d8;
+  --s-indigo:#6a4bb0; --s-ochre:#a87413; --s-jade:#0f8f76;
+  --s-vermilion:#bf4535; --s-null:#9a94ad;
+  --wash-indigo:rgba(106,75,176,.13); --wash-vermilion:rgba(191,69,53,.10);
+  --glow-a:rgba(106,75,176,.16); --glow-b:rgba(191,69,53,.11); --glow-c:rgba(15,143,118,.10);
+  --shadow:0 1px 2px rgba(26,23,34,.04), 0 8px 28px rgba(26,23,34,.05);
+  --display:'Spectral',Georgia,serif;
+  --body:'IBM Plex Sans',-apple-system,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  --r:14px; --ease:cubic-bezier(.22,.68,.32,1);
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --ground:#131119; --surface:#1c1926; --surface-2:#241f31;
+  --ink:#eeebf5; --ink-2:#aca5c0; --muted:#7d768f;
+  --rule:#2d2740; --rule-strong:#413a56;
+  --s-indigo:#8f72d6; --s-ochre:#b1862f; --s-jade:#2aa88f;
+  --s-vermilion:#d65f54; --s-null:#7a7391;
+  --wash-indigo:rgba(143,114,214,.18); --wash-vermilion:rgba(214,95,84,.14);
+  --glow-a:rgba(143,114,214,.17); --glow-b:rgba(214,95,84,.12); --glow-c:rgba(42,168,143,.11);
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 28px rgba(0,0,0,.28);
+}}
+:root[data-theme="dark"]{
+  --ground:#131119; --surface:#1c1926; --surface-2:#241f31;
+  --ink:#eeebf5; --ink-2:#aca5c0; --muted:#7d768f;
+  --rule:#2d2740; --rule-strong:#413a56;
+  --s-indigo:#8f72d6; --s-ochre:#b1862f; --s-jade:#2aa88f;
+  --s-vermilion:#d65f54; --s-null:#7a7391;
+  --wash-indigo:rgba(143,114,214,.18); --wash-vermilion:rgba(214,95,84,.14);
+  --glow-a:rgba(143,114,214,.17); --glow-b:rgba(214,95,84,.12); --glow-c:rgba(42,168,143,.11);
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 28px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--ground);color:var(--ink);font-family:var(--body);
+  font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;
+}
+.field{position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(58vw 52vw at 12% -8%,var(--glow-a),transparent 68%),
+    radial-gradient(50vw 46vw at 104% 42%,var(--glow-b),transparent 66%),
+    radial-gradient(44vw 40vw at 38% 112%,var(--glow-c),transparent 66%);}
+.wrap{max-width:1140px;margin:0 auto;padding-inline:20px;padding-block:0}
+
+header{padding-block:38px 24px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);margin:0 0 14px;display:flex;gap:10px;flex-wrap:wrap}
+.eyebrow .sep{color:var(--rule-strong)}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(28px,4.4vw,44px);
+  line-height:1.08;letter-spacing:-.02em;margin:0 0 12px;text-wrap:balance}
+.sub{color:var(--ink-2);max-width:68ch;margin:0;font-size:15.5px}
+.sub b{color:var(--ink);font-weight:600}
+
+/* ---- control bar ---- */
+.controls{
+  display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;
+  background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);
+  padding:18px 20px;margin-block:24px;box-shadow:var(--shadow);
+}
+.ctl{display:flex;flex-direction:column;gap:6px;min-width:0}
+.ctl label{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted)}
+select,input[type=range]{font-family:var(--mono);font-size:13px;color:var(--ink);
+  background:var(--surface-2);border:1px solid var(--rule-strong);border-radius:8px;
+  padding:8px 10px;min-width:170px}
+input[type=range]{padding:0;height:26px;min-width:190px;accent-color:var(--s-indigo)}
+.rangeval{font-family:var(--mono);font-size:12px;color:var(--ink-2);
+  font-variant-numeric:tabular-nums}
+.grow{flex:1 1 auto}
+button{
+  font-family:var(--mono);font-size:12.5px;letter-spacing:.07em;text-transform:uppercase;
+  border-radius:999px;padding:12px 26px;cursor:pointer;border:1px solid transparent;
+  background:var(--s-indigo);color:#fff;font-weight:500;
+  transition:transform .2s var(--ease),filter .2s var(--ease),opacity .2s;
+}
+button:hover:not(:disabled){filter:brightness(1.1);transform:translateY(-1px)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.ghost{background:transparent;color:var(--ink-2);border-color:var(--rule-strong)}
+button:focus-visible{outline:2px solid var(--s-vermilion);outline-offset:3px}
+
+/* ---- stage rail ---- */
+.rail{display:grid;grid-template-columns:repeat(auto-fit,minmax(138px,1fr));gap:8px;margin-bottom:20px}
+.sg{
+  background:var(--surface);border:1px solid var(--rule);border-radius:10px;
+  padding:11px 13px;display:flex;flex-direction:column;gap:5px;
+  transition:border-color .3s var(--ease),background .3s var(--ease);position:relative;overflow:hidden;
+}
+.sg .nm{font-size:12px;font-weight:500;line-height:1.3}
+.sg .st{font-family:var(--mono);font-size:10px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted)}
+.sg[data-state=running]{border-color:var(--s-indigo);background:var(--wash-indigo)}
+.sg[data-state=running] .st{color:var(--s-indigo)}
+.sg[data-state=running]::after{
+  content:"";position:absolute;left:0;bottom:0;height:2px;width:36%;
+  background:var(--s-indigo);animation:sweep 1.25s var(--ease) infinite}
+@keyframes sweep{0%{transform:translateX(-100%)}100%{transform:translateX(380%)}}
+.sg[data-state=done]{border-color:var(--s-jade)}
+.sg[data-state=done] .st{color:var(--s-jade)}
+.sg[data-state=failed]{border-color:var(--s-vermilion)}
+.sg[data-state=failed] .st{color:var(--s-vermilion)}
+.sg[data-state=skipped] .st{color:var(--s-ochre)}
+
+/* ---- live metrics ---- */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:20px}
+.m{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:14px 16px}
+.m dt{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);margin:0 0 5px}
+.m dd{margin:0;font-family:var(--mono);font-size:21px;font-weight:500;
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.m dd small{font-size:11.5px;color:var(--ink-2);font-weight:400}
+
+/* ---- panels ---- */
+.grid{display:grid;grid-template-columns:1.35fr 1fr;gap:18px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);
+  box-shadow:var(--shadow);overflow:hidden;margin-bottom:18px}
+.panel h2{font-family:var(--body);font-size:13.5px;font-weight:600;margin:0;
+  padding:15px 18px 0;letter-spacing:-.005em}
+.panel .hint{color:var(--muted);font-size:12.5px;margin:4px 18px 0}
+.panel .bd{padding:8px 12px 12px}
+svg.chart{display:block;width:100%;height:auto;overflow:visible}
+svg.chart text{font-family:var(--mono);fill:var(--ink-2)}
+.ax-label{font-size:10px;fill:var(--muted)}
+.ax-title{font-size:10px;fill:var(--muted);letter-spacing:.09em;text-transform:uppercase}
+.gridline{stroke:var(--rule);stroke-width:1}
+.axisline{stroke:var(--rule-strong);stroke-width:1}
+.dlabel{font-size:10.5px;font-weight:500;font-variant-numeric:tabular-nums}
+
+/* ---- log ---- */
+.logwrap{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);
+  box-shadow:var(--shadow);overflow:hidden}
+.log{height:300px;overflow-y:auto;padding:12px 16px;font-family:var(--mono);
+  font-size:11.5px;line-height:1.75;margin:0}
+.log div{display:flex;gap:10px;padding:1px 0}
+.log .ts{color:var(--muted);flex:none;font-variant-numeric:tabular-nums}
+.log .msg{color:var(--ink-2);word-break:break-word;min-width:0}
+.log .lv-ok .msg{color:var(--s-jade)}
+.log .lv-warn .msg{color:var(--s-ochre)}
+.log .lv-error .msg{color:var(--s-vermilion)}
+.log .lv-hl .msg{color:var(--ink);font-weight:500}
+.log .lv-trace .msg{color:var(--muted);white-space:pre-wrap;font-size:10.5px}
+
+/* ---- verdict ---- */
+.verdict{
+  border-radius:var(--r);padding:22px 24px;margin-bottom:18px;border:1px solid var(--rule);
+  background:var(--surface);box-shadow:var(--shadow);position:relative;overflow:hidden;
+  opacity:.5;transition:opacity .5s var(--ease),background .5s var(--ease);
+}
+.verdict::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--rule-strong)}
+.verdict.on{opacity:1;background:linear-gradient(140deg,var(--wash-vermilion),transparent 62%),var(--surface)}
+.verdict.on::before{background:linear-gradient(180deg,var(--s-indigo),var(--s-vermilion))}
+.verdict .lb{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--s-vermilion);margin:0 0 9px}
+.verdict .cl{font-family:var(--display);font-size:clamp(18px,2.4vw,23px);line-height:1.3;
+  margin:0 0 10px;text-wrap:balance}
+.verdict .ev{margin:0;font-family:var(--mono);font-size:11.5px;color:var(--ink-2);
+  display:flex;gap:16px;flex-wrap:wrap}
+.verdict .ev b{color:var(--ink);font-weight:500}
+
+.phead{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.toggle{display:inline-flex;align-items:center;gap:9px;cursor:pointer;margin:14px 18px 0;
+  font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-2);background:var(--surface-2);border:1px solid var(--rule-strong);
+  border-radius:999px;padding:6px 13px 6px 9px;user-select:none;
+  transition:border-color .3s var(--ease),color .3s var(--ease)}
+.toggle:hover{border-color:var(--s-vermilion);color:var(--ink)}
+.toggle input{position:absolute;opacity:0;width:0;height:0}
+.toggle .sw{width:26px;height:15px;border-radius:999px;background:var(--rule-strong);
+  position:relative;flex:none;transition:background .3s var(--ease)}
+.toggle .sw::after{content:"";position:absolute;top:2px;left:2px;width:11px;height:11px;
+  border-radius:50%;background:var(--surface);transition:transform .3s var(--ease)}
+.toggle input:checked + .sw{background:var(--s-vermilion)}
+.toggle input:checked + .sw::after{transform:translateX(11px)}
+.toggle input:focus-visible + .sw{outline:2px solid var(--s-indigo);outline-offset:3px}
+
+/* ---- chess board + openings ---- */
+.boardrow{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.boardwrap{flex:0 0 232px}
+#board{width:232px;height:232px;display:block;border-radius:8px;
+  border:1px solid var(--rule-strong)}
+/* The board keeps its own wood palette in both themes — a chessboard that
+   inverts in dark mode stops reading as a chessboard. */
+#board .sq-l{fill:#efe7dd}
+#board .sq-d{fill:#a98b6f}
+#board .pc{font-size:19px;text-anchor:middle;dominant-baseline:central;
+  font-family:"Segoe UI Symbol","Apple Color Emoji",serif}
+#board .pc.w{fill:#fffdf9;stroke:#2b2b2b;stroke-width:.6px;paint-order:stroke}
+#board .pc.b{fill:#241f1b;stroke:#efe7dd;stroke-width:.5px;paint-order:stroke}
+#board .last{fill:var(--s-ochre);opacity:.35}
+#board .sq-hit{cursor:pointer}
+#board .sel{fill:var(--s-indigo);opacity:.42}
+#board .dot{fill:var(--s-indigo);opacity:.55}
+#board .cap{fill:none;stroke:var(--s-vermilion);stroke-width:2.2;opacity:.75}
+#board .chk{fill:var(--s-vermilion);opacity:.4}
+
+.turnchip{font-family:var(--mono);font-size:11px;letter-spacing:.07em;
+  text-transform:uppercase;border:1px solid var(--rule-strong);border-radius:999px;
+  padding:6px 13px;margin:14px 18px 0;color:var(--ink-2);background:var(--surface-2);
+  transition:border-color .3s var(--ease),color .3s var(--ease)}
+.turnchip.w{border-color:var(--s-ochre);color:var(--ink)}
+.turnchip.b{border-color:var(--s-indigo);color:var(--ink)}
+.turnchip.over{border-color:var(--s-vermilion);color:var(--s-vermilion)}
+
+.liveopen{flex:1 1 250px;min-width:0}
+.lo-eco{margin:0;font-size:11px;letter-spacing:.12em;color:var(--s-indigo)}
+.lo-name{margin:2px 0 12px;font-family:var(--display);font-size:19px;
+  line-height:1.25;text-wrap:balance}
+.lo-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0}
+.lo-stats div{background:var(--surface-2);border-radius:8px;padding:8px 10px}
+.lo-stats dt{font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 3px}
+.lo-stats dd{margin:0;font-family:var(--mono);font-size:15px;font-weight:500;
+  font-variant-numeric:tabular-nums}
+.lo-sub{margin:10px 0 0;font-size:10.5px;color:var(--muted);line-height:1.7}
+.openlist-row{display:flex;flex-wrap:wrap;gap:6px;max-height:none;overflow:visible}
+.openlist-row li{border:1px solid var(--rule);padding:5px 10px;font-size:11.5px}
+.boardctl{display:flex;align-items:center;gap:8px;margin-top:10px}
+.movetext{font-size:11px;color:var(--ink-2);flex:1;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+button.mini{background:var(--surface-2);color:var(--ink-2);
+  border:1px solid var(--rule-strong);border-radius:8px;padding:5px 10px;
+  font-size:11px;letter-spacing:.04em;text-transform:none}
+button.mini:hover{color:var(--ink);border-color:var(--s-indigo)}
+.openlist{flex:1 1 230px;list-style:none;margin:0;padding:0;max-height:270px;
+  overflow-y:auto;min-width:0}
+.openlist li{display:flex;gap:10px;align-items:baseline;padding:6px 9px;
+  border-radius:8px;cursor:pointer;font-size:12.5px;
+  transition:background .2s var(--ease)}
+.openlist li:hover{background:var(--surface-2)}
+.openlist li.on{background:var(--wash-indigo)}
+.openlist .eco{font-family:var(--mono);font-size:10.5px;color:var(--s-indigo);
+  flex:none;width:32px}
+.openlist .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.openlist .ct{font-family:var(--mono);font-size:10.5px;color:var(--muted);
+  flex:none;font-variant-numeric:tabular-nums}
+
+.ticker{list-style:none;margin:0;padding:0;height:180px;overflow:hidden}
+.ticker li{display:flex;gap:9px;align-items:baseline;padding:4px 4px;
+  font-family:var(--mono);font-size:11px;border-bottom:1px solid var(--rule);
+  animation:slidein .35s var(--ease)}
+@keyframes slidein{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.ticker .eco{color:var(--s-indigo);flex:none}
+.ticker .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;color:var(--ink-2)}
+.ticker .el{color:var(--muted);flex:none}
+
+.netlegend{display:flex;gap:12px;flex-wrap:wrap;padding:8px 6px 2px;
+  font-family:var(--mono);font-size:10.5px;color:var(--ink-2)}
+.netlegend button{background:transparent;border:1px solid var(--rule);color:var(--ink-2);
+  border-radius:999px;padding:3px 10px;font-size:10.5px;letter-spacing:.04em;
+  text-transform:none;cursor:pointer}
+.netlegend button.off{opacity:.35}
+.netlegend button i{display:inline-block;width:8px;height:8px;border-radius:50%;
+  margin-right:6px;vertical-align:-1px}
+
+.tip{position:fixed;pointer-events:none;z-index:60;opacity:0;transform:translateY(4px);
+  transition:opacity .15s var(--ease),transform .15s var(--ease);
+  background:var(--surface);border:1px solid var(--rule-strong);border-radius:10px;
+  padding:9px 12px;font-family:var(--mono);font-size:11px;line-height:1.6;
+  box-shadow:var(--shadow);max-width:230px;color:var(--ink)}
+.tip.on{opacity:1;transform:translateY(0)}
+.tip .t-h{font-weight:500;margin-bottom:4px;letter-spacing:.04em}
+.tip .t-r{display:flex;justify-content:space-between;gap:14px;color:var(--ink-2)}
+.tip .t-r b{color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums}
+
+.note{font-size:13px;color:var(--muted);margin:14px 0 0}
+.note code{font-family:var(--mono);font-size:.92em;background:var(--surface-2);
+  padding:2px 6px;border-radius:5px;color:var(--ink-2)}
+footer{padding-block:28px 48px;color:var(--muted);font-size:12.5px;
+  border-top:1px solid var(--rule);margin-top:26px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="field" aria-hidden="true"></div>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow"><span>23 CSE 356 · Social Network Analysis</span><span class="sep">/</span>
+    <span>Live pipeline</span><span class="sep">/</span><span id="hostLabel">localhost</span></p>
+  <h1>Contagion Pipeline</h1>
+  <p class="sub">
+    Press run and this streams a real month from <b>database.lichess.org</b>, decompresses it in
+    flight, and executes the whole analysis in front of you — parse, exposure/adoption trials,
+    network, curve, shuffled-time null, matched controls, verdict.
+    <b>Nothing here is simulated.</b> The interesting moment is stage 5: watch the raw curve look
+    like complex contagion, then watch the null land on top of it.
+  </p>
+</header>
+
+<div class="controls">
+  <div class="ctl">
+    <label for="month">Archive month</label>
+    <select id="month"></select>
+  </div>
+  <div class="ctl">
+    <label for="cap">Games to scan</label>
+    <input type="range" id="cap" min="100000" max="5000000" step="100000" value="400000">
+    <span class="rangeval" id="capVal">400,000</span>
+  </div>
+  <div class="ctl">
+    <label for="reps">Null replicates</label>
+    <select id="reps">
+      <option value="1">1 — quick look only</option>
+      <option value="2">2</option>
+      <option value="3" selected>3 — matches the report</option>
+      <option value="5">5 — steadiest</option>
+    </select>
+  </div>
+  <div class="ctl">
+    <label for="refresh">Source</label>
+    <label class="toggle" for="refresh" style="margin:0">
+      <input type="checkbox" id="refresh">
+      <span class="sw" aria-hidden="true"></span><span>Force re-download</span>
+    </label>
+  </div>
+  <div class="grow"></div>
+  <button id="run">Run the pipeline</button>
+  <button id="stop" class="ghost" disabled>Cancel</button>
+</div>
+
+<div class="rail" id="rail"></div>
+
+<dl class="metrics">
+  <div class="m"><dt>Scanned</dt><dd id="mScan">—</dd></div>
+  <div class="m"><dt>Kept in band</dt><dd id="mKept">—</dd></div>
+  <div class="m"><dt>Games/sec</dt><dd id="mRate">—</dd></div>
+  <div class="m"><dt>Players</dt><dd id="mPlayers">—</dd></div>
+  <div class="m"><dt>Trials</dt><dd id="mTrials">—</dd></div>
+  <div class="m"><dt>Adoptions</dt><dd id="mAdopt">—</dd></div>
+</dl>
+
+<div class="verdict" id="verdict">
+  <p class="lb">Verdict</p>
+  <p class="cl" id="vClaim">Not run yet — press “Run the pipeline”.</p>
+  <p class="ev" id="vEvidence"></p>
+</div>
+
+<div class="grid">
+  <div>
+    <div class="panel">
+      <div class="phead">
+        <div><h2>Adoption-probability curve</h2>
+          <p class="hint" id="curveHint">Waiting for the curve stage…</p></div>
+        <label class="toggle" for="nullToggle" id="nullToggleWrap" hidden>
+          <input type="checkbox" id="nullToggle" checked>
+          <span class="sw" aria-hidden="true"></span><span>Null</span>
+        </label>
+      </div>
+      <div class="bd"><svg class="chart" id="cCurve" viewBox="0 0 700 330" role="img"
+        aria-label="Live adoption probability curve"></svg></div>
+    </div>
+
+    <div class="panel" id="openPanel">
+      <div class="phead">
+        <div><h2>Play it out — the board is live</h2>
+          <p class="hint" id="openHint">Two players alternate moves. Every move is matched
+            against the archive and the numbers below update.</p></div>
+        <span class="turnchip" id="turnChip">White to move</span>
+      </div>
+      <div class="bd boardrow">
+        <div class="boardwrap">
+          <svg id="board" viewBox="0 0 200 200" role="img"
+               aria-label="Interactive chess board"></svg>
+          <div class="boardctl">
+            <button class="mini" id="bUndo">Undo</button>
+            <button class="mini" id="bReset">Reset</button>
+            <button class="mini" id="bPlay">Replay line</button>
+          </div>
+          <p class="movetext mono" id="moveText">Start position — White to move.</p>
+        </div>
+
+        <div class="liveopen" id="liveOpen">
+          <p class="lo-eco mono" id="loEco">—</p>
+          <p class="lo-name" id="loName">Make a move to identify the opening.</p>
+          <dl class="lo-stats" id="loStats"></dl>
+          <p class="lo-sub mono" id="loVars"></p>
+        </div>
+      </div>
+      <div class="bd" style="padding-top:0">
+        <p class="hint" style="margin:0 6px 6px">Or load a line from the archive:</p>
+        <ol class="openlist openlist-row" id="openList"></ol>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>The player interaction network</h2>
+      <p class="hint" id="netHint">Drawn live once the network stage finishes. Hover a
+        player; colour is their Louvain community.</p>
+      <div class="bd" style="position:relative">
+        <canvas id="netCanvas" style="width:100%;height:340px;display:block;
+          border-radius:10px"></canvas>
+        <div class="netlegend" id="netLegend"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Excess over the null</h2>
+      <p class="hint" id="excessHint">Complex contagion requires this to rise with d.</p>
+      <div class="bd"><svg class="chart" id="cExcess" viewBox="0 0 700 250" role="img"
+        aria-label="Live excess over null"></svg></div>
+    </div>
+
+    <div class="panel">
+      <h2>Decisive test — hold k fixed, vary d</h2>
+      <p class="hint" id="heldHint">Each line fixes the total exposure count.</p>
+      <div class="bd"><svg class="chart" id="cHeld" viewBox="0 0 700 260" role="img"
+        aria-label="Adoption by distinct exposers at fixed exposure counts"></svg></div>
+    </div>
+  </div>
+  <div>
+    <div class="panel">
+      <h2>Throughput</h2>
+      <p class="hint" id="spkHint">Games scanned per second, live.</p>
+      <div class="bd"><svg class="chart" id="cSpark" viewBox="0 0 340 90" role="img"
+        aria-label="Live scan throughput"></svg></div>
+    </div>
+
+    <div class="panel">
+      <h2>Games streaming past</h2>
+      <p class="hint">Real games from the archive, as they are parsed.</p>
+      <div class="bd"><ul class="ticker" id="ticker"></ul></div>
+    </div>
+    <div class="logwrap"><div class="log" id="log" role="log" aria-live="polite"></div></div>
+    <p class="note">
+      A capped scan covers only the start of the month, so the adoption window is reduced
+      automatically to fit the observed span — otherwise every trial is censored. Uncap to
+      <code>5,000,000</code> for the full-month run.
+    </p>
+  </div>
+</div>
+<div class="tip" id="tip" role="status" aria-live="polite"></div>
+
+<footer>
+  Lichess open database · CC0 · streamed live, never written to disk ·
+  <span style="font-family:var(--mono)">src/parse.py → src/events.py → src/curve.py → src/nulls.py</span>
+</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+var NS="http://www.w3.org/2000/svg";
+var es=null, runId=null, started=0;
+var $=function(id){return document.getElementById(id);};
+var fmt=function(n){return (n==null?"—":Number(n).toLocaleString("en-US"));};
+var pct=function(x,d){return (x*100).toFixed(d==null?1:d)+"%";};
+
+/* A script error used to fail silently and just leave the UI inert. During a
+   live demo that is the worst possible failure mode -- surface it in the log. */
+addEventListener("error",function(e){
+  try{ logLine(null,"UI error: "+(e.message||e.type)+
+    (e.lineno?(" (line "+e.lineno+")"):""),"error"); }catch(_){}
+});
+
+/* ---------- controls ---------- */
+var capEl=$("cap"), capVal=$("capVal");
+capEl.addEventListener("input",function(){
+  capVal.textContent=Number(capEl.value).toLocaleString("en-US")+
+    (capEl.value>=capEl.max?" (full month)":"");
+});
+$("hostLabel").textContent=location.host;
+
+fetch("/api/months").then(function(r){return r.json();}).then(function(d){
+  var sel=$("month");
+  d.months.forEach(function(m,i){
+    var o=document.createElement("option");
+    o.value=m.id; o.textContent=m.label+"  ·  "+m.mb+" MB  ·  "+m.games+" games";
+    if(m.id==="2016-01") o.selected=true;
+    sel.appendChild(o);
+  });
+  buildRail(d.stages);
+});
+
+function buildRail(stages){
+  var rail=$("rail"); rail.textContent="";
+  stages.forEach(function(s){
+    var d=document.createElement("div");
+    d.className="sg"; d.dataset.state="pending"; d.dataset.key=s.key;
+    d.innerHTML="<span class='nm'></span><span class='st'>pending</span>";
+    d.querySelector(".nm").textContent=s.label;
+    rail.appendChild(d);
+  });
+}
+
+/* ---------- log ---------- */
+function logLine(t,msg,level){
+  var log=$("log");
+  var row=document.createElement("div");
+  row.className="lv-"+(level||"info");
+  var a=document.createElement("span"); a.className="ts";
+  a.textContent=(t==null?"":(t.toFixed(1)+"s").padStart(7," "));
+  var b=document.createElement("span"); b.className="msg"; b.textContent=msg;
+  row.appendChild(a); row.appendChild(b); log.appendChild(row);
+  log.scrollTop=log.scrollHeight;
+}
+
+/* ---------- svg utils ---------- */
+function el(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);return e;}
+function spline(pts,t){
+  if(pts.length<2) return pts.length?("M"+pts[0][0]+" "+pts[0][1]):"";
+  t=(t==null?0.72:t);
+  var d="M"+pts[0][0].toFixed(2)+" "+pts[0][1].toFixed(2);
+  for(var i=0;i<pts.length-1;i++){
+    var p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;
+    d+=" C"+(p1[0]+(p2[0]-p0[0])/6*t).toFixed(2)+" "+(p1[1]+(p2[1]-p0[1])/6*t).toFixed(2)
+      +","+(p2[0]-(p3[0]-p1[0])/6*t).toFixed(2)+" "+(p2[1]-(p3[1]-p1[1])/6*t).toFixed(2)
+      +","+p2[0].toFixed(2)+" "+p2[1].toFixed(2);
+  }
+  return d;
+}
+function frame(svg,o){
+  for(var i=0;i<=o.yTicks;i++){
+    var v=o.y0+(o.y1-o.y0)*i/o.yTicks;
+    var y=o.b-(v-o.y0)/(o.y1-o.y0)*(o.b-o.t);
+    svg.appendChild(el("line",{x1:o.l,x2:o.r,y1:y,y2:y,class:"gridline"}));
+    var tx=el("text",{x:o.l-9,y:y+3.5,"text-anchor":"end",class:"ax-label"});
+    tx.textContent=o.yFmt(v); svg.appendChild(tx);
+  }
+  svg.appendChild(el("line",{x1:o.l,x2:o.r,y1:o.b,y2:o.b,class:"axisline"}));
+}
+function drawIn(path,ms){
+  try{var L=path.getTotalLength();
+    path.setAttribute("stroke-dasharray",L);
+    path.setAttribute("stroke-dashoffset",L);
+    path.animate([{strokeDashoffset:L},{strokeDashoffset:0}],
+      {duration:ms||1100,easing:"cubic-bezier(.22,.68,.32,1)",fill:"forwards"});
+  }catch(e){}
+  return path;
+}
+
+/* ---------- curve chart ---------- */
+var CURVE={rows:[],nullRows:[],held:[],showNull:true};
+function drawCurve(){
+  var svg=$("cCurve"); svg.textContent="";
+  var rows=CURVE.rows; if(!rows.length) return;
+  var L=52,R=668,T=20,B=262;
+  var lo=Math.min.apply(null,rows.map(function(r){return r.lo;}).concat(
+        CURVE.nullRows.map(function(r){return r.rate_null;})));
+  var hi=Math.max.apply(null,rows.map(function(r){return r.hi;}).concat(
+        CURVE.nullRows.map(function(r){return r.rate_null;})));
+  var pad=(hi-lo)*0.18||0.01, y0=Math.max(0,lo-pad), y1=hi+pad;
+  var dmax=Math.max.apply(null,rows.map(function(r){return r.d;}));
+  var X=function(d){return L+(dmax<=1?0.5:(d-1)/(dmax-1))*(R-L);};
+  var Y=function(v){return B-(v-y0)/(y1-y0)*(B-T);};
+  frame(svg,{l:L,r:R,t:T,b:B,y0:y0,y1:y1,yTicks:4,yFmt:function(v){return pct(v,1);}});
+
+  var hiP=rows.map(function(r){return [X(r.d),Y(r.hi)];});
+  var loP=rows.map(function(r){return [X(r.d),Y(r.lo)];}).reverse();
+  svg.appendChild(el("path",{d:spline(hiP)+" L"+loP[0][0].toFixed(2)+" "+loP[0][1].toFixed(2)+
+    spline(loP).replace(/^M[^C]*/," ")+" Z",fill:"var(--wash-indigo)",stroke:"none"}));
+
+  if(CURVE.nullRows.length && CURVE.showNull!==false){
+    var np=CURVE.nullRows.map(function(r){return [X(r.d),Y(r.rate_null)];});
+    svg.appendChild(drawIn(el("path",{d:spline(np),fill:"none",stroke:"var(--s-null)",
+      "stroke-width":2,"stroke-dasharray":"7 5","stroke-linecap":"round"}),1200));
+    CURVE.nullRows.forEach(function(r){
+      svg.appendChild(el("circle",{cx:X(r.d),cy:Y(r.rate_null),r:3.6,fill:"var(--surface)",
+        stroke:"var(--s-null)","stroke-width":2}));
+    });
+  }
+  var rp=rows.map(function(r){return [X(r.d),Y(r.rate)];});
+  svg.appendChild(drawIn(el("path",{d:spline(rp),fill:"none",stroke:"var(--s-indigo)",
+    "stroke-width":2.6,"stroke-linejoin":"round","stroke-linecap":"round"}),900));
+  rows.forEach(function(r,i){
+    svg.appendChild(el("circle",{cx:X(r.d),cy:Y(r.rate),r:4.6,fill:"var(--s-indigo)",
+      stroke:"var(--surface)","stroke-width":2}));
+    var t=el("text",{x:X(r.d),y:B+19,"text-anchor":"middle",class:"ax-label"});
+    t.textContent=r.d; svg.appendChild(t);
+    var nr=CURVE.nullRows[i];
+    hotspot(svg,X(r.d),Y(r.rate),16,
+      "<div class='t-h'>d = "+r.d+"</div>"+
+      "<div class='t-r'><span>observed</span><b>"+pct(r.rate,2)+"</b></div>"+
+      ((nr&&CURVE.showNull!==false)?
+        "<div class='t-r'><span>null</span><b>"+pct(nr.rate_null,2)+"</b></div>"+
+        "<div class='t-r'><span>lift</span><b>"+(nr.lift_over_null!=null?
+          nr.lift_over_null.toFixed(3):"—")+"</b></div>":"")+
+      "<div class='t-r'><span>n</span><b>"+fmt(r.n)+"</b></div>");
+  });
+  var xt=el("text",{x:(L+R)/2,y:B+44,"text-anchor":"middle",class:"ax-title"});
+  xt.textContent="d — distinct exposers"; svg.appendChild(xt);
+  var mid=(T+B)/2;
+  var yt=el("text",{x:13,y:mid,"text-anchor":"middle",class:"ax-title",
+    transform:"rotate(-90 13 "+mid+")"});
+  yt.textContent="P(adopt)"; svg.appendChild(yt);
+
+  if(CURVE.nullRows.length){
+    var lg=el("g",{});
+    [["Observed","var(--s-indigo)",0],["Shuffled null","var(--s-null)",128]].forEach(function(s){
+      lg.appendChild(el("rect",{x:L+s[2],y:T-8,width:15,height:3,fill:s[1],rx:2}));
+      var t=el("text",{x:L+s[2]+21,y:T-4,class:"ax-label"}); t.textContent=s[0];
+      lg.appendChild(t);
+    });
+    svg.appendChild(lg);
+  }
+}
+
+function drawExcess(rows){
+  var svg=$("cExcess"); svg.textContent="";
+  if(!rows.length) return;
+  var vals=rows.map(function(r){return r.lift_over_null;}).filter(function(v){return v!=null;});
+  if(!vals.length) return;
+  var L=56,R=668,T=20,B=190;
+  var y0=Math.min(0.97,Math.min.apply(null,vals)-0.03);
+  var y1=Math.max(1.03,Math.max.apply(null,vals)+0.03);
+  var dmax=Math.max.apply(null,rows.map(function(r){return r.d;}));
+  var X=function(d){return L+(dmax<=1?0.5:(d-1)/(dmax-1))*(R-L);};
+  var Y=function(v){return B-(v-y0)/(y1-y0)*(B-T);};
+  frame(svg,{l:L,r:R,t:T,b:B,y0:y0,y1:y1,yTicks:4,yFmt:function(v){return v.toFixed(2)+"×";}});
+  var yl=Y(1);
+  svg.appendChild(el("line",{x1:L,x2:R,y1:yl,y2:yl,stroke:"var(--s-null)",
+    "stroke-width":1.5,"stroke-dasharray":"5 4"}));
+  var nl=el("text",{x:R,y:yl-7,"text-anchor":"end",class:"dlabel",fill:"var(--muted)"});
+  nl.textContent="no effect"; svg.appendChild(nl);
+
+  var pts=rows.filter(function(r){return r.lift_over_null!=null;})
+              .map(function(r){return [X(r.d),Y(r.lift_over_null)];});
+  svg.appendChild(el("path",{d:spline(pts)+" L"+pts[pts.length-1][0].toFixed(2)+" "+yl.toFixed(2)+
+    " L"+pts[0][0].toFixed(2)+" "+yl.toFixed(2)+" Z",fill:"var(--wash-vermilion)",stroke:"none"}));
+  svg.appendChild(drawIn(el("path",{d:spline(pts),fill:"none",stroke:"var(--s-vermilion)",
+    "stroke-width":2.6,"stroke-linecap":"round","stroke-linejoin":"round"}),1000));
+  rows.forEach(function(r){
+    if(r.lift_over_null==null) return;
+    svg.appendChild(el("circle",{cx:X(r.d),cy:Y(r.lift_over_null),r:4.6,
+      fill:"var(--s-vermilion)",stroke:"var(--surface)","stroke-width":2}));
+    var t=el("text",{x:X(r.d),y:B+19,"text-anchor":"middle",class:"ax-label"});
+    t.textContent=r.d; svg.appendChild(t);
+    hotspot(svg,X(r.d),Y(r.lift_over_null),16,
+      "<div class='t-h'>d = "+r.d+"</div>"+
+      "<div class='t-r'><span>lift over null</span><b>"+r.lift_over_null.toFixed(3)+"×</b></div>"+
+      (r.z!=null?"<div class='t-r'><span>z</span><b>"+Number(r.z).toFixed(1)+"</b></div>":""));
+  });
+  var xt=el("text",{x:(L+R)/2,y:B+44,"text-anchor":"middle",class:"ax-title"});
+  xt.textContent="d — distinct exposers"; svg.appendChild(xt);
+}
+
+/* ---------- tooltip ---------- */
+var tip=$("tip");
+function showTip(ev,html){
+  tip.innerHTML=html; tip.classList.add("on");
+  var r=tip.getBoundingClientRect();
+  var x=ev.clientX+15, y=ev.clientY-r.height-12;
+  if(x+r.width>innerWidth-10) x=ev.clientX-r.width-15;
+  if(y<8) y=ev.clientY+18;
+  tip.style.left=x+"px"; tip.style.top=y+"px";
+}
+function hideTip(){tip.classList.remove("on");}
+function hotspot(parent,x,y,r,html){
+  var h=el("circle",{cx:x,cy:y,r:r,fill:"transparent","pointer-events":"all"});
+  h.addEventListener("mousemove",function(e){showTip(e,html);});
+  h.addEventListener("mouseleave",hideTip);
+  parent.appendChild(h);
+}
+addEventListener("scroll",hideTip,{passive:true});
+
+/* ---------- throughput sparkline ---------- */
+var SPARK=[];
+function drawSpark(){
+  var svg=$("cSpark"); svg.textContent="";
+  if(SPARK.length<2) return;
+  var L=8,R=332,T=10,B=76;
+  var mx=Math.max.apply(null,SPARK)||1;
+  var X=function(i){return L+i/(SPARK.length-1)*(R-L);};
+  var Y=function(v){return B-(v/mx)*(B-T);};
+  var pts=SPARK.map(function(v,i){return [X(i),Y(v)];});
+  svg.appendChild(el("path",{d:spline(pts,0.5)+" L"+R+" "+B+" L"+L+" "+B+" Z",
+    fill:"var(--wash-indigo)",stroke:"none"}));
+  svg.appendChild(el("path",{d:spline(pts,0.5),fill:"none",stroke:"var(--s-indigo)",
+    "stroke-width":2,"stroke-linecap":"round","stroke-linejoin":"round"}));
+  var last=pts[pts.length-1];
+  svg.appendChild(el("circle",{cx:last[0],cy:last[1],r:3.5,fill:"var(--s-indigo)"}));
+  var t=el("text",{x:L,y:T-1,class:"dlabel",fill:"var(--muted)"});
+  t.textContent="peak "+fmt(Math.round(mx))+"/s"; svg.appendChild(t);
+}
+
+/* ---------- interactive chess board ---------- */
+var GLYPH={K:"♔",Q:"♕",R:"♖",B:"♗",N:"♘",P:"♙",
+           k:"♚",q:"♛",r:"♜",b:"♝",n:"♞",p:"♟"};
+var SQ=25, FILES="abcdefgh";
+var GAME={sans:[],fen:null,legal:{},turn:"white",sel:null,prevFen:null,
+          openings:[],lineSans:[],busy:false,timer:0};
+
+function sqName(f,r){ return FILES[f]+(8-r); }
+function expandRow(rowStr){
+  var out=[];
+  for(var i=0;i<rowStr.length;i++){
+    var c=rowStr[i];
+    if(c>="1"&&c<="8"){ for(var j=0;j<+c;j++) out.push(null); }
+    else out.push(c);
+  }
+  return out;
+}
+function fenGrid(fen){
+  return fen ? fen.split(" ")[0].split("/").map(expandRow) : null;
+}
+
+function drawBoard(){
+  var svg=$("board"); svg.textContent="";
+  var grid=fenGrid(GAME.fen), prev=fenGrid(GAME.prevFen);
+
+  for(var r=0;r<8;r++) for(var f=0;f<8;f++){
+    svg.appendChild(el("rect",{x:f*SQ,y:r*SQ,width:SQ,height:SQ,
+      class:(r+f)%2===0?"sq-l":"sq-d"}));
+  }
+  if(!grid) return;
+
+  // squares that changed since the previous position = the move just played
+  if(prev){
+    for(var r2=0;r2<8;r2++) for(var f2=0;f2<8;f2++){
+      if(grid[r2][f2]!==prev[r2][f2])
+        svg.appendChild(el("rect",{x:f2*SQ,y:r2*SQ,width:SQ,height:SQ,class:"last"}));
+    }
+  }
+  if(GAME.sel){
+    var sf=FILES.indexOf(GAME.sel[0]), sr=8-(+GAME.sel[1]);
+    svg.appendChild(el("rect",{x:sf*SQ,y:sr*SQ,width:SQ,height:SQ,class:"sel"}));
+  }
+
+  for(var r3=0;r3<8;r3++){
+    for(var f3=0;f3<8;f3++){
+      var p=grid[r3][f3]; if(!p) continue;
+      var t=el("text",{x:f3*SQ+SQ/2,y:r3*SQ+SQ/2+0.5,
+        class:"pc "+(p===p.toUpperCase()?"w":"b")});
+      t.textContent=GLYPH[p]||""; svg.appendChild(t);
+    }
+  }
+
+  // legal destinations for the selected piece
+  if(GAME.sel && GAME.legal[GAME.sel]){
+    GAME.legal[GAME.sel].forEach(function(dest){
+      var df=FILES.indexOf(dest[0]), dr=8-(+dest[1]);
+      if(grid[dr][df])
+        svg.appendChild(el("circle",{cx:df*SQ+SQ/2,cy:dr*SQ+SQ/2,r:SQ*0.42,class:"cap"}));
+      else
+        svg.appendChild(el("circle",{cx:df*SQ+SQ/2,cy:dr*SQ+SQ/2,r:3.4,class:"dot"}));
+    });
+  }
+
+  // transparent click targets, drawn last so they sit on top
+  for(var r4=0;r4<8;r4++) for(var f4=0;f4<8;f4++){
+    var hit=el("rect",{x:f4*SQ,y:r4*SQ,width:SQ,height:SQ,
+      fill:"transparent",class:"sq-hit"});
+    (function(nm){ hit.addEventListener("click",function(){onSquare(nm);}); })(sqName(f4,r4));
+    svg.appendChild(hit);
+  }
+}
+
+function onSquare(name){
+  if(GAME.busy) return;
+  if(GAME.sel && GAME.legal[GAME.sel] && GAME.legal[GAME.sel].indexOf(name)>=0){
+    var uci=GAME.sel+name;
+    // auto-queen: the opening phase never needs another promotion piece
+    var grid=fenGrid(GAME.fen);
+    var sf=FILES.indexOf(GAME.sel[0]), sr=8-(+GAME.sel[1]);
+    var piece=grid?grid[sr][sf]:null;
+    if(piece && piece.toLowerCase()==="p" && (name[1]==="8"||name[1]==="1")) uci+="q";
+    GAME.sel=null;
+    sendMove(uci);
+    return;
+  }
+  GAME.sel = GAME.legal[name] ? name : null;
+  drawBoard();
+}
+
+function applyState(st){
+  GAME.fen=st.fen; GAME.legal=st.legal||{}; GAME.turn=st.turn;
+  GAME.sans=st.sans||[]; GAME.sel=null;
+  drawBoard();
+
+  var chip=$("turnChip");
+  chip.className="turnchip "+(st.turn==="white"?"w":"b");
+  var label=(st.turn==="white"?"White":"Black")+" to move";
+  if(st.status==="check") label+=" · check";
+  if(st.status==="checkmate"){ label="Checkmate"; chip.className="turnchip over"; }
+  if(st.status==="stalemate"){ label="Stalemate"; chip.className="turnchip over"; }
+  chip.textContent=label;
+
+  var txt=GAME.sans.map(function(s,i){
+    return (i%2===0?(i/2+1)+". ":"")+s; }).join(" ");
+  $("moveText").textContent=txt||"Start position — White to move.";
+  if(st.error) $("moveText").textContent=(txt+"   ("+st.error+")");
+
+  showLiveOpening(st.opening, st.has_data);
+  lightUpNetwork(st.opening);
+}
+
+/* Light up the players in the network who actually played the line on the
+   board. This is the point of the whole project made visible: the openings
+   cluster inside communities rather than scattering across the graph. */
+function lightUpNetwork(o){
+  if(!NET.nodes.length) return;
+  var hint=$("netHint");
+  if(o && o.matched && o.graph_adopters && o.graph_adopters.length){
+    // Adopters, not everyone who ever played it: the top-degree players have
+    // played nearly every line, so "played" lights the whole graph and says
+    // nothing. Adoption is the contagion event.
+    NET.lit=new Set(o.graph_adopters);
+    var total=o.graph_total||1;
+    hint.innerHTML="<b>"+fmt(o.graph_adopters.length)+" of "+fmt(total)+
+      "</b> drawn players took up <b>"+(o.settled?o.eco+" "+o.name:"this line")+
+      "</b> after being exposed to it"+
+      (o.graph_hits?" ("+fmt(o.graph_hits.length)+" have played it at all)":"")+
+      ". Do the adopters cluster inside communities?";
+  } else if(o && o.matched && o.graph_hits && o.graph_hits.length){
+    NET.lit=new Set(o.graph_hits);
+    hint.innerHTML="<b>"+fmt(o.graph_hits.length)+" of "+fmt(o.graph_total)+
+      "</b> drawn players have played this line. No first-time adoption of it "+
+      "was recorded in this slice.";
+  } else if(o && o.matched===0){
+    NET.lit=new Set();
+    hint.textContent="No drawn player reached that position.";
+  } else {
+    NET.lit=null;
+    hint.textContent="Colour is the Louvain community, size is degree, "+
+      "white ring marks an early adopter. Play a move to light up who played it.";
+  }
+  if(NET.draw) NET.draw();
+}
+
+function showLiveOpening(o,hasData){
+  var stats=$("loStats");
+  if(!hasData){
+    $("loEco").textContent="—";
+    $("loName").textContent="Run the pipeline first — then every move is matched against that slice.";
+    stats.textContent=""; $("loVars").textContent=""; return;
+  }
+  if(!o){
+    $("loEco").textContent="—";
+    $("loName").textContent="Make a move to identify the opening.";
+    stats.textContent=""; $("loVars").textContent=""; return;
+  }
+  if(!o.matched){
+    $("loEco").textContent="ply "+o.ply;
+    $("loName").textContent="No game in this slice played that line.";
+    stats.textContent="";
+    $("loVars").textContent="Out of book for this sample — try a more common move, or scan more games.";
+    return;
+  }
+  // Only name the position once one ECO actually dominates the continuations.
+  if(o.settled){
+    $("loEco").textContent=o.eco+"  ·  ply "+o.ply;
+    $("loName").textContent=o.name;
+  } else {
+    $("loEco").textContent="ply "+o.ply+"  ·  still branching";
+    $("loName").textContent="Leading line: "+o.name+
+      " ("+(o.top_share*100).toFixed(0)+"% of games from here)";
+  }
+  var rows=[
+    ["games in slice",fmt(o.matched)],
+    ["share of slice",(o.share*100).toFixed(2)+"%"],
+    ["white wins",(o.white_win*100).toFixed(1)+"%"],
+    ["mean Elo",fmt(o.mean_elo)],
+    ["exposure trials",fmt(o.trials)],
+    ["adoptions",fmt(o.adoptions)+(o.adoption_rate!=null?
+      "  ("+(o.adoption_rate*100).toFixed(1)+"%)":"")]
+  ];
+  stats.textContent="";
+  rows.forEach(function(r){
+    var d=document.createElement("div");
+    d.innerHTML="<dt></dt><dd></dd>";
+    d.querySelector("dt").textContent=r[0];
+    d.querySelector("dd").textContent=r[1];
+    stats.appendChild(d);
+  });
+  $("loVars").textContent = (o.variations && o.variations.length>1)
+    ? "also here: "+o.variations.slice(1,4).map(function(v){
+        return v.eco+" "+v.name+" ("+fmt(v.games)+")"; }).join("  ·  ")
+    : "";
+}
+
+function sendMove(uci){
+  GAME.busy=true;
+  fetch("/api/board",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({sans:GAME.sans,uci:uci||null})})
+    .then(function(r){return r.json();})
+    .then(function(st){ GAME.busy=false; if(st.fen) applyState(st); })
+    .catch(function(){ GAME.busy=false;
+      $("moveText").textContent="Could not reach the server."; });
+}
+
+function resetBoard(){
+  clearInterval(GAME.timer);
+  GAME.sans=[]; GAME.prevFen=null; GAME.fen=null;
+  sendMove(null);
+}
+function undoMove(){
+  clearInterval(GAME.timer);
+  GAME.sans=GAME.sans.slice(0,-1); GAME.prevFen=null;
+  sendMove(null);
+}
+
+function replayLine(sans){
+  clearInterval(GAME.timer);
+  GAME.sans=[]; GAME.prevFen=null; GAME.fen=null;
+  sendMove(null);
+  var i=0;
+  GAME.timer=setInterval(function(){
+    if(i>=sans.length){ clearInterval(GAME.timer); return; }
+    var next=sans.slice(0,i+1); i++;
+    fetch("/api/board",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({sans:next})})
+      .then(function(r){return r.json();})
+      .then(function(st){ if(st.fen){ GAME.prevFen=GAME.fen; applyState(st); } })
+      .catch(function(){});
+  },700);
+}
+
+function showOpenings(list){
+  GAME.openings=list||[];
+  var ol=$("openList"); ol.textContent="";
+  GAME.openings.forEach(function(o){
+    var li=document.createElement("li");
+    li.innerHTML="<span class='eco'></span><span class='nm'></span>";
+    li.querySelector(".eco").textContent=o.eco;
+    li.querySelector(".nm").textContent=o.name;
+    li.title=o.sans.join(" ");
+    li.addEventListener("click",function(){
+      var kids=ol.children;
+      for(var i=0;i<kids.length;i++) kids[i].classList.remove("on");
+      li.classList.add("on");
+      GAME.lineSans=o.sans;
+      replayLine(o.sans);
+    });
+    ol.appendChild(li);
+  });
+  $("openHint").textContent="Two players alternate moves on the board. Every move is "+
+    "matched against the "+fmt(GAME.openings.length)+" most common lines in this slice.";
+}
+
+$("bReset").addEventListener("click",resetBoard);
+$("bUndo").addEventListener("click",undoMove);
+$("bPlay").addEventListener("click",function(){ replayLine(GAME.lineSans||[]); });
+
+// Track the previous position so the "last move" highlight works on human moves.
+(function(){
+  var _apply=applyState;
+  applyState=function(st){
+    if(GAME.fen && st.fen!==GAME.fen) GAME.prevFen=GAME.fen;
+    _apply(st);
+  };
+})();
+
+resetBoard();
+
+/* ---------- live game ticker ---------- */
+function pushTicker(g){
+  if(!g) return;
+  var ul=$("ticker");
+  var li=document.createElement("li");
+  li.innerHTML="<span class='eco'></span><span class='nm'></span><span class='el'></span>";
+  li.querySelector(".eco").textContent=g.eco;
+  li.querySelector(".nm").textContent=g.opening||g.moves||"";
+  li.querySelector(".el").textContent=g.white_elo+"/"+g.black_elo;
+  ul.insertBefore(li,ul.firstChild);
+  while(ul.children.length>14) ul.removeChild(ul.lastChild);
+}
+
+/* ---------- live network canvas ---------- */
+var NET={nodes:[],edges:[],hidden:{},raf:0,hover:-1,lit:null,draw:null};
+var PAL=["--s-indigo","--s-jade","--s-ochre","--s-vermilion","--s-null"];
+function communityColour(c){
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue(PAL[c%PAL.length]).trim()||"#888";
+}
+function startNetwork(payload){
+  var cv=$("netCanvas"), ctx=cv.getContext("2d");
+  var dpr=Math.min(2,devicePixelRatio||1);
+  function size(){
+    cv.width=cv.clientWidth*dpr; cv.height=cv.clientHeight*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  // A resize clears the canvas buffer. The simulation stops after it settles,
+  // so without an explicit repaint the network would simply vanish when the
+  // window changes size (plugging in a projector, say).
+  size();
+  addEventListener("resize",function(){ size(); if(NET.draw) NET.draw(); });
+
+  var W=function(){return cv.clientWidth;}, H=function(){return cv.clientHeight;};
+  var n=payload.nodes.length;
+  NET.lit=null;
+  var nodes=payload.nodes.map(function(d,i){
+    var a=i/n*Math.PI*2, rad=Math.min(W(),H())*0.32;
+    return {x:W()/2+Math.cos(a)*rad*(0.55+Math.random()*0.5),
+            y:H()/2+Math.sin(a)*rad*(0.55+Math.random()*0.5),
+            vx:0,vy:0,deg:d.d,comm:d.c,early:d.e};
+  });
+  var edges=payload.edges;
+  NET.nodes=nodes; NET.edges=edges; NET.hidden={};
+
+  // legend / community filter — click a community to dim it
+  var comms=[...new Set(payload.nodes.map(function(d){return d.c;}))].sort();
+  var lg=$("netLegend"); lg.textContent="";
+  comms.forEach(function(c){
+    var b=document.createElement("button");
+    b.innerHTML="<i style='background:"+communityColour(c)+"'></i>community "+c;
+    b.addEventListener("click",function(){
+      NET.hidden[c]=!NET.hidden[c]; b.classList.toggle("off",!!NET.hidden[c]);
+      if(NET.draw) NET.draw();
+    });
+    lg.appendChild(b);
+  });
+  var meta=document.createElement("span");
+  meta.textContent="showing "+fmt(n)+" of "+fmt(payload.total_nodes)+
+    " players · "+fmt(edges.length)+" of "+fmt(payload.total_edges)+" edges";
+  lg.appendChild(meta);
+
+  cv.onmousemove=function(e){
+    var r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top;
+    var best=-1,bd=1e9;
+    for(var i=0;i<nodes.length;i++){
+      if(NET.hidden[nodes[i].comm]) continue;
+      var dx=nodes[i].x-mx, dy=nodes[i].y-my, d2=dx*dx+dy*dy;
+      if(d2<bd){bd=d2;best=i;}
+    }
+    if(bd<220){ NET.hover=best;
+      var nd=nodes[best];
+      showTip(e,"<div class='t-h'>player</div>"+
+        "<div class='t-r'><span>degree</span><b>"+nd.deg+"</b></div>"+
+        "<div class='t-r'><span>community</span><b>"+nd.comm+"</b></div>"+
+        "<div class='t-r'><span>early adopter</span><b>"+(nd.early?"yes":"no")+"</b></div>");
+    } else { NET.hover=-1; hideTip(); }
+    if(NET.draw) NET.draw();     // the sim stops once settled; repaint the highlight
+  };
+  cv.onmouseleave=function(){NET.hover=-1;hideTip();if(NET.draw)NET.draw();};
+
+  var deg=nodes.map(function(d){return d.deg;});
+  var dmax=Math.max.apply(null,deg)||1;
+  var alive=0;
+  cancelAnimationFrame(NET.raf);
+
+  function physics(){
+    var k=Math.max(6,Math.min(W(),H())/Math.sqrt(nodes.length))*1.1;
+    // repulsion, sampled: O(n*9) rather than O(n^2), enough to separate at this size
+    for(var i=0;i<nodes.length;i++){
+      var a=nodes[i];
+      for(var s=0;s<9;s++){
+        var b=nodes[(Math.random()*nodes.length)|0];
+        if(a===b) continue;
+        var dx=a.x-b.x, dy=a.y-b.y, d2=dx*dx+dy*dy+0.01;
+        var f=(k*k)/d2*0.45;
+        a.vx+=dx*f*0.01; a.vy+=dy*f*0.01;
+      }
+    }
+    // attraction along edges
+    for(var e2=0;e2<edges.length;e2++){
+      var u=nodes[edges[e2][0]], v=nodes[edges[e2][1]];
+      if(!u||!v) continue;
+      var dx2=v.x-u.x, dy2=v.y-u.y, d=Math.sqrt(dx2*dx2+dy2*dy2)+0.01;
+      var f2=(d*d)/k*0.00035;
+      u.vx+=dx2*f2; u.vy+=dy2*f2; v.vx-=dx2*f2; v.vy-=dy2*f2;
+    }
+    var cxp=W()/2, cyp=H()/2, damp=0.86;
+    for(var i3=0;i3<nodes.length;i3++){
+      var p=nodes[i3];
+      p.vx+=(cxp-p.x)*0.0016; p.vy+=(cyp-p.y)*0.0016;
+      p.vx*=damp; p.vy*=damp;
+      p.x+=Math.max(-6,Math.min(6,p.vx)); p.y+=Math.max(-6,Math.min(6,p.vy));
+      p.x=Math.max(8,Math.min(W()-8,p.x)); p.y=Math.max(8,Math.min(H()-8,p.y));
+    }
+  }
+
+  function draw(){
+    var css=getComputedStyle(document.documentElement);
+    ctx.clearRect(0,0,W(),H());
+    ctx.lineWidth=0.5;
+    ctx.strokeStyle=css.getPropertyValue("--rule-strong").trim();
+    ctx.globalAlpha=NET.lit?0.12:0.28;   // recede while players are lit up
+    ctx.beginPath();
+    for(var e3=0;e3<edges.length;e3++){
+      var u2=nodes[edges[e3][0]], v2=nodes[edges[e3][1]];
+      if(!u2||!v2||NET.hidden[u2.comm]||NET.hidden[v2.comm]) continue;
+      ctx.moveTo(u2.x,u2.y); ctx.lineTo(v2.x,v2.y);
+    }
+    ctx.stroke(); ctx.globalAlpha=1;
+
+    var lit=NET.lit;                 // players who played the line on the board
+    for(var i4=0;i4<nodes.length;i4++){
+      var q=nodes[i4];
+      if(NET.hidden[q.comm]) continue;
+      var on=!lit || lit.has(i4);
+      var r=2.2+Math.sqrt(q.deg/dmax)*7;
+      if(lit && on) r+=1.6;          // lift the matching players off the field
+      ctx.beginPath(); ctx.arc(q.x,q.y,r,0,6.2832);
+      ctx.fillStyle=communityColour(q.comm);
+      ctx.globalAlpha = (NET.hover>=0 && NET.hover!==i4) ? 0.45
+                      : (on ? 1 : 0.12);
+      ctx.fill();
+      if(lit && on){                 // halo so they read at a glance
+        ctx.lineWidth=2; ctx.strokeStyle=css.getPropertyValue("--ink").trim();
+        ctx.globalAlpha=0.55; ctx.stroke();
+      } else if(q.early){
+        ctx.lineWidth=1.6; ctx.strokeStyle="#fff";
+        ctx.globalAlpha=on?0.85:0.1; ctx.stroke();
+      }
+      if(NET.hover===i4){ ctx.lineWidth=2.4;
+        ctx.strokeStyle=css.getPropertyValue("--ink").trim();
+        ctx.globalAlpha=1; ctx.stroke(); }
+    }
+    ctx.globalAlpha=1;
+  }
+  NET.draw=draw;          // so a resize or a hover can repaint after the sim ends
+
+  function step(){
+    alive++;
+    physics();
+    draw();
+    if(alive<900) NET.raf=requestAnimationFrame(step);
+  }
+
+  step();
+}
+
+/* ---------- held-k chart ---------- */
+function drawHeld(rows){
+  var svg=$("cHeld"); svg.textContent="";
+  if(!rows||!rows.length) return;
+  var ks=[...new Set(rows.map(function(r){return r.k;}))].sort(function(a,b){return a-b;}).slice(0,3);
+  var use=rows.filter(function(r){return ks.indexOf(r.k)>=0 && r.n>=20;});
+  if(use.length<2) return;
+  var L=54,R=660,T=20,B=200;
+  var lo=Math.min.apply(null,use.map(function(r){return r.lo;}));
+  var hi=Math.max.apply(null,use.map(function(r){return r.hi;}));
+  var pad=(hi-lo)*0.12||0.01, y0=Math.max(0,lo-pad), y1=hi+pad;
+  var dmax=Math.max.apply(null,use.map(function(r){return r.d;}));
+  var X=function(d){return L+(dmax<=1?0.5:(d-1)/(dmax-1))*(R-L);};
+  var Y=function(v){return B-(v-y0)/(y1-y0)*(B-T);};
+  frame(svg,{l:L,r:R,t:T,b:B,y0:y0,y1:y1,yTicks:4,yFmt:function(v){return pct(v,1);}});
+  var cols=["var(--s-indigo)","var(--s-ochre)","var(--s-jade)"];
+  ks.forEach(function(k,ki){
+    var rs=use.filter(function(r){return r.k===k;}).sort(function(a,b){return a.d-b.d;});
+    if(rs.length<2) return;
+    var col=cols[ki%cols.length];
+    rs.forEach(function(r){
+      svg.appendChild(el("line",{x1:X(r.d),x2:X(r.d),y1:Y(r.lo),y2:Y(r.hi),
+        stroke:col,"stroke-width":1.4,opacity:.4,"stroke-linecap":"round"}));
+    });
+    svg.appendChild(el("path",{d:spline(rs.map(function(r){return [X(r.d),Y(r.rate)];})),
+      fill:"none",stroke:col,"stroke-width":2.1,"stroke-linejoin":"round","stroke-linecap":"round"}));
+    rs.forEach(function(r){
+      svg.appendChild(el("circle",{cx:X(r.d),cy:Y(r.rate),r:4.2,fill:col,
+        stroke:"var(--surface)","stroke-width":2}));
+      hotspot(svg,X(r.d),Y(r.rate),14,
+        "<div class='t-h'>k = "+k+", d = "+r.d+"</div>"+
+        "<div class='t-r'><span>adoption</span><b>"+pct(r.rate,2)+"</b></div>"+
+        "<div class='t-r'><span>n</span><b>"+fmt(r.n)+"</b></div>");
+    });
+    var last=rs[rs.length-1];
+    var lb=el("text",{x:X(last.d)+10,y:Y(last.rate)+4,class:"dlabel",fill:col});
+    lb.textContent="k="+k; svg.appendChild(lb);
+  });
+  for(var d=1;d<=dmax;d++){
+    var t=el("text",{x:X(d),y:B+18,"text-anchor":"middle",class:"ax-label"});
+    t.textContent=d; svg.appendChild(t);
+  }
+  var xt=el("text",{x:(L+R)/2,y:B+42,"text-anchor":"middle",class:"ax-title"});
+  xt.textContent="d — distinct exposers (k fixed)"; svg.appendChild(xt);
+}
+
+/* ---------- event handling ---------- */
+function setStage(key,state,detail){
+  var n=document.querySelector('.sg[data-key="'+key+'"]'); if(!n) return;
+  n.dataset.state=state;
+  n.querySelector(".st").textContent=detail?detail:state;
+}
+function reset(){
+  ["mScan","mKept","mRate","mPlayers","mTrials","mAdopt"].forEach(function(i){$(i).textContent="—";});
+  $("log").textContent=""; $("cCurve").textContent=""; $("cExcess").textContent="";
+  $("cHeld").textContent=""; $("cSpark").textContent="";
+  SPARK=[]; NET.nodes=[]; NET.edges=[]; cancelAnimationFrame(NET.raf);
+  $("netCanvas").getContext("2d").clearRect(0,0,9999,9999);
+  $("netLegend").textContent=""; $("nullToggleWrap").hidden=true;
+  $("ticker").textContent=""; $("openList").textContent="";
+  clearInterval(GAME.timer); GAME.openings=[]; GAME.lineSans=[];
+  resetBoard();
+  $("nullToggle").checked=true;
+  CURVE={rows:[],nullRows:[],held:[],showNull:true};
+  $("verdict").classList.remove("on");
+  $("vClaim").textContent="Running…"; $("vEvidence").textContent="";
+  $("curveHint").textContent="Waiting for the curve stage…";
+  document.querySelectorAll(".sg").forEach(function(n){
+    n.dataset.state="pending"; n.querySelector(".st").textContent="pending";});
+}
+
+function handle(e){
+  switch(e.kind){
+    case "init":
+      buildRail(e.stages);
+      logLine(e.t,"Run started · month "+e.month+
+        (e.max_games?(" · cap "+fmt(e.max_games)+" games"):" · full month"),"hl");
+      break;
+    case "log": logLine(e.t,e.msg,e.level); break;
+    case "stage": setStage(e.key,e.state,e.detail); break;
+    case "scan":
+      $("mScan").textContent=fmt(e.scanned);
+      $("mKept").textContent=fmt(e.kept);
+      $("mRate").textContent=fmt(e.rate);
+      SPARK.push(e.rate); if(SPARK.length>90) SPARK.shift();
+      drawSpark(); pushTicker(e.game);
+      break;
+    case "openings":
+      showOpenings(e.openings);
+      break;
+    case "graph":
+      startNetwork(e);
+      $("netHint").textContent="Top "+fmt(e.nodes.length)+" players by degree. "+
+        "Colour = Louvain community, size = degree, white ring = early adopter. "+
+        "Click a community below to dim it.";
+      break;
+    case "sample":
+      $("mScan").textContent=fmt(e.games)+"";
+      $("mKept").textContent=fmt(e.games);
+      $("mPlayers").textContent=fmt(e.players);
+      logLine(e.t,"Kept "+fmt(e.games)+" games · "+fmt(e.players)+" players · "+
+        e.openings+" ECO codes · spans "+e.span_days+" days","ok");
+      var sk=e.skipped||{};
+      Object.keys(sk).forEach(function(k){
+        logLine(null,"  dropped "+fmt(sk[k])+" — "+k,"info");});
+      break;
+    case "window":
+      logLine(e.t,"Adoption window: "+e.days+" day(s)"+(e.auto?" (auto-fitted)":""),
+        e.auto?"warn":"info");
+      break;
+    case "trials":
+      $("mTrials").textContent=fmt(e.n);
+      $("mAdopt").textContent=fmt(e.adoptions)+" ";
+      var s=document.createElement("small"); s.textContent=pct(e.rate,1);
+      $("mAdopt").appendChild(s);
+      break;
+    case "network":
+      logLine(e.t,"Graph: "+fmt(e.nodes)+" nodes, "+fmt(e.edges)+" edges, "+
+        e.communities+" communities, modularity "+e.modularity,"info");
+      if(e.early&&e.early.early&&e.early.rest)
+        logLine(null,"  early adopters degree "+e.early.early.degree+
+          " vs "+e.early.rest.degree,"info");
+      break;
+    case "curve":
+      CURVE.rows=e.by_d||[]; CURVE.held=e.held_k||[]; drawCurve(); drawHeld(CURVE.held);
+      $("curveHint").textContent="Observed curve only — no null yet. "+
+        "This is the reading the null is about to refute.";
+      break;
+    case "null":
+      CURVE.nullRows=(e.rows||[]).map(function(r){
+        return {d:r.d,rate_null:r.rate_null,lift_over_null:r.lift_over_null,z:r.z_vs_null};});
+      drawCurve(); drawExcess(CURVE.nullRows);
+      $("nullToggleWrap").hidden=false;
+      $("curveHint").textContent="Null overlaid — toggle it to replay the reversal.";
+      var first=CURVE.nullRows[0], last=CURVE.nullRows[CURVE.nullRows.length-1];
+      if(first&&last&&first.lift_over_null!=null&&last.lift_over_null!=null){
+        logLine(e.t,"Excess over null: "+first.lift_over_null.toFixed(3)+"× at d=1 → "+
+          last.lift_over_null.toFixed(3)+"× at d="+last.d,"hl");
+      }
+      break;
+    case "matched":
+      if(e.n_pairs) logLine(e.t,"Matched controls: exposed "+pct(e.exposed_adoption_rate,2)+
+        " vs control "+pct(e.control_adoption_rate,2)+
+        "  (diff "+(e.difference*100).toFixed(2)+" pp, CI ["+
+        (e.ci95[0]*100).toFixed(2)+", "+(e.ci95[1]*100).toFixed(2)+"])","hl");
+      else logLine(e.t,"Matched controls: no usable pairs at this sample size","warn");
+      window.__matched=e;
+      break;
+    case "predict":
+      if(e.error) logLine(e.t,"Prediction: "+e.error,"warn");
+      else logLine(e.t,"Held-out AUC: baseline "+e.baseline+" → network "+e.network+
+        "  (gain "+(e.gain>=0?"+":"")+e.gain+")","info");
+      break;
+    case "verdict": showVerdict(e); break;
+    case "done":
+      $("run").disabled=false; $("stop").disabled=true;
+      if(e.ok) logLine(e.t,"Done in "+e.seconds+"s.","ok");
+      else if(e.cancelled) logLine(e.t,"Run cancelled.","warn");
+      break;
+  }
+}
+
+function showVerdict(v){
+  var box=$("verdict"); box.classList.add("on");
+  $("vClaim").textContent=v.verdict.charAt(0).toUpperCase()+v.verdict.slice(1);
+  var ev=$("vEvidence"); ev.textContent="";
+  var bits=[];
+  if(v.raw_lift_d_last_over_first!=null) bits.push(["raw lift","×"+v.raw_lift_d_last_over_first]);
+  if(v.lift_over_null_at_min_d!=null) bits.push(["excess at d=1","×"+v.lift_over_null_at_min_d]);
+  if(v.lift_over_null_at_max_d!=null) bits.push(["excess at d=max","×"+v.lift_over_null_at_max_d]);
+  if(v.separated_at_fixed_k!=null) bits.push(["fixed-k separation",v.separated_at_fixed_k?"yes":"no"]);
+  var m=window.__matched;
+  if(m&&m.n_pairs) bits.push(["matched diff",(m.difference*100).toFixed(2)+" pp"]);
+  bits.forEach(function(b){
+    var s=document.createElement("span");
+    s.innerHTML=b[0]+" <b>"+b[1]+"</b>"; ev.appendChild(s);
+  });
+}
+
+/* ---------- run control ---------- */
+$("run").addEventListener("click",function(){
+  reset();
+  $("run").disabled=true; $("stop").disabled=false;
+  started=Date.now();
+  fetch("/api/run",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      month:$("month").value,
+      max_games:Number(capEl.value)>=Number(capEl.max)?null:Number(capEl.value),
+      null_reps:Number($("reps").value),
+      window_days:14,
+      refresh:$("refresh").checked
+    })}).then(function(r){return r.json();}).then(function(d){
+      if(d.error){logLine(0,"Could not start: "+d.error,"error");
+        $("run").disabled=false;$("stop").disabled=true;return;}
+      runId=d.run_id;
+      if(es) es.close();
+      es=new EventSource("/api/stream?run="+runId);
+      es.onmessage=function(m){ try{ handle(JSON.parse(m.data)); }catch(err){} };
+      es.addEventListener("end",function(){ es.close(); es=null;
+        $("run").disabled=false; $("stop").disabled=true; });
+      es.onerror=function(){
+        logLine(null,"Stream interrupted — is the server still running?","error");
+        if(es){es.close();es=null;}
+        $("run").disabled=false; $("stop").disabled=true;
+      };
+    }).catch(function(err){
+      logLine(0,"Could not reach the server: "+err,"error");
+      $("run").disabled=false; $("stop").disabled=true;
+    });
+});
+
+/* replay the reveal: hide the null and the curve reads as complex contagion again */
+$("nullToggle").addEventListener("change",function(){
+  CURVE.showNull=this.checked;
+  drawCurve();
+  $("curveHint").textContent=this.checked
+    ? "Null overlaid — it reproduces almost the whole rise."
+    : "Null hidden. On its own this looks like textbook complex contagion.";
+});
+
+$("stop").addEventListener("click",function(){
+  if(!runId) return;
+  $("stop").disabled=true;
+  fetch("/api/cancel?run="+runId,{method:"POST"});
+  logLine(null,"Cancelling…","warn");
+});
+})();
+</script>
+</body>
+</html>

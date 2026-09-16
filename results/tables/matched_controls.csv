@@ -1,0 +1,2 @@
+n_pairs,exposed_adoption_rate,control_adoption_rate,difference,ci95,risk_ratio
+61376,0.1335,0.1035,0.03,"[0.0264, 0.0336]",1.29

@@ -1,0 +1,2 @@
+n_train,n_test,split_at,auc_baseline,auc_network,auc_gain
+156778,67189,2016-01-13 11:40:21,0.5255,0.5289,0.0034
