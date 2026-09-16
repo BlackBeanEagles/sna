@@ -80,7 +80,7 @@ def _yerr(tb: pd.DataFrame):
             (tb["hi"] - tb["rate"]).clip(lower=0).to_numpy()]
 
 
-def plot(tables: dict[str, pd.DataFrame], out: Path, title_suffix: str = "",
+def plot(tables: dict[str, pd.DataFrame], out: Path,
          null_cmp: pd.DataFrame = None):
     n_panels = 3 if (null_cmp is not None and len(null_cmp)) else 2
     fig, axes = plt.subplots(1, n_panels, figsize=(6 * n_panels, 4.6))
@@ -103,7 +103,7 @@ def plot(tables: dict[str, pd.DataFrame], out: Path, title_suffix: str = "",
                 linewidth=1.3, label="shuffled-time null (by d)")
     ax.set_xlabel("exposure measure")
     ax.set_ylabel(f"P(adopt within {config.ADOPTION_WINDOW_DAYS}d)")
-    ax.set_title("Adoption probability curve" + title_suffix)
+    ax.set_title("Adoption probability curve")
     ax.legend(fontsize=8)
     ax.grid(alpha=.3)
 

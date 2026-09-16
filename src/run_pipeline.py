@@ -11,8 +11,6 @@ import json
 import time
 from pathlib import Path
 
-import pandas as pd
-
 from . import (animate, config, curve, events, matching, nulls, parse,
                predict, simulate, structure)
 
@@ -29,6 +27,9 @@ def main():
     ap.add_argument("--sim-games", type=int, default=80000)
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--null-reps", type=int, default=config.N_NULL_REPLICATES)
+    ap.add_argument("--null-kind", default="shuffle",
+                    choices=["shuffle", "rewire"],
+                    help="timestamp shuffling, or degree-preserving rewiring")
     ap.add_argument("--no-animation", action="store_true")
     a = ap.parse_args()
 
@@ -74,9 +75,10 @@ def main():
     report["network"] = net_summary
     report["early_adopters"] = by_early.round(4).to_dict()
 
-    print(f"[5/8] timestamp-shuffled null ({a.null_reps} replicates) ...")
+    print(f"[5/8] {a.null_kind} null ({a.null_reps} replicates) ...")
     cmp = nulls.run(config.INTERIM / "games.parquet",
-                    config.PROCESSED / "trials.parquet", n_reps=a.null_reps)
+                    config.PROCESSED / "trials.parquet",
+                    n_reps=a.null_reps, kind=a.null_kind)
     report["null_comparison"] = (cmp.round(4).to_dict(orient="records")
                                  if len(cmp) else [])
     if len(cmp):

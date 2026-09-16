@@ -14,7 +14,6 @@ import threading
 import time
 import traceback
 import uuid
-from datetime import datetime
 
 import pandas as pd
 
@@ -188,7 +187,6 @@ class Run:
         self.refresh = refresh
         self.q: queue.Queue = queue.Queue()
         self.cancelled = threading.Event()
-        self.done = False
         self.started = time.time()
         _RUNS[self.id] = self
 
@@ -231,7 +229,6 @@ def _execute(run: Run):
         run.emit("log", msg=traceback.format_exc()[-1200:], level="trace")
         run.emit("done", ok=False)
     finally:
-        run.done = True
         run.q.put(None)
 
 
@@ -253,7 +250,7 @@ def _pipeline(run: Run):
         run.log(f"Loaded a cached slice of {run.month} "
                 f"({len(df):,} games) — no download needed.", "ok")
         run.emit("scan", scanned=len(df), kept=len(df), rate=0, game=None)
-        return _analyse(run, df, cached=True)
+        return _analyse(run, df)
 
     run.log(f"GET {url}")
     run.log("Decompressing zstd on the fly — the PGN is never written to disk.")
@@ -294,10 +291,10 @@ def _pipeline(run: Run):
     except Exception:
         pass                                   # a cache failure must not kill the run
 
-    return _analyse(run, df, cached=False)
+    return _analyse(run, df)
 
 
-def _analyse(run: "Run", df, cached: bool):
+def _analyse(run: "Run", df):
     span_days = (df["ts"].max() - df["ts"].min()).total_seconds() / 86400
     players = len(set(df["white"]) | set(df["black"]))
     skipped = df.attrs.get("skipped", {})

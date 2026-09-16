@@ -95,13 +95,15 @@ def compare(real_by_d: pd.DataFrame, null_by_d: pd.DataFrame,
               "lift_over_null", "z_vs_null"]]
 
 
-def run(games_path: Path, trials_path: Path, n_reps: int = None):
+def run(games_path: Path, trials_path: Path, n_reps: int = None,
+        kind: str = "shuffle"):
     df = pd.read_parquet(games_path)
     real = curve.analyse(pd.read_parquet(trials_path))["by_d"]
-    null = run_null(df, n_reps=n_reps, kind="shuffle")
+    null = run_null(df, n_reps=n_reps, kind=kind)
     cmp = compare(real, null) if len(null) else pd.DataFrame()
     if len(cmp):
-        cmp.to_csv(config.TABLES / "null_comparison.csv", index=False)
+        suffix = "" if kind == "shuffle" else f"_{kind}"
+        cmp.to_csv(config.TABLES / f"null_comparison{suffix}.csv", index=False)
     return cmp
 
 
@@ -110,6 +112,8 @@ if __name__ == "__main__":
     ap.add_argument("--games", default=str(config.INTERIM / "games.parquet"))
     ap.add_argument("--trials", default=str(config.PROCESSED / "trials.parquet"))
     ap.add_argument("--reps", type=int, default=config.N_NULL_REPLICATES)
+    ap.add_argument("--kind", default="shuffle", choices=["shuffle", "rewire"],
+                    help="shuffle timestamps, or degree-preserving edge rewiring")
     a = ap.parse_args()
-    c = run(Path(a.games), Path(a.trials), a.reps)
+    c = run(Path(a.games), Path(a.trials), a.reps, a.kind)
     print(c.to_string(index=False) if len(c) else "null produced no trials")

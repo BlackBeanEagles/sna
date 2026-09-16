@@ -18,7 +18,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from src import config, events, nulls, curve  # noqa: E402
+from src import curve, events, nulls  # noqa: E402
 
 T0 = datetime(2016, 1, 1)
 
@@ -149,6 +149,31 @@ def test_shuffling_timestamps_preserves_the_games_themselves():
     out = nulls.shuffle_timestamps(df, np.random.default_rng(0))
     assert sorted(out["ts"]) == sorted(df["ts"])
     assert len(out) == len(df)
+
+
+def test_rewire_preserves_degree_and_makes_no_self_loops():
+    """The proposal's second null: degree-preserving edge rewiring. It has to
+    change who played whom while leaving every player's game count alone."""
+    import numpy as np
+    from collections import Counter
+
+    df = pd.DataFrame({
+        "white": [f"w{i % 7}" for i in range(60)],
+        "black": [f"b{i % 5}" for i in range(60)],
+        "ts": pd.date_range("2016-01-01", periods=60, freq="h"),
+    })
+    out = nulls.rewire_preserving_degree(df, np.random.default_rng(0))
+
+    def degrees(d):
+        c = Counter()
+        for u, v in zip(d.white, d.black):
+            c[u] += 1
+            c[v] += 1
+        return c
+
+    assert degrees(df) == degrees(out)
+    assert (out.white != out.black).all()          # no self-loops
+    assert set(zip(df.white, df.black)) != set(zip(out.white, out.black))
 
 
 def test_null_honours_granularity():

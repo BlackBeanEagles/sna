@@ -73,13 +73,13 @@ Everything lands in `results/` — `report.json`, `tables/*.csv`,
 | file | build-guide step | what it does |
 |---|---|---|
 | `src/config.py` | — | every locked decision in one place |
-| `src/fetch.py` | 1 | streams a slice of a 30 GB Lichess dump, stops early |
+| `src/fetch.py` | 1 | how a month maps to an archive URL |
 | `src/simulate.py` | 1 | synthetic PGN with a planted contagion rule — the pipeline's test |
 | `src/parse.py` | 2 | PGN → one Parquet event table; nothing downstream re-reads PGN |
 | `src/events.py` | 3–4 | exposure/adoption sweep, trial table, structural diversity |
 | `src/structure.py` | 4 | graph, centrality, Louvain communities, early-adopter profile |
 | `src/curve.py` | 5 | the adoption-probability curve and the simple/complex verdict |
-| `src/nulls.py` | 6 | timestamp shuffling + degree-preserving rewiring |
+| `src/nulls.py` | 6 | timestamp shuffling and degree-preserving rewiring (`--null-kind`) |
 | `src/matching.py` | 7a | rating-and-activity matched controls |
 | `src/predict.py` | 7b | held-out AUC, network features vs baseline |
 | `src/animate.py` | 8 | diffusion GIF + static panels for the report |
@@ -148,10 +148,10 @@ Set in `src/config.py`, all changeable in one place:
 ## Data
 
 Lichess open database, <https://database.lichess.org> — monthly PGN archives,
-permissive licence, persistent player names, exact timestamps, ratings, full
-move lists. `src/fetch.py` streams and decompresses on the fly and stops once
-it has enough games, so a 200k-game slice costs a few hundred MB of transfer
-rather than the full 30 GB.
+CC0, persistent player names, exact timestamps, ratings, full move lists.
+`src/parse.py` opens the remote `.pgn.zst` directly and decompresses as it
+reads, so the ~5 GB of PGN is never written to disk and a capped scan stops
+without fetching the rest.
 
 ## Status
 
