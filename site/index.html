@@ -495,12 +495,12 @@ footer{
       <figure>
         <div class="fig-head"><div>
           <p class="fig-title">Matched controls</p>
-          <p class="fig-sub">61,376 pairs, rating- and activity-matched.</p>
+          <p class="fig-sub">61,519 pairs, rating- and activity-matched.</p>
         </div></div>
         <div class="fig-body"><svg class="chart" id="c-matched" viewBox="0 0 380 260" role="img"
           aria-label="Exposed players adopt at 13.35 percent versus 10.35 percent for matched unexposed"></svg></div>
         <figcaption>
-          <b>+3.00 percentage points</b>, 95% CI [2.64, 3.36]. Risk ratio 1.29.
+          <b>+2.80 percentage points</b>, 95% CI [2.44, 3.16]. Risk ratio 1.265.
         </figcaption>
       </figure>
 
@@ -885,8 +885,8 @@ footer{
     frame(svg,{l:L,r:R,t:T,b:B,y0:y0,y1:y1,yTicks:4,yFmt:function(v){return pct(v,0);}});
 
     var bars=[
-      {lab:"Exposed",v:.1335,c:"var(--s-ochre)"},
-      {lab:"Matched control",v:.1035,c:"var(--s-null)"}
+      {lab:"Exposed",v:.1338,c:"var(--s-ochre)"},
+      {lab:"Matched control",v:.1058,c:"var(--s-null)"}
     ];
     var bw=76, gap=54, x0=L+44;
     bars.forEach(function(b,i){
@@ -902,18 +902,18 @@ footer{
       hit.addEventListener("mousemove",function(e){showTip(e,
         "<div class='t-h'>"+b.lab+"</div>"+
         "<div class='t-r'><span>Adoption</span><b>"+pct(b.v,2)+"</b></div>"+
-        "<div class='t-r'><span>Pairs</span><b>61,376</b></div>");});
+        "<div class='t-r'><span>Pairs</span><b>61,519</b></div>");});
       hit.addEventListener("mouseleave",hideTip);
       svg.appendChild(hit);
     });
 
-    var xa=x0+bw, xb=x0+bw+gap, yA=Y(.1335), yB=Y(.1035);
+    var xa=x0+bw, xb=x0+bw+gap, yA=Y(.1338), yB=Y(.1058);
     svg.appendChild(el("line",{x1:xa+8,x2:xb-8,y1:yA,y2:yA,class:"ref-line"}));
     svg.appendChild(fadeIn(el("line",{x1:(xa+xb)/2,x2:(xa+xb)/2,y1:yA,y2:yB,
       stroke:"var(--s-vermilion)","stroke-width":2,"stroke-linecap":"round"}),800));
     var dl=el("text",{x:(xa+xb)/2,y:(yA+yB)/2-9,"text-anchor":"middle",class:"dlabel",
       fill:"var(--s-vermilion)"});
-    dl.textContent="+3.0 pp";svg.appendChild(fadeIn(dl,900));
+    dl.textContent="+2.8 pp";svg.appendChild(fadeIn(dl,900));
 
     var mid=(T+B)/2;
     var yt=el("text",{x:14,y:mid,"text-anchor":"middle",class:"ax-title",

@@ -151,6 +151,44 @@ def test_shuffling_timestamps_preserves_the_games_themselves():
     assert len(out) == len(df)
 
 
+def test_aborted_game_does_not_leak_its_tags_into_the_next():
+    """Lichess contains games with headers but no movetext. If the scanner only
+    resets after a game WITH moves, the aborted game's ECO and Elo leak into
+    the following game and it is analysed under the wrong opening."""
+    import tempfile
+    from src import parse
+
+    pgn = (
+        '[Event "Rated Blitz game"]\n[White "ghost"]\n[ECO "Z99"]\n'
+        '[WhiteElo "2500"]\n\n'
+        '[Event "Rated Blitz game"]\n[White "real"]\n[Black "opp"]\n'
+        '[UTCDate "2016.01.03"]\n[UTCTime "00:00:03"]\n[BlackElo "2002"]\n\n'
+        'd4 d5 0-1\n'
+    )
+    f = Path(tempfile.gettempdir()) / "sna_test_aborted.pgn"
+    f.write_text(pgn, encoding="utf-8")
+
+    games = list(parse.iter_games(f))
+    assert len(games) == 1                       # the aborted game is dropped
+    tags, _ = games[0]
+    assert tags["White"] == "real"
+    assert "ECO" not in tags                     # not inherited from the ghost
+    assert "WhiteElo" not in tags
+
+
+def test_matching_pool_reaches_the_bottom_of_the_activity_tolerance():
+    """The activity index is log-spaced at the tolerance ratio, so the lowest
+    acceptable activity can floor two buckets down. Searching only one bucket
+    below quietly dropped valid controls and biased the pool upwards."""
+    import inspect
+    from src import matching
+
+    src = inspect.getsource(matching.build_matched)
+    assert "for da in (-2, -1, 0, 1, 2)" in src, (
+        "activity bucket search is too narrow; controls in [0.75a, 0.8a] "
+        "can be missed")
+
+
 def test_rewire_preserves_degree_and_makes_no_self_loops():
     """The proposal's second null: degree-preserving edge rewiring. It has to
     change who played whom while leaving every player's game count alone."""

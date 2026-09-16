@@ -81,24 +81,32 @@ def build_matched(df: pd.DataFrame, n_per_trial: int = 1,
 
         rb, ab = int(r0 // r_w), int(np.log(a0) / np.log(a_ratio))
         pool = []
+        # Activity buckets are log-spaced at the tolerance ratio, but the lower
+        # bound (0.75*a) sits up to 1.29 buckets down, which floors to TWO
+        # buckets in the worst case. Searching only -1 silently excluded
+        # controls with activity in roughly [0.75a, 0.8a] -- biasing the pool
+        # towards more active players, who adopt more, which understates the
+        # effect. Exact tolerance is still checked per candidate below, so
+        # widening the search only costs a little speed.
         for dr in (-1, 0, 1):
-            for da in (-1, 0, 1):
+            for da in (-2, -1, 0, 1, 2):
                 pool.extend(idx.get((rb + dr, ab + da), ()))
         if not pool:
             continue
         banned = exposed_players[beh]
-        cand = []
-        for i in rng.choice(len(pool), min(len(pool), 60), replace=False):
-            c = pool[i]
-            if c == player or c in banned:
-                continue
-            rc, ac = meta[c]
-            if (abs(rc - r0) <= config.RATING_MATCH_TOLERANCE
-                    and abs(ac - a0) <= config.ACTIVITY_MATCH_RATIO * a0):
-                cand.append(c)
-                if len(cand) >= n_per_trial:
-                    break
-        for c in cand:
+        # Check the tolerance FIRST, then sample among the players who pass.
+        # Sampling a fixed number of candidates out of the bucket pool and
+        # testing those instead makes the match rate depend on how much of the
+        # pool happens to be out of tolerance -- widening the bucket search
+        # then *lowers* the number of matches found, which is backwards.
+        valid = [c for c in pool
+                 if c != player and c not in banned
+                 and abs(meta[c][0] - r0) <= config.RATING_MATCH_TOLERANCE
+                 and abs(meta[c][1] - a0) <= config.ACTIVITY_MATCH_RATIO * a0]
+        if not valid:
+            continue
+        take = min(n_per_trial, len(valid))
+        for c in rng.choice(valid, size=take, replace=False):
             c_adopt = first_perf.get((c, beh))
             ctrl = int(c_adopt is not None and t0 < c_adopt <= t0 + window)
             rows.append((player, c, beh[0], beh[1], t0, treat, ctrl))

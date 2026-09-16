@@ -9,6 +9,15 @@ period and scored by AUC on the later held-out period:
 
 If the network features carry real information, the AUC gap is positive on
 data the model has never seen, in a period strictly after training.
+
+KNOWN LIMITATION -- temporal leakage. Every feature here is computed over the
+WHOLE month before the split: `rating`, `activity` and `popularity` in
+events.build_trials, and `degree`, `kcore`, `betweenness` from the full-period
+graph in structure.node_features. A model trained on the first 70% therefore
+sees summary statistics that partly encode the held-out 30%, which inflates
+both AUCs. It does not change this check's conclusion -- both models sit near
+chance and the gap is +0.003 -- but the numbers are optimistic, and a clean
+version would recompute every feature from the training window alone.
 """
 from __future__ import annotations
 

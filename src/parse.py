@@ -76,11 +76,16 @@ def iter_games(path, limit: int | None = None):
         for line in fh:
             line = line.rstrip("\n")
             if line.startswith("["):
-                if in_moves:                       # previous game ended
-                    yield tags, " ".join(moves)
-                    n += 1
-                    if limit and n >= limit:
-                        return
+                # [Event ...] starts a game. Reset on it rather than only after
+                # a game with moves, or an aborted game (headers, no movetext --
+                # Lichess does contain them) leaks its tags into the next game,
+                # silently giving it the wrong opening and ratings.
+                if line.startswith("[Event ") and tags:
+                    if in_moves:
+                        yield tags, " ".join(moves)
+                        n += 1
+                        if limit and n >= limit:
+                            return
                     tags, moves, in_moves = {}, [], False
                 m = TAG_RE.match(line)
                 if m and m.group(1) in WANTED:

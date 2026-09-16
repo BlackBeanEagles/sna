@@ -171,15 +171,15 @@
     }
   ],
   "matched_controls": {
-    "n_pairs": 61376,
-    "exposed_adoption_rate": 0.1335,
-    "control_adoption_rate": 0.1035,
-    "difference": 0.03,
+    "n_pairs": 61519,
+    "exposed_adoption_rate": 0.1338,
+    "control_adoption_rate": 0.1058,
+    "difference": 0.028,
     "ci95": [
-      0.0264,
-      0.0336
+      0.0244,
+      0.0316
     ],
-    "risk_ratio": 1.29
+    "risk_ratio": 1.265
   },
   "predictive": {
     "n_train": 156778,
@@ -207,5 +207,8 @@
     "nodes_drawn": "400",
     "adopters": "394"
   },
-  "runtime_seconds": 1982.3
+  "runtime_seconds": 1982.3,
+  "corrections": [
+    "matched controls recomputed after fixing the activity-bucket window and the filter-before-sample order in matching.py"
+  ]
 }

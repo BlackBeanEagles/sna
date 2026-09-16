@@ -161,7 +161,7 @@ Complete. Run on the full Lichess 2016-01 month: 249,505 games, 6,881 players,
 
 The raw d-curve rises (0.159 -> 0.227) but the timestamp-shuffled null rises
 just as fast, and the excess over the null decays to zero as d grows. Matched
-controls show a real but modest exposure effect: +3.0 pp, 95% CI [2.64, 3.36].
+controls show a real but modest exposure effect: +2.8 pp, 95% CI [2.44, 3.16].
 The held-out AUC check was inconclusive (gain +0.003, both models near chance).
 
 Data and results live outside the repo:

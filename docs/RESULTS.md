@@ -56,14 +56,14 @@ No trend. `separated_at_fixed_k: false`. Same at k = 2 and k = 3.
 
 ### But influence is real — it just needs only one exposure
 
-Rating-and-activity matched controls, n = 61,376 pairs:
+Rating-and-activity matched controls, n = 61,519 pairs:
 
 | | |
 |---|---|
-| Exposed adoption rate | 13.35% |
-| Matched unexposed | 10.35% |
-| **Difference** | **+3.00 pp**, 95% CI [2.64, 3.36] |
-| Risk ratio | 1.29 |
+| Exposed adoption rate | 13.38% |
+| Matched unexposed | 10.58% |
+| **Difference** | **+2.80 pp**, 95% CI [2.44, 3.16] |
+| Risk ratio | 1.265 |
 
 This estimate uses one pair per exposed player-behaviour, so unlike the curve
 above it is **not affected by the trial-independence problem** documented
@@ -111,6 +111,16 @@ is consistent with the simple-contagion verdict — if d carries no signal, a
 model given d should not improve — but it is equally consistent with the
 feature set being too weak to predict individual adoption at all. It should
 be reported as inconclusive, not as support.
+
+It also has **temporal leakage**, which should be admitted before anyone asks:
+every feature is computed over the whole month before the split — rating,
+activity and opening popularity in `events.build_trials`, and degree, k-core
+and betweenness from the full-period graph. A model trained on the first 70%
+therefore sees statistics that partly encode the held-out 30%, so both AUCs are
+optimistic. With both models at chance and a gap of +0.003 this changes
+nothing, but a clean version would recompute every feature from the training
+window alone. This is the weakest part of the project and is best presented as
+such.
 
 ## Robustness: the decay is not an artefact of the d-cap
 
