@@ -43,7 +43,7 @@ def rewire_preserving_degree(df: pd.DataFrame, rng: np.random.Generator,
 
 def run_null(df: pd.DataFrame, n_reps: int = None, kind: str = "shuffle",
              seed: int = config.RANDOM_SEED,
-             window_days: int = None) -> pd.DataFrame:
+             window_days: int = None, by: str = "d") -> pd.DataFrame:
     """window_days MUST match the window used for the real trials. If the null
     builds its trials on a different window the comparison is meaningless: a
     window wider than the observed span censors every non-adopter, so the null
@@ -57,19 +57,20 @@ def run_null(df: pd.DataFrame, n_reps: int = None, kind: str = "shuffle",
         trials = events.build_trials(null_df, window_days=window_days)
         if not len(trials):
             continue
-        tb = curve.analyse(trials)["by_d"]
+        tb = curve.analyse(trials)["by_" + by]
         tb["rep"] = rep
         frames.append(tb)
     if not frames:
         return pd.DataFrame()
     allreps = pd.concat(frames, ignore_index=True)
-    return (allreps.groupby("d")
+    return (allreps.groupby(by)
             .agg(n=("n", "sum"), rate=("rate", "mean"), rate_sd=("rate", "std"))
             .reset_index())
 
 
-def compare(real_by_d: pd.DataFrame, null_by_d: pd.DataFrame) -> pd.DataFrame:
-    m = real_by_d.merge(null_by_d, on="d", suffixes=("_real", "_null"))
+def compare(real_by_d: pd.DataFrame, null_by_d: pd.DataFrame,
+            by: str = "d") -> pd.DataFrame:
+    m = real_by_d.merge(null_by_d, on=by, suffixes=("_real", "_null"))
     m["lift_over_null"] = m["rate_real"] / m["rate_null"].replace(0, np.nan)
 
     # Spread of the null rate across replicates. With a single replicate there
@@ -81,7 +82,7 @@ def compare(real_by_d: pd.DataFrame, null_by_d: pd.DataFrame) -> pd.DataFrame:
     binom = np.sqrt(m["rate_null"] * (1 - m["rate_null"]) / m["n_null"].clip(lower=1))
     m["null_se"] = se.fillna(binom)
     m["z_vs_null"] = (m["rate_real"] - m["rate_null"]) / m["null_se"].replace(0, np.nan)
-    return m[["d", "n_real", "rate_real", "rate_null", "rate_sd",
+    return m[[by, "n_real", "rate_real", "rate_null", "rate_sd",
               "lift_over_null", "z_vs_null"]]
 
 

@@ -140,6 +140,32 @@ exposure; it is not the d = 6 bucket doing the work.
 
 Raw table: `results/tables/null_comparison_cap12.csv`.
 
+## Structural diversity gives the same answer as raw exposer count
+
+The proposal's stated technique is Ugander et al.'s measure — not how many
+distinct neighbours exposed you (`d`), but how many **connected components**
+the exposing neighbourhood breaks into (`sd`). Two exposures from two players
+who have met is one social source; from two strangers, two. Testing `d` alone
+would leave the proposal's actual promise untested, so `sd` was put through the
+identical shuffled-time null (`scripts/check_diversity.py`).
+
+| sd | n | observed | null | lift | z |
+|---|---|---|---|---|---|
+| 1 | 87,558 | 0.1601 | 0.1355 | **1.181** | 23.4 |
+| 2 | 42,703 | 0.1608 | 0.1435 | 1.120 | 24.3 |
+| 3 | 25,318 | 0.1738 | 0.1612 | 1.078 | 6.9 |
+| 4 | 16,685 | 0.1896 | 0.1766 | 1.074 | 7.0 |
+| 5 | 11,660 | 0.1961 | 0.1905 | 1.029 | 3.2 |
+| 6+ | 40,043 | 0.2230 | 0.2245 | **0.993** | −0.6 |
+
+The excess decays from 1.181 to 0.993, the fixed-`k` comparison still fails to
+separate, and the verdict is unchanged. **Structural diversity tracks raw
+exposer count almost exactly** (excess at the top bucket: d 0.999, sd 0.993),
+so the conclusion does not depend on which of the two measures is used — the
+sharper, network-defined measure finds no reinforcement either.
+
+Raw tables: `results/tables/null_comparison_d.csv`, `null_comparison_sd.csv`.
+
 ## Limitations
 
 1. **One month, one rating band, one platform.** The excess-over-null decay

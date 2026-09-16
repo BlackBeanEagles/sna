@@ -171,5 +171,16 @@ export SNA_DATA_ROOT='E:\sna_data'      # or set SNA_DATA_ROOT=E:\sna_data on cm
 ./.venv/Scripts/python.exe -m src.run_pipeline --month 2016-01
 ```
 
-Not yet done: replication on a second month, and the ply-level granularity
-robustness check (`OPENING_GRANULARITY = "ply"` in `src/config.py`).
+Robustness checks that have been run (see [docs/RESULTS.md](docs/RESULTS.md)):
+
+- **d-cap** — unclipping the top bucket to d = 12 leaves the decay intact, so
+  the convergence is not an artefact of lumping the tail (`scripts/check_clipping.py`).
+- **Structural diversity** — Ugander's components-of-the-exposure-subgraph
+  measure gives the same verdict as raw exposer count (`scripts/check_diversity.py`).
+- **Ply granularity** — `scripts/check_ply.py` reruns the whole comparison with
+  behaviours keyed by the first 8 plies instead of ECO code.
+
+Tests: `python -m pytest tests -q` (16 tests over the exposure/adoption core,
+the null model and the verdict logic).
+
+Still open: replication on a second month.
