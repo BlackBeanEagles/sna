@@ -151,6 +151,43 @@ def test_shuffling_timestamps_preserves_the_games_themselves():
     assert len(out) == len(df)
 
 
+def test_null_honours_granularity():
+    """The null must build trials the same way the real analysis does.
+
+    Leaving granularity at the default while the real trials are keyed by ply
+    compares a sparse ply world against a dense ECO world and manufactures a
+    spurious 'complex contagion' verdict. Same class of bug as the adoption
+    window mismatch, so it gets the same guard.
+    """
+    rows = [game(f"p{d}", f"q{d}", d,
+                 ply="e4 c5 Nf3 d6" if d % 2 == 0 else "e4 c5 Nc3 Nc6")
+            for d in range(6)]
+    df = frame(rows)
+
+    # ply granularity must actually split the single ECO into two behaviours
+    eco_keys = {events.behaviour_key(r, "eco") for r in df.itertuples()}
+    ply_keys = {events.behaviour_key(r, "ply") for r in df.itertuples()}
+    assert len(eco_keys) == 1 and len(ply_keys) == 2
+
+    # and run_null must forward that choice to build_trials, not silently
+    # fall back to the configured default
+    seen = []
+    real_build = events.build_trials
+
+    def spy(frame_, *args, **kwargs):
+        seen.append(kwargs.get("granularity"))
+        return real_build(frame_, *args, **kwargs)
+
+    events.build_trials = spy
+    try:
+        nulls.run_null(df, n_reps=1, window_days=2, granularity="ply")
+    finally:
+        events.build_trials = real_build
+
+    assert seen and all(g == "ply" for g in seen), (
+        f"run_null passed granularity={seen} to build_trials, expected 'ply'")
+
+
 def test_compare_falls_back_to_binomial_se_with_one_replicate():
     """A single replicate has no across-replicate spread. Without a fallback
     every z is NaN and the verdict silently collapses to 'nothing detected'."""

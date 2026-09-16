@@ -166,6 +166,34 @@ sharper, network-defined measure finds no reinforcement either.
 
 Raw tables: `results/tables/null_comparison_d.csv`, `null_comparison_sd.csv`.
 
+## Robustness: ply-level granularity
+
+ECO codes are coarse — many distinct ideas share one code. The proposal
+promised a robustness check at ply level, where a behaviour is keyed by the
+first 8 plies instead. That fragments the data hard: 40 ECO behaviours become
+**56,912 ply behaviours**, and the adoption rate falls from 17.71% to 0.65%
+(1,712 adoptions), because almost nobody repeats an exact 8-ply line.
+
+| d | ECO lift | ply lift | ply n |
+|---|---|---|---|
+| 1 | 1.178 | **1.162** | 229,966 |
+| 2 | 1.116 | 1.080 | 19,335 |
+| 3 | 1.081 | 0.991 | 6,310 |
+| 4 | 1.074 | 1.191 | 2,936 |
+| 5 | 1.039 | 1.238 | 1,625 |
+| 6+ | 0.999 | **0.865** | 3,302 |
+
+**The verdict is the same at both granularities**: simple contagion, with the
+excess over the null starting near 1.16 at d = 1 and ending at or below 1.0.
+
+Report the ply curve with the caveat it deserves: from d = 3 onward the buckets
+hold only 1,600–6,300 trials with an adoption rate under 4%, so the middle of
+that column is noisy and non-monotonic (0.991, then 1.191, then 1.238, then
+0.865). What is stable is the pair of endpoints and the verdict — not the shape
+in between. The ECO-level analysis remains the headline for that reason.
+
+Reproduce: `python scripts/check_ply.py --reps 3`.
+
 ## Limitations
 
 1. **One month, one rating band, one platform.** The excess-over-null decay

@@ -28,8 +28,10 @@ def analyse(df: pd.DataFrame, granularity: str, reps: int) -> dict:
     if not len(trials):
         return {"granularity": granularity, "error": "no trials"}
     tables = curve.analyse(trials)
+    # the null MUST use the same granularity as the real trials
     null = nulls.run_null(df, n_reps=reps, kind="shuffle",
-                          window_days=config.ADOPTION_WINDOW_DAYS)
+                          window_days=config.ADOPTION_WINDOW_DAYS,
+                          granularity=granularity)
     cmp = nulls.compare(tables["by_d"], null)
     v = curve.verdict(tables, cmp)
     return {
