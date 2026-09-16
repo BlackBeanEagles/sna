@@ -177,8 +177,13 @@ Robustness checks that have been run (see [docs/RESULTS.md](docs/RESULTS.md)):
   the convergence is not an artefact of lumping the tail (`scripts/check_clipping.py`).
 - **Structural diversity** — Ugander's components-of-the-exposure-subgraph
   measure gives the same verdict as raw exposer count (`scripts/check_diversity.py`).
-- **Ply granularity** — `scripts/check_ply.py` reruns the whole comparison with
-  behaviours keyed by the first 8 plies instead of ECO code.
+- **Ply granularity** — behaviours keyed by the first 8 plies instead of ECO
+  code give the same verdict (`scripts/check_ply.py`).
+- **Trial independence** — one row per player-behaviour spell instead of one
+  per exposure. The verdict survives; the z-scores fall two- to four-fold, so
+  the published intervals are optimistic (`scripts/check_independence.py`).
+- **Adoption window** — 7, 14 and 28 days all give the same verdict
+  (`scripts/check_window.py`).
 
 Tests: `python -m pytest tests -q` (16 tests over the exposure/adoption core,
 the null model and the verdict logic).

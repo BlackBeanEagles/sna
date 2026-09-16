@@ -1,0 +1,4 @@
+window_days,trials,adoptions,rate,excess_at_d1,excess_at_dmax,decays,verdict
+7,302631,29091,0.0961,1.323,1.114,True,simple contagion
+14,223967,39661,0.1771,1.18,0.996,True,simple contagion
+28,76571,47066,0.6147,1.109,0.952,True,simple contagion

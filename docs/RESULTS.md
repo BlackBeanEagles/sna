@@ -194,19 +194,97 @@ in between. The ECO-level analysis remains the headline for that reason.
 
 Reproduce: `python scripts/check_ply.py --reps 3`.
 
+## The trials are not independent — and the intervals say otherwise
+
+This is the most serious caveat in the project, and it is not visible from the
+headline table.
+
+The trial table has one row per (player, behaviour, k-th exposure), and
+`adopted` is scored for *every* exposure whose 14-day window contains the
+adoption. So one real adoption event is counted many times:
+
+| | |
+|---|---|
+| trial rows | 223,967 |
+| distinct (player, behaviour) spells | 78,274 |
+| distinct players | 6,730 |
+| "adoptions" reported | 39,661 |
+| **distinct adoption events** | **14,320** |
+| each adoption counted | **2.77× on average, up to 144×** |
+| adoption events counted more than once | 46.9% |
+
+Wilson intervals and z-scores both assume independent Bernoulli trials. They
+are therefore **too narrow**, and the verdict rests on exactly those quantities
+(interval separation, and z > 3 against the null).
+
+Recomputing with **one row per spell** — each player-behaviour contributing a
+single observation and each adoption counted once — gives
+(`scripts/check_independence.py`):
+
+| d | n | observed | null | lift | z (per-spell) | z (per-exposure) |
+|---|---|---|---|---|---|---|
+| 1 | 41,617 | 0.1802 | 0.1584 | **1.138** | 8.9 | 20.1 |
+| 2 | 15,481 | 0.1724 | 0.1599 | 1.078 | 3.1 | 11.9 |
+| 3 | 7,616 | 0.1754 | 0.1729 | 1.015 | 2.1 | 8.9 |
+| 4 | 4,209 | 0.1894 | 0.1818 | 1.042 | 1.2 | 9.9 |
+| 5 | 2,582 | 0.1921 | 0.1924 | 0.998 | −0.1 | 3.2 |
+| 6+ | 6,769 | 0.2248 | 0.2258 | **0.996** | −1.4 | −0.1 |
+
+**What survives:** the decay from ~1.14 to ~1.00, the verdict, and a clearly
+significant effect at the first exposure (z = 8.9).
+
+**What does not:** the apparent strength of the middle of the curve. At d = 3
+and d = 4 the per-exposure z-scores of 8.9 and 9.9 collapse to 2.1 and 1.2 —
+below any reasonable threshold. The per-exposure z-scores are inflated roughly
+two- to four-fold throughout.
+
+So the honest statement of the result is: *the first exposure carries a real
+effect; beyond it, nothing distinguishable from the null* — which is the same
+verdict, argued from weaker and more defensible numbers. Quote the per-spell
+figures when precision is being challenged.
+
+Raw table: `results/tables/null_comparison_perspell_last.csv`.
+
+## Robustness: the 14-day adoption window
+
+The window is the analyst's choice, not a property of the data, so it is a free
+parameter worth testing (`scripts/check_window.py`).
+
+| window | trials | adoptions | rate | excess at d=1 | excess at d=6+ | verdict |
+|---|---|---|---|---|---|---|
+| 7 days | 302,631 | 29,091 | 9.61% | 1.323 | 1.114 | simple contagion |
+| **14 days** | 223,967 | 39,661 | 17.71% | 1.180 | 0.996 | simple contagion |
+| 28 days | 76,571 | 47,066 | 61.47% | 1.109 | 0.952 | simple contagion |
+
+**The verdict is stable at every window**, and the excess decays in all three.
+
+Two things not to overclaim. First, *how far* it decays is window-dependent: at
+7 days the excess is still 1.114 at the top bucket rather than reaching 1.0, so
+"the excess falls to exactly 1" is a 14-day statement, whereas "the excess
+decays with d" holds throughout. Second, the 28-day row should be read with
+care — a 28-day window inside a 31-day month censors most non-adopters, which
+is why the trial count collapses from 223,967 to 76,571 and the adoption rate
+jumps to 61%. It agrees, but it is the weakest of the three.
+
+Raw table: `results/tables/window_sensitivity.csv`.
+
 ## Limitations
 
 1. **One month, one rating band, one platform.** The excess-over-null decay
-   is the key claim and it has not been replicated. Running 2016-07 is the
-   cheapest strengthening available.
+   is the key claim and it has not been replicated on a second month. This is
+   now the largest remaining gap: every other robustness check above has been
+   run and passed.
 2. **6,881 players, not 10⁵.** The filters compound harshly. Widening the
    band or relaxing the ≥20-game floor trades noise for scale.
-3. **ECO-level granularity only.** The ply-level robustness check
-   (`OPENING_GRANULARITY = "ply"`) has not been run.
+3. **Ply-level granularity is noisy.** The check agrees with the ECO result
+   (section above), but its buckets beyond d = 2 hold 1,600–6,300 trials at
+   under 4% adoption, so only the endpoints are trustworthy.
 4. **d = 6 is a clipped bucket** (all d ≥ 6) in the headline table, which is why
    its n is large. The robustness run above unclips it to d = 12 and the result
    holds.
-5. **Adoption ≠ repertoire change.** A player may play an opening once
+5. **Confidence intervals throughout this report are optimistic** for the
+   reason above; the per-spell table is the conservative version.
+6. **Adoption ≠ repertoire change.** A player may play an opening once
    experimentally; the design cannot distinguish that from real uptake.
 
 ## Note on a bug worth mentioning in the report
