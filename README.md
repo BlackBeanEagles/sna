@@ -1,4 +1,4 @@
-# Openings as Contagion
+# Chess Openings As Contagion
 
 Testing simple versus complex contagion in the diffusion of chess openings
 across a player-interaction network. Implementation of the SNA research

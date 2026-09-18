@@ -1,7 +1,7 @@
 # 23 CSE 356 SOCIAL NETWORK ANALYSIS
 ## Project – Research Proposal
 
-**Project Title:** Openings as Contagion: Testing Simple versus Complex Contagion in the Diffusion of Chess Openings across a Player Interaction Network
+**Project Title:** Chess Openings As Contagion
 
 **Student Name(s):** [Your Name]
 
