@@ -131,8 +131,8 @@ that gap.
     A temporal, undirected player-interaction graph $G = (V, E, T)$. Nodes $V$
     are individual players. An edge $(u, v, t)$ exists whenever $u$ and $v$
     played a game at time $t$; the same pair may be connected by many timestamped
-    edges. Node attributes include rating, rating volatility and games per week
-    (activity). Edge attributes include the opening played -- classified by ECO
+    edges. Node attributes include rating and games per week (activity). Edge
+    attributes include the opening played -- classified by ECO
     code and by the first $k$ plies -- the colour each player held, and the
     result. From this graph two event streams are derived: an
     \textbf{exposure event} $(A \rightarrow B, X, c, t)$, meaning $A$ played
@@ -146,9 +146,11 @@ that gap.
     identifiers, exact timestamps, ratings and full move lists. To keep the
     project tractable for a single investigator, the scope is restricted to one
     month of standard time-control games within a single rating band (proposed:
-    1800--2200), covering the most frequent openings by ECO code. This yields a
-    network on the order of $10^5$ players and $10^6$ games -- large enough for
-    statistical power, small enough for a laptop.
+    1800--2200), covering the most frequent openings by ECO code and excluding
+    players with too few games for their adoption timing to be meaningful. A
+    month holds on the order of $5 \times 10^6$ games; those restrictions are
+    expected to retain a few times $10^5$ of them, over a player set in the
+    thousands -- large enough for statistical power, small enough for a laptop.
 
     \item \textbf{SNA Techniques:}
     Temporal network construction and ego-network extraction for the exposure
@@ -156,8 +158,8 @@ that gap.
     al.~[2], namely the number of connected components in the subgraph induced
     on a player's exposing neighbours rather than merely the count of those
     neighbours; centrality analysis (degree, betweenness, $k$-core) to test
-    whether early adopters occupy distinctive structural positions; community
-    detection (Louvain / Leiden) to determine whether openings diffuse
+    whether early adopters occupy distinctive structural positions; Louvain
+    community detection to determine whether openings diffuse
     predominantly within communities and cross between them via brokers
     occupying structural holes; null-model construction by timestamp shuffling
     and degree-preserving edge rewiring; and diffusion visualisation over the
