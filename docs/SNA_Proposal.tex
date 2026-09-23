@@ -74,11 +74,14 @@ player.
 \section*{2. Research Gap}
 
 Existing network-science work on chess treats the \textit{openings} as the
-network. De Marzo and Servedio [4] construct a bipartite player--opening
-structure and apply complexity algorithms to rank opening difficulty and player
-skill; related work measures similarity between openings from co-play
-statistics. In all of this the players are aggregated away, and the object of
-study is the opening space.
+network. De Marzo and Servedio [4] build a bipartite player--opening structure
+from 3.7 million Lichess games, project it into a relatedness network of
+openings, and use complexity algorithms to rank opening difficulty and player
+skill. Notably, they also forecast which openings a player will take up next --
+but from the \textit{proximity of openings to that player's existing
+repertoire}, an ``adjacent possible'' effect in opening space. The players
+themselves are never connected to one another, so adoption is explained by
+what a player already knows rather than by whom they have faced.
 
 Conversely, the social contagion literature has established that behaviour
 spread often requires social reinforcement -- Centola's experimental result that
@@ -88,10 +91,14 @@ neighbourhood predicts adoption better than the raw number of exposures [2].
 These studies rely on platforms where exposure is estimated rather than
 observed, and where the counterfactual is contested [3].
 
-The gap is the intersection: no published work treats chess opening choice as a
-social contagion process over the player-to-player interaction network, despite
-chess offering the cleanest observable exposure signal available in any
-large-scale behavioural dataset. This project addresses that gap.
+The gap is the intersection: to our knowledge no published work treats chess
+opening choice as a social contagion process over the player-to-player
+interaction network, despite chess offering the cleanest observable exposure
+signal available in any large-scale behavioural dataset. Opening adoption has
+been predicted from the structure of opening space, and social reinforcement
+has been studied where exposure must be inferred; neither has been done where
+exposure is observed and the edges are between people. This project addresses
+that gap.
 
 % ==================================================
 \section*{3. Objectives}
