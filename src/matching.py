@@ -16,7 +16,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from . import config, events
+from . import config, events, parse
 
 
 def _match_index(rating: pd.Series, games: pd.Series):
@@ -133,7 +133,7 @@ def summarise(pairs: pd.DataFrame) -> dict:
 
 
 def run(games_path: Path):
-    df = pd.read_parquet(games_path)
+    df = parse.load_games(games_path)
     pairs = build_matched(df)
     pairs.to_parquet(config.PROCESSED / "matched_pairs.parquet", index=False)
     s = summarise(pairs)

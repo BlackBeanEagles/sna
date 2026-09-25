@@ -17,7 +17,7 @@ import networkx as nx
 import pandas as pd
 from matplotlib.animation import FuncAnimation, PillowWriter
 
-from . import config, events, structure
+from . import config, events, parse, structure
 
 UNADOPTED = "#d9d9d9"
 ADOPTED = "#c2185b"
@@ -107,7 +107,7 @@ def animate(df: pd.DataFrame, out_gif: Path = None, out_png: Path = None,
 
 
 def run(games_path: Path):
-    return animate(pd.read_parquet(games_path))
+    return animate(parse.load_games(games_path))
 
 
 if __name__ == "__main__":

@@ -9,3 +9,4 @@ __pycache__/
 # cached archive slices (regenerated on demand, ~10 MB each)
 data/interim/slice_*.parquet
 data/interim/probe.parquet
+data/interim/simulated_games.parquet

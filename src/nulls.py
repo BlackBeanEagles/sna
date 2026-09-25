@@ -14,7 +14,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from . import config, curve, events
+from . import config, curve, events, parse
 
 
 def shuffle_timestamps(df: pd.DataFrame, rng: np.random.Generator) -> pd.DataFrame:
@@ -97,7 +97,7 @@ def compare(real_by_d: pd.DataFrame, null_by_d: pd.DataFrame,
 
 def run(games_path: Path, trials_path: Path, n_reps: int = None,
         kind: str = "shuffle"):
-    df = pd.read_parquet(games_path)
+    df = parse.load_games(games_path)
     real = curve.analyse(pd.read_parquet(trials_path))["by_d"]
     null = run_null(df, n_reps=n_reps, kind=kind)
     cmp = compare(real, null) if len(null) else pd.DataFrame()

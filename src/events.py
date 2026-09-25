@@ -28,7 +28,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from . import config
+from . import config, parse
 
 
 def behaviour_key(row, granularity: str) -> str:
@@ -134,7 +134,7 @@ def build_trials(df: pd.DataFrame, granularity: str = None,
 
 
 def run(games_path: Path, out: Path, granularity=None) -> pd.DataFrame:
-    df = pd.read_parquet(games_path)
+    df = parse.load_games(games_path)
     trials = build_trials(df, granularity)
     trials.to_parquet(out, index=False)
     return trials

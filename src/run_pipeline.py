@@ -48,9 +48,14 @@ def main():
     else:
         pgn = a.pgn if str(a.pgn).startswith("http") else Path(a.pgn)
 
+    # Simulated runs write to their own filename so that games.parquet always
+    # means real data -- a stale synthetic table there gets analysed silently.
+    games_path = config.INTERIM / (
+        "simulated_games.parquet" if (a.simulate or not a.pgn) else "games.parquet")
+
     label = str(pgn).rsplit("/", 1)[-1]
     print(f"[2/8] parsing {label} ...")
-    games = parse.run(pgn, config.INTERIM / "games.parquet", limit=a.limit,
+    games = parse.run(pgn, games_path, limit=a.limit,
                       progress=250000)
     report["parse"] = {
         "games": len(games), "skipped": games.attrs["skipped"],
@@ -64,19 +69,19 @@ def main():
         return
 
     print("[3/8] building exposure/adoption trials ...")
-    trials = events.run(config.INTERIM / "games.parquet",
+    trials = events.run(games_path,
                         config.PROCESSED / "trials.parquet")
     report["trials"] = {"n": len(trials), "adoptions": int(trials.adopted.sum()),
                         "rate": round(float(trials.adopted.mean()), 4)}
     print("      ", report["trials"])
 
     print("[4/8] network structure and early adopters ...")
-    _, feats, by_early, net_summary = structure.run(config.INTERIM / "games.parquet")
+    _, feats, by_early, net_summary = structure.run(games_path)
     report["network"] = net_summary
     report["early_adopters"] = by_early.round(4).to_dict()
 
     print(f"[5/8] {a.null_kind} null ({a.null_reps} replicates) ...")
-    cmp = nulls.run(config.INTERIM / "games.parquet",
+    cmp = nulls.run(games_path,
                     config.PROCESSED / "trials.parquet",
                     n_reps=a.null_reps, kind=a.null_kind)
     report["null_comparison"] = (cmp.round(4).to_dict(orient="records")
@@ -92,7 +97,7 @@ def main():
     print("      ", v)
 
     print("[7/8] matched controls + held-out AUC ...")
-    report["matched_controls"] = matching.run(config.INTERIM / "games.parquet")
+    report["matched_controls"] = matching.run(games_path)
     report["predictive"] = predict.run(config.PROCESSED / "trials.parquet",
                                        config.PROCESSED / "node_features.parquet")
     print("      ", report["matched_controls"])
@@ -102,7 +107,7 @@ def main():
     if not a.no_animation:
         print("[8/8] diffusion animation ...")
         report["animation"] = {k: str(v) for k, v in
-                               animate.run(config.INTERIM / "games.parquet").items()}
+                               animate.run(games_path).items()}
 
     report["runtime_seconds"] = round(time.time() - t_start, 1)
     out = config.RESULTS / "report.json"

@@ -173,6 +173,26 @@ def parse(path, limit: int | None = None, ply_depth: int | None = None,
     return df
 
 
+def load_games(path) -> pd.DataFrame:
+    """Read a parsed games table, refusing simulated data.
+
+    src/simulate.py writes players named `sim_00001`. A synthetic table left
+    sitting at the default path is silently analysed as though it were real --
+    which is exactly what happened once, and the numbers looked plausible.
+    Simulated runs write to a filename containing "simulated"; anything else
+    holding sim_ players is a mistake, so say so loudly instead of returning it.
+    """
+    df = pd.read_parquet(path)
+    if "simulated" in Path(path).name:
+        return df
+    if len(df) and df["white"].astype(str).str.fullmatch(r"sim_\d+").any():
+        raise SystemExit(
+            f"{path} contains SIMULATED games (players named sim_*), not real "
+            f"ones.\nRe-run the pipeline on a real month, or point --games at a "
+            f"real slice such as slice_<month>_full.parquet.")
+    return df
+
+
 def run(src, out: Path, limit=None, apply_filters=True,
         progress: int = 0) -> pd.DataFrame:
     df = parse(src, limit=limit, apply_filters=apply_filters, progress=progress)

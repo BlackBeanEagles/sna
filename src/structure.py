@@ -13,7 +13,7 @@ from pathlib import Path
 import networkx as nx
 import pandas as pd
 
-from . import config, events
+from . import config, events, parse
 
 
 def build_graph(df: pd.DataFrame) -> nx.Graph:
@@ -82,7 +82,7 @@ def cross_community_flow(df: pd.DataFrame, feats: pd.DataFrame) -> dict:
 
 
 def run(games_path: Path):
-    df = pd.read_parquet(games_path)
+    df = parse.load_games(games_path)
     g = build_graph(df)
     feats = node_features(g)
     fp = early_adopters(df)
