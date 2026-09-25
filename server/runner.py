@@ -385,19 +385,17 @@ def _analyse(run: "Run", df):
 
     # ---------------- 7. prediction ----------------
     run.stage("predict", "running")
-    merged = trials.merge(feats, on="player", how="left")
-    cut = merged["t"].quantile(config.TRAIN_FRACTION)
-    tr, te = merged[merged["t"] <= cut], merged[merged["t"] > cut]
-    base = predict._fit_auc(tr, te, predict.BASELINE)
-    net = predict._fit_auc(tr, te, predict.NETWORK)
-    if base and net:
-        run.emit("predict", baseline=round(float(base[0]), 4),
-                 network=round(float(net[0]), 4),
-                 gain=round(float(net[0] - base[0]), 4))
-        run.stage("predict", "done", f"AUC gain {net[0]-base[0]:+.4f}")
-    else:
-        run.emit("predict", error="not enough class variation in the split")
+    # same code path as the CLI: features rebuilt from the training window
+    # only, three nested models, and the network block taken apart
+    pred = predict.evaluate(df, trials)
+    run.emit("predict", **pred)
+    if "error" in pred:
         run.stage("predict", "skipped", "insufficient variation")
+    else:
+        run.log(pred["reading"], "hl")
+        run.stage("predict", "done",
+                  f"repertoire {pred['gain_repertoire_over_baseline']:+.3f} "
+                  f"vs exposure {pred['gain_plus_diversity_only']:+.3f}")
 
     # ---------------- 8. verdict ----------------
     run.stage("verdict", "running")

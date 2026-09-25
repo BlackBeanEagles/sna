@@ -1273,9 +1273,17 @@ function handle(e){
       window.__matched=e;
       break;
     case "predict":
-      if(e.error) logLine(e.t,"Prediction: "+e.error,"warn");
-      else logLine(e.t,"Held-out AUC: baseline "+e.baseline+" → network "+e.network+
-        "  (gain "+(e.gain>=0?"+":"")+e.gain+")","info");
+      if(e.error){ logLine(e.t,"Prediction: "+e.error,"warn"); break; }
+      logLine(e.t,"Held-out AUC — baseline "+e.auc_baseline+
+        " → +repertoire "+e.auc_repertoire+" → +network "+e.auc_network,"info");
+      logLine(null,"  repertoire proximity is worth "+
+        (e.gain_repertoire_over_baseline>=0?"+":"")+e.gain_repertoire_over_baseline+
+        " AUC; exposure adds at most "+
+        (e.gain_plus_diversity_only>=0?"+":"")+e.gain_plus_diversity_only+
+        " on top of it","hl");
+      logLine(null,"  (models overfit: train "+e.train_auc_network+
+        " vs test "+e.auc_network+"; base rate "+e.base_rate_train+
+        " → "+e.base_rate_test+" between halves)","info");
       break;
     case "verdict": showVerdict(e); break;
     case "done":

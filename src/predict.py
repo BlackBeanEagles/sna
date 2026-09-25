@@ -67,10 +67,12 @@ def _logistic(train, test, cols):
                          m.predict_proba(test[cols].fillna(0.0))[:, 1])
 
 
-def run(trials_path: Path, games_path: Path):
-    trials = pd.read_parquet(trials_path)
-    games = parse.load_games(games_path)
+def evaluate(games: pd.DataFrame, trials: pd.DataFrame) -> dict:
+    """The whole check, on data already in memory.
 
+    `run()` is the file-based entry point; the live console holds the frames
+    already and calls this directly, so both go through identical code.
+    """
     split = trials["t"].quantile(config.TRAIN_FRACTION)
     data = features.build(games, trials, split)
     train, test = data[data["t"] <= split], data[data["t"] > split]
@@ -107,6 +109,11 @@ def run(trials_path: Path, games_path: Path):
         f"{exposure_gain:+.4f} on top of it"
     )
 
+    return out
+
+
+def run(trials_path: Path, games_path: Path) -> dict:
+    out = evaluate(parse.load_games(games_path), pd.read_parquet(trials_path))
     pd.DataFrame([out]).to_csv(config.TABLES / "predictive_auc.csv", index=False)
     return out
 

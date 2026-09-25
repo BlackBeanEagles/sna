@@ -70,22 +70,33 @@ def relatedness(rep: dict[str, set], openings: list[str]) -> pd.DataFrame:
     return pd.DataFrame(phi, index=openings, columns=openings)
 
 
-def density(rep: dict[str, set], phi: pd.DataFrame, player: str,
-            opening: str) -> float:
-    """How close `opening` sits to what `player` already plays.
+def density_matrix(rep: dict[str, set], phi: pd.DataFrame,
+                   players: list[str]) -> np.ndarray:
+    """Density for every (opening, player) pair at once.
 
-    The share of that opening's total relatedness that points at openings the
-    player already has. 1.0 means everything related to it is already in the
-    repertoire; 0.0 means none of it is.
+    How close an opening sits to what a player already plays: the share of that
+    opening's total relatedness pointing at openings already in the repertoire.
+    1.0 means everything related to it is already known, 0.0 means none of it.
+
+    Done as a single matrix product. The obvious per-trial version costs a
+    pandas label lookup and a fancy-index sum for each of ~224k trials, which
+    took over ten minutes; this takes a fraction of a second and is the same
+    arithmetic. phi has a zero diagonal, so an opening never counts itself.
     """
-    if opening not in phi.index:
-        return 0.0
-    row = phi.loc[opening]
-    total = row.sum()
-    if total <= 0:
-        return 0.0
-    have = [o for o in rep.get(player, ()) if o in phi.index and o != opening]
-    return float(row[have].sum() / total) if have else 0.0
+    openings = list(phi.index)
+    o_idx = {o: i for i, o in enumerate(openings)}
+    mask = np.zeros((len(players), len(openings)), dtype=float)
+    for pi, p in enumerate(players):
+        for o in rep.get(p, ()):
+            j = o_idx.get(o)
+            if j is not None:
+                mask[pi, j] = 1.0
+
+    phi_v = phi.to_numpy()
+    totals = phi_v.sum(axis=1)                 # per opening
+    reach = phi_v @ mask.T                     # openings x players
+    with np.errstate(divide="ignore", invalid="ignore"):
+        return np.where(totals[:, None] > 0, reach / totals[:, None], 0.0)
 
 
 def build(games: pd.DataFrame, trials: pd.DataFrame,
@@ -121,10 +132,17 @@ def build(games: pd.DataFrame, trials: pd.DataFrame,
     out["popularity"] = out["opening"].map(popularity).fillna(0.0)
     out["repertoire_size"] = out["player"].map(
         {p: len(s) for p, s in rep.items()}).fillna(0.0)
-    out["repertoire_density"] = [
-        density(rep, phi, p, o)
-        for p, o in zip(out["player"].to_numpy(), out["opening"].to_numpy())
-    ]
+
+    players = sorted(rep)
+    dens = density_matrix(rep, phi, players)
+    p_idx = {p: i for i, p in enumerate(players)}
+    o_idx = {o: i for i, o in enumerate(phi.index)}
+    rows = out["opening"].map(o_idx).to_numpy()
+    cols = out["player"].map(p_idx).to_numpy()
+    known = pd.notna(rows) & pd.notna(cols)
+    vals = np.zeros(len(out), dtype=float)
+    vals[known] = dens[rows[known].astype(int), cols[known].astype(int)]
+    out["repertoire_density"] = vals
     out = out.drop(columns=["degree", "kcore", "betweenness"], errors="ignore")
     out = out.merge(feats, on="player", how="left")
     for c in ("degree", "kcore", "betweenness"):
