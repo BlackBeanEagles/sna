@@ -131,8 +131,10 @@ at all. Three checks separate influence from that:
    same window. This also absorbs external shocks — a tournament broadcast
    lifts exposed and unexposed alike.
 3. **Held-out AUC.** Train on the first 70% of the period, score on the later
-   30%. Network features (`k`, `d`, `sd`, centrality) against a baseline of
-   opening popularity + rating + activity.
+   30%, with every feature rebuilt from the training window so nothing leaks.
+   Three nested models — popularity/rating/activity, then repertoire proximity
+   (the "adjacent possible" explanation), then exposure and centrality — so the
+   question is *what* explains adoption, not merely whether it can be predicted.
 
 ## Locked decisions
 

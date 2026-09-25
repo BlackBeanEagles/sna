@@ -95,32 +95,64 @@ Early adopters (first 10% to play a behaviour) are structurally distinctive:
 Openings enter through hubs, not the periphery, and diffuse mostly within
 communities (72%) — consistent with brokers carrying them across.
 
-## What did not work
+## The predictive check, rebuilt
 
-**The predictive check failed to demonstrate anything.** Held-out AUC
-(train on first 70% of the month, score the later 30%):
+The original version of this check was the weakest part of the project: both
+models sat at chance, and every feature was computed over the whole month
+before being used to predict the last 30% of it, so both figures were
+optimistic anyway. It has been rebuilt without the leakage and with the
+competing explanation included.
 
-| model | AUC |
-|---|---|
-| baseline (popularity + rating + activity) | 0.5255 |
-| + network (k, d, sd, degree, k-core, betweenness) | 0.5289 |
-| **gain** | **+0.0034** |
+**What was missing.** The old feature set only ever asked *who played this
+opening at you*. De Marzo and Servedio [4] showed that a player's next opening
+is largely predicted by how close it sits to what they already play -- an
+"adjacent possible" effect with no social component. Leaving that out made the
+social features look better than they are, because they were the only
+candidate in the model. `repertoire_density` now measures it: the share of an
+opening's total relatedness that points at openings the player already has,
+with relatedness built from co-play exactly as in [4].
 
-Both are barely above chance. Network features add essentially nothing. This
-is consistent with the simple-contagion verdict — if d carries no signal, a
-model given d should not improve — but it is equally consistent with the
-feature set being too weak to predict individual adoption at all. It should
-be reported as inconclusive, not as support.
+**Nested models, held out on the later part of the month:**
 
-It also has **temporal leakage**, which should be admitted before anyone asks:
-every feature is computed over the whole month before the split — rating,
-activity and opening popularity in `events.build_trials`, and degree, k-core
-and betweenness from the full-period graph. A model trained on the first 70%
-therefore sees statistics that partly encode the held-out 30%, so both AUCs are
-optimistic. With both models at chance and a gap of +0.003 this changes
-nothing, but a clean version would recompute every feature from the training
-window alone. This is the weakest part of the project and is best presented as
-such.
+| Model | Test AUC | Gain |
+|---|---|---|
+| Baseline — popularity, rating, activity | 0.611 | — |
+| **+ Repertoire proximity** | **0.646** | **+0.036** |
+| + Network — exposure, diversity, centrality | 0.676 | +0.030 |
+
+**Taking the network block apart.** It bundles two claims that mean opposite
+things here, so they are separated:
+
+| Added to the repertoire model | Test AUC | Gain |
+|---|---|---|
+| `k` — how many exposures | 0.649 | +0.003 |
+| `d`, `sd` — how diverse those exposers were | 0.655 | +0.008 |
+| centrality — degree, k-core, betweenness | 0.658 | +0.012 |
+
+**Reading.** Repertoire proximity is worth +0.036 AUC. Knowing who played the
+opening at the player is worth at most +0.008 on top of it, and most of what
+the network block does contribute comes from centrality -- which is largely a
+proxy for how much a player plays, the same activity confound the null model
+exposes elsewhere in this report.
+
+This is the same conclusion the adoption curve reaches, arrived at
+independently: **what a player already knows explains adoption far better than
+who has played it at them.**
+
+### Three caveats, because this section is easy to over-read
+
+1. **A linear model gets this badly wrong.** Fitted with logistic regression
+   all three models sit near chance (0.55, 0.52, 0.54) and the richer ones
+   score *worse* out of sample. The relationships are not linear. Both sets of
+   figures are in `results/tables/predictive_auc.csv`; the gradient-boosted
+   ones are reported here, and the choice is stated rather than hidden.
+2. **The models overfit.** Training AUC is 0.79--0.85 against 0.61--0.68 on the
+   held-out period. The ordering is stable but the absolute values are not
+   impressive.
+3. **The base rate shifts between the two periods** -- 15.1% of trials adopt in
+   the training window against 23.8% in the test window -- so the test task is
+   not identical to the training task. Compare the models against each other,
+   not against an external benchmark.
 
 ## Robustness: the decay is not an artefact of the d-cap
 
@@ -294,12 +326,15 @@ Raw table: `results/tables/window_sensitivity.csv`.
 3. **Ply-level granularity is noisy.** The check agrees with the ECO result
    (section above), but its buckets beyond d = 2 hold 1,600–6,300 trials at
    under 4% adoption, so only the endpoints are trustworthy.
-4. **d = 6 is a clipped bucket** (all d ≥ 6) in the headline table, which is why
+4. **The predictive models overfit and the base rate shifts** between the
+   training and test halves of the month; read the model comparison as an
+   ordering, not as absolute performance.
+5. **d = 6 is a clipped bucket** (all d ≥ 6) in the headline table, which is why
    its n is large. The robustness run above unclips it to d = 12 and the result
    holds.
-5. **Confidence intervals throughout this report are optimistic** for the
+6. **Confidence intervals throughout this report are optimistic** for the
    reason above; the per-spell table is the conservative version.
-6. **Adoption ≠ repertoire change.** A player may play an opening once
+7. **Adoption ≠ repertoire change.** A player may play an opening once
    experimentally; the design cannot distinguish that from real uptake.
 
 ## Note on a bug worth mentioning in the report

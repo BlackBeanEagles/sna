@@ -1,2 +1,2 @@
-n_train,n_test,split_at,auc_baseline,auc_network,auc_gain
-156778,67189,2016-01-13 11:40:21,0.5255,0.5289,0.0034
+n_train,n_test,split_at,leakage_free,base_rate_train,base_rate_test,auc_baseline,train_auc_baseline,logistic_baseline,auc_repertoire,train_auc_repertoire,logistic_repertoire,auc_network,train_auc_network,logistic_network,gain_repertoire_over_baseline,gain_network_over_repertoire,auc_plus_k_only,gain_plus_k_only,auc_plus_diversity_only,gain_plus_diversity_only,auc_plus_centrality_only,gain_plus_centrality_only,reading
+156778,67189,2016-01-13 11:40:21,True,0.151,0.238,0.6106,0.793,0.5544,0.6461,0.8456,0.5246,0.6758,0.8537,0.5413,0.0355,0.0297,0.6487,0.0026,0.6545,0.0083,0.6579,0.0118,repertoire proximity is worth +0.0355 AUC over the baseline; knowing who played the opening at the player adds at most +0.0083 on top of it
