@@ -387,7 +387,7 @@ def _analyse(run: "Run", df):
     run.stage("predict", "running")
     # same code path as the CLI: features rebuilt from the training window
     # only, three nested models, and the network block taken apart
-    pred = predict.evaluate(df, trials)
+    pred = predict.evaluate(df, trials, full=False)
     run.emit("predict", **pred)
     if "error" in pred:
         run.stage("predict", "skipped", "insufficient variation")
@@ -395,7 +395,7 @@ def _analyse(run: "Run", df):
         run.log(pred["reading"], "hl")
         run.stage("predict", "done",
                   f"repertoire {pred['gain_repertoire_over_baseline']:+.3f} "
-                  f"vs exposure {pred['gain_plus_diversity_only']:+.3f}")
+                  f"vs network {pred['gain_network_over_repertoire']:+.3f}")
 
     # ---------------- 8. verdict ----------------
     run.stage("verdict", "running")

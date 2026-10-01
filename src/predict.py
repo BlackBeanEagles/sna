@@ -67,11 +67,19 @@ def _logistic(train, test, cols):
                          m.predict_proba(test[cols].fillna(0.0))[:, 1])
 
 
-def evaluate(games: pd.DataFrame, trials: pd.DataFrame) -> dict:
+def evaluate(games: pd.DataFrame, trials: pd.DataFrame,
+             full: bool = True) -> dict:
     """The whole check, on data already in memory.
 
     `run()` is the file-based entry point; the live console holds the frames
     already and calls this directly, so both go through identical code.
+
+    `full=False` fits only the three nested models, skipping the network-block
+    decomposition and the logistic comparison. That is nine model fits down to
+    three. The console runs inside a process already holding the games, the
+    trials, the graph and the cached slice, and the full version pushed it to
+    9 GB and into the pagefile; the decomposition belongs in the CLI, where
+    nothing else is resident.
     """
     split = trials["t"].quantile(config.TRAIN_FRACTION)
     data = features.build(games, trials, split)
@@ -92,22 +100,27 @@ def evaluate(games: pd.DataFrame, trials: pd.DataFrame) -> dict:
         auc[name] = te
         out[f"auc_{name}"] = round(float(te), 4)
         out[f"train_auc_{name}"] = round(float(tr), 4)
-        out[f"logistic_{name}"] = round(float(_logistic(train, test, cols)), 4)
+        if full:
+            out[f"logistic_{name}"] = round(float(_logistic(train, test, cols)), 4)
 
     out["gain_repertoire_over_baseline"] = round(auc["repertoire"] - auc["baseline"], 4)
     out["gain_network_over_repertoire"] = round(auc["network"] - auc["repertoire"], 4)
 
-    for name, cols in DECOMPOSE.items():
-        te, _ = _gbm(train, test, cols)
-        out[f"auc_{name}"] = round(float(te), 4)
-        out[f"gain_{name}"] = round(float(te - auc["repertoire"]), 4)
-
-    exposure_gain = max(out["gain_plus_k_only"], out["gain_plus_diversity_only"])
-    out["reading"] = (
-        f"repertoire proximity is worth {out['gain_repertoire_over_baseline']:+.4f} AUC "
-        f"over the baseline; knowing who played the opening at the player adds at most "
-        f"{exposure_gain:+.4f} on top of it"
-    )
+    if full:
+        for name, cols in DECOMPOSE.items():
+            te, _ = _gbm(train, test, cols)
+            out[f"auc_{name}"] = round(float(te), 4)
+            out[f"gain_{name}"] = round(float(te - auc["repertoire"]), 4)
+        exposure_gain = max(out["gain_plus_k_only"], out["gain_plus_diversity_only"])
+        out["reading"] = (
+            f"repertoire proximity is worth {out['gain_repertoire_over_baseline']:+.4f} "
+            f"AUC over the baseline; knowing who played the opening at the player adds "
+            f"at most {exposure_gain:+.4f} on top of it")
+    else:
+        out["reading"] = (
+            f"repertoire proximity is worth {out['gain_repertoire_over_baseline']:+.4f} "
+            f"AUC over the baseline; social exposure and centrality together add "
+            f"{out['gain_network_over_repertoire']:+.4f} on top of it")
 
     return out
 

@@ -10,38 +10,63 @@
 <style>
 :root{
   color-scheme: light dark;
-  --ground:#f5f4f8; --surface:#fdfcff; --surface-2:#eeecf4;
-  --ink:#1a1722; --ink-2:#5c5670; --muted:#8d87a0;
-  --rule:#e2dfeb; --rule-strong:#c9c4d8;
-  --s-indigo:#6a4bb0; --s-ochre:#a87413; --s-jade:#0f8f76;
-  --s-vermilion:#bf4535; --s-null:#9a94ad;
-  --wash-indigo:rgba(106,75,176,.13); --wash-vermilion:rgba(191,69,53,.10);
-  --glow-a:rgba(106,75,176,.16); --glow-b:rgba(191,69,53,.11); --glow-c:rgba(15,143,118,.10);
-  --shadow:0 1px 2px rgba(26,23,34,.04), 0 8px 28px rgba(26,23,34,.05);
+  /* Paper and ink. The page is a tournament scoresheet, not a screen: warm
+     off-white stock, near-black ink, hairline rules, square corners. */
+  --ground:#f2efe8; --surface:#fbf9f4; --surface-2:#ebe5d9;
+  --ink:#1c1a17; --ink-2:#55504a; --muted:#8a8279;
+  --rule:#ddd6c8; --rule-strong:#bfb5a2;
+
+  /* The two board tones, used as STRUCTURE -- alternating rows, the rail --
+     not as a texture laid over things. */
+  --sq-light:#efe7dd; --sq-dark:#b08968;
+  --row-alt:#f5f1e8;
+
+  /* Chart inks: ink blue, annotation red, violet, gold. Validated against the
+     colourblind checks in both themes; do not substitute these by eye. */
+  --s-blue:#2f5597; --s-red:#b03028; --s-violet:#6b4a9e; --s-gold:#b0862a;
+  --s-null:#9a9287;
+
+  /* Status is reserved and never reused as a chart series. */
+  --ok:#3f7050; --warn:#8a6418; --bad:#a8362c;
+
+  /* names the existing rules still use */
+  --s-indigo:#2f5597; --s-vermilion:#b03028; --s-jade:#3f7050; --s-ochre:#b0862a;
+  --wash-indigo:rgba(47,85,151,.12); --wash-vermilion:rgba(176,48,40,.10);
+  --wash-blue:rgba(47,85,151,.12); --wash-red:rgba(176,48,40,.10);
+
+  --shadow:0 1px 2px rgba(28,26,23,.05), 0 6px 20px rgba(28,26,23,.06);
   --display:'Spectral',Georgia,serif;
   --body:'IBM Plex Sans',-apple-system,'Segoe UI',sans-serif;
   --mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
-  --r:14px; --ease:cubic-bezier(.22,.68,.32,1);
+  --r:3px; --ease:cubic-bezier(.22,.68,.32,1);
 }
 @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
-  --ground:#131119; --surface:#1c1926; --surface-2:#241f31;
-  --ink:#eeebf5; --ink-2:#aca5c0; --muted:#7d768f;
-  --rule:#2d2740; --rule-strong:#413a56;
-  --s-indigo:#8f72d6; --s-ochre:#b1862f; --s-jade:#2aa88f;
-  --s-vermilion:#d65f54; --s-null:#7a7391;
-  --wash-indigo:rgba(143,114,214,.18); --wash-vermilion:rgba(214,95,84,.14);
-  --glow-a:rgba(143,114,214,.17); --glow-b:rgba(214,95,84,.12); --glow-c:rgba(42,168,143,.11);
-  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 28px rgba(0,0,0,.28);
+  --ground:#17150f; --surface:#1f1c15; --surface-2:#2a251b;
+  --ink:#efe9dc; --ink-2:#b8b0a1; --muted:#847c6f;
+  --rule:#342e23; --rule-strong:#4a4133;
+  --sq-light:#d9cdbb; --sq-dark:#8a6a4c;
+  --row-alt:#221e16;
+  --s-blue:#5a8ace; --s-red:#cc5f55; --s-violet:#9a7ec4; --s-gold:#b08c30;
+  --s-null:#7d756a;
+  --ok:#5f9b72; --warn:#b08c30; --bad:#cc5f55;
+  --s-indigo:#5a8ace; --s-vermilion:#cc5f55; --s-jade:#5f9b72; --s-ochre:#b08c30;
+  --wash-indigo:rgba(90,138,206,.16); --wash-vermilion:rgba(204,95,85,.14);
+  --wash-blue:rgba(90,138,206,.16); --wash-red:rgba(204,95,85,.14);
+  --shadow:0 1px 2px rgba(0,0,0,.35), 0 6px 20px rgba(0,0,0,.3);
 }}
 :root[data-theme="dark"]{
-  --ground:#131119; --surface:#1c1926; --surface-2:#241f31;
-  --ink:#eeebf5; --ink-2:#aca5c0; --muted:#7d768f;
-  --rule:#2d2740; --rule-strong:#413a56;
-  --s-indigo:#8f72d6; --s-ochre:#b1862f; --s-jade:#2aa88f;
-  --s-vermilion:#d65f54; --s-null:#7a7391;
-  --wash-indigo:rgba(143,114,214,.18); --wash-vermilion:rgba(214,95,84,.14);
-  --glow-a:rgba(143,114,214,.17); --glow-b:rgba(214,95,84,.12); --glow-c:rgba(42,168,143,.11);
-  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 28px rgba(0,0,0,.28);
+  --ground:#17150f; --surface:#1f1c15; --surface-2:#2a251b;
+  --ink:#efe9dc; --ink-2:#b8b0a1; --muted:#847c6f;
+  --rule:#342e23; --rule-strong:#4a4133;
+  --sq-light:#d9cdbb; --sq-dark:#8a6a4c;
+  --row-alt:#221e16;
+  --s-blue:#5a8ace; --s-red:#cc5f55; --s-violet:#9a7ec4; --s-gold:#b08c30;
+  --s-null:#7d756a;
+  --ok:#5f9b72; --warn:#b08c30; --bad:#cc5f55;
+  --s-indigo:#5a8ace; --s-vermilion:#cc5f55; --s-jade:#5f9b72; --s-ochre:#b08c30;
+  --wash-indigo:rgba(90,138,206,.16); --wash-vermilion:rgba(204,95,85,.14);
+  --wash-blue:rgba(90,138,206,.16); --wash-red:rgba(204,95,85,.14);
+  --shadow:0 1px 2px rgba(0,0,0,.35), 0 6px 20px rgba(0,0,0,.3);
 }
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -68,14 +93,14 @@ h1{font-family:var(--display);font-weight:600;font-size:clamp(28px,4.4vw,44px);
 /* ---- control bar ---- */
 .controls{
   display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;
-  background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);
+  background:var(--surface);border:1px solid var(--rule);border-radius:0;
   padding:18px 20px;margin-block:24px;box-shadow:var(--shadow);
 }
 .ctl{display:flex;flex-direction:column;gap:6px;min-width:0}
 .ctl label{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
   text-transform:uppercase;color:var(--muted)}
 select,input[type=range]{font-family:var(--mono);font-size:13px;color:var(--ink);
-  background:var(--surface-2);border:1px solid var(--rule-strong);border-radius:8px;
+  background:var(--surface-2);border:1px solid var(--rule-strong);border-radius:0;
   padding:8px 10px;min-width:170px}
 input[type=range]{padding:0;height:26px;min-width:190px;accent-color:var(--s-indigo)}
 .rangeval{font-family:var(--mono);font-size:12px;color:var(--ink-2);
@@ -83,7 +108,7 @@ input[type=range]{padding:0;height:26px;min-width:190px;accent-color:var(--s-ind
 .grow{flex:1 1 auto}
 button{
   font-family:var(--mono);font-size:12.5px;letter-spacing:.07em;text-transform:uppercase;
-  border-radius:999px;padding:12px 26px;cursor:pointer;border:1px solid transparent;
+  border-radius:0;padding:12px 26px;cursor:pointer;border:1px solid transparent;
   background:var(--s-indigo);color:#fff;font-weight:500;
   transition:transform .2s var(--ease),filter .2s var(--ease),opacity .2s;
 }
@@ -93,30 +118,43 @@ button.ghost{background:transparent;color:var(--ink-2);border-color:var(--rule-s
 button:focus-visible{outline:2px solid var(--s-vermilion);outline-offset:3px}
 
 /* ---- stage rail ---- */
-.rail{display:grid;grid-template-columns:repeat(auto-fit,minmax(138px,1fr));gap:8px;margin-bottom:20px}
-.sg{
-  background:var(--surface);border:1px solid var(--rule);border-radius:10px;
-  padding:11px 13px;display:flex;flex-direction:column;gap:5px;
-  transition:border-color .3s var(--ease),background .3s var(--ease);position:relative;overflow:hidden;
+.rail{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));
+  gap:0;margin-bottom:22px;border:1px solid var(--rule-strong);
+  background:var(--surface);
 }
-.sg .nm{font-size:12px;font-weight:500;line-height:1.3}
-.sg .st{font-family:var(--mono);font-size:10px;letter-spacing:.08em;
+/* A tournament scoresheet: numbered moves, hairline rules, alternating
+   squares. The board's two tones carry the banding. */
+.sg{
+  padding:9px 12px;display:flex;flex-direction:column;gap:3px;
+  border-right:1px solid var(--rule);position:relative;overflow:hidden;
+  transition:background .3s var(--ease);
+}
+.sg:nth-child(even){background:var(--row-alt)}
+.sg:last-child{border-right:none}
+.sg::before{
+  content:counter(move) ".";counter-increment:move;
+  position:absolute;top:8px;right:10px;
+  font-family:var(--mono);font-size:10px;color:var(--muted);
+}
+.rail{counter-reset:move}
+.sg .nm{font-size:12px;font-weight:500;line-height:1.3;padding-right:20px}
+.sg .st{font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;
   text-transform:uppercase;color:var(--muted)}
-.sg[data-state=running]{border-color:var(--s-indigo);background:var(--wash-indigo)}
-.sg[data-state=running] .st{color:var(--s-indigo)}
+.sg[data-state=running]{background:var(--wash-blue)}
+.sg[data-state=running] .st{color:var(--s-blue)}
 .sg[data-state=running]::after{
   content:"";position:absolute;left:0;bottom:0;height:2px;width:36%;
-  background:var(--s-indigo);animation:sweep 1.25s var(--ease) infinite}
+  background:var(--s-blue);animation:sweep 1.25s var(--ease) infinite}
 @keyframes sweep{0%{transform:translateX(-100%)}100%{transform:translateX(380%)}}
-.sg[data-state=done]{border-color:var(--s-jade)}
-.sg[data-state=done] .st{color:var(--s-jade)}
-.sg[data-state=failed]{border-color:var(--s-vermilion)}
-.sg[data-state=failed] .st{color:var(--s-vermilion)}
-.sg[data-state=skipped] .st{color:var(--s-ochre)}
+.sg[data-state=done] .st{color:var(--ok)}
+.sg[data-state=done] .nm{color:var(--ink)}
+.sg[data-state=failed] .st{color:var(--bad)}
+.sg[data-state=skipped] .st{color:var(--warn)}
 
 /* ---- live metrics ---- */
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:20px}
-.m{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:14px 16px}
+.m{background:var(--surface);border:1px solid var(--rule);border-radius:0;padding:14px 16px}
 .m dt{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
   color:var(--muted);margin:0 0 5px}
 .m dd{margin:0;font-family:var(--mono);font-size:21px;font-weight:500;
@@ -126,7 +164,7 @@ button:focus-visible{outline:2px solid var(--s-vermilion);outline-offset:3px}
 /* ---- panels ---- */
 .grid{display:grid;grid-template-columns:1.35fr 1fr;gap:18px;align-items:start}
 @media (max-width:900px){.grid{grid-template-columns:1fr}}
-.panel{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:0;
   box-shadow:var(--shadow);overflow:hidden;margin-bottom:18px}
 .panel h2{font-family:var(--body);font-size:13.5px;font-weight:600;margin:0;
   padding:15px 18px 0;letter-spacing:-.005em}
@@ -141,7 +179,7 @@ svg.chart text{font-family:var(--mono);fill:var(--ink-2)}
 .dlabel{font-size:10.5px;font-weight:500;font-variant-numeric:tabular-nums}
 
 /* ---- log ---- */
-.logwrap{background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);
+.logwrap{background:var(--surface);border:1px solid var(--rule);border-radius:0;
   box-shadow:var(--shadow);overflow:hidden}
 .log{height:300px;overflow-y:auto;padding:12px 16px;font-family:var(--mono);
   font-size:11.5px;line-height:1.75;margin:0}
@@ -156,7 +194,7 @@ svg.chart text{font-family:var(--mono);fill:var(--ink-2)}
 
 /* ---- verdict ---- */
 .verdict{
-  border-radius:var(--r);padding:22px 24px;margin-bottom:18px;border:1px solid var(--rule);
+  border-radius:0;padding:22px 24px;margin-bottom:18px;border:1px solid var(--rule);
   background:var(--surface);box-shadow:var(--shadow);position:relative;overflow:hidden;
   opacity:.5;transition:opacity .5s var(--ease),background .5s var(--ease);
 }
@@ -190,19 +228,19 @@ svg.chart text{font-family:var(--mono);fill:var(--ink-2)}
 /* ---- chess board + openings ---- */
 .boardrow{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
 .boardwrap{flex:0 0 232px}
-#board{width:232px;height:232px;display:block;border-radius:8px;
-  border:1px solid var(--rule-strong)}
+#board{width:232px;height:232px;display:block;border:1px solid var(--ink-2)}
 /* The board keeps its own wood palette in both themes — a chessboard that
    inverts in dark mode stops reading as a chessboard. */
-#board .sq-l{fill:#efe7dd}
-#board .sq-d{fill:#a98b6f}
+#board .sq-l{fill:var(--sq-light)}
+#board .sq-d{fill:var(--sq-dark)}
 #board .pc{font-size:19px;text-anchor:middle;dominant-baseline:central;
   font-family:"Segoe UI Symbol","Apple Color Emoji",serif}
 #board .pc.w{fill:#fffdf9;stroke:#2b2b2b;stroke-width:.6px;paint-order:stroke}
 #board .pc.b{fill:#241f1b;stroke:#efe7dd;stroke-width:.5px;paint-order:stroke}
 #board .last{fill:var(--s-ochre);opacity:.35}
 #board .sq-hit{cursor:pointer}
-#board .sel{fill:var(--s-indigo);opacity:.42}
+#board .sel{fill:var(--s-blue);opacity:.38}
+#board .coord{font-family:var(--mono);font-size:5.5px;fill:#6b5a44;opacity:.8}
 #board .dot{fill:var(--s-indigo);opacity:.55}
 #board .cap{fill:none;stroke:var(--s-vermilion);stroke-width:2.2;opacity:.75}
 #board .chk{fill:var(--s-vermilion);opacity:.4}
@@ -220,25 +258,25 @@ svg.chart text{font-family:var(--mono);fill:var(--ink-2)}
 .lo-name{margin:2px 0 12px;font-family:var(--display);font-size:19px;
   line-height:1.25;text-wrap:balance}
 .lo-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0}
-.lo-stats div{background:var(--surface-2);border-radius:8px;padding:8px 10px}
+.lo-stats div{background:var(--surface-2);border-radius:0;padding:8px 10px}
 .lo-stats dt{font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;
   text-transform:uppercase;color:var(--muted);margin:0 0 3px}
 .lo-stats dd{margin:0;font-family:var(--mono);font-size:15px;font-weight:500;
   font-variant-numeric:tabular-nums}
 .lo-sub{margin:10px 0 0;font-size:10.5px;color:var(--muted);line-height:1.7}
 .openlist-row{display:flex;flex-wrap:wrap;gap:6px;max-height:none;overflow:visible}
-.openlist-row li{border:1px solid var(--rule);padding:5px 10px;font-size:11.5px}
+.openlist-row li{border:1px solid var(--rule);padding:5px 10px;font-size:11.5px;font-family:var(--mono)}
 .boardctl{display:flex;align-items:center;gap:8px;margin-top:10px}
-.movetext{font-size:11px;color:var(--ink-2);flex:1;min-width:0;
+.movetext{font-size:12px;color:var(--ink);flex:1;min-width:0;letter-spacing:.01em;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 button.mini{background:var(--surface-2);color:var(--ink-2);
-  border:1px solid var(--rule-strong);border-radius:8px;padding:5px 10px;
+  border:1px solid var(--rule-strong);border-radius:0;padding:5px 10px;
   font-size:11px;letter-spacing:.04em;text-transform:none}
 button.mini:hover{color:var(--ink);border-color:var(--s-indigo)}
 .openlist{flex:1 1 230px;list-style:none;margin:0;padding:0;max-height:270px;
   overflow-y:auto;min-width:0}
 .openlist li{display:flex;gap:10px;align-items:baseline;padding:6px 9px;
-  border-radius:8px;cursor:pointer;font-size:12.5px;
+  border-radius:0;cursor:pointer;font-size:12.5px;
   transition:background .2s var(--ease)}
 .openlist li:hover{background:var(--surface-2)}
 .openlist li.on{background:var(--wash-indigo)}
@@ -269,7 +307,7 @@ button.mini:hover{color:var(--ink);border-color:var(--s-indigo)}
 
 .tip{position:fixed;pointer-events:none;z-index:60;opacity:0;transform:translateY(4px);
   transition:opacity .15s var(--ease),transform .15s var(--ease);
-  background:var(--surface);border:1px solid var(--rule-strong);border-radius:10px;
+  background:var(--surface);border:1px solid var(--rule-strong);border-radius:0;
   padding:9px 12px;font-family:var(--mono);font-size:11px;line-height:1.6;
   box-shadow:var(--shadow);max-width:230px;color:var(--ink)}
 .tip.on{opacity:1;transform:translateY(0)}
@@ -403,7 +441,7 @@ footer{padding-block:28px 48px;color:var(--muted);font-size:12.5px;
         player; colour is their Louvain community.</p>
       <div class="bd" style="position:relative">
         <canvas id="netCanvas" style="width:100%;height:340px;display:block;
-          border-radius:10px"></canvas>
+          border-radius:0"></canvas>
         <div class="netlegend" id="netLegend"></div>
       </div>
     </div>
@@ -750,6 +788,17 @@ function drawBoard(){
     });
   }
 
+  // Rank and file coordinates, as a real board carries them -- and useful
+  // when you are calling a move out loud to a room.
+  for(var f5=0;f5<8;f5++){
+    var fl=el("text",{x:f5*SQ+SQ-3,y:8*SQ-2.5,"text-anchor":"end",class:"coord"});
+    fl.textContent=FILES[f5]; svg.appendChild(fl);
+  }
+  for(var r5=0;r5<8;r5++){
+    var rk=el("text",{x:2,y:r5*SQ+7,class:"coord"});
+    rk.textContent=8-r5; svg.appendChild(rk);
+  }
+
   // transparent click targets, drawn last so they sit on top
   for(var r4=0;r4<8;r4++) for(var f4=0;f4<8;f4++){
     var hit=el("rect",{x:f4*SQ,y:r4*SQ,width:SQ,height:SQ,
@@ -757,6 +806,15 @@ function drawBoard(){
     (function(nm){ hit.addEventListener("click",function(){onSquare(nm);}); })(sqName(f4,r4));
     svg.appendChild(hit);
   }
+}
+
+/* Chess literature writes the piece, not its initial: 1.e4 c5 2.♘f3.
+   One symbol serves both sides -- the move number says whose it is -- and
+   pawn moves carry no symbol at all. */
+var FIGURINE={K:"♔",Q:"♕",R:"♖",B:"♗",N:"♘"};
+function figurine(san){
+  var m=/^([KQRBN])/.exec(san);
+  return m ? FIGURINE[m[1]] + san.slice(1) : san;
 }
 
 function onSquare(name){
@@ -790,7 +848,7 @@ function applyState(st){
   chip.textContent=label;
 
   var txt=GAME.sans.map(function(s,i){
-    return (i%2===0?(i/2+1)+". ":"")+s; }).join(" ");
+    return (i%2===0?(i/2+1)+". ":"")+figurine(s); }).join(" ");
   $("moveText").textContent=txt||"Start position — White to move.";
   if(st.error) $("moveText").textContent=(txt+"   ("+st.error+")");
 
@@ -1276,11 +1334,7 @@ function handle(e){
       if(e.error){ logLine(e.t,"Prediction: "+e.error,"warn"); break; }
       logLine(e.t,"Held-out AUC — baseline "+e.auc_baseline+
         " → +repertoire "+e.auc_repertoire+" → +network "+e.auc_network,"info");
-      logLine(null,"  repertoire proximity is worth "+
-        (e.gain_repertoire_over_baseline>=0?"+":"")+e.gain_repertoire_over_baseline+
-        " AUC; exposure adds at most "+
-        (e.gain_plus_diversity_only>=0?"+":"")+e.gain_plus_diversity_only+
-        " on top of it","hl");
+      logLine(null,"  "+e.reading,"hl");
       logLine(null,"  (models overfit: train "+e.train_auc_network+
         " vs test "+e.auc_network+"; base rate "+e.base_rate_train+
         " → "+e.base_rate_test+" between halves)","info");
