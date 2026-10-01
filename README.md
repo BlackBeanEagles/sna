@@ -187,7 +187,12 @@ Robustness checks that have been run (see [docs/RESULTS.md](docs/RESULTS.md)):
 - **Adoption window** — 7, 14 and 28 days all give the same verdict
   (`scripts/check_window.py`).
 
-Tests: `python -m pytest tests -q` (16 tests over the exposure/adoption core,
+Tests: `python -m pytest tests -q` (20 tests over the exposure/adoption core,
 the null model and the verdict logic).
+
+Reproducibility: `python scripts/verify_published.py` re-derives every number
+in `results/report.json` from the cached slice using the current code and fails
+if any has drifted. It checks the analysis, not the parser -- re-parsing needs
+the archive downloaded again.
 
 Still open: replication on a second month.

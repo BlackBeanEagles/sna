@@ -185,20 +185,27 @@
     "n_train": 156778,
     "n_test": 67189,
     "split_at": "2016-01-13 11:40:21",
-    "auc_baseline": 0.5255,
-    "auc_network": 0.5289,
-    "auc_gain": 0.0034,
-    "network_coefficients": {
-      "popularity": 0.0,
-      "rating": -0.046,
-      "activity": 0.1667,
-      "k": -0.004,
-      "d": 0.088,
-      "sd": -0.1077,
-      "degree": -0.0081,
-      "kcore": 0.2525,
-      "betweenness": -0.0544
-    }
+    "leakage_free": true,
+    "base_rate_train": 0.151,
+    "base_rate_test": 0.238,
+    "auc_baseline": 0.6106,
+    "train_auc_baseline": 0.793,
+    "logistic_baseline": 0.5544,
+    "auc_repertoire": 0.6461,
+    "train_auc_repertoire": 0.8456,
+    "logistic_repertoire": 0.5246,
+    "auc_network": 0.6758,
+    "train_auc_network": 0.8537,
+    "logistic_network": 0.5413,
+    "gain_repertoire_over_baseline": 0.0355,
+    "gain_network_over_repertoire": 0.0297,
+    "auc_plus_k_only": 0.6487,
+    "gain_plus_k_only": 0.0026,
+    "auc_plus_diversity_only": 0.6545,
+    "gain_plus_diversity_only": 0.0083,
+    "auc_plus_centrality_only": 0.6579,
+    "gain_plus_centrality_only": 0.0118,
+    "reading": "repertoire proximity is worth +0.0355 AUC over the baseline; knowing who played the opening at the player adds at most +0.0083 on top of it"
   },
   "animation": {
     "behaviour": "A00/B",
@@ -209,6 +216,7 @@
   },
   "runtime_seconds": 1982.3,
   "corrections": [
-    "matched controls recomputed after fixing the activity-bucket window and the filter-before-sample order in matching.py"
+    "matched controls recomputed after fixing the activity-bucket window and the filter-before-sample order in matching.py",
+    "predictive check rebuilt: leakage removed, repertoire-proximity explanation added, network block decomposed"
   ]
 }
