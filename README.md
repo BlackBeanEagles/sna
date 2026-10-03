@@ -188,7 +188,8 @@ Robustness checks that have been run (see [docs/RESULTS.md](docs/RESULTS.md)):
   (`scripts/check_window.py`).
 
 Tests: `python -m pytest tests -q` (20 tests over the exposure/adoption core,
-the null model and the verdict logic).
+the null model and the verdict logic). [docs/TESTING.md](docs/TESTING.md) is the
+full checklist, with the expected value for every number.
 
 Reproducibility: `python scripts/verify_published.py` re-derives every number
 in `results/report.json` from the cached slice using the current code and fails
