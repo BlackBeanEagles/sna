@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
-import queue
+import time
 import sys
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
@@ -57,6 +57,16 @@ class Handler(BaseHTTPRequestHandler):
         if path in ("/", "/index.html"):
             html = (STATIC / "index.html").read_bytes()
             return self._send(200, html, "text/html; charset=utf-8")
+        if path == "/findings":
+            html = (ROOT / "site" / "index.html").read_bytes()
+            return self._send(200, html, "text/html; charset=utf-8")
+        if path in ("/assets/chess-network-hero.png",
+                    "/assets/chess-diffusion-landscape.png",
+                    "/assets/chess-diffusion-walnut.png"):
+            image = (ROOT / "site" / "assets" / path.rsplit("/", 1)[1]).read_bytes()
+            return self._send(200, image, "image/png")
+        if path == "/api/runs":
+            return self._json({"runs": runner.list_runs()})
         if path == "/api/months":
             return self._json({"months": runner.MONTHS, "stages":
                                [{"key": k, "label": l} for k, l in runner.STAGES]})
@@ -76,16 +86,22 @@ class Handler(BaseHTTPRequestHandler):
             cap = cfg.get("max_games")
             cap = int(cap) if cap else None
             run = runner.start(month, cap,
-                               int(cfg.get("null_reps", 2)),
+                               int(cfg.get("null_reps", 20)),
                                int(cfg.get("window_days", 14)),
                                bool(cfg.get("refresh", False)))
             return self._json({"run_id": run.id})
+        if path == "/api/resume":
+            rid = (self._query().get("run") or [""])[0]
+            run = runner.resume(rid)
+            return self._json({"run_id": run.id} if run else
+                              {"error": "run cannot be resumed"}, 200 if run else 409)
         if path == "/api/board":
             n = int(self.headers.get("Content-Length") or 0)
             body = json.loads(self.rfile.read(n) or b"{}")
             sans = body.get("sans") or []
             if not isinstance(sans, list) or len(sans) > 200:
                 return self._json({"error": "bad move list"}, 400)
+            runner.load_board_data(str(body.get("run_id") or ""))
             state = runner.board_state([str(s) for s in sans], body.get("uci"))
             state["has_data"] = runner.LAST.get("df") is not None
             state["month"] = runner.LAST.get("month")
@@ -104,6 +120,11 @@ class Handler(BaseHTTPRequestHandler):
         run = runner.get(rid)
         if not run:
             return self._json({"error": "unknown run"}, 404)
+        try:
+            after = max(0, int(self.headers.get("Last-Event-ID") or
+                               (self._query().get("after") or ["0"])[0]))
+        except ValueError:
+            after = 0
 
         self.send_response(200)
         self.send_header("Content-Type", "text/event-stream")
@@ -113,22 +134,48 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
 
         try:
+            position = 0
+            stream = None
+            last_ping = time.monotonic()
             while True:
-                try:
-                    item = run.q.get(timeout=10)
-                except queue.Empty:
-                    self.wfile.write(b": keepalive\n\n")   # hold the socket open
+                if stream is None and run.events_path.is_file():
+                    stream = run.events_path.open("r", encoding="utf-8")
+                mark = stream.tell() if stream is not None else 0
+                line = stream.readline() if stream is not None else ""
+                if line and not line.endswith("\n"):
+                    stream.seek(mark)
+                    line = ""
+                if line:
+                    position += 1
+                    if position <= after:
+                        continue
+                    payload = json.loads(line)
+                    self.wfile.write(f"id: {position}\n".encode("ascii"))
+                    self.wfile.write(b"data: " + line.encode("utf-8") + b"\n")
                     self.wfile.flush()
+                    if payload.get("kind") == "done":
+                        self.wfile.write(b"event: end\ndata: {}\n\n")
+                        self.wfile.flush()
+                        return
                     continue
-                if item is None:
-                    self.wfile.write(b"event: end\ndata: {}\n\n")
+                if stream is not None and run.manifest_path.is_file():
+                    status = runner.current_status(json.loads(run.manifest_path.read_text(encoding="utf-8")))
+                    if status != "running" and position >= after:
+                        if status == "interrupted":
+                            self.wfile.write(b'data: {"kind":"done","ok":false,"interrupted":true}\n\n')
+                        self.wfile.write(b"event: end\ndata: {}\n\n")
+                        self.wfile.flush()
+                        return
+                if time.monotonic() - last_ping >= 10:
+                    self.wfile.write(b": keepalive\n\n")
                     self.wfile.flush()
-                    return
-                payload = json.dumps(item, default=str).encode("utf-8")
-                self.wfile.write(b"data: " + payload + b"\n\n")
-                self.wfile.flush()
+                    last_ping = time.monotonic()
+                time.sleep(0.35)
         except (BrokenPipeError, ConnectionResetError):
-            run.cancel()                                    # viewer closed the tab
+            return
+        finally:
+            if stream is not None:
+                stream.close()
 
 
 def main():

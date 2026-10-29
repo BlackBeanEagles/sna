@@ -1,2 +1,2 @@
-n_pairs,exposed_adoption_rate,control_adoption_rate,difference,ci95,risk_ratio
-61519,0.1338,0.1058,0.028,"[0.0244, 0.0316]",1.265
+n_pairs,exposed_adoption_rate,control_adoption_rate,difference,ci95,ci95_method,bootstrap_reps,risk_ratio,control_crossover_rate
+56459,0.1297,0.1042,0.0255,"[0.0182, 0.0313]",player-cluster Poisson bootstrap; both pair members,400,1.244,0.1616

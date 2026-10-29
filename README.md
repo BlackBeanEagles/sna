@@ -10,10 +10,13 @@ When an opponent plays an opening against you, does one exposure suffice
 (simple contagion), or does adoption require reinforcement from several
 **structurally distinct** opponents (complex contagion)?
 
-Chess is the rare setting where both sides of that question are directly
-observed: exposure is forced (you had to answer the opening at the board)
-and adoption is timestamped to the second (the first game you play it
-yourself).
+The game record timestamps encounters with an opening and the first later
+game in which a player uses that opening. These are observational signals:
+players and opponents choose moves, so an encounter is not randomized.
+
+## Project report
+
+The template-based Word report, with methodology diagrams and corrected result graphs, is in [`docs/Chess_Openings_As_Contagion_Project_Report.docx`](docs/Chess_Openings_As_Contagion_Project_Report.docx). The cover has placeholders for the student, guide and institution details to be filled before submission.
 
 ## Three ways to run it
 
@@ -21,7 +24,7 @@ yourself).
 |---|---|---|
 | **Live console** | Press a button and watch the whole pipeline execute on a real Lichess month — streaming, stage by stage, with a playable board. | `python server/app.py` → <http://localhost:8124> |
 | **Findings page** | The static write-up of the result, with the charts. | `python -m http.server 8123 --directory site` → <http://localhost:8123> |
-| **CLI** | What produced every number in the report. | `python -m src.run_pipeline --month 2016-01` |
+| **CLI** | Run the complete pipeline on a chosen archive. | `python -m src.run_pipeline --month 2016-01` |
 
 ### The live console
 
@@ -30,7 +33,7 @@ yourself).
 ```
 
 Pick a month, a scan cap and the number of null replicates, then press **Run the
-pipeline**. It streams the archive over HTTP, decompresses in flight, and runs
+pipeline**. It streams the archive over HTTPS, decompresses in flight, and runs
 every stage in front of you — parse, trials, network, curve, shuffled-time null,
 matched controls, verdict — with a live throughput sparkline, a game ticker, a
 force-directed network, and the charts drawing themselves as each stage lands.
@@ -45,11 +48,13 @@ Two things worth knowing:
   server-side by `python-chess` and matched against the loaded slice, so the
   opening, its share of games, its exposure trials and its adoption count update
   move by move — and the players in the network who *adopted* that opening light
-  up. Use **3 null replicates** and the full month to reproduce the published
-  numbers.
+  up. Use **20 null replicates** and the full month to reproduce the published
+  reference; three is a quicker exploratory check.
 
 The console's `d`-curve, null overlay and verdict come from the same
-`src/` modules the CLI uses. Nothing in it is simulated.
+`src/` modules the CLI uses. Nothing in it is simulated. **Recent runs**
+replays saved settings and progress after a page reload; **Retry** restarts an
+interrupted run from its cached slice.
 
 ## Quick start
 
@@ -111,7 +116,8 @@ exposure)` for which the player had not yet performed the behaviour:
 - `adopted` — 1 if the player first performs `b` within 14 days
 
 Trials whose 14-day window runs past the end of the observation period are
-censored out unless adoption already happened inside it.
+excluded regardless of whether adoption was observed. Every included trial
+has the same complete follow-up.
 
 **The decisive comparison** is `k` held fixed while `d` varies. A rising
 `d`-curve on its own is not evidence of complex contagion — see below.
@@ -126,15 +132,15 @@ at all. Three checks separate influence from that:
    opening popularity exactly as they are but destroys causal ordering.
    On the synthetic runs this null *also* produces a rising `d`-curve — which
    is the point: the real effect has to clear the null, not merely rise.
-2. **Matched controls.** Each exposed `(player, behaviour)` is matched to an
-   unexposed player within ±50 rating points and ±25% games played, over the
-   same window. This also absorbs external shocks — a tournament broadcast
-   lifts exposed and unexposed alike.
-3. **Held-out AUC.** Train on the first 70% of the period, score on the later
-   30%, with every feature rebuilt from the training window so nothing leaks.
-   Three nested models — popularity/rating/activity, then repertoire proximity
-   (the "adjacent possible" explanation), then exposure and centrality — so the
-   question is *what* explains adoption, not merely whether it can be predicted.
+2. **Matched controls.** Each exposed `(player, behaviour)` is matched to a
+   player who has neither encountered nor played the target opening at the
+   matching time, within ±50 rating points and ±25% games played. Later control
+   exposure is recorded as crossover. This is an observational association.
+3. **Held-out AUC.** Fixed background features are measured before evaluated
+   trials, and entire player-opening-colour spells are held out together.
+   Three nested models compare popularity/rating/activity, repertoire
+   proximity, and exposure/network position without sharing an adoption event
+   across train and test rows.
 
 ## Locked decisions
 
@@ -157,43 +163,32 @@ without fetching the rest.
 
 ## Status
 
-Complete. Run on the full Lichess 2016-01 month: 249,505 games, 6,881 players,
-223,967 trials. **Verdict: simple contagion, not complex** — see
-[docs/RESULTS.md](docs/RESULTS.md) for the numbers.
+The corrected January 2016 analysis uses 249,505 games and 6,881 players.
+Complete 14-day follow-up leaves **214,317 trial rows**, with a 14.00% trial
+adoption rate. In 20 timestamp shuffles, observed/reference lift falls from
+**1.084× at one distinct exposer to 0.959× at six or more**. This is a
+simple-contagion *pattern* without clear reinforcement in this sample; it is
+not a causal estimate.
 
-The raw d-curve rises (0.159 -> 0.227) but the timestamp-shuffled null rises
-just as fast, and the excess over the null decays to zero as d grows. Matched
-controls show a real but modest exposure effect: +2.8 pp, 95% CI [2.44, 3.16].
-The held-out AUC check was inconclusive (gain +0.003, both models near chance).
+Matching on rating and activity measured before each exposure yields
+**+2.55 percentage points** (12.97% vs 10.42%, 56,459 pairs). A 400-replicate
+player-cluster bootstrap gives a descriptive interval of [+1.82, +3.13]
+points. The group-held-out prediction AUCs are 0.595 baseline, 0.608 with
+repertoire proximity, and 0.633 with network features. See
+[docs/RESULTS.md](docs/RESULTS.md) for limitations and provenance.
 
-Data and results live outside the repo:
+The findings page filters the observed curve by opening and colour, shows
+sample sizes and descriptive intervals, and exports the selected CSV or SVG.
+Filtered curves have no shuffled-time reference yet.
 
-```bash
-export SNA_DATA_ROOT='E:\sna_data'      # or set SNA_DATA_ROOT=E:\sna_data on cmd
-./.venv/Scripts/python.exe -m src.run_pipeline --month 2016-01
-```
+Tests: `python -m pytest tests -q -p no:cacheprovider` (26 passing tests).
+`python scripts/verify_published.py` checks the core report from the cached
+January slice. The source archive has not been reparsed, and a second month
+remains blocked by the connection's untrusted archive certificate. The
+one-row-per-spell check preserves the direction of the curve. Older robustness
+tables under `results/tables/legacy_pre_followup/` are historical evidence.
 
-Robustness checks that have been run (see [docs/RESULTS.md](docs/RESULTS.md)):
-
-- **d-cap** — unclipping the top bucket to d = 12 leaves the decay intact, so
-  the convergence is not an artefact of lumping the tail (`scripts/check_clipping.py`).
-- **Structural diversity** — Ugander's components-of-the-exposure-subgraph
-  measure gives the same verdict as raw exposer count (`scripts/check_diversity.py`).
-- **Ply granularity** — behaviours keyed by the first 8 plies instead of ECO
-  code give the same verdict (`scripts/check_ply.py`).
-- **Trial independence** — one row per player-behaviour spell instead of one
-  per exposure. The verdict survives; the z-scores fall two- to four-fold, so
-  the published intervals are optimistic (`scripts/check_independence.py`).
-- **Adoption window** — 7, 14 and 28 days all give the same verdict
-  (`scripts/check_window.py`).
-
-Tests: `python -m pytest tests -q` (20 tests over the exposure/adoption core,
-the null model and the verdict logic). [docs/TESTING.md](docs/TESTING.md) is the
-full checklist, with the expected value for every number.
-
-Reproducibility: `python scripts/verify_published.py` re-derives every number
-in `results/report.json` from the cached slice using the current code and fails
-if any has drifted. It checks the analysis, not the parser -- re-parsing needs
-the archive downloaded again.
-
-Still open: replication on a second month.
+To view both frontends locally, run `python server/app.py` and open
+<http://localhost:8124>. The **Read the corrected findings** link opens the
+report page from that same server. Alternatively, run `python site/build.py`
+and serve `site/` as static files.

@@ -1,142 +1,43 @@
-# What to test
+# Verification
 
-Four levels, cheapest first. If you only have ten minutes, do level 1 and 2.
+The published January analysis starts from the cached 249,505-game slice. Its source PGN has not been reparsed.
 
-Every expected value below comes from the committed run on the full January
-2016 Lichess month. If something disagrees, that is a real finding, not a
-rounding difference — write down what you saw.
+## Regression and report checks
 
----
-
-## Level 1 — does the code work at all  (about 1 minute)
-
-```bash
-cd C:\Users\hridy\Desktop\sna
-.venv\Scripts\python.exe -m pytest tests -q
-```
-
-**Expect:** `20 passed`
-
-These cover the part where the science lives — who was exposed to what, when
-someone counts as having adopted, and whether the verdict logic can be fooled.
-Four of them exist because a bug once produced a confident wrong answer.
-
----
-
-## Level 2 — do the published numbers still come out  (about 5 minutes)
-
-```bash
+```powershell
+.venv\Scripts\python.exe -m pytest tests -q -p no:cacheprovider
 .venv\Scripts\python.exe scripts\verify_published.py
 ```
 
-**Expect:** `19/19 checks pass` and the closing line
-*"every published number is reproducible by the current code"*.
+Expected: **26 tests pass** and all checked report metrics match. The verifier rebuilds complete trials, the curve, **20** timestamp shuffles, matching and the verdict. It does not reparse the archive or refit prediction.
 
-It rebuilds the trials, the adoption curve, three null replicates, the matched
-controls and the verdict from scratch and compares each against
-`results/report.json`. This is the single most valuable check in the project:
-it is the difference between "the results match the code" being true and being
-assumed.
+| Measure | Current value |
+|---|---:|
+| Complete exposure trials | 214,317 |
+| Positive trial rows | 30,011 |
+| Trial adoption rate | 14.00% |
+| Observed / shuffled rate at d = 1 | 1.084 |
+| Observed / shuffled rate at d ≥ 6 | 0.959 |
+| Matched pairs | 56,459 |
+| Matched adoption difference | +2.55 percentage points |
+| Player-cluster bootstrap interval | [+1.82, +3.13] points |
+| Control crossover during follow-up | 16.16% |
+| Group-held-out AUC, baseline / repertoire / network | 0.595 / 0.608 / 0.633 |
 
-**Known limit:** it verifies the analysis, not the parser. Re-parsing needs the
-archive downloaded again.
+## One-row-per-spell sensitivity
 
----
-
-## Level 3 — the live demonstration  (about 5 minutes)
-
-```bash
-.venv\Scripts\python.exe server\app.py
+```powershell
+.venv\Scripts\python.exe scripts\check_independence.py --reps 3 --how last
 ```
 
-Open <http://localhost:8124>. Set **January 2016**, scan to **maximum**,
-replicates **3**, press **Run the pipeline**.
+Expected: 76,091 spells and 11,478 distinct adoption events. The observed/shuffled lift falls from 1.050 at d=1 to 0.928 at d≥6. This sensitivity run uses only three shuffles; avoid formal tail-probability claims.
 
-### 3a. It starts
+## Frontend checks
 
-- First log line within a second or two: *"Loaded a cached slice of 2016-01
-  (249,505 games) — no download needed."*
-- If instead it says `GET https://database.lichess.org/...` and then stalls,
-  the cache is missing and you are on a network that blocks the download.
+Run `python server/app.py` and open <http://localhost:8124>. The console should show an eight-stage rail and **Recent runs**. Start a cached January full-month run; progress should appear in that panel. Reload the browser: selecting the saved run should replay the event log. If the server interrupts the worker, **Retry** should restart that run from its cached slice.
 
-### 3b. The numbers, as each stage lands
+Open **Read the corrected findings**. The page should show 214,317 complete trials, 14.0% trial adoption, 1.084× at the first distinct exposer, 0.959× at six or more, and +2.55 points for matching. Select B20 / Black: the chart should use only 3,642 complete trials, disable the shuffled reference and show descriptive error bars. CSV and SVG buttons should export the selected view. Check narrow and wide viewports.
 
-| Stage | Expect |
-|---|---|
-| Stream & filter | 249,505 games · 6,881 players · 40 ECO codes · spans 31 days |
-| Trials | 223,967 trials, 39,661 adoptions (17.7%) |
-| Network | 6,881 nodes, 173,944 edges, 5 communities, modularity 0.493 |
-| Curve | raw curve rises 0.159 → 0.227 (×1.42) |
-| Null | excess **1.178× at d=1 → 0.999× at d=6** |
-| Matched controls | about **+2.97 pp**, CI roughly [2.51, 3.44] |
-| Prediction | repertoire gain about +0.036, network about +0.030 |
-| Verdict | **simple contagion** |
+## Archive limitation
 
-The matched-control figure differs from the report's **+2.80 pp** on purpose:
-the console subsamples to stay responsive, the CLI does not. Quote +2.80 in
-writing, and say so if anyone notices the difference on screen.
-
-### 3c. The reveal — this is the demo
-
-Once the curve is drawn, toggle **the null** off and on. Off, the curve reads
-as textbook complex contagion. On, it collapses. That is the whole argument in
-one control.
-
-### 3d. The board
-
-Click a white pawn — legal destinations should appear as dots. Play `1.e4 c5`.
-
-- The panel beside the board should name the Sicilian and show its games,
-  share, exposure trials and adoptions.
-- Players in the network who **adopted** that opening should light up; the rest
-  dim. Expect roughly 31 of 240 drawn players.
-
----
-
-## Level 4 — the design, which has had the least eyes on it
-
-These were built and served but barely looked at. They are the most likely
-place to find something visibly wrong.
-
-- **Stage rail** should read like a scoresheet: numbered 1–8, hairline rules,
-  alternating banding from the board's two square tones.
-- **Board** should carry **a–h** along the bottom and **1–8** up the side.
-- **Move list** should be figurine notation — `1.e4 c5 2.♘f3`, piece symbols
-  rather than letters. If you see `Nf3`, the glyph substitution is not firing.
-- **Both themes.** The page follows your OS light/dark setting. Check both;
-  dark mode has had less attention.
-- **Narrow window.** Drag the browser narrow and confirm nothing overflows
-  sideways.
-
----
-
-## What cannot be tested here
-
-Two things are blocked by the campus network inspecting HTTPS, and both need a
-different connection:
-
-```bash
-.venv\Scripts\python.exe -m src.run_pipeline --month 2016-01   # re-parse with the fixed parser
-.venv\Scripts\python.exe -m src.run_pipeline --month 2016-07   # replicate on a second month
-```
-
-The first matters because the cached slice was parsed *before* a bug was fixed
-in which an aborted game leaked its opening and ratings into the next game. The
-effect is probably nil — the Lichess database holds rated completed games, and
-aborted games are unrated — but that is reasoning, not measurement.
-
-The second is the largest remaining scientific gap: the central finding rests
-on one month.
-
----
-
-## If you want to try breaking it
-
-Worth doing once, so you know the guards are real rather than decorative.
-
-| Try | Should happen |
-|---|---|
-| Point `--games` at a simulated table | Refuses, names the file, says what to use instead |
-| Run the console with **1** null replicate | Still works — a binomial fallback covers the missing spread |
-| Close the browser tab mid-run | The run cancels server-side rather than orphaning |
-| Resize the window after the network draws | The graph repaints instead of vanishing |
+A fresh parse and second-month replication require a verified archive download. This connection presents an untrusted certificate for `database.lichess.org`; Python and system curl reject it. Use a trusted connection or a verified local archive rather than disabling certificate validation.

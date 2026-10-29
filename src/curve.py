@@ -190,9 +190,9 @@ def verdict(tables: dict[str, pd.DataFrame], null_cmp: pd.DataFrame = None,
     elif out["raw_curve_rises"] and held and excess_grows:
         out["verdict"] = "complex contagion"
     elif out.get("beats_null_anywhere"):
-        out["verdict"] = ("simple contagion: exposure matters, but the rise in d "
-                          "is explained by the activity confound, not by "
-                          "reinforcement")
+        out["verdict"] = ("simple contagion pattern: first-exposure association "
+                          "exceeds the shuffled null; no clear evidence that "
+                          "distinct exposers reinforce adoption")
     else:
         out["verdict"] = "no detectable contagion above the null"
     return out

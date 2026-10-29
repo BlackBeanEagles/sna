@@ -99,7 +99,7 @@ def main():
     print("[7/8] matched controls + held-out AUC ...")
     report["matched_controls"] = matching.run(games_path)
     report["predictive"] = predict.run(config.PROCESSED / "trials.parquet",
-                                       config.PROCESSED / "node_features.parquet")
+                                       games_path)
     print("      ", report["matched_controls"])
     print("      ", {k: v for k, v in report["predictive"].items()
                      if k.startswith("auc")})

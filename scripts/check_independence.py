@@ -5,16 +5,10 @@ a single player-behaviour spell contributes several rows, and — because
 `adopted` is scored for every exposure whose window contains the adoption —
 one real adoption event can be counted many times over.
 
-On the full 2016-01 month:
-
-    223,967 trial rows   from    78,274 spells   and   6,730 players
-     39,661 'adoptions'  from    14,320 distinct adoption events
-
-so each adoption is counted 2.77x on average (max 144x), and 47% of events are
-counted more than once. Wilson intervals and z-scores both assume independent
-Bernoulli trials, so both are too narrow — which matters, because the verdict
-turns on interval separation and on z > 3.
-
+Earlier reports counted many exposure rows per eventual adoption. Trial-level
+Wilson intervals and z-scores assume independent observations and can be too
+narrow when players and behaviours recur. The current numbers are printed by
+this script from the selected game table.
 This script recomputes the headline comparison with ONE row per spell, so each
 player-behaviour contributes exactly one observation and each adoption is
 counted exactly once. If the excess-over-null decay survives that, the finding

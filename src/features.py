@@ -2,10 +2,10 @@
 
 Two problems with the original check, both fixed here.
 
-**Leakage.** Every feature used to be computed over the whole month and then
-used to predict the last 30% of it, so the model saw summary statistics that
-partly encoded the held-out period. Here every feature is computed from games
-strictly before the split, so nothing about the test period reaches the model.
+**Leakage.** The original model computed summary features over the whole
+month. Here fixed background features are computed before the first evaluated
+trial; exposure features are measured at each trial. Whole player-behaviour
+spells are assigned to one side of the held-out split.
 
 **A missing explanation.** The original feature set asked only "who played this
 opening at you?". De Marzo and Servedio [4] showed that a player's next opening

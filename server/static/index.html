@@ -1,12 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Contagion Pipeline — Live</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<title>Opening Lab · Live Analysis</title>
 <style>
 :root{
   color-scheme: light dark;
@@ -151,6 +148,7 @@ button:focus-visible{outline:2px solid var(--s-vermilion);outline-offset:3px}
 .sg[data-state=done] .nm{color:var(--ink)}
 .sg[data-state=failed] .st{color:var(--bad)}
 .sg[data-state=skipped] .st{color:var(--warn)}
+#nullToggleWrap[hidden]{display:none!important}
 
 /* ---- live metrics ---- */
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:20px}
@@ -190,7 +188,6 @@ svg.chart text{font-family:var(--mono);fill:var(--ink-2)}
 .log .lv-warn .msg{color:var(--s-ochre)}
 .log .lv-error .msg{color:var(--s-vermilion)}
 .log .lv-hl .msg{color:var(--ink);font-weight:500}
-.log .lv-trace .msg{color:var(--muted);white-space:pre-wrap;font-size:10.5px}
 
 /* ---- verdict ---- */
 .verdict{
@@ -320,7 +317,194 @@ button.mini:hover{color:var(--ink);border-color:var(--s-indigo)}
   padding:2px 6px;border-radius:5px;color:var(--ink-2)}
 footer{padding-block:28px 48px;color:var(--muted);font-size:12.5px;
   border-top:1px solid var(--rule);margin-top:26px}
+/* Aligned with the findings page: flatter surfaces, deliberate stage rows and
+   controls that keep their order when the viewport narrows. */
+:root{--shadow:none}
+.field{display:none}
+header{padding-block:36px 20px}
+header .sub{max-width:82ch}
+.findings-link{display:inline-block;margin-top:12px;color:var(--s-blue);font-size:13px;text-decoration:none;font-weight:600}
+.findings-link:hover{text-decoration:underline}
+.controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px 16px;padding:20px}
+.controls .ctl{min-width:0}.controls select,.controls input[type=range]{width:100%;min-width:0}
+.controls .grow{display:none}
+#run{grid-column:3}#stop{grid-column:4}
+.rail{grid-template-columns:repeat(4,minmax(0,1fr))}
+.sg{min-height:65px;padding:11px 15px}
+.sg:nth-child(4n){border-right:none}
+.sg:nth-child(-n+4){border-bottom:1px solid var(--rule)}
+.sg .nm{font-size:12.5px}
+.metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
+.m{padding:15px 18px}
+.panel,.controls,.logwrap,.verdict{box-shadow:none}
+@media(max-width:760px){
+  .controls{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #run{grid-column:1}#stop{grid-column:2}
+  .rail{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sg:nth-child(4n){border-right:1px solid var(--rule)}
+  .sg:nth-child(2n){border-right:none}
+  .sg:nth-child(-n+6){border-bottom:1px solid var(--rule)}
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:470px){
+  .wrap{padding-inline:15px}
+  header{padding-block:28px 16px}
+  .controls{grid-template-columns:1fr}
+  #run,#stop{grid-column:1}
+  .boardwrap{flex-basis:100%}
+  #board{max-width:232px}
+  .rail{grid-template-columns:1fr 1fr}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.history{border:1px solid var(--rule);background:var(--surface);margin:0 0 18px}
+.history summary{padding:13px 18px;cursor:pointer;font:600 13px var(--body)}
+.history summary span{color:var(--muted);font:11px var(--mono);margin-left:12px}
+.history-body{border-top:1px solid var(--rule);padding:14px 18px}
+.history-list{display:flex;gap:8px;flex-wrap:wrap}
+.history-list button{border:1px solid var(--rule);background:var(--ground);color:var(--ink);
+  padding:8px 10px;text-align:left;cursor:pointer;font:12px var(--body)}
+.history-list button:hover,.history-list button[aria-current="true"]{border-color:var(--s-blue)}
+.history-list small{display:block;color:var(--muted);font:10px var(--mono);margin-top:3px}
+.history-actions{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap}
+@media(max-width:560px){.history summary span{display:block;margin:4px 0 0}}
+
+/* Shared dashboard styling with the findings page. */
+:root{
+  color-scheme:light;
+  --ground:#f5f7fb;--surface:#fff;--surface-2:#f1f5fc;
+  --ink:#17243a;--ink-2:#47566d;--soft:#47566d;--muted:#69778b;
+  --rule:#e4e9f1;--rule-strong:#cbd5e2;
+  --row-alt:#fff;--s-blue:#2b62e8;--s-red:#df6a56;--s-violet:#7459b8;
+  --s-gold:#b67b25;--s-null:#a9b5c7;--ok:#218a76;--warn:#a97018;--bad:#cf4e44;
+  --s-indigo:#2b62e8;--s-vermilion:#df6a56;--s-jade:#218a76;--s-ochre:#b67b25;
+  --wash-indigo:#eef4ff;--wash-vermilion:#fff2ee;--wash-blue:#eef4ff;--wash-red:#fff2ee;
+  --shadow:0 6px 22px rgba(30,55,92,.04);
+  --display:Inter,"Segoe UI Variable","Segoe UI",system-ui,sans-serif;
+  --body:Inter,"Segoe UI Variable","Segoe UI",system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Consolas,monospace;
+  --r:14px;
+}
+body{
+  font-family:var(--body);color:var(--ink);
+  background:
+    radial-gradient(ellipse 54% 25% at 5% 4%,rgba(151,196,255,.30),transparent 75%),
+    radial-gradient(ellipse 45% 26% at 95% 7%,rgba(255,183,193,.26),transparent 75%),
+    radial-gradient(ellipse 50% 35% at 92% 62%,rgba(140,225,214,.16),transparent 78%),
+    #f7f9fe;
+}
+.wrap{max-width:1200px;padding-inline:22px}
+header{
+  position:relative;overflow:hidden;isolation:isolate;margin-top:22px;padding:45px 46px 42px;
+  color:#fff;background:linear-gradient(120deg,#142b50,#123d62);border-radius:24px;
+  box-shadow:0 20px 44px rgba(17,40,80,.13)
+}
+header::before{
+  content:"";position:absolute;z-index:-1;width:390px;height:390px;right:-125px;top:-210px;
+  border:1px solid rgba(255,255,255,.12);border-radius:50%;
+  box-shadow:0 0 0 55px rgba(255,255,255,.025),0 0 0 110px rgba(255,255,255,.017)
+}
+header .eyebrow{font:750 10px var(--body);letter-spacing:.14em;color:#a8c7fc}
+header h1{font:780 clamp(32px,4vw,48px)/1.08 var(--display);letter-spacing:-.045em;color:#fff}
+header .sub{color:#d8e5f8;font-size:15px}
+.findings-link{
+  display:inline-flex;align-items:center;margin-top:20px;padding:10px 15px;
+  color:#fff;background:#2b62e8;border-radius:10px;font-size:12px;font-weight:750
+}
+.findings-link:hover{color:#fff;background:#1d54d8;text-decoration:none}
+.controls{margin-block:17px;padding:21px 22px;background:var(--surface);border:1px solid var(--rule);border-radius:18px;box-shadow:var(--shadow)}
+.ctl label{font:800 10px var(--body);letter-spacing:.11em;color:var(--muted)}
+select,input[type=range]{background:#fff;color:var(--ink);border:1px solid var(--rule-strong);border-radius:10px;font:600 13px var(--body)}
+input[type=range]{border:0;accent-color:var(--s-blue)}
+.rangeval{font:600 12px var(--body);color:var(--soft)}
+button{border-radius:10px;background:var(--s-blue);font:750 12px var(--body);letter-spacing:0;text-transform:none;padding:11px 18px;box-shadow:0 5px 13px rgba(43,98,232,.13)}
+button.ghost{background:#f2f5fa;color:var(--ink-2);border-color:var(--rule);box-shadow:none}
+button:hover:not(:disabled){filter:none;background:#1b53d8}
+button.ghost:hover:not(:disabled){background:#e8edf5}
+.toggle{background:#f6f8fc;border-color:var(--rule);color:var(--ink-2);font-family:var(--body);font-weight:650;letter-spacing:0;text-transform:none}
+.toggle input:checked + .sw{background:var(--s-blue)}
+.rail{gap:8px;border:0;background:none}
+.sg,.sg:nth-child(even){min-height:69px;background:#fff;border:1px solid var(--rule)!important;border-radius:13px;box-shadow:0 3px 12px rgba(30,55,92,.025)}
+.sg[data-state=running]{background:var(--wash-blue)}
+.sg .nm{font-size:12px;font-weight:680}
+.sg .st{letter-spacing:.04em}
+.metrics{gap:9px}
+.m{background:#fff;border:1px solid var(--rule);border-radius:14px;padding:16px 18px}
+.m dt{font:800 10px var(--body);letter-spacing:.1em}
+.m dd{font:780 23px var(--body);letter-spacing:-.035em}
+.panel,.logwrap{border:1px solid var(--rule);border-radius:18px;background:#fff;box-shadow:var(--shadow)}
+.panel h2{font:750 17px var(--body);letter-spacing:-.025em;padding:20px 22px 0}
+.panel .hint{font-size:12px;margin:5px 22px 0;color:var(--muted)}
+.panel .bd{padding:12px 18px 18px}
+svg.chart text{font-family:var(--body)}
+.log{font-size:11px}
+.verdict{border-radius:17px;background:#fff;padding:22px 26px;opacity:1}
+.verdict::before{width:5px;background:var(--s-blue)}
+.verdict.on{background:linear-gradient(125deg,#f1f6ff,#fff 68%)}
+.verdict .lb{font:800 10px var(--body);letter-spacing:.12em;color:var(--s-blue)}
+.verdict .cl{font:760 clamp(19px,2.4vw,25px)/1.3 var(--body);letter-spacing:-.025em}
+.verdict .ev{font-family:var(--body)}
+.turnchip,.toggle{margin-top:17px}
+.lo-name{font-family:var(--body);font-weight:750}
+.lo-stats div{border-radius:10px}
+button.mini{background:#f1f5fc;color:var(--ink-2);border:1px solid var(--rule);border-radius:9px;font:650 11px var(--body);box-shadow:none}
+button.mini:hover{background:#e7efff}
+.openlist-row li{border-radius:8px}
+.tip{border-radius:12px}
+.history{background:#fff;border:1px solid var(--rule);border-radius:14px;overflow:hidden}
+.history summary{font-weight:750}
+.history summary span{font-family:var(--body);font-weight:450;letter-spacing:0}
+.history-list button{background:#f8faff;border-radius:10px;box-shadow:none}
+.note{color:var(--muted)}
+footer{border-color:var(--rule)}
+@media(max-width:760px){
+  header{padding:34px 28px;border-radius:19px}
+  .controls{gap:14px}
+}
+@media(max-width:470px){
+  .wrap{padding-inline:14px}
+  header{margin-top:14px;padding:30px 24px}
+  header .sub{font-size:14px}
+  .controls{padding:16px}
+  .panel h2{font-size:16px}
+  .panel .bd{padding-inline:10px}
+  .m{padding:14px}
+  .m dd{font-size:21px}
+}
+
+svg.chart:empty{height:0}
+#netCanvas:not(.ready){display:none!important}
+.ticker:empty{height:0}
+.logwrap:has(.log:empty){display:none}
+
+/* Match the findings page's chess-club colours. */
+:root{
+  --ground:#f3ecdf;--surface:#fffaf1;--surface-2:#eee8da;
+  --ink:#2b2922;--ink-2:#59564b;--soft:#59564b;--muted:#736e60;
+  --rule:#dfd2bd;--rule-strong:#b9a88a;--row-alt:#fffaf1;
+  --sq-light:#eee3cf;--sq-dark:#9d7853;
+  --s-blue:#285b3f;--s-red:#a46038;--s-violet:#735b65;--s-gold:#a77b3c;
+  --s-null:#a29985;--ok:#386b4b;--warn:#92662f;--bad:#a14b39;
+  --s-indigo:#285b3f;--s-vermilion:#a46038;--s-jade:#386b4b;--s-ochre:#a77b3c;
+  --wash-indigo:#e9eee3;--wash-vermilion:#f2e8dd;--wash-blue:#e9eee3;--wash-red:#f2e8dd;
+}
+body{
+  background:
+    radial-gradient(ellipse 60% 45% at 5% 7%,rgba(203,195,153,.36),transparent 75%),
+    radial-gradient(ellipse 55% 45% at 95% 14%,rgba(154,185,145,.25),transparent 75%),
+    radial-gradient(ellipse 50% 42% at 88% 79%,rgba(191,145,104,.20),transparent 75%),
+    #f2ebdd;
+}
+header{background:linear-gradient(120deg,#213b2b,#435139);box-shadow:0 20px 44px rgba(57,52,34,.15)}
+header .eyebrow{color:#d4c69e}
+header .sub{color:#e5e6d5}
+.findings-link,button{background:var(--s-blue);box-shadow:0 5px 13px rgba(40,91,63,.15)}
+.findings-link:hover,button:hover:not(:disabled){background:#1d4931}
+button.ghost,button.mini{background:#eee8da}
+.ctl label{color:var(--muted)}
+select{background:#fffaf1}
+.panel,.controls,.logwrap,.verdict,.history,.m,.sg,.sg:nth-child(even){background:var(--surface)}
+.verdict.on{background:linear-gradient(125deg,#edf1e7,#fffaf1 68%)}
+
 </style>
 </head>
 <body>
@@ -328,35 +512,35 @@ footer{padding-block:28px 48px;color:var(--muted);font-size:12.5px;
 <div class="wrap">
 
 <header>
-  <p class="eyebrow"><span>23 CSE 356 · Social Network Analysis</span><span class="sep">/</span>
-    <span>Live pipeline</span><span class="sep">/</span><span id="hostLabel">localhost</span></p>
-  <h1>Contagion Pipeline</h1>
+  <p class="eyebrow">Opening diffusion · Live analysis</p>
+  <h1>How openings spread</h1>
   <p class="sub">
-    Press run and this streams a real month from <b>database.lichess.org</b>, decompresses it in
-    flight, and executes the whole analysis in front of you — parse, exposure/adoption trials,
-    network, curve, shuffled-time null, matched controls, verdict.
-    <b>Nothing here is simulated.</b> The interesting moment is stage 5: watch the raw curve look
-    like complex contagion, then watch the null land on top of it.
+    Explore how chess openings spread between players. Run an archive month to see the
+    evidence build, then compare the observed pattern with shuffled timing and matched players.
   </p>
+  <a class="findings-link" href="/findings">Read the corrected findings →</a>
 </header>
 
 <div class="controls">
   <div class="ctl">
     <label for="month">Archive month</label>
     <select id="month"></select>
+    <span class="rangeval" id="monthMeta"></span>
   </div>
   <div class="ctl">
     <label for="cap">Games to scan</label>
-    <input type="range" id="cap" min="100000" max="5000000" step="100000" value="400000">
-    <span class="rangeval" id="capVal">400,000</span>
+    <input type="range" id="cap" min="100000" max="5000000" step="100000" value="5000000">
+    <span class="rangeval" id="capVal">5,000,000 (full month)</span>
   </div>
   <div class="ctl">
-    <label for="reps">Null replicates</label>
+    <label for="reps">Timing shuffles</label>
     <select id="reps">
       <option value="1">1 — quick look only</option>
       <option value="2">2</option>
-      <option value="3" selected>3 — matches the report</option>
-      <option value="5">5 — steadiest</option>
+      <option value="3">3 — quicker check</option>
+      <option value="5">5</option>
+      <option value="10">10</option>
+      <option value="20" selected>20 — matches the report</option>
     </select>
   </div>
   <div class="ctl">
@@ -367,10 +551,19 @@ footer{padding-block:28px 48px;color:var(--muted);font-size:12.5px;
     </label>
   </div>
   <div class="grow"></div>
-  <button id="run">Run the pipeline</button>
+  <button id="run">Run analysis</button>
   <button id="stop" class="ghost" disabled>Cancel</button>
 </div>
 
+<details class="history">
+  <summary>Recent runs <span>Reopen or retry a previous analysis</span></summary>
+  <div class="history-body">
+    <div id="runHistory" aria-live="polite">Loading run history…</div>
+    <div class="history-actions">
+      <button class="mini" id="refreshHistory" type="button">Refresh list</button>
+    </div>
+  </div>
+</details>
 <div class="rail" id="rail"></div>
 
 <dl class="metrics">
@@ -379,12 +572,12 @@ footer{padding-block:28px 48px;color:var(--muted);font-size:12.5px;
   <div class="m"><dt>Games/sec</dt><dd id="mRate">—</dd></div>
   <div class="m"><dt>Players</dt><dd id="mPlayers">—</dd></div>
   <div class="m"><dt>Trials</dt><dd id="mTrials">—</dd></div>
-  <div class="m"><dt>Adoptions</dt><dd id="mAdopt">—</dd></div>
+  <div class="m"><dt>Positive trials</dt><dd id="mAdopt">—</dd></div>
 </dl>
 
 <div class="verdict" id="verdict">
   <p class="lb">Verdict</p>
-  <p class="cl" id="vClaim">Not run yet — press “Run the pipeline”.</p>
+  <p class="cl" id="vClaim">Choose a month and press “Run analysis”.</p>
   <p class="ev" id="vEvidence"></p>
 </div>
 
@@ -436,9 +629,9 @@ footer{padding-block:28px 48px;color:var(--muted);font-size:12.5px;
     </div>
 
     <div class="panel">
-      <h2>The player interaction network</h2>
-      <p class="hint" id="netHint">Drawn live once the network stage finishes. Hover a
-        player; colour is their Louvain community.</p>
+      <h2>Player connections</h2>
+      <p class="hint" id="netHint">Appears when player connections are ready. Hover a
+        player to explore their network.</p>
       <div class="bd" style="position:relative">
         <canvas id="netCanvas" style="width:100%;height:340px;display:block;
           border-radius:0"></canvas>
@@ -448,7 +641,7 @@ footer{padding-block:28px 48px;color:var(--muted);font-size:12.5px;
 
     <div class="panel">
       <h2>Excess over the null</h2>
-      <p class="hint" id="excessHint">Complex contagion requires this to rise with d.</p>
+      <p class="hint" id="excessHint">A rising pattern would support reinforcement from distinct opponents.</p>
       <div class="bd"><svg class="chart" id="cExcess" viewBox="0 0 700 250" role="img"
         aria-label="Live excess over null"></svg></div>
     </div>
@@ -484,8 +677,7 @@ footer{padding-block:28px 48px;color:var(--muted);font-size:12.5px;
 <div class="tip" id="tip" role="status" aria-live="polite"></div>
 
 <footer>
-  Lichess open database · CC0 · streamed live, never written to disk ·
-  <span style="font-family:var(--mono)">src/parse.py → src/events.py → src/curve.py → src/nulls.py</span>
+  Source: Lichess open database · Results describe associations between exposure and play.
 </footer>
 </div>
 
@@ -493,16 +685,15 @@ footer{padding-block:28px 48px;color:var(--muted);font-size:12.5px;
 (function(){
 "use strict";
 var NS="http://www.w3.org/2000/svg";
-var es=null, runId=null, started=0;
+var es=null, runId=null, started=0, streamWarned=false;
 var $=function(id){return document.getElementById(id);};
 var fmt=function(n){return (n==null?"—":Number(n).toLocaleString("en-US"));};
 var pct=function(x,d){return (x*100).toFixed(d==null?1:d)+"%";};
 
 /* A script error used to fail silently and just leave the UI inert. During a
    live demo that is the worst possible failure mode -- surface it in the log. */
-addEventListener("error",function(e){
-  try{ logLine(null,"UI error: "+(e.message||e.type)+
-    (e.lineno?(" (line "+e.lineno+")"):""),"error"); }catch(_){}
+addEventListener("error",function(){
+  try{ logLine(null,"Something went wrong while displaying this run. Refresh the page to reopen it.","error"); }catch(_){}
 });
 
 /* ---------- controls ---------- */
@@ -511,18 +702,25 @@ capEl.addEventListener("input",function(){
   capVal.textContent=Number(capEl.value).toLocaleString("en-US")+
     (capEl.value>=capEl.max?" (full month)":"");
 });
-$("hostLabel").textContent=location.host;
+
 
 fetch("/api/months").then(function(r){return r.json();}).then(function(d){
   var sel=$("month");
   d.months.forEach(function(m,i){
     var o=document.createElement("option");
-    o.value=m.id; o.textContent=m.label+"  ·  "+m.mb+" MB  ·  "+m.games+" games";
+    o.value=m.id; o.textContent=m.label;
     if(m.id==="2016-01") o.selected=true;
     sel.appendChild(o);
   });
+  function updateMonthMeta(){
+    var m=d.months.find(function(x){return x.id===sel.value;});
+    $("monthMeta").textContent=m?m.mb+" MB · "+m.games+" games":"";
+  }
+  sel.addEventListener("change",updateMonthMeta);
+  updateMonthMeta();
   buildRail(d.stages);
-});
+  refreshHistory(true);
+}).catch(function(){ $("runHistory").textContent="Could not load server options."; });
 
 function buildRail(stages){
   var rail=$("rail"); rail.textContent="";
@@ -893,7 +1091,7 @@ function showLiveOpening(o,hasData){
   var stats=$("loStats");
   if(!hasData){
     $("loEco").textContent="—";
-    $("loName").textContent="Run the pipeline first — then every move is matched against that slice.";
+    $("loName").textContent="Run analysis first, then each move is compared with the selected games.";
     stats.textContent=""; $("loVars").textContent=""; return;
   }
   if(!o){
@@ -943,7 +1141,7 @@ function showLiveOpening(o,hasData){
 function sendMove(uci){
   GAME.busy=true;
   fetch("/api/board",{method:"POST",headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({sans:GAME.sans,uci:uci||null})})
+    body:JSON.stringify({sans:GAME.sans,uci:uci||null,run_id:runId})})
     .then(function(r){return r.json();})
     .then(function(st){ GAME.busy=false; if(st.fen) applyState(st); })
     .catch(function(){ GAME.busy=false;
@@ -970,7 +1168,7 @@ function replayLine(sans){
     if(i>=sans.length){ clearInterval(GAME.timer); return; }
     var next=sans.slice(0,i+1); i++;
     fetch("/api/board",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({sans:next})})
+      body:JSON.stringify({sans:next,run_id:runId})})
       .then(function(r){return r.json();})
       .then(function(st){ if(st.fen){ GAME.prevFen=GAME.fen; applyState(st); } })
       .catch(function(){});
@@ -1036,6 +1234,7 @@ function communityColour(c){
 }
 function startNetwork(payload){
   var cv=$("netCanvas"), ctx=cv.getContext("2d");
+  cv.classList.add("ready");
   var dpr=Math.min(2,devicePixelRatio||1);
   function size(){
     cv.width=cv.clientWidth*dpr; cv.height=cv.clientHeight*dpr;
@@ -1239,6 +1438,7 @@ function reset(){
   $("log").textContent=""; $("cCurve").textContent=""; $("cExcess").textContent="";
   $("cHeld").textContent=""; $("cSpark").textContent="";
   SPARK=[]; NET.nodes=[]; NET.edges=[]; cancelAnimationFrame(NET.raf);
+  $("netCanvas").classList.remove("ready");
   $("netCanvas").getContext("2d").clearRect(0,0,9999,9999);
   $("netLegend").textContent=""; $("nullToggleWrap").hidden=true;
   $("ticker").textContent=""; $("openList").textContent="";
@@ -1260,7 +1460,7 @@ function handle(e){
       logLine(e.t,"Run started · month "+e.month+
         (e.max_games?(" · cap "+fmt(e.max_games)+" games"):" · full month"),"hl");
       break;
-    case "log": logLine(e.t,e.msg,e.level); break;
+    case "log": if(e.level!=="trace")logLine(e.t,e.msg,e.level); break;
     case "stage": setStage(e.key,e.state,e.detail); break;
     case "scan":
       $("mScan").textContent=fmt(e.scanned);
@@ -1275,7 +1475,7 @@ function handle(e){
     case "graph":
       startNetwork(e);
       $("netHint").textContent="Top "+fmt(e.nodes.length)+" players by degree. "+
-        "Colour = Louvain community, size = degree, white ring = early adopter. "+
+        "Colour groups connected players, size shows their number of connections, and a white ring marks an early adopter. "+
         "Click a community below to dim it.";
       break;
     case "sample":
@@ -1285,8 +1485,8 @@ function handle(e){
       logLine(e.t,"Kept "+fmt(e.games)+" games · "+fmt(e.players)+" players · "+
         e.openings+" ECO codes · spans "+e.span_days+" days","ok");
       var sk=e.skipped||{};
-      Object.keys(sk).forEach(function(k){
-        logLine(null,"  dropped "+fmt(sk[k])+" — "+k,"info");});
+      var dropped=Object.keys(sk).reduce(function(n,k){return n+Number(sk[k]||0);},0);
+      if(dropped) logLine(null,fmt(dropped)+" games excluded by study filters.","info");
       break;
     case "window":
       logLine(e.t,"Adoption window: "+e.days+" day(s)"+(e.auto?" (auto-fitted)":""),
@@ -1307,15 +1507,17 @@ function handle(e){
       break;
     case "curve":
       CURVE.rows=e.by_d||[]; CURVE.held=e.held_k||[]; drawCurve(); drawHeld(CURVE.held);
-      $("curveHint").textContent="Observed curve only — no null yet. "+
-        "This is the reading the null is about to refute.";
+      $("curveHint").textContent="Observed curve only. The shuffled-time comparison is still running.";
+      break;
+    case "null_progress":
+      setStage("null","running",e.done+" / "+e.total+" shuffles");
       break;
     case "null":
       CURVE.nullRows=(e.rows||[]).map(function(r){
         return {d:r.d,rate_null:r.rate_null,lift_over_null:r.lift_over_null,z:r.z_vs_null};});
       drawCurve(); drawExcess(CURVE.nullRows);
       $("nullToggleWrap").hidden=false;
-      $("curveHint").textContent="Null overlaid — toggle it to replay the reversal.";
+      $("curveHint").textContent="Observed and shuffled-time curves are ready for comparison.";
       var first=CURVE.nullRows[0], last=CURVE.nullRows[CURVE.nullRows.length-1];
       if(first&&last&&first.lift_over_null!=null&&last.lift_over_null!=null){
         logLine(e.t,"Excess over null: "+first.lift_over_null.toFixed(3)+"× at d=1 → "+
@@ -1335,15 +1537,14 @@ function handle(e){
       logLine(e.t,"Held-out AUC — baseline "+e.auc_baseline+
         " → +repertoire "+e.auc_repertoire+" → +network "+e.auc_network,"info");
       logLine(null,"  "+e.reading,"hl");
-      logLine(null,"  (models overfit: train "+e.train_auc_network+
-        " vs test "+e.auc_network+"; base rate "+e.base_rate_train+
-        " → "+e.base_rate_test+" between halves)","info");
+      logLine(null,"  Training and held-out scores differ; interpret the model comparison cautiously.","info");
       break;
     case "verdict": showVerdict(e); break;
     case "done":
       $("run").disabled=false; $("stop").disabled=true;
       if(e.ok) logLine(e.t,"Done in "+e.seconds+"s.","ok");
       else if(e.cancelled) logLine(e.t,"Run cancelled.","warn");
+      else if(e.interrupted) logLine(e.t,"Run interrupted. Choose Retry in Recent runs to restart from the cached slice.","warn");
       break;
   }
 }
@@ -1365,9 +1566,70 @@ function showVerdict(v){
   });
 }
 
+/* ---------- saved runs ---------- */
+function refreshHistory(restore){
+  return fetch("/api/runs").then(function(r){if(!r.ok)throw Error("history unavailable");return r.json();})
+    .then(function(d){
+      var list=$("runHistory"); list.textContent="";
+      if(!d.runs.length){list.textContent="No saved runs yet.";return;}
+      var wrap=document.createElement("div"); wrap.className="history-list";
+      d.runs.forEach(function(r){
+        var b=document.createElement("button"); b.type="button";
+        b.setAttribute("aria-current",r.id===runId?"true":"false");
+        b.textContent=r.month+" · "+r.status;
+        var sm=document.createElement("small");
+        sm.textContent=new Date(r.started*1000).toLocaleString()+" · "+
+          (r.max_games?fmt(r.max_games)+" scanned cap":"full month")+
+          " · "+r.null_reps+" shuffles";
+        b.appendChild(sm);
+        b.addEventListener("click",function(){attachRun(r.id);});
+        wrap.appendChild(b);
+        if(r.status==="interrupted"||r.status==="failed"){
+          var retry=document.createElement("button");retry.type="button";
+          retry.textContent="Retry "+r.month;
+          retry.addEventListener("click",function(){
+            fetch("/api/resume?run="+encodeURIComponent(r.id),{method:"POST"})
+              .then(function(res){return res.json();}).then(function(data){
+                if(data.error)throw Error(data.error);
+                attachRun(data.run_id);refreshHistory(false);
+              }).catch(function(){logLine(null,"Could not retry this run. Try again shortly.","error");});
+          });
+          wrap.appendChild(retry);
+        }
+      });
+      list.appendChild(wrap);
+      if(restore){
+        var saved=localStorage.getItem("sna:lastRun");
+        if(saved&&d.runs.some(function(r){return r.id===saved;}))attachRun(saved);
+      }
+    }).catch(function(){$("runHistory").textContent="Recent runs are unavailable right now.";});
+}
+function attachRun(id){
+  if(es)es.close();
+  runId=id; streamWarned=false;
+  localStorage.setItem("sna:lastRun",id);
+  reset();
+  $("run").disabled=true; $("stop").disabled=false;
+  es=new EventSource("/api/stream?run="+encodeURIComponent(id));
+  es.onmessage=function(m){
+    try{handle(JSON.parse(m.data));}
+    catch(err){logLine(null,"Could not display part of this run. Try reopening it.","error");}
+  };
+  es.addEventListener("end",function(){
+    es.close();es=null;$("run").disabled=false;$("stop").disabled=true;
+    refreshHistory(false);
+  });
+  es.onerror=function(){
+    if(!streamWarned){
+      logLine(null,"Connection interrupted. Reconnecting to the saved run…","warn");
+      streamWarned=true;
+    }
+  };
+}
+$("refreshHistory").addEventListener("click",function(){refreshHistory(false);});
+
 /* ---------- run control ---------- */
 $("run").addEventListener("click",function(){
-  reset();
   $("run").disabled=true; $("stop").disabled=false;
   started=Date.now();
   fetch("/api/run",{method:"POST",headers:{"Content-Type":"application/json"},
@@ -1380,30 +1642,21 @@ $("run").addEventListener("click",function(){
     })}).then(function(r){return r.json();}).then(function(d){
       if(d.error){logLine(0,"Could not start: "+d.error,"error");
         $("run").disabled=false;$("stop").disabled=true;return;}
-      runId=d.run_id;
-      if(es) es.close();
-      es=new EventSource("/api/stream?run="+runId);
-      es.onmessage=function(m){ try{ handle(JSON.parse(m.data)); }catch(err){} };
-      es.addEventListener("end",function(){ es.close(); es=null;
-        $("run").disabled=false; $("stop").disabled=true; });
-      es.onerror=function(){
-        logLine(null,"Stream interrupted — is the server still running?","error");
-        if(es){es.close();es=null;}
-        $("run").disabled=false; $("stop").disabled=true;
-      };
-    }).catch(function(err){
-      logLine(0,"Could not reach the server: "+err,"error");
+      attachRun(d.run_id);
+      refreshHistory(false);
+    }).catch(function(){
+      logLine(0,"Could not start the analysis. Check the connection and try again.","error");
       $("run").disabled=false; $("stop").disabled=true;
     });
 });
 
-/* replay the reveal: hide the null and the curve reads as complex contagion again */
+/* Toggle the shuffled-time reference. */
 $("nullToggle").addEventListener("change",function(){
   CURVE.showNull=this.checked;
   drawCurve();
   $("curveHint").textContent=this.checked
-    ? "Null overlaid — it reproduces almost the whole rise."
-    : "Null hidden. On its own this looks like textbook complex contagion.";
+    ? "Observed and shuffled-time curves shown together."
+    : "Showing the observed curve alone.";
 });
 
 $("stop").addEventListener("click",function(){

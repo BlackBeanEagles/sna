@@ -1,945 +1,621 @@
-<title>Chess Openings As Contagion</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-
+<title>Opening Diffusion · Research Dashboard</title>
+<meta name="description" content="An observational analysis of chess-opening adoption in a Lichess player network.">
 <style>
+
 :root{
-  /* neutrals carry a faint indigo bias toward the accent */
-  --ground:#f5f4f8;
-  --surface:#fdfcff;
-  --surface-2:#eeecf4;
-  --ink:#1a1722;
-  --ink-2:#5c5670;
-  --muted:#8d87a0;
-  --rule:#e2dfeb;
-  --rule-strong:#c9c4d8;
-
-  /* abstract categorical set — indigo · ochre · jade · vermilion */
-  --s-indigo:#6a4bb0;
-  --s-ochre:#a87413;
-  --s-jade:#0f8f76;
-  --s-vermilion:#bf4535;
-  --s-null:#9a94ad;
-
-  --wash-indigo:rgba(106,75,176,.13);
-  --wash-vermilion:rgba(191,69,53,.10);
-  --glow-a:rgba(106,75,176,.16);
-  --glow-b:rgba(191,69,53,.11);
-  --glow-c:rgba(15,143,118,.10);
-
-  --shadow:0 1px 2px rgba(26,23,34,.04), 0 8px 28px rgba(26,23,34,.05);
-  --shadow-lift:0 2px 6px rgba(26,23,34,.06), 0 18px 48px rgba(26,23,34,.09);
-
-  --display:'Spectral',Georgia,'Times New Roman',serif;
-  --body:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  --mono:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
-
-  --r:14px;
-  --maxw:1080px;
-  --ease:cubic-bezier(.22,.68,.32,1);
+  color-scheme:light;
+  --paper:#f5f7fb;--card:#fff;--ink:#17243a;--soft:#47566d;--muted:#69778b;
+  --line:#e4e9f1;--line-strong:#cbd5e2;--blue:#2b62e8;--red:#df6a56;
+  --green:#218a76;--wash:#eef4ff;--navy:#132542;
+  --mono:ui-monospace,SFMono-Regular,Consolas,monospace;
+  --body:Inter,"Segoe UI Variable","Segoe UI",system-ui,sans-serif;
+  --display:Inter,"Segoe UI Variable","Segoe UI",system-ui,sans-serif;
+  font-synthesis:none;
 }
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --ground:#131119;
-    --surface:#1c1926;
-    --surface-2:#241f31;
-    --ink:#eeebf5;
-    --ink-2:#aca5c0;
-    --muted:#7d768f;
-    --rule:#2d2740;
-    --rule-strong:#413a56;
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.58 var(--body)}
+button,select{font:inherit}
+button,a,select{outline-offset:3px}
+a{color:inherit}
+.wrap{width:min(1160px,calc(100% - 44px));margin-inline:auto}
+.topbar{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(16px)}
+.topbar-inner{min-height:72px;display:flex;justify-content:space-between;align-items:center;gap:24px}
+.brand{display:inline-flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink);font-size:15px;font-weight:800;letter-spacing:-.025em;white-space:nowrap}
+.mark{display:grid;grid-template-columns:repeat(2,9px);grid-template-rows:repeat(2,9px);gap:3px;transform:rotate(-7deg)}
+.mark i{display:block;background:var(--blue);border-radius:2px}
+.mark i:nth-child(2),.mark i:nth-child(3){background:#8db2fb}
+.nav{display:flex;align-items:center;gap:30px}
+.nav a{text-decoration:none;color:var(--soft);font-size:13px;font-weight:650}
+.nav a:hover{color:var(--blue)}
+.nav .live-link{color:#fff;background:var(--blue);padding:10px 15px;border-radius:11px;box-shadow:0 5px 13px rgba(43,98,232,.15)}
+.nav .live-link:hover{color:#fff;background:#174ed7}
+h1,h2,h3,p{margin-top:0}
+.hero{position:relative;isolation:isolate;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(250px,.8fr);align-items:end;gap:48px;margin-top:24px;padding:58px 62px 60px;background:linear-gradient(122deg,#142b50 0%,#172f56 52%,#123d62 100%);border-radius:26px;box-shadow:0 20px 44px rgba(17,40,80,.14)}
+.hero::before{content:"";position:absolute;z-index:-1;width:440px;height:440px;border:1px solid rgba(255,255,255,.1);border-radius:50%;right:-120px;top:-220px;box-shadow:0 0 0 56px rgba(255,255,255,.025),0 0 0 115px rgba(255,255,255,.018)}
+.hero::after{content:"";position:absolute;z-index:-1;inset:auto 0 0 auto;width:360px;height:260px;background:linear-gradient(90deg,transparent 49%,rgba(255,255,255,.035) 50%) 0 0/44px 44px,linear-gradient(transparent 49%,rgba(255,255,255,.035) 50%) 0 0/44px 44px;mask-image:linear-gradient(105deg,transparent,#000)}
+.kicker,.eyebrow{font:750 11px/1.3 var(--body);letter-spacing:.14em;text-transform:uppercase;color:#9fc3ff}
+.kicker{display:inline-flex;align-items:center;margin:0 0 22px;padding:8px 12px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.13);border-radius:999px}
+h1{font:780 clamp(42px,4.9vw,62px)/1.07 var(--display);letter-spacing:-.055em;color:#fff;max-width:13ch;margin-bottom:19px}
+.hero-lead{font-size:17px;line-height:1.55;color:#d8e5f8;max-width:59ch;margin:0}
+.question{background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.21);border-radius:18px;padding:24px 26px;box-shadow:0 12px 30px rgba(4,19,44,.1)}
+.question .eyebrow{margin:0 0 11px}
+.question p:last-child{font-size:19px;font-weight:680;line-height:1.38;letter-spacing:-.025em;color:#fff;margin:0}
+.summary{display:grid;grid-template-columns:120px minmax(0,1fr) 240px;align-items:center;gap:28px;margin-top:18px;padding:24px 30px;background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 5px 18px rgba(31,57,94,.04)}
+.summary-label{color:var(--blue);font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.summary-copy{font-size:19px;line-height:1.35;letter-spacing:-.025em;font-weight:760;margin:0}
+.summary-note{border-left:1px solid var(--line);padding-left:23px;color:var(--muted);font-size:12px;line-height:1.5;margin:0}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0 12px}
+.stats div{padding:21px 24px;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 12px rgba(31,57,94,.025)}
+.stats dt{color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+.stats dd{margin:0;font-size:30px;line-height:1.1;font-weight:780;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.section{padding:68px 0 2px}
+.section-head{display:grid;grid-template-columns:150px minmax(0,1fr);align-items:start;gap:25px;margin-bottom:24px}
+.section-index{color:var(--blue);font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding-top:9px}
+h2{font-size:clamp(28px,3.2vw,40px);line-height:1.12;font-weight:780;letter-spacing:-.045em;margin-bottom:10px}
+.section-head p{max-width:68ch;color:var(--soft);margin:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:19px;box-shadow:0 6px 22px rgba(30,55,92,.04);overflow:hidden}
+.card-head{display:flex;justify-content:space-between;align-items:center;gap:22px;padding:23px 28px 15px}
+h3{font-size:20px;line-height:1.25;font-weight:750;letter-spacing:-.025em;margin-bottom:4px}
+.card-head p{color:var(--muted);font-size:12px;margin:0}
+.explorer-tools{display:flex;align-items:end;gap:12px;flex-wrap:wrap;padding:20px 22px;margin:0 0 14px;background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 4px 18px rgba(30,55,92,.035)}
+.explorer-tools label{display:grid;gap:6px;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.explorer-tools select{min-height:40px;min-width:170px;max-width:250px;padding:0 33px 0 12px;background:#fff;color:var(--ink);border:1px solid var(--line-strong);border-radius:10px;font-size:13px;font-weight:600;letter-spacing:0;text-transform:none}
+.explorer-tools button{min-height:40px;cursor:pointer;padding:0 14px;background:var(--wash);color:var(--blue);border:1px solid #dce7ff;border-radius:10px;font-size:12px;font-weight:750}
+.explorer-tools button:hover{background:#dce8ff}
+.explorer-tools p{flex-basis:100%;font-size:12px;color:var(--muted);margin:5px 0 0}
+.chart-wrap{padding:0 20px 12px}
+.chart{display:block;width:100%;height:auto;overflow:visible}
+.chart .grid{stroke:#e8edf5}
+.chart .axis{stroke:#bcc9da}
+.chart text{font:11px var(--body);fill:#67768c}
+.chart .axis-title{fill:#78869b;font-size:10px}
+.chart .observed{stroke:var(--blue);fill:none;stroke-width:3.4;stroke-linejoin:round;stroke-linecap:round}
+.chart .null{stroke:var(--red);fill:none;stroke-width:2.7;stroke-dasharray:7 6;stroke-linecap:round}
+.chart .point-observed{fill:var(--blue);stroke:#fff;stroke-width:2.7}
+.chart .point-null{fill:var(--red);stroke:#fff;stroke-width:2.3}
+.chart .uncertainty{stroke:var(--blue);stroke-width:1.5;opacity:.38}
+.chart .reference{stroke:var(--line-strong);stroke-dasharray:4 5}
+.toggle{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;color:var(--soft);font-size:12px;font-weight:600;cursor:pointer}
+.toggle input{accent-color:var(--blue)}
+.chart-note{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:15px 28px 18px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+.legend{display:flex;gap:20px;align-items:center;flex-wrap:wrap;color:var(--soft);font-weight:650}
+.legend i{display:inline-block;width:22px;border-top:3px solid var(--blue);vertical-align:middle;margin-right:8px}
+.legend i.null-key{border-color:var(--red);border-top-style:dashed}
+.compare{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}
+.compare-item{position:relative;overflow:hidden;padding:22px 26px;background:var(--card);border:1px solid var(--line);border-radius:18px}
+.compare-item::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--blue)}
+.compare-item:last-child::before{background:var(--red)}
+.compare-item .label{color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.compare-item strong{display:block;margin:5px 0 2px;font-size:34px;line-height:1.2;letter-spacing:-.045em;font-weight:800;font-variant-numeric:tabular-nums}
+.compare-item:first-child strong{color:var(--blue)}
+.compare-item:last-child strong{color:var(--red)}
+.compare-item p{color:var(--soft);font-size:12px;margin:0}
+.footnote{font-size:12px;line-height:1.6;color:var(--muted);margin:14px 0 0}
+.two-col{display:grid;grid-template-columns:minmax(0,1.07fr) minmax(0,.93fr);gap:16px}
+.analysis-card{padding:26px 28px}
+.analysis-card h3{margin-bottom:18px}
+.bar-row{display:grid;grid-template-columns:108px 1fr 65px;align-items:center;gap:12px;margin:14px 0;font-size:12px;font-weight:650}
+.bar{height:12px;background:#eef1f6;border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--blue);border-radius:999px}
+.bar-row.control .bar i{background:var(--red)}
+.bar-row b{text-align:right;font-weight:750;font-variant-numeric:tabular-nums}
+.big-delta{margin:20px 0 6px;color:var(--blue);font-size:30px;font-weight:800;letter-spacing:-.04em}
+.small{font-size:12px;line-height:1.55;color:var(--muted);margin-bottom:0}
+.callout{padding:16px 18px;background:#f5f8fe;border:1px solid #e6edfb;border-radius:12px;color:var(--soft);font-size:13px}
+.callout p{margin:0}
+.callout b{color:var(--ink)}
+.table-scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:540px;font-variant-numeric:tabular-nums}
+th,td{padding:14px 23px;border-bottom:1px solid var(--line);text-align:left}
+th{background:#f8faff;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+td{font-size:13px}
+tr:last-child td{border-bottom:0}
+td.num{text-align:right;font-weight:800}
+tr.highlight{background:#f0f5ff}
+.method-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.method-step{padding:23px 24px 25px;background:var(--card);border:1px solid var(--line);border-radius:17px}
+.method-step b{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;background:var(--wash);color:var(--blue);border-radius:9px;font-size:11px;font-weight:800}
+.method-step h3{font-size:17px;margin:18px 0 9px}
+.method-step p{font-size:12px;color:var(--soft);margin:0}
+.limit-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;list-style:none;padding:0;margin:0}
+.limit-list li{padding:20px 22px;background:var(--card);border:1px solid var(--line);border-radius:15px;color:var(--soft);font-size:13px}
+.limit-list b{display:block;color:var(--ink);margin-bottom:5px;font-size:14px}
+footer{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:55px 0 38px;color:var(--muted);font-size:12px}
+footer a{color:var(--blue);font-weight:700}
+@media(max-width:850px){
+  .hero{grid-template-columns:1fr;align-items:start;gap:26px;padding:43px 42px}
+  .question{max-width:550px}
+  .summary{grid-template-columns:120px 1fr}
+  .summary-note{grid-column:2;border-left:0;padding-left:0}
+  .section-head{grid-template-columns:1fr;gap:5px}
+  .section-index{padding:0}
+  .two-col{grid-template-columns:1fr}
+  .method-grid{grid-template-columns:1fr}
+}
+@media(max-width:620px){
+  .wrap{width:calc(100% - 28px)}
+  .topbar-inner{min-height:62px;gap:8px}
+  .brand{font-size:13px;gap:8px}
+  .mark{grid-template-columns:repeat(2,7px);grid-template-rows:repeat(2,7px)}
+  .nav{gap:10px}
+  .nav a{font-size:11px}
+  .nav a:not(.live-link){display:none}
+  .nav .live-link{padding:8px 10px;border-radius:9px}
+  .hero{margin-top:14px;padding:34px 25px 26px;border-radius:19px;gap:25px}
+  .hero::after{display:none}
+  .kicker{font-size:9px;margin-bottom:17px}
+  h1{font-size:clamp(36px,9vw,48px);max-width:14ch}
+  .hero-lead{font-size:14px}
+  .question{padding:17px 18px;border-radius:13px}
+  .question p:last-child{font-size:16px}
+  .summary{display:block;padding:20px 21px;border-radius:15px}
+  .summary-label{display:block;margin-bottom:10px}
+  .summary-copy{font-size:17px}
+  .summary-note{border-top:1px solid var(--line);padding:11px 0 0;margin-top:13px}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .stats div{padding:17px 17px;border-radius:14px}
+  .stats dd{font-size:25px}
+  .section{padding-top:55px}
+  h2{font-size:29px}
+  .section-head p{font-size:13px}
+  .explorer-tools{padding:16px}
+  .explorer-tools label{flex:1 1 130px}
+  .explorer-tools select{min-width:0;width:100%}
+  .explorer-tools button{flex:1 1 auto}
+  .card-head{display:block;padding:20px 19px 12px}
+  .card-head .toggle{margin-top:12px}
+  .chart-wrap{padding:0 8px 8px}
+  .chart text{font-size:12px}
+  .chart .axis-title{font-size:11px}
+  .chart-note{padding:14px 19px}
+  .compare{grid-template-columns:1fr}
+  .compare-item{padding:19px 21px}
+  .analysis-card{padding:21px}
+  .limit-list{grid-template-columns:1fr}
+  footer{padding-top:42px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 
-    --s-indigo:#8f72d6;
-    --s-ochre:#b1862f;
-    --s-jade:#2aa88f;
-    --s-vermilion:#d65f54;
-    --s-null:#7a7391;
 
-    --wash-indigo:rgba(143,114,214,.18);
-    --wash-vermilion:rgba(214,95,84,.14);
-    --glow-a:rgba(143,114,214,.17);
-    --glow-b:rgba(214,95,84,.12);
-    --glow-c:rgba(42,168,143,.11);
+/* Colour fields and the topic illustration give the page a visual focal point. */
+body{
+  background:
+    radial-gradient(ellipse 54% 25% at 5% 4%,rgba(151,196,255,.32),transparent 75%),
+    radial-gradient(ellipse 45% 26% at 95% 7%,rgba(255,183,193,.30),transparent 75%),
+    radial-gradient(ellipse 50% 35% at 92% 62%,rgba(140,225,214,.18),transparent 78%),
+    radial-gradient(ellipse 40% 25% at 1% 90%,rgba(182,175,255,.16),transparent 80%),
+    #f7f9fe;
+  background-attachment:fixed;
+}
+.hero{
+  grid-template-columns:minmax(0,1.15fr) minmax(0,.9fr);
+  align-items:center;gap:2px;min-height:420px;
+  padding:45px 26px 40px 54px;
+  background:linear-gradient(122deg,#dcecff 0%,#e6e8ff 54%,#f9e4e7 100%);
+  box-shadow:0 18px 45px rgba(72,99,153,.13);
+}
+.hero::before{
+  width:540px;height:540px;right:-120px;top:-300px;
+  border:1px solid rgba(73,108,184,.17);
+  box-shadow:0 0 0 62px rgba(93,132,202,.055),0 0 0 126px rgba(255,255,255,.14);
+}
+.hero::after{
+  width:480px;height:330px;right:-80px;bottom:-160px;inset:auto -80px -160px auto;
+  border-radius:50%;
+  background:radial-gradient(ellipse,rgba(116,185,245,.23) 0%,rgba(194,155,229,.14) 48%,transparent 73%);
+  mask-image:none;
+}
+.hero > div{position:relative;z-index:1}
+.kicker{color:#315dae;background:rgba(255,255,255,.54);border-color:rgba(91,129,190,.17)}
+.hero h1{color:#172a4a;max-width:13ch}
+.hero-lead{color:#425875;max-width:42ch}
+.hero-art{display:flex;align-items:center;justify-content:center;min-width:0;align-self:stretch;position:relative}
+.hero-art::before{
+  content:"";position:absolute;inset:18% 12%;
+  border-radius:50%;background:rgba(65,111,195,.18);filter:blur(48px)
+}
+.hero-art img{position:relative;display:block;width:100%;max-width:480px;height:auto;filter:drop-shadow(0 18px 18px rgba(49,80,140,.17))}
+@media(max-width:850px){
+  .hero{grid-template-columns:1fr;gap:2px;min-height:0;padding:37px 38px 10px}
+  .hero-art{height:280px}
+  .hero-art img{width:min(100%,430px);max-height:100%;object-fit:contain}
+}
+@media(max-width:620px){
+  body{background-attachment:scroll}
+  .hero{padding:31px 25px 0;gap:0}
+  .hero h1{font-size:clamp(37px,9vw,49px)}
+  .hero-lead{font-size:14px}
+  .hero-art{height:235px;margin:0 -13px -4px}
+  .hero-art::before{inset:20% 10%;filter:blur(30px)}
+  .hero-art img{width:100%;max-height:250px;object-fit:contain}
+}
 
-    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 28px rgba(0,0,0,.28);
-    --shadow-lift:0 2px 6px rgba(0,0,0,.34), 0 18px 48px rgba(0,0,0,.4);
+
+/* Full-viewport artwork stays behind every section as the page scrolls. */
+body{
+  background:
+    radial-gradient(ellipse 65% 50% at 6% 8%,rgba(119,183,255,.42),transparent 73%),
+    radial-gradient(ellipse 58% 54% at 95% 13%,rgba(249,153,186,.36),transparent 73%),
+    radial-gradient(ellipse 60% 55% at 90% 76%,rgba(99,215,202,.26),transparent 73%),
+    radial-gradient(ellipse 54% 48% at 4% 88%,rgba(167,150,249,.30),transparent 75%),
+    #edf3ff;
+  background-attachment:fixed;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:url("assets/chess-network-hero.png") center center / cover no-repeat;
+  opacity:.19;filter:saturate(1.08);
+}
+main.wrap,footer.wrap{position:relative;z-index:1}
+.summary,.stats div,.explorer-tools,.card,.compare-item,.method-step,.limit-list li{
+  background:rgba(255,255,255,.86);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  box-shadow:0 8px 22px rgba(52,85,141,.055);
+}
+@media(max-width:620px){
+  body{background-attachment:fixed}
+  body::before{background-position:52% center;opacity:.15}
+  .summary,.stats div,.explorer-tools,.card,.compare-item,.method-step,.limit-list li{
+    background:rgba(255,255,255,.9);
   }
 }
-:root[data-theme="dark"]{
-  --ground:#131119;
-  --surface:#1c1926;
-  --surface-2:#241f31;
-  --ink:#eeebf5;
-  --ink-2:#aca5c0;
-  --muted:#7d768f;
-  --rule:#2d2740;
-  --rule-strong:#413a56;
 
-  --s-indigo:#8f72d6;
-  --s-ochre:#b1862f;
-  --s-jade:#2aa88f;
-  --s-vermilion:#d65f54;
-  --s-null:#7a7391;
 
-  --wash-indigo:rgba(143,114,214,.18);
-  --wash-vermilion:rgba(214,95,84,.14);
-  --glow-a:rgba(143,114,214,.17);
-  --glow-b:rgba(214,95,84,.12);
-  --glow-c:rgba(42,168,143,.11);
-
-  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 28px rgba(0,0,0,.28);
-  --shadow-lift:0 2px 6px rgba(0,0,0,.34), 0 18px 48px rgba(0,0,0,.4);
+/* The new chessboard-to-network artwork replaces the repeated knight render. */
+body::before{
+  background-image:url("assets/chess-diffusion-landscape.png");
+  background-position:center center;
+  opacity:.16;
 }
-
-*{box-sizing:border-box}
-body{
-  background:var(--ground);
-  color:var(--ink);
-  font-family:var(--body);
-  font-size:16px;
-  line-height:1.62;
-  -webkit-font-smoothing:antialiased;
-  position:relative;
-}
-/* Soft abstract colour field. Painted as radial gradients rather than blurred
-   boxes: a filter:blur() on three viewport-sized layers costs the compositor a
-   full-screen convolution every frame and can stall painting outright. */
-.field{
-  position:fixed;inset:0;z-index:-1;pointer-events:none;
+.hero{
+  display:flex;align-items:center;min-height:415px;
+  padding:55px 60px;
   background:
-    radial-gradient(58vw 52vw at 12% -8%,  var(--glow-a), transparent 68%),
-    radial-gradient(50vw 46vw at 104% 42%, var(--glow-b), transparent 66%),
-    radial-gradient(44vw 40vw at 38% 112%, var(--glow-c), transparent 66%);
+    linear-gradient(90deg,rgba(238,244,255,.98) 0%,rgba(235,242,255,.91) 34%,rgba(234,241,255,.25) 65%,rgba(234,241,255,.04) 100%),
+    url("assets/chess-diffusion-landscape.png") center center / cover no-repeat;
+  box-shadow:0 20px 48px rgba(57,84,135,.16);
+}
+.hero::before,.hero::after{display:none}
+.hero > div:first-child{max-width:555px}
+.hero .kicker{background:rgba(255,255,255,.7)}
+.hero h1{max-width:12ch}
+.hero-lead{max-width:40ch}
+@media(max-width:850px){
+  .hero{min-height:440px;padding:43px 40px}
+}
+@media(max-width:620px){
+  body::before{background-position:64% center;opacity:.13}
+  .hero{
+    display:block;min-height:560px;padding:34px 26px;
+    background:
+      linear-gradient(180deg,rgba(238,245,255,.99) 0%,rgba(238,245,255,.97) 60%,rgba(236,242,255,.30) 83%,rgba(236,242,255,.04) 100%),
+      url("assets/chess-diffusion-landscape.png") 67% center / cover no-repeat;
+  }
+  .hero h1{max-width:11ch}
+  .hero-lead{max-width:39ch}
 }
 
-.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:20px;padding-block:0}
 
-/* ---------- masthead ---------- */
-.masthead{padding-block:60px 32px}
-.eyebrow{
-  font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;
-  text-transform:uppercase;color:var(--muted);margin:0 0 22px;
-  display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+/* Chess-club palette: ivory, walnut, forest green, and antique brass. */
+:root{
+  --paper:#f3ecdf;--card:#fffaf1;--ink:#2b2922;--soft:#59564b;--muted:#736e60;
+  --line:#dfd2bd;--line-strong:#b9a88a;--blue:#285b3f;--red:#a46038;
+  --green:#386b4b;--wash:#e9eee3;--navy:#223d2e;
 }
-.eyebrow span.sep{color:var(--rule-strong)}
-h1{
-  font-family:var(--display);font-weight:600;font-size:clamp(36px,5.8vw,60px);
-  line-height:1.06;letter-spacing:-.02em;margin:0 0 20px;text-wrap:balance;
+body{
+  background:
+    radial-gradient(ellipse 65% 50% at 6% 8%,rgba(203,195,153,.39),transparent 73%),
+    radial-gradient(ellipse 58% 54% at 95% 13%,rgba(154,185,145,.32),transparent 73%),
+    radial-gradient(ellipse 60% 55% at 90% 76%,rgba(191,145,104,.27),transparent 73%),
+    radial-gradient(ellipse 54% 48% at 4% 88%,rgba(132,158,112,.25),transparent 75%),
+    #f2ebdd;
+  background-attachment:fixed;
 }
-.standfirst{
-  font-family:var(--display);font-size:clamp(17px,2.1vw,20.5px);line-height:1.58;
-  color:var(--ink-2);max-width:62ch;margin:0;
+body::before{
+  background-image:url("assets/chess-diffusion-walnut.png");
+  opacity:.16;
 }
-.standfirst em{color:var(--ink);font-style:italic}
-
-/* ---------- verdict ---------- */
-.verdict{
-  margin-block:36px 0;padding:28px 30px;border-radius:var(--r);
-  background:linear-gradient(140deg,var(--wash-indigo),transparent 62%),var(--surface);
-  border:1px solid var(--rule);box-shadow:var(--shadow);position:relative;overflow:hidden;
+.topbar{background:rgba(255,251,242,.96)}
+.mark i{background:var(--blue)}
+.mark i:nth-child(2),.mark i:nth-child(3){background:#b58a55}
+.nav .live-link{background:var(--blue);box-shadow:0 5px 13px rgba(40,91,63,.17)}
+.nav .live-link:hover{background:#1e4932}
+.hero{
+  background:
+    linear-gradient(90deg,rgba(252,247,235,.98) 0%,rgba(250,245,232,.92) 34%,rgba(250,245,232,.25) 65%,rgba(250,245,232,.04) 100%),
+    url("assets/chess-diffusion-walnut.png") center center / cover no-repeat;
+  box-shadow:0 20px 48px rgba(79,64,41,.16);
 }
-.verdict::before{
-  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
-  background:linear-gradient(180deg,var(--s-indigo),var(--s-vermilion));
+.hero .kicker{color:var(--blue);background:rgba(255,251,240,.74);border-color:rgba(106,112,71,.20)}
+.hero h1{color:#29291e}
+.hero-lead{color:#4e4d3e}
+.summary,.stats div,.explorer-tools,.card,.compare-item,.method-step,.limit-list li{
+  background:rgba(255,251,242,.90);
+  border-color:var(--line);
+  box-shadow:0 8px 22px rgba(91,75,48,.055);
 }
-.verdict-label{
-  font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--s-vermilion);margin:0 0 11px;
-}
-.verdict-claim{
-  font-family:var(--display);font-size:clamp(22px,3.1vw,28px);line-height:1.28;
-  margin:0 0 13px;letter-spacing:-.012em;text-wrap:balance;
-}
-.verdict-body{margin:0;color:var(--ink-2);max-width:66ch;font-size:15.5px}
-
-/* ---------- stat strip ---------- */
-.strip{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
-  gap:10px;margin-block:36px;
-}
-.stat{
-  background:var(--surface);padding:16px 18px;border:1px solid var(--rule);
-  border-radius:calc(var(--r) - 4px);box-shadow:var(--shadow);
-  transition:transform .3s var(--ease),box-shadow .3s var(--ease);
-}
-.stat:hover{transform:translateY(-2px);box-shadow:var(--shadow-lift)}
-.stat dt{
-  font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--muted);margin:0 0 6px;
-}
-.stat dd{
-  margin:0;font-family:var(--mono);font-size:19px;font-weight:500;
-  font-variant-numeric:tabular-nums;letter-spacing:-.02em;
-}
-.stat dd small{font-size:12px;color:var(--ink-2);font-weight:400;letter-spacing:0}
-
-/* ---------- sections ---------- */
-section{padding-block:50px;border-top:1px solid var(--rule)}
-.step-head{display:flex;gap:16px;align-items:baseline;margin-bottom:9px}
-.step-num{
-  font-family:var(--mono);font-size:12px;font-weight:500;color:var(--s-indigo);
-  letter-spacing:.08em;flex:none;padding-top:3px;
-}
-h2{
-  font-family:var(--display);font-weight:600;font-size:clamp(25px,3.5vw,33px);
-  line-height:1.16;letter-spacing:-.017em;margin:0;text-wrap:balance;
-}
-.lede{color:var(--ink-2);max-width:66ch;margin:0 0 28px 0;font-size:15.5px}
-.step-head + .lede{margin-left:28px}
-@media (max-width:620px){ .step-head + .lede{margin-left:0} }
-
-/* ---------- figure ---------- */
-figure{
-  margin:0;background:var(--surface);border:1px solid var(--rule);
-  border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);
-  transition:box-shadow .35s var(--ease);
-}
-figure:hover{box-shadow:var(--shadow-lift)}
-.fig-head{
-  padding:18px 22px 0;display:flex;justify-content:space-between;
-  gap:16px;align-items:flex-start;flex-wrap:wrap;
-}
-.fig-title{font-weight:600;font-size:15px;margin:0;letter-spacing:-.005em}
-.fig-sub{color:var(--muted);font-size:13px;margin:4px 0 0;max-width:54ch}
-.fig-body{padding:6px 12px 14px}
-figcaption{
-  padding:14px 22px;border-top:1px solid var(--rule);
-  background:var(--surface-2);font-size:13.5px;color:var(--ink-2);
-  transition:opacity .3s var(--ease);
-}
-figcaption b{color:var(--ink);font-weight:600}
-
-svg.chart{display:block;width:100%;height:auto;overflow:visible}
-svg.chart text{font-family:var(--mono);fill:var(--ink-2)}
-.ax-label{font-size:10.5px;fill:var(--muted)}
-.ax-title{font-size:10.5px;fill:var(--muted);letter-spacing:.09em;text-transform:uppercase}
-.gridline{stroke:var(--rule);stroke-width:1}
-.axisline{stroke:var(--rule-strong);stroke-width:1}
-.ref-line{stroke:var(--rule-strong);stroke-width:1;stroke-dasharray:2 4}
-.dlabel{font-size:11px;font-weight:500;font-variant-numeric:tabular-nums}
-
-.nullgrp{transition:opacity .5s var(--ease)}
-.draw{animation:draw 1.5s var(--ease) forwards}
-@keyframes draw{to{stroke-dashoffset:0}}
-.pop{opacity:0;animation:pop .5s var(--ease) forwards}
-@keyframes pop{to{opacity:1}}
-
-/* legend */
-.legend{display:flex;gap:18px;flex-wrap:wrap;padding:4px 22px 10px;margin:0}
-.lg{
-  display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2);
-  transition:opacity .4s var(--ease);
-}
-.lg i{width:16px;height:3px;border-radius:2px;display:block;flex:none}
-.lg i.dash{height:0;border-top:2px dashed var(--s-null);background:none!important;border-radius:0}
-
-/* toggle */
-.toggle{
-  display:inline-flex;align-items:center;gap:10px;cursor:pointer;
-  font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;
-  color:var(--ink-2);background:var(--surface-2);border:1px solid var(--rule-strong);
-  border-radius:999px;padding:7px 15px 7px 10px;user-select:none;
-  transition:border-color .3s var(--ease),color .3s var(--ease),box-shadow .3s var(--ease);
-}
-.toggle:hover{border-color:var(--s-vermilion);color:var(--ink);box-shadow:var(--shadow)}
-.toggle input{position:absolute;opacity:0;width:0;height:0}
-.toggle .sw{
-  width:28px;height:16px;border-radius:999px;background:var(--rule-strong);
-  position:relative;flex:none;transition:background .35s var(--ease);
-}
-.toggle .sw::after{
-  content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;
-  border-radius:50%;background:var(--surface);
-  transition:transform .35s var(--ease);
-}
-.toggle input:checked + .sw{background:var(--s-vermilion)}
-.toggle input:checked + .sw::after{transform:translateX(12px)}
-.toggle input:focus-visible + .sw{outline:2px solid var(--s-indigo);outline-offset:3px}
-
-/* tooltip */
-.tip{
-  position:fixed;pointer-events:none;z-index:50;opacity:0;
-  transform:translateY(4px);
-  transition:opacity .18s var(--ease),transform .18s var(--ease);
-  background:var(--surface);border:1px solid var(--rule-strong);border-radius:10px;
-  padding:10px 13px;font-family:var(--mono);font-size:11.5px;line-height:1.6;
-  box-shadow:var(--shadow-lift);max-width:235px;color:var(--ink);
-}
-.tip.on{opacity:1;transform:translateY(0)}
-.tip .t-h{font-weight:500;margin-bottom:5px;letter-spacing:.04em}
-.tip .t-r{display:flex;justify-content:space-between;gap:14px;color:var(--ink-2)}
-.tip .t-r b{color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums}
-
-.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-@media (max-width:760px){.two{grid-template-columns:1fr}}
-
-/* table */
-.tablewrap{
-  overflow-x:auto;border:1px solid var(--rule);border-radius:var(--r);
-  background:var(--surface);box-shadow:var(--shadow);
-}
-table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:520px}
-th,td{padding:10px 16px;text-align:right;border-bottom:1px solid var(--rule)}
-th:first-child,td:first-child{text-align:left}
-thead th{
-  font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
-  color:var(--muted);font-weight:500;background:var(--surface-2);white-space:nowrap;
-}
-tbody td{font-family:var(--mono);font-variant-numeric:tabular-nums}
-tbody tr{transition:background .25s var(--ease)}
-tbody tr:hover{background:var(--surface-2)}
-tbody tr:last-child td{border-bottom:none}
-tr.accent td{background:var(--wash-vermilion)}
-.pill{
-  display:inline-block;font-family:var(--mono);font-size:10.5px;padding:2.5px 8px;
-  border-radius:999px;letter-spacing:.05em;font-weight:500;
-}
-.pill.dead{background:var(--wash-vermilion);color:var(--s-vermilion)}
-.pill.live{background:var(--wash-indigo);color:var(--s-indigo)}
-
-/* callout */
-.callout{
-  background:linear-gradient(140deg,var(--wash-vermilion),transparent 58%),var(--surface);
-  border:1px solid var(--rule);border-radius:var(--r);
-  padding:24px 26px;margin-top:28px;box-shadow:var(--shadow);
-}
-.callout h3{
-  font-family:var(--body);font-size:14px;font-weight:600;margin:0 0 10px;
-  display:flex;align-items:center;gap:10px;
-}
-.callout h3::before{
-  content:"";width:7px;height:7px;border-radius:50%;background:var(--s-ochre);flex:none;
-}
-.callout p{margin:0 0 11px;color:var(--ink-2);font-size:14.5px;max-width:68ch}
-.callout p:last-child{margin-bottom:0}
-code{
-  font-family:var(--mono);font-size:.88em;background:var(--surface-2);
-  padding:2px 6px;border-radius:5px;color:var(--ink);
+.explorer-tools select{background:#fffaf1;border-color:var(--line-strong)}
+.explorer-tools button{background:#e9eee3;border-color:#d3dfcf;color:var(--blue)}
+.explorer-tools button:hover{background:#dbe8d6}
+.chart .grid{stroke:#e8decc}
+.chart .axis{stroke:#b9aa8e}
+.chart text{fill:#6a695c}
+.chart .axis-title{fill:#787667}
+.callout{background:#f2efe5;border-color:#e4d9c6}
+th{background:#f4f0e7}
+tr.highlight{background:#e9eee3}
+.method-step b{background:#e7ecdf}
+@media(max-width:620px){
+  body{background-attachment:fixed}
+  body::before{opacity:.13}
+  .hero{
+    background:
+      linear-gradient(180deg,rgba(251,247,236,.99) 0%,rgba(251,247,236,.97) 60%,rgba(251,247,236,.31) 83%,rgba(251,247,236,.04) 100%),
+      url("assets/chess-diffusion-walnut.png") 67% center / cover no-repeat;
+  }
+  .summary,.stats div,.explorer-tools,.card,.compare-item,.method-step,.limit-list li{
+    background:rgba(255,251,242,.93);
+  }
 }
 
-ol.limits{margin:0;padding-left:0;list-style:none;counter-reset:lim}
-ol.limits li{
-  counter-increment:lim;position:relative;padding-left:40px;margin-bottom:16px;
-  color:var(--ink-2);font-size:15px;max-width:68ch;
-}
-ol.limits li::before{
-  content:counter(lim,decimal-leading-zero);position:absolute;left:0;top:1px;
-  font-family:var(--mono);font-size:11px;color:var(--s-indigo);letter-spacing:.06em;
-}
-ol.limits li b{color:var(--ink);font-weight:600}
-
-footer{
-  padding-block:36px 60px;border-top:1px solid var(--rule);color:var(--muted);
-  font-size:13px;display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;
-}
-.mono{font-family:var(--mono)}
-
-@media (prefers-reduced-motion:reduce){
-  *{transition:none!important;animation:none!important}
-  .draw{stroke-dashoffset:0!important}
-  .pop{opacity:1!important}
-}
 </style>
-
-<div class="field" aria-hidden="true"></div>
-
-<div class="wrap">
-
-  <header class="masthead">
-    <p class="eyebrow">
-      <span>23 CSE 356 · Social Network Analysis</span><span class="sep">/</span>
-      <span>Lichess 2016-01</span><span class="sep">/</span>
-      <span>249,505 games</span>
-    </p>
-    <h1>Chess Openings As Contagion</h1>
-    <p class="standfirst">
-      Chess is the rare setting where social contagion is fully observable: exposure is
-      <em>forced</em> — you had to answer the opening at the board — and adoption is timestamped
-      to the second, the first game you play it yourself. So does one exposure suffice, or does
-      taking up an opening need reinforcement from several distinct opponents?
-    </p>
-
-    <div class="verdict">
-      <p class="verdict-label">Verdict</p>
-      <p class="verdict-claim">Simple contagion. Exposure matters; reinforcement does not.</p>
-      <p class="verdict-body">
-        The adoption curve rises with the number of distinct opponents who played an opening
-        against you — and that rise is almost entirely reproduced by a null model with the
-        timestamps shuffled. The first exposure carries the whole effect.
-      </p>
+<div class="topbar"><div class="wrap topbar-inner">
+  <a class="brand" href="#top"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span> Opening Lab</a>
+  <nav class="nav" aria-label="Sections">
+    <a href="#evidence">Explore</a><a href="#controls">Compare</a><a href="#method">Method</a><a class="live-link" href="http://localhost:8124/">Live console ↗</a>
+  </nav>
+</div></div>
+<main class="wrap" id="top">
+  <header class="hero">
+    <div>
+      <p class="kicker">Lichess research · January 2016</p>
+      <h1>Do chess openings spread?</h1>
+      <p class="hero-lead">Explore how seeing an opening across games relates to playing it later—and whether meeting it through more opponents changes the pattern.</p>
     </div>
-
-    <dl class="strip">
-      <div class="stat"><dt>Games kept</dt><dd>249,505</dd></div>
-      <div class="stat"><dt>Players</dt><dd>6,881</dd></div>
-      <div class="stat"><dt>Trials</dt><dd>223,967</dd></div>
-      <div class="stat"><dt>Adoptions</dt><dd>39,661 <small>17.7%</small></dd></div>
-      <div class="stat"><dt>ECO codes</dt><dd>40</dd></div>
-      <div class="stat"><dt>Elo band</dt><dd>1800–2200</dd></div>
-    </dl>
   </header>
+  <div class="summary" role="note">
+    <span class="summary-label">Key finding</span>
+    <p class="summary-copy" id="summary-copy">Loading corrected results…</p>
+    <p class="summary-note">One month, one rating band. These comparisons describe associations; they do not identify a causal effect.</p>
+  </div>
+  <dl class="stats" id="stats">
+    <div><dt>Games</dt><dd id="stat-games">—</dd></div>
+    <div><dt>Players</dt><dd id="stat-players">—</dd></div>
+    <div><dt>Complete trials</dt><dd id="stat-trials">—</dd></div>
+    <div><dt>Trial adoption rate</dt><dd id="stat-rate">—</dd></div>
+  </dl>
 
-  <section id="trap">
-    <div class="step-head">
-      <span class="step-num">01</span>
-      <h2>The curve rises. That is the trap.</h2>
+  <section class="section" id="evidence">
+    <div class="section-head"><span class="section-index">01 / Explore</span><div>
+      <h2>More exposure is not the whole story</h2>
+      <p>Players with more distinct exposers adopt more often. Shuffling game times keeps the opponents and openings while changing their ordering; the comparison tests whether the raw rise exceeds that reference.</p>
+    </div></div>
+    <div class="explorer-tools" aria-label="Explore adoption rates">
+      <label>Opening <select id="opening-filter"><option value="">All openings</option></select></label>
+      <label>Colour <select id="colour-filter"><option value="">Both colours</option><option value="W">White</option><option value="B">Black</option></select></label>
+      <button type="button" id="download-csv">Download CSV</button>
+      <button type="button" id="download-svg">Save chart SVG</button>
+      <p id="filter-note">All openings and colours · shuffled-time reference available.</p>
     </div>
-    <p class="lede">
-      Adoption climbs from 15.9% to 22.7% as the number of distinct exposers <span class="mono">d</span>
-      grows — textbook complex contagion, if you stop there. Turn on the shuffled-time null,
-      which destroys causal ordering but preserves degree, ratings and opening popularity exactly.
-    </p>
-
-    <figure>
-      <div class="fig-head">
-        <div>
-          <p class="fig-title">Probability of adopting within 14 days</p>
-          <p class="fig-sub">By number of distinct opponents who played the opening against you first.</p>
-        </div>
-        <label class="toggle" for="nullToggle">
-          <input type="checkbox" id="nullToggle" checked>
-          <span class="sw" aria-hidden="true"></span>
-          <span>Shuffled-time null</span>
-        </label>
+    <div class="card">
+      <div class="card-head"><div><h3>Adoption within 14 days</h3><p id="chart-subtitle">Observed trial rate and shuffled-time reference by distinct exposers</p></div>
+        <label class="toggle"><input type="checkbox" id="show-null" checked> Show shuffled-time reference</label>
       </div>
-      <p class="legend">
-        <span class="lg"><i style="background:var(--s-indigo)"></i>Observed</span>
-        <span class="lg" id="lgNull"><i class="dash"></i>Shuffled-time null</span>
-      </p>
-      <div class="fig-body"><svg class="chart" id="c-hero" viewBox="0 0 760 340" role="img"
-        aria-label="Adoption probability against distinct exposers, observed versus shuffled-time null"></svg></div>
-      <figcaption id="heroCap">
-        The null <b>tracks the observed curve</b> and meets it exactly at d&nbsp;=&nbsp;6+.
-        Whatever makes high-<span class="mono">d</span> players adopt more, it survives having
-        time scrambled — so it cannot be influence.
-      </figcaption>
-    </figure>
+      <div class="chart-wrap"><svg class="chart" id="curve-chart" viewBox="0 0 800 350" role="img" aria-label="Adoption rates by distinct exposers"></svg></div>
+      <div class="chart-note"><span class="legend"><span><i></i>Observed</span><span id="null-legend"><i class="null-key"></i>Shuffled time</span></span><span id="curve-note"></span></div>
+    </div>
+    <div class="compare">
+      <div class="compare-item"><span class="label">First distinct exposer</span><strong id="first-lift">—</strong><p id="first-detail">Observed / shuffled-time rate</p></div>
+      <div class="compare-item"><span class="label">Six or more distinct exposers</span><strong id="last-lift">—</strong><p id="last-detail">Observed / shuffled-time rate</p></div>
+    </div>
+    <p class="footnote">Counting one observation per player-opening spell gives the same direction: observed/shuffled lift falls from 1.050 at the first exposer to 0.928 at six or more. The main chart counts exposure trials, which can repeat within a spell.</p>
+  </section>
 
-    <figure style="margin-top:20px">
-      <div class="fig-head">
-        <div>
-          <p class="fig-title">Excess over the null</p>
-          <p class="fig-sub">Observed rate ÷ null rate. Complex contagion requires this to rise.</p>
-        </div>
+  <section class="section" id="controls">
+    <div class="section-head"><span class="section-index">02 / Compare</span><div>
+      <h2>Look beyond the curve</h2>
+      <p>The matched comparison and held-out models offer context. Neither turns an observational dataset into a randomized experiment.</p>
+    </div></div>
+    <div class="two-col">
+      <div class="card analysis-card">
+        <h3>Matched at first exposure</h3>
+        <div class="bar-row"><span>Exposed</span><span class="bar"><i id="exposed-bar"></i></span><b id="exposed-rate">—</b></div>
+        <div class="bar-row control"><span>Control</span><span class="bar"><i id="control-bar"></i></span><b id="control-rate">—</b></div>
+        <div class="big-delta" id="matched-delta">—</div>
+        <p class="small" id="matched-meta"></p>
       </div>
-      <div class="fig-body"><svg class="chart" id="c-excess" viewBox="0 0 760 290" role="img"
-        aria-label="Ratio of observed to null adoption rate, decaying from 1.18 to 1.00"></svg></div>
-      <figcaption>
-        It <b>decays monotonically to 1.00</b>. The influence signal is strongest at the
-        <em>first</em> exposer and gone by the sixth — the exact opposite of reinforcement.
-      </figcaption>
-    </figure>
-  </section>
-
-  <section id="decisive">
-    <div class="step-head">
-      <span class="step-num">02</span>
-      <h2>Hold exposures fixed, vary the exposers</h2>
-    </div>
-    <p class="lede">
-      The decisive comparison isolates diversity from volume: among players who received exactly
-      <span class="mono">k</span> exposures, does it matter whether they came from one opponent or
-      four? Complex contagion says yes. The data says no.
-    </p>
-
-    <figure>
-      <div class="fig-head">
-        <div>
-          <p class="fig-title">Adoption by distinct exposers, total exposures held constant</p>
-          <p class="fig-sub">Each line fixes k. A rising line would be complex contagion; these wander.</p>
-        </div>
+      <div class="card analysis-card">
+        <h3>How to read the match</h3>
+        <div class="callout"><p>Controls were eligible if they had neither played nor encountered the target opening at the matching time. <b>Later exposure is counted as a crossover</b>, not used to choose controls with knowledge of the future.</p></div>
+        <p class="small">Rating and activity are measured before matching. The player-cluster bootstrap reflects repeated players in both pair roles; opponent choice and repertoire remain confounders.</p>
       </div>
-      <p class="legend">
-        <span class="lg"><i style="background:var(--s-indigo)"></i>k = 2</span>
-        <span class="lg"><i style="background:var(--s-ochre)"></i>k = 3</span>
-        <span class="lg"><i style="background:var(--s-jade)"></i>k = 4</span>
-      </p>
-      <div class="fig-body"><svg class="chart" id="c-heldk" viewBox="0 0 760 320" role="img"
-        aria-label="Adoption rate by distinct exposers at fixed exposure counts, showing no trend"></svg></div>
-      <figcaption>
-        At <span class="mono">k&nbsp;=&nbsp;4</span> the rate goes 0.179 → 0.142 → 0.159 → 0.184.
-        <b>No trend, and no separation</b> beyond the confidence intervals.
-      </figcaption>
-    </figure>
-  </section>
-
-  <section id="survives">
-    <div class="step-head">
-      <span class="step-num">03</span>
-      <h2>Influence is real — it just needs only one exposure</h2>
     </div>
-    <p class="lede">
-      Each exposed player is matched to an unexposed player within ±50 Elo and ±25% games played,
-      over the same window. The difference answers "would they have adopted anyway?" — and absorbs
-      external shocks, since a tournament broadcast lifts matched pairs alike.
-    </p>
-
-    <div class="two">
-      <figure>
-        <div class="fig-head"><div>
-          <p class="fig-title">Matched controls</p>
-          <p class="fig-sub">61,519 pairs, rating- and activity-matched.</p>
-        </div></div>
-        <div class="fig-body"><svg class="chart" id="c-matched" viewBox="0 0 380 260" role="img"
-          aria-label="Exposed players adopt at 13.35 percent versus 10.35 percent for matched unexposed"></svg></div>
-        <figcaption>
-          <b>+2.80 percentage points</b>, 95% CI [2.44, 3.16]. Risk ratio 1.265.
-        </figcaption>
-      </figure>
-
-      <figure>
-        <div class="fig-head"><div>
-          <p class="fig-title">Early adopters sit at the core</p>
-          <p class="fig-sub">First 10% to play a behaviour vs. everyone else.</p>
-        </div></div>
-        <div class="fig-body"><svg class="chart" id="c-early" viewBox="0 0 380 260" role="img"
-          aria-label="Early adopters have higher degree and roughly double the betweenness"></svg></div>
-        <figcaption>
-          Degree <b>84.3 vs 60.8</b>; betweenness roughly double. Openings enter through hubs.
-        </figcaption>
-      </figure>
-    </div>
-
-    <div class="strip" style="margin-top:20px">
-      <div class="stat"><dt>Nodes</dt><dd>6,881</dd></div>
-      <div class="stat"><dt>Edges</dt><dd>173,944</dd></div>
-      <div class="stat"><dt>Components</dt><dd>1</dd></div>
-      <div class="stat"><dt>Communities</dt><dd>5</dd></div>
-      <div class="stat"><dt>Modularity</dt><dd>0.493</dd></div>
-      <div class="stat"><dt>Within-community</dt><dd>72.1<small>%</small></dd></div>
+    <div class="card" style="margin-top:18px">
+      <div class="card-head"><div><h3>Held-out prediction</h3><p>Player-opening-colour spells held out together; background features measured before evaluated trials</p></div></div>
+      <div class="table-scroll"><table><thead><tr><th>Model</th><th>Added information</th><th style="text-align:right">AUC</th></tr></thead><tbody id="model-rows"></tbody></table></div>
+      <p class="footnote" style="padding:0 24px 20px">AUC measures ranking on held-out spells. Differences between models describe predictive value, not causal influence.</p>
     </div>
   </section>
 
-  <section id="evidence">
-    <div class="step-head">
-      <span class="step-num">04</span>
-      <h2>The full comparison</h2>
-    </div>
-    <p class="lede">
-      Three timestamp-shuffled replicates. <span class="mono">z</span> is the observed rate's
-      distance from the null in null standard deviations; <span class="mono">d = 6</span> is a
-      clipped bucket holding all d ≥ 6, which is why its <span class="mono">n</span> is large.
-    </p>
-    <div class="tablewrap">
-      <table>
-        <thead><tr>
-          <th>d — distinct exposers</th><th>n</th><th>Observed</th><th>Null</th>
-          <th>Lift</th><th>z</th><th>Signal</th>
-        </tr></thead>
-        <tbody>
-          <tr><td>1</td><td>85,771</td><td>0.1595</td><td>0.1354</td><td>1.178</td><td>20.1</td><td><span class="pill live">strong</span></td></tr>
-          <tr><td>2</td><td>40,895</td><td>0.1583</td><td>0.1419</td><td>1.116</td><td>11.9</td><td><span class="pill live">strong</span></td></tr>
-          <tr><td>3</td><td>24,022</td><td>0.1689</td><td>0.1563</td><td>1.081</td><td>8.9</td><td><span class="pill live">present</span></td></tr>
-          <tr><td>4</td><td>15,556</td><td>0.1817</td><td>0.1692</td><td>1.074</td><td>9.9</td><td><span class="pill live">present</span></td></tr>
-          <tr><td>5</td><td>10,877</td><td>0.1851</td><td>0.1781</td><td>1.039</td><td>3.2</td><td><span class="pill live">weak</span></td></tr>
-          <tr class="accent"><td>6+</td><td>46,846</td><td>0.2265</td><td>0.2267</td><td>0.999</td><td>−0.1</td><td><span class="pill dead">none</span></td></tr>
-        </tbody>
-      </table>
+  <section class="section" id="method">
+    <div class="section-head"><span class="section-index">03 / Method</span><div>
+      <h2>From games to trials</h2>
+      <p>These figures use the available January 2016 game sample. Rechecking the original archive and testing another month remain open.</p>
+    </div></div>
+    <div class="method-grid">
+      <div class="method-step"><b>01</b><h3>Define exposure</h3><p>An opponent plays an ECO opening against a player. Opening and colour stay together in the behaviour key.</p></div>
+      <div class="method-step"><b>02</b><h3>Follow for 14 days</h3><p>Each included exposure has a fully observable 14-day window. Late positive and negative trials are both excluded.</p></div>
+      <div class="method-step"><b>03</b><h3>Compare alternatives</h3><p>Use 20 timestamp shuffles, eligible matched controls, and group-held-out prediction to challenge a simple reading of the raw curve.</p></div>
     </div>
   </section>
-
-  <section id="failed">
-    <div class="step-head">
-      <span class="step-num">05</span>
-      <h2>What did not work</h2>
-    </div>
-    <p class="lede">Reported as inconclusive rather than dressed up as support.</p>
-
-    <div class="tablewrap">
-      <table>
-        <thead><tr><th>Held-out model</th><th>Features</th><th>AUC</th></tr></thead>
-        <tbody>
-          <tr><td>Baseline</td><td>popularity, rating, activity</td><td>0.5255</td></tr>
-          <tr><td>+ Network</td><td>k, d, sd, degree, k-core, betweenness</td><td>0.5289</td></tr>
-          <tr class="accent"><td><b>Gain</b></td><td>trained on first 70% of the month</td><td><b>+0.0034</b></td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="lede" style="margin-top:18px;margin-bottom:0">
-      Both models sit barely above chance. This is <em>consistent</em> with the simple-contagion
-      verdict — if <span class="mono">d</span> carries no signal, adding it should not help — but it
-      is equally consistent with the features being too weak to predict individual adoption at all.
-      It supports nothing on its own.
-    </p>
-
-    <div class="callout">
-      <h3>A bug worth putting in the report</h3>
-      <p>
-        The first run printed <b>“complex contagion (marginal)”</b>. That verdict function read only
-        the raw curve and never consulted the null model the pipeline had just computed. Because the
-        null reproduces nearly the entire rise, the conclusion inverted once it was included.
-      </p>
-      <p>
-        <code>curve.verdict()</code> now requires three things at once — a raw rise, survival at fixed
-        <span class="mono">k</span>, and growth of the excess over the null — and the pipeline computes
-        the null <em>before</em> pronouncing. This is exactly the error the identification strategy was
-        designed to catch, caught by its own null model.
-      </p>
-    </div>
+  <section class="section" id="limits">
+    <div class="section-head"><span class="section-index">04 / Limits</span><div><h2>What the result cannot settle</h2></div></div>
+    <ul class="limit-list">
+      <li><b>Single-month evidence.</b> The analysis has not yet been replicated on a second archive month.</li>
+      <li><b>Observational exposure.</b> Opponent choice, repertoire, activity and changing opening popularity can shape both exposure and adoption.</li>
+      <li><b>Repeated observations.</b> One player and one eventual adoption can contribute multiple exposure trials; trial-level intervals overstate precision.</li>
+      <li><b>Archive recheck pending.</b> The analysis uses previously saved games. Reading the original archive again is a separate validation step.</li>
+    </ul>
   </section>
-
-  <section id="limits">
-    <div class="step-head">
-      <span class="step-num">06</span>
-      <h2>Limitations</h2>
-    </div>
-    <ol class="limits">
-      <li><b>One month, one rating band, one platform.</b> The excess-over-null decay is the central
-        claim and has not been replicated. A second month is the cheapest strengthening available.</li>
-      <li><b>6,881 players, not the 10⁵ projected.</b> The filters compound harshly: 2.59M games lost
-        to the Elo band applied to both players, 1.64M to time control, 224k to rare ECO codes,
-        65k to the ≥20-game activity floor.</li>
-      <li><b>ECO-level granularity only.</b> The ply-level robustness check is implemented
-        (<code>OPENING_GRANULARITY = "ply"</code>) but has not been run.</li>
-      <li><b>Adoption ≠ repertoire change.</b> A player may try an opening once experimentally;
-        the design cannot distinguish that from genuine uptake.</li>
-    </ol>
-  </section>
-
-  <footer>
-    <span>Lichess open database, January 2016 · CC0 · <span class="mono">database.lichess.org</span></span>
-    <span class="mono">33 min end-to-end · 4.99M games scanned</span>
-  </footer>
-</div>
-
-<div class="tip" id="tip" role="status" aria-live="polite"></div>
-
+</main>
+<footer class="wrap"><span>Source: Lichess open database · January 2016 · 1800–2200 Elo</span><span>Analysis: complete 14-day follow-up · <a href="#top">Back to top ↑</a></span></footer>
 <script>
 (function(){
   "use strict";
-  var NS="http://www.w3.org/2000/svg";
-  var tip=document.getElementById("tip");
-  var REDUCED=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  var BY_D=[
-    {d:1,n:85771,rate:.159483,lo:.157048,hi:.161948,nul:.1354,lift:1.178,z:20.1},
-    {d:2,n:40895,rate:.158308,lo:.154802,hi:.161878,nul:.1419,lift:1.116,z:11.9},
-    {d:3,n:24022,rate:.168928,lo:.164243,hi:.173720,nul:.1563,lift:1.081,z:8.9},
-    {d:4,n:15556,rate:.181666,lo:.175686,hi:.187804,nul:.1692,lift:1.074,z:9.9},
-    {d:5,n:10877,rate:.185069,lo:.177883,hi:.192479,nul:.1781,lift:1.039,z:3.2},
-    {d:6,n:46846,rate:.226508,lo:.222740,hi:.230321,nul:.2267,lift:0.999,z:-0.1}
+  var report=__REPORT_JSON__;
+  var byD=report.curve_by_d||[];
+  var nullRows=report.null_comparison||[];
+  var explorer=report.explorer||[];
+  var nullByD={};
+  function id(x){return document.getElementById(x);}
+  document.querySelector(".live-link").href=location.pathname==="/findings"?"/":"http://localhost:8124/";
+  function txt(x,v){id(x).textContent=v;}
+  function count(v){return Number(v||0).toLocaleString("en-US");}
+  function pct(v,d){return (100*Number(v||0)).toFixed(d==null?1:d)+"%";}
+  var ns="http://www.w3.org/2000/svg";
+  function svgEl(name,attrs,text){var e=document.createElementNS(ns,name);Object.keys(attrs||{}).forEach(function(k){e.setAttribute(k,attrs[k]);});if(text!=null)e.textContent=text;return e;}
+  var verdict=report.verdict||{};
+  txt("summary-copy",verdict.excess_over_null_grows_with_d===false?
+      "More distinct opponents do not show clear reinforcement above the shuffled-time reference.":
+      "The corrected comparison is inconclusive about reinforcement.");
+  txt("stat-games",count(report.parse&&report.parse.games));
+  txt("stat-players",count(report.parse&&report.parse.players));
+  txt("stat-trials",count(report.trials&&report.trials.n));
+  txt("stat-rate",pct(report.trials&&report.trials.rate,1));
+  function renderCurve(){
+    if(!byD.length)return;
+    nullByD={};nullRows.forEach(function(r){nullByD[r.d]=r;});
+    var hasNull=!!nullRows.length;
+    var first=byD[0],last=byD[byD.length-1],nf=nullByD[first.d]||{},nl=nullByD[last.d]||{};
+    txt("first-lift",hasNull?(nf.lift_over_null||0).toFixed(3)+"×":pct(first.rate,2));
+    txt("last-lift",hasNull?(nl.lift_over_null||0).toFixed(3)+"×":pct(last.rate,2));
+    txt("first-detail",hasNull?pct(first.rate,1)+" observed · "+pct(nf.rate_null,1)+" reference":count(first.n)+" complete trials");
+    txt("last-detail",hasNull?pct(last.rate,1)+" observed · "+pct(nl.rate_null,1)+" reference":count(last.n)+" complete trials");
+    txt("curve-note"," " + count(byD.reduce(function(a,r){return a+r.n;},0))+" complete exposure trials");
+    var chart=id("curve-chart"),mobile=window.matchMedia("(max-width:620px)").matches;
+    chart.setAttribute("viewBox",mobile?"0 0 420 320":"0 0 800 350");
+    var L=mobile?43:60,R=mobile?403:755,T=mobile?18:25,B=mobile?250:275;
+    chart.textContent="";
+    var vals=byD.map(function(r){return r.rate;}).concat(nullRows.map(function(r){return r.rate_null;}));
+    var low=Math.max(0,Math.floor((Math.min.apply(null,vals)-.025)*20)/20);
+    var high=Math.ceil((Math.max.apply(null,vals)+.025)*20)/20;
+    if(high<=low)high=low+.1;
+    function X(i){return L+i*(R-L)/Math.max(1,byD.length-1);}
+    function Y(v){return B-(v-low)/(high-low)*(B-T);}
+    for(var i=0;i<=5;i++){
+      var v=low+(high-low)*i/5,y=Y(v);
+      chart.appendChild(svgEl("line",{x1:L,x2:R,y1:y,y2:y,class:"grid"}));
+      chart.appendChild(svgEl("text",{x:L-11,y:y+4,"text-anchor":"end"},pct(v,0)));
+    }
+    chart.appendChild(svgEl("line",{x1:L,x2:R,y1:B,y2:B,class:"axis"}));
+    byD.forEach(function(r,i){chart.appendChild(svgEl("text",{x:X(i),y:B+22,"text-anchor":"middle"},r.d===6?String(r.d)+"+":String(r.d)));});
+    chart.appendChild(svgEl("text",{x:(L+R)/2,y:B+52,"text-anchor":"middle",class:"axis-title"},"Distinct exposing opponents (d)"));
+    if(!mobile)chart.appendChild(svgEl("text",{x:16,y:(T+B)/2,"text-anchor":"middle",transform:"rotate(-90 16 "+((T+B)/2)+")",class:"axis-title"},"Adoption rate (%)"));
+    function path(rows,value){return rows.map(function(r,i){return (i?"L":"M")+X(i).toFixed(1)+" "+Y(value(r)).toFixed(1);}).join(" ");}
+    byD.forEach(function(r,i){
+      chart.appendChild(svgEl("line",{x1:X(i),x2:X(i),y1:Y(r.lo==null?r.rate:r.lo),
+        y2:Y(r.hi==null?r.rate:r.hi),class:"uncertainty"}));
+    });
+    chart.appendChild(svgEl("path",{d:path(byD,function(r){return r.rate;}),class:"observed"}));
+    var nullGroup=svgEl("g",{id:"null-series"});
+    if(hasNull)nullGroup.appendChild(svgEl("path",{d:path(byD,function(r){return (nullByD[r.d]||{}).rate_null||0;}),class:"null"}));
+    byD.forEach(function(r,i){
+      var observed=svgEl("circle",{cx:X(i),cy:Y(r.rate),r:6,class:"point-observed"});
+      observed.appendChild(svgEl("title",{},String(r.d)+" exposer(s): "+pct(r.rate,2)+" observed; "+count(r.n)+" trials"));
+      chart.appendChild(observed);
+      var nr=nullByD[r.d];
+      if(nr){var point=svgEl("circle",{cx:X(i),cy:Y(nr.rate_null),r:5,class:"point-null"});
+        point.appendChild(svgEl("title",{},String(r.d)+" exposer(s): "+pct(nr.rate_null,2)+" shuffled reference"));
+        nullGroup.appendChild(point);}
+    });
+    chart.appendChild(nullGroup);
+    id("show-null").disabled=!hasNull;
+    id("show-null").checked=hasNull;
+    id("null-legend").style.opacity=hasNull?"1":".35";
+    id("show-null").onchange=function(){
+      nullGroup.style.display=this.checked?"":"none";
+      id("null-legend").style.opacity=this.checked?"1":".35";
+    };
+  }
+  function wilson(adopted,n){
+    var p=adopted/n,z=1.96,den=1+z*z/n;
+    var center=(p+z*z/(2*n))/den;
+    var half=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n))/den;
+    return [center-half,center+half];
+  }
+  function updateSelection(){
+    var opening=id("opening-filter").value,colour=id("colour-filter").value;
+    var all=!opening&&!colour;
+    if(all){byD=report.curve_by_d||[];nullRows=report.null_comparison||[];}
+    else{
+      var groups={};
+      explorer.forEach(function(r){
+        if((opening&&r.opening!==opening)||(colour&&r.colour!==colour))return;
+        var d=Number(r.d);
+        if(!groups[d])groups[d]={d:d,n:0,adopted:0};
+        groups[d].n+=Number(r.n);groups[d].adopted+=Number(r.adopted);
+      });
+      byD=Object.keys(groups).map(function(k){
+        var r=groups[k],interval=wilson(r.adopted,r.n);
+        r.rate=r.adopted/r.n;r.lo=interval[0];r.hi=interval[1];return r;
+      }).sort(function(a,b){return a.d-b.d;});
+      nullRows=[];
+    }
+    txt("chart-subtitle",all?"Observed trial rate and shuffled-time reference by distinct exposers":"Observed trial rate for this opening and colour");
+    txt("filter-note",all?
+      "All openings and colours · shuffled-time reference shown. Error bars are trial-level Wilson intervals.":
+      "Subset shows observed rates only; no shuffled-time reference was computed for this filter. Error bars are descriptive trial-level intervals.");
+    renderCurve();
+  }
+  var openings=Array.from(new Set(explorer.map(function(r){return r.opening;}))).sort();
+  openings.forEach(function(opening){
+    var o=document.createElement("option");o.value=opening;o.textContent=opening;
+    id("opening-filter").appendChild(o);
+  });
+  id("opening-filter").addEventListener("change",updateSelection);
+  id("colour-filter").addEventListener("change",updateSelection);
+  function download(name,content,type){
+    var a=document.createElement("a"),url=URL.createObjectURL(new Blob([content],{type:type}));
+    a.href=url;a.download=name;a.click();setTimeout(function(){URL.revokeObjectURL(url);},1000);
+  }
+  id("download-csv").addEventListener("click",function(){
+    var lines=["opening,colour,d,n,adopted,rate,lo,hi,shuffled_rate"];
+    byD.forEach(function(r){
+      lines.push([id("opening-filter").value||"ALL",id("colour-filter").value||"ALL",
+        r.d,r.n,r.adopted==null?Math.round(r.rate*r.n):r.adopted,
+        r.rate,r.lo,r.hi,(nullByD[r.d]||{}).rate_null||""].join(","));
+    });
+    download("sna-adoption-curve.csv",lines.join("\n")+"\n","text/csv");
+  });
+  id("download-svg").addEventListener("click",function(){
+    var original=id("curve-chart"),copy=original.cloneNode(true);
+    copy.setAttribute("xmlns",ns);
+    var oldNodes=[original].concat(Array.from(original.querySelectorAll("*")));
+    var newNodes=[copy].concat(Array.from(copy.querySelectorAll("*")));
+    oldNodes.forEach(function(node,i){
+      var style=getComputedStyle(node);
+      ["stroke","fill","stroke-width","stroke-dasharray","font-family","font-size","opacity"]
+        .forEach(function(key){var value=style.getPropertyValue(key);if(value)newNodes[i].setAttribute(key,value);});
+    });
+    download("sna-adoption-curve.svg",new XMLSerializer().serializeToString(copy),"image/svg+xml");
+  });
+  updateSelection();
+  window.matchMedia("(max-width:620px)").addEventListener("change",renderCurve);
+  var m=report.matched_controls||{};
+  txt("exposed-rate",pct(m.exposed_adoption_rate,2));
+  txt("control-rate",pct(m.control_adoption_rate,2));
+  id("exposed-bar").style.width=Math.min(100,100*(m.exposed_adoption_rate||0)/.2)+"%";
+  id("control-bar").style.width=Math.min(100,100*(m.control_adoption_rate||0)/.2)+"%";
+  txt("matched-delta",(m.difference>=0?"+":"")+(100*m.difference).toFixed(2)+" percentage points");
+  txt("matched-meta",count(m.n_pairs)+" pairs · "+pct(m.control_crossover_rate,1)+" controls later exposed · player-cluster bootstrap interval "+(m.ci95?"["+pct(m.ci95[0],2)+", "+pct(m.ci95[1],2)+"]":"unavailable"));
+  var p=report.predictive||{}, rows=[
+    ["Baseline","Opening popularity, rating, activity",p.auc_baseline],
+    ["+ Repertoire","Prior opening proximity",p.auc_repertoire],
+    ["+ Network","Exposure and network position",p.auc_network]
   ];
-  var HELD={
-    2:[{d:1,n:5546,r:.157771,lo:.148415,hi:.167602},{d:2,n:33737,r:.159291,lo:.155425,hi:.163235}],
-    3:[{d:1,n:1180,r:.168644,lo:.148362,hi:.191076},{d:2,n:5075,r:.153695,lo:.144034,hi:.163879},
-       {d:3,n:17695,r:.170670,lo:.165198,hi:.176284}],
-    4:[{d:1,n:390,r:.179487,lo:.144583,hi:.220644},{d:2,n:1279,r:.142299,lo:.124222,hi:.162518},
-       {d:3,n:4163,r:.158540,lo:.147760,hi:.169949},{d:4,n:10215,r:.184337,lo:.176936,hi:.191975}]
-  };
-
-  function el(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);return e;}
-  function pct(x,dp){return (x*100).toFixed(dp==null?1:dp)+"%";}
-  function num(x){return x.toLocaleString("en-US");}
-
-  /* Catmull-Rom -> cubic bezier: smooth curves through every data point,
-     never overshooting into impossible probabilities. */
-  function spline(pts,t){
-    if(pts.length<2) return "";
-    t=(t==null?0.72:t);
-    var d="M"+pts[0][0].toFixed(2)+" "+pts[0][1].toFixed(2);
-    for(var i=0;i<pts.length-1;i++){
-      var p0=pts[i-1]||pts[i], p1=pts[i], p2=pts[i+1], p3=pts[i+2]||p2;
-      var c1x=p1[0]+(p2[0]-p0[0])/6*t, c1y=p1[1]+(p2[1]-p0[1])/6*t;
-      var c2x=p2[0]-(p3[0]-p1[0])/6*t, c2y=p2[1]-(p3[1]-p1[1])/6*t;
-      d+=" C"+c1x.toFixed(2)+" "+c1y.toFixed(2)+","+c2x.toFixed(2)+" "+c2y.toFixed(2)
-        +","+p2[0].toFixed(2)+" "+p2[1].toFixed(2);
-    }
-    return d;
-  }
-  function animate(path,delay){
-    if(REDUCED) return path;
-    try{
-      var len=path.getTotalLength();
-      path.setAttribute("stroke-dasharray",len);
-      path.setAttribute("stroke-dashoffset",len);
-      path.style.animationDelay=(delay||0)+"ms";
-      path.classList.add("draw");
-    }catch(e){}
-    return path;
-  }
-  function fadeIn(node,delay){
-    if(REDUCED) return node;
-    node.style.animationDelay=(delay||0)+"ms";
-    node.classList.add("pop");
-    return node;
-  }
-
-  function showTip(evt,html){
-    tip.innerHTML=html;tip.classList.add("on");
-    var r=tip.getBoundingClientRect();
-    var x=evt.clientX+16, y=evt.clientY-r.height-14;
-    if(x+r.width>window.innerWidth-10) x=evt.clientX-r.width-16;
-    if(y<8) y=evt.clientY+20;
-    tip.style.left=x+"px"; tip.style.top=y+"px";
-  }
-  function hideTip(){tip.classList.remove("on");}
-  function hotspot(parent,x,y,r,html){
-    var h=el("circle",{cx:x,cy:y,r:r,fill:"transparent","pointer-events":"all"});
-    h.addEventListener("mousemove",function(e){showTip(e,html);});
-    h.addEventListener("mouseleave",hideTip);
-    parent.appendChild(h);
-  }
-  function frame(svg,o){
-    var g=el("g",{});svg.appendChild(g);
-    for(var i=0;i<=o.yTicks;i++){
-      var v=o.y0+(o.y1-o.y0)*i/o.yTicks;
-      var y=o.b-(v-o.y0)/(o.y1-o.y0)*(o.b-o.t);
-      g.appendChild(el("line",{x1:o.l,x2:o.r,y1:y,y2:y,class:"gridline"}));
-      var tx=el("text",{x:o.l-10,y:y+3.5,"text-anchor":"end",class:"ax-label"});
-      tx.textContent=o.yFmt(v);g.appendChild(tx);
-    }
-    g.appendChild(el("line",{x1:o.l,x2:o.r,y1:o.b,y2:o.b,class:"axisline"}));
-    return g;
-  }
-
-  /* ================= HERO ================= */
-  (function(){
-    var svg=document.getElementById("c-hero");
-    var L=52,R=724,T=22,B=272, y0=.12,y1=.245;
-    var X=function(d){return L+(d-1)/5*(R-L);};
-    var Y=function(v){return B-(v-y0)/(y1-y0)*(B-T);};
-    frame(svg,{l:L,r:R,t:T,b:B,y0:y0,y1:y1,yTicks:5,yFmt:function(v){return pct(v,0);}});
-
-    // smoothed confidence band
-    var hiPts=BY_D.map(function(p){return [X(p.d),Y(p.hi)];});
-    var loPts=BY_D.map(function(p){return [X(p.d),Y(p.lo)];}).reverse();
-    var band=spline(hiPts)+" L"+loPts[0][0].toFixed(2)+" "+loPts[0][1].toFixed(2)+
-             spline(loPts).replace(/^M[^C]*/," ")+" Z";
-    svg.appendChild(fadeIn(el("path",{d:band,fill:"var(--wash-indigo)",stroke:"none"}),700));
-
-    // null group — fades as one object
-    var ng=el("g",{class:"nullgrp"});svg.appendChild(ng);
-    var nullPts=BY_D.map(function(p){return [X(p.d),Y(p.nul)];});
-    ng.appendChild(el("path",{d:spline(nullPts),fill:"none",stroke:"var(--s-null)",
-      "stroke-width":2,"stroke-dasharray":"7 5","stroke-linecap":"round"}));
-    BY_D.forEach(function(p,i){
-      ng.appendChild(fadeIn(el("circle",{cx:X(p.d),cy:Y(p.nul),r:4,fill:"var(--surface)",
-        stroke:"var(--s-null)","stroke-width":2}),500+i*70));
-    });
-    var cx=X(6), cy=Y(.2266);
-    ng.appendChild(el("line",{x1:cx,x2:cx,y1:cy-48,y2:cy-12,class:"ref-line"}));
-    var meet=el("text",{x:cx,y:cy-54,"text-anchor":"end",class:"dlabel",fill:"var(--s-vermilion)"});
-    meet.textContent="they meet";ng.appendChild(meet);
-
-    // observed
-    var rPts=BY_D.map(function(p){return [X(p.d),Y(p.rate)];});
-    svg.appendChild(animate(el("path",{d:spline(rPts),fill:"none",stroke:"var(--s-indigo)",
-      "stroke-width":2.6,"stroke-linejoin":"round","stroke-linecap":"round"}),120));
-    BY_D.forEach(function(p,i){
-      svg.appendChild(fadeIn(el("circle",{cx:X(p.d),cy:Y(p.rate),r:5,fill:"var(--s-indigo)",
-        stroke:"var(--surface)","stroke-width":2}),600+i*80));
-    });
-
-    BY_D.forEach(function(p){
-      var t=el("text",{x:X(p.d),y:B+20,"text-anchor":"middle",class:"ax-label"});
-      t.textContent=p.d===6?"6+":p.d;svg.appendChild(t);
-    });
-    var xt=el("text",{x:(L+R)/2,y:B+46,"text-anchor":"middle",class:"ax-title"});
-    xt.textContent="d — distinct exposers";svg.appendChild(xt);
-    var mid=(T+B)/2;
-    var yt=el("text",{x:14,y:mid,"text-anchor":"middle",class:"ax-title",
-      transform:"rotate(-90 14 "+mid+")"});
-    yt.textContent="P(adopt within 14 days)";svg.appendChild(yt);
-
-    var hs=el("g",{});svg.appendChild(hs);
-    function rebuildTips(on){
-      hs.textContent="";
-      BY_D.forEach(function(p){
-        var h="<div class='t-h'>d = "+(p.d===6?"6+":p.d)+"</div>"+
-          "<div class='t-r'><span>Observed</span><b>"+pct(p.rate,2)+"</b></div>"+
-          (on?"<div class='t-r'><span>Null</span><b>"+pct(p.nul,2)+"</b></div>"+
-              "<div class='t-r'><span>Lift</span><b>"+p.lift.toFixed(3)+"</b></div>":"")+
-          "<div class='t-r'><span>n</span><b>"+num(p.n)+"</b></div>";
-        hotspot(hs,X(p.d),Y(p.rate),17,h);
-        if(on) hotspot(hs,X(p.d),Y(p.nul),14,h);
-      });
-    }
-
-    var tog=document.getElementById("nullToggle");
-    var cap=document.getElementById("heroCap");
-    var lgNull=document.getElementById("lgNull");
-    var CAP_ON="The null <b>tracks the observed curve</b> and meets it exactly at d&nbsp;=&nbsp;6+. "+
-      "Whatever makes high-<span class='mono'>d</span> players adopt more, it survives having time "+
-      "scrambled — so it cannot be influence.";
-    var CAP_OFF="Read alone, this is a <b>textbook complex-contagion curve</b> — adoption climbing "+
-      "steadily with each additional distinct exposer. This is the reading the null refutes. "+
-      "Switch it back on.";
-    function sync(){
-      var on=tog.checked;
-      ng.style.opacity=on?"1":"0";
-      ng.style.pointerEvents=on?"":"none";
-      lgNull.style.opacity=on?"1":".3";
-      cap.style.opacity="0";
-      setTimeout(function(){cap.innerHTML=on?CAP_ON:CAP_OFF;cap.style.opacity="1";},REDUCED?0:180);
-      rebuildTips(on);
-    }
-    tog.addEventListener("change",sync);
-    rebuildTips(true);
-  })();
-
-  /* ================= EXCESS ================= */
-  (function(){
-    var svg=document.getElementById("c-excess");
-    var L=56,R=724,T=22,B=222, y0=.98,y1=1.20;
-    var X=function(d){return L+(d-1)/5*(R-L);};
-    var Y=function(v){return B-(v-y0)/(y1-y0)*(B-T);};
-    frame(svg,{l:L,r:R,t:T,b:B,y0:y0,y1:y1,yTicks:4,yFmt:function(v){return v.toFixed(2)+"×";}});
-
-    var yl=Y(1);
-    svg.appendChild(el("line",{x1:L,x2:R,y1:yl,y2:yl,stroke:"var(--s-null)",
-      "stroke-width":1.5,"stroke-dasharray":"5 4"}));
-    var nl=el("text",{x:R,y:yl-8,"text-anchor":"end",class:"dlabel",fill:"var(--muted)"});
-    nl.textContent="no effect";svg.appendChild(nl);
-
-    var pts=BY_D.map(function(p){return [X(p.d),Y(p.lift)];});
-    // soft fill beneath the decay, down to the no-effect line
-    var fill=spline(pts)+" L"+X(6).toFixed(2)+" "+yl.toFixed(2)+
-             " L"+X(1).toFixed(2)+" "+yl.toFixed(2)+" Z";
-    svg.appendChild(fadeIn(el("path",{d:fill,fill:"var(--wash-vermilion)",stroke:"none"}),600));
-    svg.appendChild(animate(el("path",{d:spline(pts),fill:"none",stroke:"var(--s-vermilion)",
-      "stroke-width":2.6,"stroke-linejoin":"round","stroke-linecap":"round"}),120));
-    BY_D.forEach(function(p,i){
-      svg.appendChild(fadeIn(el("circle",{cx:X(p.d),cy:Y(p.lift),r:5,fill:"var(--s-vermilion)",
-        stroke:"var(--surface)","stroke-width":2}),600+i*80));
-    });
-
-    var a=el("text",{x:X(1)+12,y:Y(1.178)-11,class:"dlabel",fill:"var(--s-vermilion)"});
-    a.textContent="1.178×";svg.appendChild(a);
-    var b=el("text",{x:X(6),y:Y(.999)+21,"text-anchor":"end",class:"dlabel",fill:"var(--s-vermilion)"});
-    b.textContent="0.999×";svg.appendChild(b);
-
-    BY_D.forEach(function(p){
-      var t=el("text",{x:X(p.d),y:B+20,"text-anchor":"middle",class:"ax-label"});
-      t.textContent=p.d===6?"6+":p.d;svg.appendChild(t);
-      hotspot(svg,X(p.d),Y(p.lift),18,
-        "<div class='t-h'>d = "+(p.d===6?"6+":p.d)+"</div>"+
-        "<div class='t-r'><span>Lift</span><b>"+p.lift.toFixed(3)+"×</b></div>"+
-        "<div class='t-r'><span>z vs null</span><b>"+p.z.toFixed(1)+"</b></div>");
-    });
-    var xt=el("text",{x:(L+R)/2,y:B+46,"text-anchor":"middle",class:"ax-title"});
-    xt.textContent="d — distinct exposers";svg.appendChild(xt);
-  })();
-
-  /* ================= HELD-K ================= */
-  (function(){
-    var svg=document.getElementById("c-heldk");
-    var L=56,R=700,T=22,B=252, y0=.11,y1=.235;
-    var X=function(d){return L+(d-1)/3*(R-L);};
-    var Y=function(v){return B-(v-y0)/(y1-y0)*(B-T);};
-    frame(svg,{l:L,r:R,t:T,b:B,y0:y0,y1:y1,yTicks:5,yFmt:function(v){return pct(v,0);}});
-
-    var cols={2:"var(--s-indigo)",3:"var(--s-ochre)",4:"var(--s-jade)"};
-    [2,3,4].forEach(function(k,ki){
-      var rows=HELD[k], col=cols[k];
-      rows.forEach(function(p){
-        svg.appendChild(el("line",{x1:X(p.d),x2:X(p.d),y1:Y(p.lo),y2:Y(p.hi),
-          stroke:col,"stroke-width":1.5,opacity:.4,"stroke-linecap":"round"}));
-      });
-      var pts=rows.map(function(p){return [X(p.d),Y(p.r)];});
-      svg.appendChild(animate(el("path",{d:spline(pts),fill:"none",stroke:col,
-        "stroke-width":2.2,"stroke-linejoin":"round","stroke-linecap":"round"}),150+ki*180));
-      rows.forEach(function(p,i){
-        svg.appendChild(fadeIn(el("circle",{cx:X(p.d),cy:Y(p.r),r:4.5,fill:col,
-          stroke:"var(--surface)","stroke-width":2}),700+ki*180+i*70));
-        hotspot(svg,X(p.d),Y(p.r),15,
-          "<div class='t-h'>k = "+k+", d = "+p.d+"</div>"+
-          "<div class='t-r'><span>Adoption</span><b>"+pct(p.r,2)+"</b></div>"+
-          "<div class='t-r'><span>95% CI</span><b>"+pct(p.lo,1)+"–"+pct(p.hi,1)+"</b></div>"+
-          "<div class='t-r'><span>n</span><b>"+num(p.n)+"</b></div>");
-      });
-      var last=rows[rows.length-1];
-      var lb=el("text",{x:X(last.d)+12,y:Y(last.r)+4,class:"dlabel",fill:col});
-      lb.textContent="k = "+k;svg.appendChild(fadeIn(lb,1100+ki*180));
-    });
-
-    [1,2,3,4].forEach(function(d){
-      var t=el("text",{x:X(d),y:B+20,"text-anchor":"middle",class:"ax-label"});
-      t.textContent=d;svg.appendChild(t);
-    });
-    var xt=el("text",{x:(L+R)/2,y:B+46,"text-anchor":"middle",class:"ax-title"});
-    xt.textContent="d — distinct exposers (k held fixed)";svg.appendChild(xt);
-  })();
-
-  /* ================= MATCHED ================= */
-  (function(){
-    var svg=document.getElementById("c-matched");
-    var L=54,R=344,T=26,B=196, y0=0,y1=.16;
-    var Y=function(v){return B-(v-y0)/(y1-y0)*(B-T);};
-    frame(svg,{l:L,r:R,t:T,b:B,y0:y0,y1:y1,yTicks:4,yFmt:function(v){return pct(v,0);}});
-
-    var bars=[
-      {lab:"Exposed",v:.1338,c:"var(--s-ochre)"},
-      {lab:"Matched control",v:.1058,c:"var(--s-null)"}
-    ];
-    var bw=76, gap=54, x0=L+44;
-    bars.forEach(function(b,i){
-      var x=x0+i*(bw+gap), y=Y(b.v);
-      var rect=el("rect",{x:x,y:y,width:bw,height:B-y,fill:b.c,rx:6,ry:6});
-      svg.appendChild(fadeIn(rect,200+i*140));
-      svg.appendChild(el("rect",{x:x,y:B-6,width:bw,height:6,fill:b.c}));
-      var vt=el("text",{x:x+bw/2,y:y-10,"text-anchor":"middle",class:"dlabel",fill:"var(--ink)"});
-      vt.textContent=pct(b.v,2);svg.appendChild(fadeIn(vt,500+i*140));
-      var lt=el("text",{x:x+bw/2,y:B+19,"text-anchor":"middle",class:"ax-label"});
-      lt.textContent=b.lab;svg.appendChild(lt);
-      var hit=el("rect",{x:x,y:y-18,width:bw,height:B-y+18,fill:"transparent","pointer-events":"all"});
-      hit.addEventListener("mousemove",function(e){showTip(e,
-        "<div class='t-h'>"+b.lab+"</div>"+
-        "<div class='t-r'><span>Adoption</span><b>"+pct(b.v,2)+"</b></div>"+
-        "<div class='t-r'><span>Pairs</span><b>61,519</b></div>");});
-      hit.addEventListener("mouseleave",hideTip);
-      svg.appendChild(hit);
-    });
-
-    var xa=x0+bw, xb=x0+bw+gap, yA=Y(.1338), yB=Y(.1058);
-    svg.appendChild(el("line",{x1:xa+8,x2:xb-8,y1:yA,y2:yA,class:"ref-line"}));
-    svg.appendChild(fadeIn(el("line",{x1:(xa+xb)/2,x2:(xa+xb)/2,y1:yA,y2:yB,
-      stroke:"var(--s-vermilion)","stroke-width":2,"stroke-linecap":"round"}),800));
-    var dl=el("text",{x:(xa+xb)/2,y:(yA+yB)/2-9,"text-anchor":"middle",class:"dlabel",
-      fill:"var(--s-vermilion)"});
-    dl.textContent="+2.8 pp";svg.appendChild(fadeIn(dl,900));
-
-    var mid=(T+B)/2;
-    var yt=el("text",{x:14,y:mid,"text-anchor":"middle",class:"ax-title",
-      transform:"rotate(-90 14 "+mid+")"});
-    yt.textContent="P(adopt)";svg.appendChild(yt);
-  })();
-
-  /* ================= EARLY ADOPTERS ================= */
-  (function(){
-    var svg=document.getElementById("c-early");
-    var rows=[
-      {lab:"Degree",e:84.29,r:60.77,fmt:function(v){return v.toFixed(1);},max:95},
-      {lab:"k-core",e:30.89,r:28.35,fmt:function(v){return v.toFixed(1);},max:95},
-      {lab:"Betweenness ×10⁴",e:6.39,r:3.32,fmt:function(v){return v.toFixed(2);},max:95}
-    ];
-    var L=112,R=330,T=28,rowH=58,bh=13;
-    rows.forEach(function(row,i){
-      var yb=T+i*rowH;
-      var lt=el("text",{x:L-12,y:yb+13,"text-anchor":"end",class:"ax-label"});
-      lt.textContent=row.lab;svg.appendChild(lt);
-      [["Early",row.e,"var(--s-ochre)",0],["Rest",row.r,"var(--s-null)",bh+6]].forEach(function(s,j){
-        var w=Math.max(2,(s[1]/row.max)*(R-L)), y=yb+s[3];
-        svg.appendChild(fadeIn(el("rect",{x:L,y:y,width:w,height:bh,fill:s[2],rx:6,ry:6}),
-          200+i*130+j*70));
-        var vt=el("text",{x:L+w+9,y:y+bh-2.5,class:"dlabel",fill:"var(--ink-2)"});
-        vt.textContent=row.fmt(s[1]);svg.appendChild(fadeIn(vt,450+i*130+j*70));
-        var hit=el("rect",{x:L,y:y-2,width:R-L,height:bh+4,fill:"transparent","pointer-events":"all"});
-        hit.addEventListener("mousemove",function(e){showTip(e,
-          "<div class='t-h'>"+row.lab+"</div>"+
-          "<div class='t-r'><span>"+s[0]+" adopters</span><b>"+row.fmt(s[1])+"</b></div>");});
-        hit.addEventListener("mouseleave",hideTip);
-        svg.appendChild(hit);
-      });
-    });
-    [["Early adopters","var(--s-ochre)"],["Everyone else","var(--s-null)"]].forEach(function(s,i){
-      var x=L+i*118, y=T+rows.length*rowH-4;
-      svg.appendChild(el("rect",{x:x,y:y,width:14,height:3,fill:s[1],rx:2,ry:2}));
-      var t=el("text",{x:x+20,y:y+5,class:"ax-label"});
-      t.textContent=s[0];svg.appendChild(t);
-    });
-  })();
-
-  window.addEventListener("scroll",hideTip,{passive:true});
+  rows.forEach(function(r,i){if(r[2]==null)return;var tr=document.createElement("tr");if(i===2)tr.className="highlight";
+    [r[0],r[1],Number(r[2]).toFixed(3)].forEach(function(v,j){var td=document.createElement("td");td.textContent=v;if(j===2)td.className="num";tr.appendChild(td);});id("model-rows").appendChild(tr);});
 })();
 </script>

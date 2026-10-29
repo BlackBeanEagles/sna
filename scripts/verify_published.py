@@ -1,4 +1,4 @@
-"""Re-derive every published number and check it against results/report.json.
+"""Re-derive the published core metrics and check results/report.json.
 
 The committed results were produced at one point in time; the code has changed
 since. This re-runs the analysis stages on the cached slice with whatever the
@@ -36,15 +36,19 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--games", default=str(config.INTERIM / "games.parquet"))
     ap.add_argument("--report", default=str(config.RESULTS / "report.json"))
-    ap.add_argument("--reps", type=int, default=3)
+    ap.add_argument("--reps", type=int, default=None)
     a = ap.parse_args()
 
     published = json.loads(Path(a.report).read_text())
+    a.reps = a.reps or published.get("null_replicates", 3)
     df = parse.load_games(a.games)
     print(f"cached slice: {len(df):,} games, "
           f"{len(set(df.white) | set(df.black)):,} players\n")
 
     checks: list[tuple[str, object, object, float]] = []
+
+    # Prediction and network summaries are intentionally outside this check.
+    # Refit prediction separately and reparse the archive to audit its source.
 
     # ---- sample -------------------------------------------------------
     checks.append(("games parsed", len(df), published["parse"]["games"], 0))
@@ -102,8 +106,8 @@ def main():
     print(f"\n{len(checks) + 1 - failed - (not same_verdict)}/{len(checks) + 1} "
           f"checks pass")
     if failed or not same_verdict:
-        sys.exit("published results are NOT reproducible by the current code")
-    print("every published number is reproducible by the current code")
+        sys.exit("published core results are NOT reproducible by the current code")
+    print("all checked core numbers are reproducible by the current code")
 
 
 if __name__ == "__main__":

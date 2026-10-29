@@ -44,7 +44,8 @@ def rewire_preserving_degree(df: pd.DataFrame, rng: np.random.Generator,
 def run_null(df: pd.DataFrame, n_reps: int = None, kind: str = "shuffle",
              seed: int = config.RANDOM_SEED,
              window_days: int = None, by: str = "d",
-             granularity: str = None) -> pd.DataFrame:
+             granularity: str = None, should_stop=None,
+             on_progress=None) -> pd.DataFrame:
     """Build the null trials with EXACTLY the same parameters as the real ones.
 
     Both window_days and granularity must match, or the comparison is not a
@@ -53,13 +54,15 @@ def run_null(df: pd.DataFrame, n_reps: int = None, kind: str = "shuffle",
     * a window wider than the observed span censors every non-adopter, so the
       null adoption rate goes to 1.0 and the lift collapses;
     * leaving granularity at the default while the real trials are keyed by
-      ply compares a 0.6%-adoption ply world against a 17.7%-adoption ECO
+      ply compares a 0.6%-adoption ply world against a ECO-adoption
       world, which manufactures a spurious "complex contagion" verdict.
     """
     n_reps = n_reps or config.N_NULL_REPLICATES
     rng = np.random.default_rng(seed)
     frames = []
     for rep in range(n_reps):
+        if should_stop is not None and should_stop():
+            break
         null_df = (shuffle_timestamps(df, rng) if kind == "shuffle"
                    else rewire_preserving_degree(df, rng))
         trials = events.build_trials(null_df, window_days=window_days,
@@ -69,6 +72,8 @@ def run_null(df: pd.DataFrame, n_reps: int = None, kind: str = "shuffle",
         tb = curve.analyse(trials)["by_" + by]
         tb["rep"] = rep
         frames.append(tb)
+        if on_progress is not None:
+            on_progress(rep + 1, n_reps)
     if not frames:
         return pd.DataFrame()
     allreps = pd.concat(frames, ignore_index=True)

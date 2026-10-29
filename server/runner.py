@@ -4,21 +4,28 @@ Same modules the CLI uses -- src.parse, src.events, src.structure, src.curve,
 src.nulls, src.matching, src.predict -- against a live stream from
 database.lichess.org. Nothing here is simulated.
 
-Events are plain dicts pushed onto a queue; server.app relays them to the
-browser as Server-Sent Events.
+Each run executes in a separate process and appends events to disk. The HTTP
+server can restart while the worker continues, and browsers can replay events.
 """
 from __future__ import annotations
 
-import queue
+import json
+import os
+import subprocess
+import sys
 import threading
 import time
 import traceback
 import uuid
+from pathlib import Path
 
 import pandas as pd
 
 from src import config, curve, events as ev, matching, nulls, parse, predict, structure
 from src.fetch import BASE
+
+RUNS_DIR = config.RESULTS / "runs"
+RUNS_DIR.mkdir(parents=True, exist_ok=True)
 
 # Months worth offering. Sizes are the compressed archive; a whole month is
 # streamed and decompressed on the fly, never written to disk.
@@ -36,7 +43,7 @@ STAGES = [
     ("curve",   "Adoption-probability curve"),
     ("null",    "Timestamp-shuffled null"),
     ("matched", "Matched controls"),
-    ("predict", "Held-out prediction"),
+    ("predict", "Group-held-out prediction"),
     ("verdict", "Verdict"),
 ]
 
@@ -178,23 +185,64 @@ def lookup_opening(sans: list[str]) -> dict | None:
 
 class Run:
     def __init__(self, month: str, max_games: int | None, null_reps: int,
-                 window_days: int, refresh: bool = False):
-        self.id = uuid.uuid4().hex[:12]
+                 window_days: int, refresh: bool = False,
+                 run_id: str | None = None):
+        self.id = run_id or uuid.uuid4().hex[:12]
         self.month = month
         self.max_games = max_games or None
-        self.null_reps = max(1, min(5, null_reps))
+        self.null_reps = max(1, min(20, null_reps))
         self.window_days = window_days
         self.refresh = refresh
-        self.q: queue.Queue = queue.Queue()
-        self.cancelled = threading.Event()
+        self.dir = RUNS_DIR / self.id
+        self.dir.mkdir(parents=True, exist_ok=True)
+        self.events_path = self.dir / "events.jsonl"
+        self.cancel_path = self.dir / "cancel"
+        self.heartbeat_path = self.dir / "heartbeat"
+        self.manifest_path = self.dir / "run.json"
         self.started = time.time()
+        if run_id is None:
+            self._save_manifest({
+                "id": self.id, "month": month, "max_games": self.max_games,
+                "null_reps": self.null_reps, "window_days": window_days,
+                "refresh": refresh, "started": self.started,
+                "status": "running",
+            })
+        else:
+            self.started = json.loads(self.manifest_path.read_text(
+                encoding="utf-8"))["started"]
         _RUNS[self.id] = self
 
-    # ---- event helpers -------------------------------------------------
+    def _save_manifest(self, manifest: dict):
+        tmp = self.manifest_path.with_suffix(".tmp")
+        tmp.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+        tmp.replace(self.manifest_path)
+
+    @classmethod
+    def from_id(cls, run_id: str) -> "Run | None":
+        if len(run_id) != 12 or any(c not in "0123456789abcdef" for c in run_id):
+            return None
+        path = RUNS_DIR / run_id / "run.json"
+        if not path.is_file():
+            return None
+        m = json.loads(path.read_text(encoding="utf-8"))
+        return cls(m["month"], m["max_games"], m["null_reps"],
+                   m["window_days"], m["refresh"], run_id=run_id)
+
     def emit(self, kind: str, **payload):
         payload["kind"] = kind
         payload["t"] = round(time.time() - self.started, 1)
-        self.q.put(payload)
+        with self.events_path.open("a", encoding="utf-8") as stream:
+            stream.write(json.dumps(payload, default=str) + "\n")
+        if kind in ("stage", "done"):
+            m = json.loads(self.manifest_path.read_text(encoding="utf-8"))
+            if kind == "stage":
+                m["stage"] = payload["key"]
+                m["stage_state"] = payload["state"]
+            else:
+                m["status"] = ("completed" if payload.get("ok") else
+                               "cancelled" if payload.get("cancelled") else "failed")
+                m["finished"] = time.time()
+            self._save_manifest(m)
 
     def log(self, msg: str, level: str = "info"):
         self.emit("log", msg=msg, level=level)
@@ -203,34 +251,124 @@ class Run:
         self.emit("stage", key=key, state=state, detail=detail)
 
     def cancel(self):
-        self.cancelled.set()
+        self.cancel_path.touch()
 
     def stopped(self) -> bool:
-        return self.cancelled.is_set()
+        return self.cancel_path.exists()
 
 
 def get(run_id: str) -> Run | None:
-    return _RUNS.get(run_id)
+    return _RUNS.get(run_id) or Run.from_id(run_id)
+
+
+def current_status(manifest: dict) -> str:
+    status = manifest.get("status", "unknown")
+    if status != "running":
+        return status
+    heartbeat = RUNS_DIR / manifest["id"] / "heartbeat"
+    if time.time() - manifest["started"] > 12:
+        if not heartbeat.is_file() or time.time() - heartbeat.stat().st_mtime > 12:
+            return "interrupted"
+    return status
+
+def list_runs(limit: int = 20) -> list[dict]:
+    manifests = sorted(RUNS_DIR.glob("*/run.json"),
+                       key=lambda p: p.stat().st_mtime, reverse=True)
+    out = []
+    for path in manifests[:limit]:
+        m = json.loads(path.read_text(encoding="utf-8"))
+        m["status"] = current_status(m)
+        out.append(m)
+    return out
+
+
+def _launch(run: Run):
+    flags = 0
+    if os.name == "nt":
+        flags = (subprocess.CREATE_NO_WINDOW | subprocess.DETACHED_PROCESS
+                 | subprocess.CREATE_NEW_PROCESS_GROUP)
+    with (run.dir / "worker.log").open("ab") as log:
+        proc = subprocess.Popen(
+            [sys.executable, "-m", "server.runner", "--worker", run.id],
+            cwd=str(config.ROOT), stdout=log, stderr=subprocess.STDOUT,
+            creationflags=flags, close_fds=True)
+    m = json.loads(run.manifest_path.read_text(encoding="utf-8"))
+    m["pid"] = proc.pid
+    run._save_manifest(m)
 
 
 def start(month: str, max_games: int | None, null_reps: int,
           window_days: int, refresh: bool = False) -> Run:
     run = Run(month, max_games, null_reps, window_days, refresh)
-    threading.Thread(target=_execute, args=(run,), daemon=True).start()
+    _launch(run)
     return run
+
+
+def resume(run_id: str) -> Run | None:
+    run = get(run_id)
+    if run is None:
+        return None
+    m = json.loads(run.manifest_path.read_text(encoding="utf-8"))
+    if current_status(m) not in ("interrupted", "failed"):
+        return None
+    if run.events_path.exists():
+        attempt = int(m.get("attempt", 1))
+        run.events_path.rename(run.dir / f"events_attempt_{attempt}.jsonl")
+        m["attempt"] = attempt + 1
+    run.cancel_path.unlink(missing_ok=True)
+    run.heartbeat_path.unlink(missing_ok=True)
+    run.started = time.time()
+    m.update(started=run.started, status="running")
+    m.pop("finished", None)
+    m.pop("stage", None)
+    m.pop("stage_state", None)
+    run._save_manifest(m)
+    _launch(run)
+    return run
+
+def load_board_data(run_id: str) -> bool:
+    run = get(run_id)
+    if run is None:
+        return False
+    if LAST.get("run_id") == run_id and LAST.get("df") is not None:
+        return True
+    cache = config.INTERIM / f"slice_{run.month}_{run.max_games or 'full'}.parquet"
+    trials_path = run.dir / "trials.parquet"
+    if not cache.is_file() or not trials_path.is_file():
+        return False
+    LAST.update(df=pd.read_parquet(cache), trials=pd.read_parquet(trials_path),
+                month=run.month, run_id=run_id, comm=None)
+    graph_path = run.dir / "graph_players.json"
+    LAST["graph_players"] = (json.loads(graph_path.read_text(encoding="utf-8"))
+                             if graph_path.is_file() else None)
+    return True
+
 
 
 # ------------------------------------------------------------------ pipeline
 def _execute(run: Run):
+    finished = threading.Event()
+
+    def heartbeat():
+        while not finished.is_set():
+            run.heartbeat_path.write_text(str(time.time()), encoding="ascii")
+            finished.wait(2)
+
+    beat = threading.Thread(target=heartbeat, daemon=True)
+    beat.start()
     try:
         _pipeline(run)
-    except Exception as exc:                       # surface, never swallow
-        run.log("FAILED: " + str(exc), "error")
-        run.emit("log", msg=traceback.format_exc()[-1200:], level="trace")
+    except Exception as exc:
+        # Keep diagnostics in the run folder; only a useful, safe summary reaches the page.
+        (run.dir / "error.txt").write_text(traceback.format_exc(), encoding="utf-8")
+        if "CERTIFICATE_VERIFY_FAILED" in str(exc) or "UNTRUSTED_ROOT" in str(exc):
+            run.log("The archive connection could not be verified. Try a trusted connection or a saved data slice.", "error")
+        else:
+            run.log("This analysis stopped unexpectedly. Open Recent runs and choose Retry.", "error")
         run.emit("done", ok=False)
     finally:
-        run.q.put(None)
-
+        finished.set()
+        beat.join(timeout=3)
 
 def _pipeline(run: Run):
     url = BASE.format(month=run.month)
@@ -247,13 +385,13 @@ def _pipeline(run: Run):
     if cache.exists() and not run.refresh:
         df = pd.read_parquet(cache)
         df.attrs["skipped"] = {}       # filters already applied when it was cached
-        run.log(f"Loaded a cached slice of {run.month} "
-                f"({len(df):,} games) — no download needed.", "ok")
+        run.log(f"Loaded saved games from {run.month} "
+                f"({len(df):,} games).", "ok")
         run.emit("scan", scanned=len(df), kept=len(df), rate=0, game=None)
         return _analyse(run, df)
 
-    run.log(f"GET {url}")
-    run.log("Decompressing zstd on the fly — the PGN is never written to disk.")
+    run.log("Opening the selected Lichess archive…")
+    run.log("Reading games from the archive…")
 
     last = {"t": 0.0}
 
@@ -287,7 +425,7 @@ def _pipeline(run: Run):
 
     try:
         df.to_parquet(cache, index=False)
-        run.log(f"Cached this slice — re-running {run.month} will be instant.")
+        run.log("Saved these games for a faster repeat analysis.")
     except Exception:
         pass                                   # a cache failure must not kill the run
 
@@ -318,6 +456,7 @@ def _analyse(run: "Run", df):
     # ---------------- 2. trials ----------------
     run.stage("trials", "running")
     trials = ev.build_trials(df, window_days=window)
+    trials.to_parquet(run.dir / "trials.parquet", index=False)
     if not len(trials) or trials["adopted"].sum() < 30:
         run.stage("trials", "failed")
         run.log(f"Only {len(trials)} trials / "
@@ -346,6 +485,8 @@ def _analyse(run: "Run", df):
              modularity=round(float(feats.attrs["modularity"]), 4),
              early=_early_payload(by_early))
     run.emit("graph", **_graph_payload(g, feats, early))
+    (run.dir / "graph_players.json").write_text(
+        json.dumps(LAST["graph_players"]), encoding="utf-8")
     run.stage("network", "done",
               f"{g.number_of_nodes():,} nodes · Q={feats.attrs['modularity']:.3f}")
     if run.stopped(): return _cancel(run)
@@ -359,7 +500,7 @@ def _analyse(run: "Run", df):
         lift = top.iloc[-1]["rate"] / top.iloc[0]["rate"] if top.iloc[0]["rate"] else 0
         run.log(f"Raw curve rises {top.iloc[0]['rate']:.3f} → "
                 f"{top.iloc[-1]['rate']:.3f} (×{lift:.2f}). "
-                "On its own this looks like complex contagion.", "hl")
+                "Compare the shuffled null before interpreting it.", "hl")
     run.stage("curve", "done")
     if run.stopped(): return _cancel(run)
 
@@ -368,7 +509,8 @@ def _analyse(run: "Run", df):
     run.log("Shuffling timestamps: keeps degree, ratings and popularity, "
             "destroys causal order.")
     null_by_d = nulls.run_null(df, n_reps=run.null_reps, kind="shuffle",
-                               window_days=window)
+                               window_days=window, should_stop=run.stopped,
+                               on_progress=lambda done, total: run.emit("null_progress", done=done, total=total))
     cmp = nulls.compare(tables["by_d"], null_by_d) if len(null_by_d) else pd.DataFrame()
     run.emit("null", rows=_rows(cmp))
     run.stage("null", "done")
@@ -493,3 +635,12 @@ def _rows(df: pd.DataFrame) -> list[dict]:
         return []
     clean = df.replace({float("nan"): None})
     return clean.to_dict(orient="records")
+
+
+
+if __name__ == "__main__":
+    if len(sys.argv) == 3 and sys.argv[1] == "--worker":
+        worker_run = Run.from_id(sys.argv[2])
+        if worker_run is None:
+            raise SystemExit("unknown run")
+        _execute(worker_run)

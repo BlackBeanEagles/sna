@@ -7,6 +7,7 @@ publish skeleton so the page looks identical either way.
 
     python site/build.py        # regenerates site/index.html
 """
+import json
 from pathlib import Path
 
 SITE = Path(__file__).resolve().parent
@@ -39,12 +40,15 @@ __FRAGMENT__
 
 def build() -> Path:
     fragment = (SITE / "page.html").read_text(encoding="utf-8")
+    report = json.loads((SITE.parent / "results" / "report.json").read_text(encoding="utf-8"))
+    # Escape angle brackets before embedding JSON in an inline script.
+    embedded = json.dumps(report, separators=(",", ":")).replace("<", "\\u003c")
+    fragment = fragment.replace("__REPORT_JSON__", embedded)
 
-    # The fragment mixes head content (<title>, <link>, <style>) with body
-    # content. Split at the first element that belongs in the body.
-    marker = fragment.find('<div class="field"')
+    # The fragment mixes head content with body content.
+    marker = fragment.find('<div class="topbar"')
     if marker == -1:
-        marker = fragment.find("<div class=\"wrap\"")
+        raise ValueError("site/page.html is missing its topbar body marker")
     head_part, body_part = fragment[:marker], fragment[marker:]
 
     # plain replace, not %-formatting: the skeleton's CSS contains "100%"

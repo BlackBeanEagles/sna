@@ -116,10 +116,12 @@ def build_trials(df: pd.DataFrame, granularity: str = None,
             if exposer not in seen:
                 seen.add(exposer)
                 distinct.append(exposer)
-            censored = (t + window) > t_end
+            # Every included trial needs the same observable follow-up. Keeping
+            # late positive trials while dropping late negative trials makes
+            # adoption rates (and the temporal test set) outcome-dependent.
+            if t + window > t_end:
+                continue
             adopted = int(adopt_t is not None and t < adopt_t <= t + window)
-            if censored and not adopted:
-                continue                    # window does not fit in the observation period
             sd = _components(distinct, edge_first_t, t) if with_diversity else 0
             rows.append((player, beh[0], beh[1], t, k, len(distinct), sd, adopted))
 

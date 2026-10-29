@@ -88,6 +88,69 @@ def test_trials_censored_when_window_runs_past_the_data():
     assert len(trials) == 0
 
 
+def test_late_adoption_is_censored_alongside_late_nonadoption():
+    # A positive result is not complete follow-up when the 14-day window
+    # extends beyond the data. Including only positives biases the rate.
+    df = frame([game("a", "b", 0), game("b", "z", 3),
+                game("q", "r", 4)])
+    trials = events.build_trials(df, window_days=14)
+    assert trials.empty
+
+
+def test_prediction_holds_out_whole_spells_and_uses_earlier_features(monkeypatch):
+    from src import predict
+    rows = []
+    for spell in range(30):
+        for hour in range(6):
+            rows.append({"player": f"p{spell}", "opening": "B20",
+                         "colour": "W", "t": T0 + timedelta(hours=spell * 6 + hour),
+                         "adopted": spell % 2})
+    trials = pd.DataFrame(rows)
+    checked = []
+
+    def fake_features(games, data, cutoff):
+        assert (data.t > cutoff).all()
+        checked.append(cutoff)
+        return data.copy()
+
+    def fake_gbm(train, test, columns):
+        train_spells = set(train.player)
+        test_spells = set(test.player)
+        assert train_spells.isdisjoint(test_spells)
+        return 0.6, 0.6
+
+    monkeypatch.setattr(predict.features, "build", fake_features)
+    monkeypatch.setattr(predict, "_gbm", fake_gbm)
+    out = predict.evaluate(pd.DataFrame(), trials, full=False)
+    assert checked and out["split_method"] == "held-out player-opening-colour spells"
+    assert out["n_train"] + out["n_test"] < len(trials)  # burn-in removed
+
+
+def test_matching_uses_risk_set_at_exposure_time():
+    from src import matching
+    df = frame([
+        game("b", "u", -2, eco="C00", wr=2000, br=2200),
+        game("d", "v", -2, eco="C00", wr=2000, br=2200),
+        game("c", "z", 0, wr=2000, br=2200),  # c already performed B20/W
+        game("a", "b", 1, wr=2200, br=2000),  # b first exposed to B20/W
+        game("d", "z", 3, eco="C00", wr=2200, br=2200),  # future rating
+        game("e", "d", 4, wr=2200, br=2000),  # d exposed only later
+        game("d", "x", 6, wr=2000, br=2200),  # d later adopts B20/W
+        game("c", "y", 8, eco="C00", wr=2000, br=2200),
+        game("b", "h", 10, eco="C00", wr=2000, br=2200),
+        game("q", "r", 40, wr=2200, br=2200),
+    ])
+    pairs = matching.build_matched(df, max_trials=None)
+    row = pairs[(pairs.exposed == "b") & (pairs.opening == "B20")
+                & (pairs.colour == "W")]
+    assert len(row) == 1
+    assert row.iloc[0].control == "d"  # c is a prior adopter, so not at risk
+    assert row.iloc[0].control_crossover == 1
+    assert row.iloc[0].control_adopted == 1
+    assert row.iloc[0].control_pre_games == 1
+    assert row.iloc[0].control_pre_rating == 2000
+
+
 def test_player_already_playing_it_is_not_at_risk():
     # b plays it on day 0 as White, is exposed to (X,W) later -> no trial
     df = frame([game("b", "z", 0), game("a", "b", 2), game("q", "r", 40)])
@@ -297,3 +360,57 @@ def test_verdict_reports_simple_when_null_matches_the_rise():
 
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-q"]))
+
+
+def test_saved_run_reopens_and_retries_without_losing_history(monkeypatch):
+    from server import runner
+    from src import config
+    import tempfile
+
+    with tempfile.TemporaryDirectory(dir=config.RESULTS) as folder:
+        monkeypatch.setattr(runner, "RUNS_DIR", Path(folder))
+        run = runner.Run("2016-01", None, 3, 14)
+        run.emit("init", month=run.month)
+        run.stage("trials", "running")
+        run.emit("done", ok=False)
+        assert runner.list_runs()[0]["status"] == "failed"
+
+        runner._RUNS.pop(run.id)
+        reopened = runner.get(run.id)
+        assert reopened is not None
+        assert reopened.events_path.read_text(encoding="utf-8").count("\n") == 3
+
+        launched = []
+        monkeypatch.setattr(runner, "_launch", lambda r: launched.append(r.id))
+        retried = runner.resume(run.id)
+        assert retried is not None and launched == [run.id]
+        assert (run.dir / "events_attempt_1.jsonl").exists()
+        assert runner.list_runs()[0]["status"] == "running"
+        runner._RUNS.pop(run.id, None)
+
+def test_cluster_bootstrap_reports_repeated_players():
+    from src import matching
+
+    pairs = pd.DataFrame({
+        "exposed": ["a", "a", "b", "c", "c", "d"],
+        "control": ["b", "c", "a", "d", "a", "b"],
+        "exposed_adopted": [1, 1, 0, 1, 0, 1],
+        "control_adopted": [0, 0, 0, 0, 0, 1],
+        "control_crossover": [0, 1, 0, 0, 1, 0],
+        "exposed_pre_rating": [1900] * 6,
+        "control_pre_rating": [1901] * 6,
+        "exposed_pre_games": [10] * 6,
+        "control_pre_games": [9] * 6,
+    })
+    first = matching.summarise(pairs, bootstrap_reps=200, seed=3)
+    second = matching.summarise(pairs, bootstrap_reps=200, seed=3)
+    assert first == second
+    assert first["ci95"][0] <= first["difference"] <= first["ci95"][1]
+    assert first["ci95_method"].startswith("player-cluster")
+    assert first["pre_match_balance"]["control_games_mean"] == 9
+
+
+def test_null_run_can_stop_between_replicates():
+    from src import nulls
+    stopped = nulls.run_null(pd.DataFrame(), n_reps=20, should_stop=lambda: True)
+    assert stopped.empty

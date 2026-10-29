@@ -44,9 +44,9 @@ MAX_EXPOSURE_COUNT = 8       # curve is reported for k = 1..8
 MAX_DIVERSITY = 6            # d and structural diversity capped for plotting
 
 # ---- identification ---------------------------------------------------
-N_NULL_REPLICATES = 5        # timestamp-shuffle replicates
+N_NULL_REPLICATES = 20       # timestamp-shuffle replicates
 RATING_MATCH_TOLERANCE = 50  # matched controls: +/- rating points
 ACTIVITY_MATCH_RATIO = 0.25  # matched controls: +/- 25% games played
-TRAIN_FRACTION = 0.7         # temporal split for the held-out AUC
+TRAIN_FRACTION = 0.7         # grouped spell split for the held-out AUC
 
 RANDOM_SEED = 20260916

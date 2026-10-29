@@ -1,8 +1,9 @@
 """Step 7b -- the held-out predictive check.
 
-Train on the first TRAIN_FRACTION of the month, score on the rest. Every
-feature is rebuilt from games before the split (src/features.py), so nothing
-about the held-out period leaks into training.
+Use an initial observation period to build fixed background features, then
+hold out entire player-opening-colour spells. A 14-day outcome window in a
+31-day archive leaves too little time for a clean temporal train/test split;
+grouping spells prevents one adoption from appearing in both sets.
 
 The question is not "can adoption be predicted?" but "what explains it?", so
 the models are nested and the gaps are the result:
@@ -16,11 +17,9 @@ mean opposite things here: how MANY opponents played it at you (exposure,
 which simple contagion says matters) versus how DIVERSE they were (which is
 what complex contagion requires).
 
-A linear model is the wrong tool for this: fitted with logistic regression all
-three sit near chance and the richer models score *worse* out of sample. The
-relationships are not linear. Gradient boosting is the primary model here;
-`logistic_*` is reported alongside so the difference is on the record rather
-than hidden by a model choice.
+Gradient boosting is the primary model. Logistic regression is reported
+alongside as a simpler comparison. The held-out model gaps are descriptive:
+they do not establish that an opponent caused adoption.
 """
 from __future__ import annotations
 
@@ -31,6 +30,7 @@ import pandas as pd
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import GroupShuffleSplit
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
@@ -81,15 +81,27 @@ def evaluate(games: pd.DataFrame, trials: pd.DataFrame,
     9 GB and into the pagefile; the decomposition belongs in the CLI, where
     nothing else is resident.
     """
-    split = trials["t"].quantile(config.TRAIN_FRACTION)
-    data = features.build(games, trials, split)
-    train, test = data[data["t"] <= split], data[data["t"] > split]
+    # The initial 20% supplies background features. Every evaluated trial
+    # occurs later, so even training rows cannot see their own outcomes.
+    feature_cutoff = trials["t"].quantile(0.20)
+    eligible = trials.loc[trials["t"] > feature_cutoff].copy()
+    if len(eligible) < 100:
+        return {"error": "not enough trials after the feature cutoff"}
+    data = features.build(games, eligible, feature_cutoff)
+    groups = pd.MultiIndex.from_frame(
+        data[["player", "opening", "colour"]]).factorize()[0]
+    splitter = GroupShuffleSplit(n_splits=1,
+                                 test_size=1 - config.TRAIN_FRACTION,
+                                 random_state=config.RANDOM_SEED)
+    train_idx, test_idx = next(splitter.split(data, data["adopted"], groups))
+    train, test = data.iloc[train_idx], data.iloc[test_idx]
     if train["adopted"].nunique() < 2 or test["adopted"].nunique() < 2:
         return {"error": "not enough class variation in one of the splits"}
 
     out = {
         "n_train": int(len(train)), "n_test": int(len(test)),
-        "split_at": str(split), "leakage_free": True,
+        "split_method": "held-out player-opening-colour spells",
+        "feature_cutoff": str(feature_cutoff), "leakage_free": True,
         "base_rate_train": round(float(train["adopted"].mean()), 4),
         "base_rate_test": round(float(test["adopted"].mean()), 4),
     }

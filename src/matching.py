@@ -1,11 +1,9 @@
 """Step 7a -- rating-and-activity matched controls.
 
-Answers "would they have adopted anyway?". Each exposed (player, behaviour)
-spell is matched to an unexposed player of comparable rating and activity,
-observed over the same window, who had NOT been exposed to that behaviour.
-The difference in adoption rates is the influence effect net of baseline
-drift -- which also absorbs external shocks (a tournament broadcast lifts
-exposed and unexposed alike).
+Each exposed (player, behaviour) spell is matched to a comparable player
+who had not yet performed or been exposed to that behaviour at the matching
+time. Rating and activity use only earlier games. Later exposure is recorded
+as a crossover. The resulting difference is observational.
 """
 from __future__ import annotations
 
@@ -41,94 +39,158 @@ def build_matched(df: pd.DataFrame, n_per_trial: int = 1,
                   max_trials: int | None = 100_000,
                   seed: int = config.RANDOM_SEED,
                   window_days: int = None) -> pd.DataFrame:
+    """Risk-set match with rating and activity observed strictly before t0."""
     rng = np.random.default_rng(seed)
     window = pd.Timedelta(days=window_days or config.ADOPTION_WINDOW_DAYS)
     t_end = df["ts"].max()
-
     exposures, first_perf, _ = events.sweep(df)
-    exposed_players = defaultdict(set)          # behaviour -> players ever exposed
-    for (p, beh) in exposures:
-        exposed_players[beh].add(p)
-
-    games = pd.concat([df["white"], df["black"]]).value_counts()
-    rating = pd.concat([
-        df[["white", "white_rating"]].rename(columns={"white": "p", "white_rating": "r"}),
-        df[["black", "black_rating"]].rename(columns={"black": "p", "black_rating": "r"}),
-    ]).groupby("p")["r"].mean()
-    idx, meta = _match_index(rating, games)
-
-    keys = list(exposures.keys())
+    keys = list(exposures)
     if max_trials and len(keys) > max_trials:
-        # random subsample of exposure spells: unbiased, and keeps a full
-        # month tractable
         keys = [keys[i] for i in rng.choice(len(keys), max_trials, replace=False)]
+    keys.sort(key=lambda key: exposures[key][0][0])
 
+    players = pd.Index(pd.unique(pd.concat([df["white"], df["black"]])))
+    player_idx = {p: i for i, p in enumerate(players)}
+    n_players = len(players)
+    never = np.iinfo(np.int64).max
+    first_exp_ns = defaultdict(lambda: np.full(n_players, never, dtype=np.int64))
+    first_perf_ns = defaultdict(lambda: np.full(n_players, never, dtype=np.int64))
+    for key, evs in exposures.items():
+        first_exp_ns[key[1]][player_idx[key[0]]] = pd.Timestamp(evs[0][0]).value
+    for (p, beh), t in first_perf.items():
+        first_perf_ns[beh][player_idx[p]] = pd.Timestamp(t).value
+
+    # Advance a game-time sweep to strictly before each exposed player's t0.
+    # The bucket index changes as players accumulate games. No full-month
+    # covariate contributes to a control decision.
+    past_games = df.sort_values("ts")[["ts", "white", "black",
+                                       "white_rating", "black_rating"]]
+    game_rows = past_games.itertuples(index=False, name=None)
+    upcoming = next(game_rows, None)
+    activity = np.zeros(n_players, dtype=np.int64)
+    rating_sum = np.zeros(n_players, dtype=float)
+    rating_n = np.zeros(n_players, dtype=np.int64)
+    bucket_of = [None] * n_players
+    buckets: dict[tuple[int, int], set[int]] = defaultdict(set)
     r_w = config.RATING_MATCH_TOLERANCE
     a_ratio = 1.0 + config.ACTIVITY_MATCH_RATIO
+    log_ratio = np.log(a_ratio)
+
+    def update_player(p: str, r: float):
+        i = player_idx[p]
+        old = bucket_of[i]
+        if old is not None:
+            buckets[old].discard(i)
+        activity[i] += 1
+        if np.isfinite(r):
+            rating_sum[i] += float(r)
+            rating_n[i] += 1
+        if rating_n[i]:
+            mean = rating_sum[i] / rating_n[i]
+            new = (int(mean // r_w), int(np.log(activity[i]) / log_ratio))
+            buckets[new].add(i)
+            bucket_of[i] = new
+
     rows = []
-    for key in keys:
-        player, beh = key
-        t0, _ = exposures[key][0]               # first exposure only
+    window_ns = window.value
+    eligible_until = {}
+    for player, beh in keys:
+        t0 = exposures[(player, beh)][0][0]
+        while upcoming is not None and upcoming[0] < t0:
+            _, white, black, wr, br = upcoming
+            update_player(white, wr)
+            update_player(black, br)
+            upcoming = next(game_rows, None)
         if t0 + window > t_end:
             continue
-        adopt_t = first_perf.get((player, beh))
-        if adopt_t is not None and adopt_t <= t0:
-            continue                            # already performing it
-        if player not in meta:
+        pi = player_idx[player]
+        if not rating_n[pi]:
             continue
-        treat = int(adopt_t is not None and t0 < adopt_t <= t0 + window)
-        r0, a0 = meta[player]
-
-        rb, ab = int(r0 // r_w), int(np.log(a0) / np.log(a_ratio))
-        pool = []
-        # Activity buckets are log-spaced at the tolerance ratio, but the lower
-        # bound (0.75*a) sits up to 1.29 buckets down, which floors to TWO
-        # buckets in the worst case. Searching only -1 silently excluded
-        # controls with activity in roughly [0.75a, 0.8a] -- biasing the pool
-        # towards more active players, who adopt more, which understates the
-        # effect. Exact tolerance is still checked per candidate below, so
-        # widening the search only costs a little speed.
+        t0_ns = pd.Timestamp(t0).value
+        adopt_t = first_perf_ns[beh][pi]
+        if adopt_t <= t0_ns:
+            continue
+        r0 = rating_sum[pi] / rating_n[pi]
+        a0 = activity[pi]
+        rb, ab = bucket_of[pi]
+        pool = set()
         for dr in (-1, 0, 1):
             for da in (-2, -1, 0, 1, 2):
-                pool.extend(idx.get((rb + dr, ab + da), ()))
+                pool.update(buckets.get((rb + dr, ab + da), ()))
+        pool.discard(pi)
         if not pool:
             continue
-        banned = exposed_players[beh]
-        # Check the tolerance FIRST, then sample among the players who pass.
-        # Sampling a fixed number of candidates out of the bucket pool and
-        # testing those instead makes the match rate depend on how much of the
-        # pool happens to be out of tolerance -- widening the bucket search
-        # then *lowers* the number of matches found, which is backwards.
-        valid = [c for c in pool
-                 if c != player and c not in banned
-                 and abs(meta[c][0] - r0) <= config.RATING_MATCH_TOLERANCE
-                 and abs(meta[c][1] - a0) <= config.ACTIVITY_MATCH_RATIO * a0]
-        if not valid:
+        peers = np.fromiter(pool, dtype=np.int64)
+        peers = peers[
+            (np.abs(rating_sum[peers] / rating_n[peers] - r0) <= r_w)
+            & (np.abs(activity[peers] - a0)
+               <= config.ACTIVITY_MATCH_RATIO * a0)
+        ]
+        if not len(peers):
+            continue
+        if beh not in eligible_until:
+            eligible_until[beh] = np.minimum(first_exp_ns[beh],
+                                             first_perf_ns[beh])
+        valid = peers[eligible_until[beh][peers] > t0_ns]
+        if not len(valid):
             continue
         take = min(n_per_trial, len(valid))
-        for c in rng.choice(valid, size=take, replace=False):
-            c_adopt = first_perf.get((c, beh))
-            ctrl = int(c_adopt is not None and t0 < c_adopt <= t0 + window)
-            rows.append((player, c, beh[0], beh[1], t0, treat, ctrl))
+        treat = int(t0_ns < adopt_t <= t0_ns + window_ns)
+        for ci in rng.choice(valid, size=take, replace=False):
+            ci = int(ci)
+            c_adopt = first_perf_ns[beh][ci]
+            c_exposed = first_exp_ns[beh][ci]
+            rows.append((player, str(players[ci]), beh[0], beh[1], t0,
+                         treat, int(t0_ns < c_adopt <= t0_ns + window_ns),
+                         int(t0_ns < c_exposed <= t0_ns + window_ns),
+                         float(r0), float(rating_sum[ci] / rating_n[ci]),
+                         int(a0), int(activity[ci])))
 
     return pd.DataFrame(rows, columns=[
         "exposed", "control", "opening", "colour", "t0",
-        "exposed_adopted", "control_adopted"])
+        "exposed_adopted", "control_adopted", "control_crossover",
+        "exposed_pre_rating", "control_pre_rating",
+        "exposed_pre_games", "control_pre_games"])
 
 
-def summarise(pairs: pd.DataFrame) -> dict:
+def summarise(pairs: pd.DataFrame, bootstrap_reps: int = 400,
+              seed: int = config.RANDOM_SEED) -> dict:
+    """Summarise pairs, resampling both exposed and control player clusters."""
     if not len(pairs):
         return {"n_pairs": 0}
-    a, b = pairs["exposed_adopted"], pairs["control_adopted"]
-    diff = a.mean() - b.mean()
-    se = np.sqrt(a.var(ddof=1) / len(a) + b.var(ddof=1) / len(b))
+    a = pairs["exposed_adopted"].to_numpy(dtype=float)
+    b = pairs["control_adopted"].to_numpy(dtype=float)
+    difference = a - b
+    diff = float(difference.mean())
+    names = pd.Index(pd.unique(pd.concat([pairs["exposed"], pairs["control"]])))
+    indices = {p: i for i, p in enumerate(names)}
+    treated_idx = pairs["exposed"].map(indices).to_numpy(dtype=np.int64)
+    control_idx = pairs["control"].map(indices).to_numpy(dtype=np.int64)
+    rng = np.random.default_rng(seed)
+    estimates = []
+    for _ in range(bootstrap_reps):
+        player_weight = rng.poisson(1, len(names))
+        pair_weight = player_weight[treated_idx] * player_weight[control_idx]
+        total = pair_weight.sum()
+        if total:
+            estimates.append(float(np.dot(pair_weight, difference) / total))
+    ci = np.quantile(estimates, [0.025, 0.975]) if len(estimates) >= 20 else [np.nan, np.nan]
     return {
         "n_pairs": int(len(pairs)),
         "exposed_adoption_rate": round(float(a.mean()), 4),
         "control_adoption_rate": round(float(b.mean()), 4),
-        "difference": round(float(diff), 4),
-        "ci95": [round(float(diff - 1.96 * se), 4), round(float(diff + 1.96 * se), 4)],
+        "difference": round(diff, 4),
+        "ci95": [round(float(v), 4) for v in ci],
+        "ci95_method": "player-cluster Poisson bootstrap; both pair members",
+        "bootstrap_reps": len(estimates),
         "risk_ratio": round(float(a.mean() / b.mean()), 3) if b.mean() else None,
+        "control_crossover_rate": round(float(pairs["control_crossover"].mean()), 4),
+        "pre_match_balance": {
+            "exposed_rating_mean": round(float(pairs["exposed_pre_rating"].mean()), 1),
+            "control_rating_mean": round(float(pairs["control_pre_rating"].mean()), 1),
+            "exposed_games_mean": round(float(pairs["exposed_pre_games"].mean()), 1),
+            "control_games_mean": round(float(pairs["control_pre_games"].mean()), 1),
+        },
     }
 
 
