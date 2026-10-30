@@ -28,6 +28,7 @@ ANCHOR = "\\usepackage{times}"
 
 
 def build(tex: Path, engine: Path) -> Path:
+    """Compile a temporary copy so the submitted LaTeX source stays intact."""
     src = tex.read_text(encoding="utf-8")
     if ANCHOR not in src:
         sys.exit(f"expected {ANCHOR!r} in {tex}")

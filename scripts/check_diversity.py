@@ -38,6 +38,7 @@ def report(name: str, cmp: pd.DataFrame, key: str):
 
 
 def main():
+    """Compare the distinct-opponent and structural-diversity readings."""
     ap = argparse.ArgumentParser()
     ap.add_argument("--games",
                     default=str(config.INTERIM / "slice_2016-01_full.parquet"))

@@ -100,9 +100,12 @@ def iter_games(path, limit: int | None = None):
 def parse(path, limit: int | None = None, ply_depth: int | None = None,
           apply_filters: bool = True, progress: int = 0,
           on_progress=None, should_stop=None) -> pd.DataFrame:
-    """on_progress(scanned, kept) is called every `progress` games, so a UI can
-    follow a long parse. should_stop() returning True aborts the scan cleanly
-    and keeps whatever was parsed so far."""
+    """Scan PGN into the filtered game table used throughout the project.
+
+    The input is streamed, so a compressed month need not fit in memory as
+    text. `on_progress` updates the live UI; `should_stop` lets it cancel.
+    Filtering here fixes the study population before network analysis.
+    """
     ply_depth = ply_depth or config.PLY_KEY_DEPTH
     rows, skipped = [], Counter()
     seen = 0

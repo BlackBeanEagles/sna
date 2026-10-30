@@ -18,6 +18,11 @@ from . import config, curve, events, parse
 
 
 def shuffle_timestamps(df: pd.DataFrame, rng: np.random.Generator) -> pd.DataFrame:
+    """Keep each game's players/opening, but remove the original time order.
+
+    Say: if the observed rise also appears after this shuffle, activity and
+    opening popularity may explain it without opponent-to-opponent spread.
+    """
     out = df.copy()
     out["ts"] = rng.permutation(out["ts"].to_numpy())
     return out.sort_values("ts").reset_index(drop=True)
@@ -84,6 +89,11 @@ def run_null(df: pd.DataFrame, n_reps: int = None, kind: str = "shuffle",
 
 def compare(real_by_d: pd.DataFrame, null_by_d: pd.DataFrame,
             by: str = "d") -> pd.DataFrame:
+    """Put observed and shuffled rates side by side for each d value.
+
+    `lift_over_null` is observed rate / shuffled rate. Above 1 means excess
+    over that reference, not a causal effect estimate.
+    """
     m = real_by_d.merge(null_by_d, on=by, suffixes=("_real", "_null"))
     m["lift_over_null"] = m["rate_real"] / m["rate_null"].replace(0, np.nan)
 

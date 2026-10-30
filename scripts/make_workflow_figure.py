@@ -78,6 +78,7 @@ MARGIN_EDGES = [(3, 9)]
 
 
 def main():
+    """Draw the methodology flow used in the written project material."""
     fig, ax = plt.subplots(figsize=(10.5, 6.2))
     ax.set_xlim(0, 1.06)
     ax.set_ylim(-0.03, 0.98)

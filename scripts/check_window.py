@@ -34,6 +34,8 @@ def main():
 
     rows = []
     for w in a.windows:
+        # Rebuild both sides with the SAME window. Otherwise a change in the
+        # verdict could be a mismatched comparison instead of sensitivity.
         trials = events.build_trials(df, window_days=w)
         if not len(trials):
             print(f"window {w}d: no trials"); continue

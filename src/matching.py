@@ -39,7 +39,12 @@ def build_matched(df: pd.DataFrame, n_per_trial: int = 1,
                   max_trials: int | None = 100_000,
                   seed: int = config.RANDOM_SEED,
                   window_days: int = None) -> pd.DataFrame:
-    """Risk-set match with rating and activity observed strictly before t0."""
+    """Compare an exposed player to a similar player still at risk at t0.
+
+    Rating and game activity are taken only from games before t0. A control
+    cannot already have seen or played this opening/colour. This reduces some
+    differences between players, but it is still observational matching.
+    """
     rng = np.random.default_rng(seed)
     window = pd.Timedelta(days=window_days or config.ADOPTION_WINDOW_DAYS)
     t_end = df["ts"].max()

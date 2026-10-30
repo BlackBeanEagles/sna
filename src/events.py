@@ -91,6 +91,12 @@ def _components(nodes: list[str], edge_first_t: dict, t_now) -> int:
 def build_trials(df: pd.DataFrame, granularity: str = None,
                  window_days: int = None, with_diversity: bool = True
                  ) -> pd.DataFrame:
+    """Turn encounters into the rows used by every later statistical check.
+
+    Explain this in a demo as: k counts all encounters, d counts different
+    opponents, sd counts disconnected groups among those opponents, and
+    adopted records first use of the same opening/colour within the window.
+    """
     window_days = window_days or config.ADOPTION_WINDOW_DAYS
     window = pd.Timedelta(days=window_days)
     exposures, first_perf, edge_first_t = sweep(df, granularity)

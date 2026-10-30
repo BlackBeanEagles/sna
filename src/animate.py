@@ -35,6 +35,11 @@ def pick_behaviour(df: pd.DataFrame):
 
 def animate(df: pd.DataFrame, out_gif: Path = None, out_png: Path = None,
             frames: int = 40, max_nodes: int = 400):
+    """Draw first use of one opening over time on a network subset.
+
+    The animation explains the idea of diffusion visually. The trial curves
+    and reference checks, rather than this picture, carry the study finding.
+    """
     out_gif = out_gif or (config.FIGURES / "diffusion.gif")
     out_png = out_png or (config.FIGURES / "diffusion_panels.png")
 

@@ -17,6 +17,11 @@ from . import config, events, parse
 
 
 def build_graph(df: pd.DataFrame) -> nx.Graph:
+    """Make one player node per account and one edge per opponent pair.
+
+    Repeated games increase the edge's `games` weight; they do not make extra
+    nodes or edges. This is the network displayed during the live demo.
+    """
     g = nx.Graph()
     w = df.groupby(["white", "black"]).size().reset_index(name="games")
     for u, v, n in w.itertuples(index=False):
@@ -28,6 +33,12 @@ def build_graph(df: pd.DataFrame) -> nx.Graph:
 
 
 def node_features(g: nx.Graph, betweenness_k: int = 200) -> pd.DataFrame:
+    """Describe each player's position and detect groups in the network.
+
+    Degree counts opponents, k-core measures membership in a dense centre,
+    and betweenness approximates how often a player bridges shortest paths.
+    Louvain groups players who are more connected to one another.
+    """
     deg = dict(g.degree())
     core = nx.core_number(g)
     k = min(betweenness_k, g.number_of_nodes())
@@ -59,7 +70,11 @@ def early_adopters(df: pd.DataFrame, quantile: float = 0.1) -> pd.DataFrame:
 
 
 def cross_community_flow(df: pd.DataFrame, feats: pd.DataFrame) -> dict:
-    """Do exposures that lead to adoption cross community boundaries?"""
+    """Count pre-adoption encounters within and across detected communities.
+
+    This is descriptive: sharing a community does not prove one opponent
+    caused another player to choose an opening.
+    """
     comm = dict(zip(feats["player"], feats["community"]))
     exposures, first_perf, _ = events.sweep(df)
     within = across = 0

@@ -7,6 +7,8 @@ import pandas as pd
 from src import config
 
 trials = pd.read_parquet(config.PROCESSED / "trials.parquet")
+# The findings filters need pre-aggregated opening/colour cells; this script
+# turns the full trial table into small, downloadable chart-ready groups.
 trials["d"] = trials["d"].clip(upper=config.MAX_DIVERSITY)
 grouped = (trials.groupby(["opening", "colour", "d"], observed=True)
            .agg(n=("adopted", "size"), adopted=("adopted", "sum"))
@@ -14,6 +16,8 @@ grouped = (trials.groupby(["opening", "colour", "d"], observed=True)
 p = grouped["adopted"] / grouped["n"]
 n = grouped["n"]
 z = 1.96
+# Wilson bounds give each selected group an uncertainty interval, especially
+# useful where a less common opening has few complete trials.
 den = 1 + z*z/n
 center = (p + z*z/(2*n)) / den
 half = z*np.sqrt(p*(1-p)/n + z*z/(4*n*n)) / den

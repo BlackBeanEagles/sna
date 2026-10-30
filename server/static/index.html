@@ -735,6 +735,9 @@ header {
 <script>
 (function(){
 "use strict";
+/* Presentation map: Run posts to /api/run, attachRun listens to /api/stream,
+   handle paints each stage, and board moves post to /api/board. The analysis
+   lives in Python; this file renders the live results and interactions. */
 var NS="http://www.w3.org/2000/svg";
 var es=null, runId=null, started=0, streamWarned=false, runMonth=null;
 var $=function(id){return document.getElementById(id);};
@@ -1514,6 +1517,8 @@ function reset(){
 }
 
 function handle(e){
+  /* Every event is a small JSON snapshot from runner.py. The kind selects the
+     matching panel, so the page can update while the worker is still running. */
   switch(e.kind){
     case "init":
       runMonth=e.month;
@@ -1682,6 +1687,8 @@ function refreshHistory(restore){
     }).catch(function(){$("runHistory").textContent="Recent runs are unavailable right now.";});
 }
 function attachRun(id){
+  /* Replaying a saved run uses the same stream as a fresh run. This is why a
+     browser refresh does not erase the readings collected in the demo. */
   if(es)es.close();
   runId=id; streamWarned=false;
   var savedButton=document.querySelector('#runHistory button[data-run-id="'+id+'"]');

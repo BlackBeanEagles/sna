@@ -80,6 +80,9 @@ def evaluate(games: pd.DataFrame, trials: pd.DataFrame,
     trials, the graph and the cached slice, and the full version pushed it to
     9 GB and into the pagefile; the decomposition belongs in the CLI, where
     nothing else is resident.
+
+    Presentation point: compare held-out AUC for baseline, then repertoire,
+    then network features. An AUC gain shows predictive signal, not causation.
     """
     # The initial 20% supplies background features. Every evaluated trial
     # occurs later, so even training rows cannot see their own outcomes.

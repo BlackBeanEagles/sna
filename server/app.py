@@ -30,6 +30,12 @@ STATIC = Path(__file__).resolve().parent / "static"
 
 
 class Handler(BaseHTTPRequestHandler):
+    """Thin HTTP layer: validate requests, then delegate analysis to runner.py.
+
+    For a presentation, point here for browser-to-Python communication. The
+    server returns HTML, JSON endpoints, and a live event stream; it does not
+    calculate the statistical result itself.
+    """
     protocol_version = "HTTP/1.1"
 
     def log_message(self, fmt, *args):             # keep the console readable
@@ -53,6 +59,8 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---------------- routes ----------------
     def do_GET(self):
+        # The console is live; /findings serves the saved full-study report.
+        # Keeping both routes on one local server makes the demo easy to open.
         path = urlparse(self.path).path
         if path in ("/", "/index.html"):
             html = (STATIC / "index.html").read_bytes()
@@ -78,6 +86,8 @@ class Handler(BaseHTTPRequestHandler):
         return self._send(404, b"not found", "text/plain")
 
     def do_POST(self):
+        # The Run button reaches /api/run, then the browser subscribes to
+        # /api/stream. Board moves go to /api/board for legal-move validation.
         path = urlparse(self.path).path
         if path == "/api/run":
             n = int(self.headers.get("Content-Length") or 0)
@@ -122,6 +132,11 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---------------- SSE ----------------
     def _stream(self):
+        """Replay saved JSON events and stream new progress to the browser.
+
+        Event IDs let the browser reconnect without losing a running analysis.
+        The worker owns the calculation; this request only reads its log.
+        """
         rid = (self._query().get("run") or [""])[0]
         run = runner.get(rid)
         if not run:

@@ -33,6 +33,11 @@ def close(a, b, tol):
 
 
 def main():
+    """Recompute selected saved metrics before claiming reproducibility.
+
+    This reads the cached filtered games, so archive parsing itself remains
+    outside this check.
+    """
     ap = argparse.ArgumentParser()
     ap.add_argument("--games", default=str(config.INTERIM / "games.parquet"))
     ap.add_argument("--report", default=str(config.RESULTS / "report.json"))

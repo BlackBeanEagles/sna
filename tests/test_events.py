@@ -24,6 +24,7 @@ T0 = datetime(2016, 1, 1)
 
 
 def game(white, black, day, eco="B20", ply="e4 c5", wr=2000, br=2000):
+    """Make a tiny known game; tests vary just the detail under inspection."""
     return {"game_id": f"g{day}", "ts": T0 + timedelta(days=day),
             "white": white, "black": black, "white_rating": wr,
             "black_rating": br, "eco": eco, "opening": "Test",

@@ -39,6 +39,11 @@ __FRAGMENT__
 
 
 def build() -> Path:
+    """Combine page, stylesheet and saved report into the static findings page.
+
+    This is a build step, not a new analysis: numbers come from report.json.
+    Re-run it after editing page.html or style.css for the local /findings view.
+    """
     fragment = (SITE / "page.html").read_text(encoding="utf-8")
     fragment = fragment.replace("__SITE_CSS__", (SITE / "style.css").read_text(encoding="utf-8"))
     report = json.loads((SITE.parent / "results" / "report.json").read_text(encoding="utf-8"))

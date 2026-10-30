@@ -31,6 +31,11 @@ def wilson(successes: int, n: int, z: float = 1.96):
 
 
 def rate_table(trials: pd.DataFrame, by: str) -> pd.DataFrame:
+    """Group trials by exposure count/diversity and estimate adoption rates.
+
+    The error bounds are Wilson intervals, which remain sensible for the
+    smaller groups at the right-hand end of the chart.
+    """
     g = trials.groupby(by)["adopted"].agg(["sum", "count"])
     out = []
     for val, row in g.iterrows():
@@ -63,6 +68,7 @@ def _clip(trials: pd.DataFrame) -> pd.DataFrame:
 
 
 def analyse(trials: pd.DataFrame) -> dict[str, pd.DataFrame]:
+    """Build the raw curves and fixed-k checks used by charts and verdicts."""
     t = _clip(trials)
     return {
         "by_k": rate_table(t, "k"),

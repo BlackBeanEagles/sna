@@ -105,6 +105,8 @@
 <script>
 (function(){
   "use strict";
+  /* This is the saved findings page. site/build.py embeds results/report.json
+     at build time; the live console is a separate route backed by runner.py. */
   var report=__REPORT_JSON__;
   var byD=report.curve_by_d||[];
   var nullRows=report.null_comparison||[];
@@ -126,6 +128,9 @@
   txt("stat-trials",count(report.trials&&report.trials.n));
   txt("stat-rate",pct(report.trials&&report.trials.rate,1));
   function renderCurve(){
+    /* Replot observed adoption and shuffled-time reference for the current
+       opening/colour selection. The reference prevents a raw rising curve
+       from being mistaken for evidence of reinforcement. */
     var chart=id("curve-chart"),empty=id("chart-empty");
     nullByD={};
     if(!byD.length){

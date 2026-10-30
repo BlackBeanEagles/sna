@@ -101,7 +101,12 @@ def density_matrix(rep: dict[str, set], phi: pd.DataFrame,
 
 def build(games: pd.DataFrame, trials: pd.DataFrame,
           split_ts) -> pd.DataFrame:
-    """Attach features computed ONLY from games before `split_ts`."""
+    """Attach features computed ONLY from games before `split_ts`.
+
+    Explain the three blocks as activity/popularity, closeness to existing
+    openings, and exposure/network position. Earlier games prevent future
+    outcomes leaking into the model's predictors.
+    """
     past = games[games["ts"] <= split_ts]
     if not len(past):
         raise ValueError("no games before the split; cannot build features")

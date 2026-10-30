@@ -35,7 +35,10 @@ SPELL = ["player", "opening", "colour"]
 
 def collapse(trials: pd.DataFrame, how: str = "last") -> pd.DataFrame:
     """One row per spell. 'last' keeps the final exposure state before the
-    window closes (largest k and d); 'first' keeps the first exposure."""
+    window closes (largest k and d); 'first' keeps the first exposure.
+    This checks whether repeated rows for one eventual adoption drive a
+    result that looks stronger than it should.
+    """
     if not len(trials):
         return trials
     t = trials.sort_values(["player", "opening", "colour", "k"])

@@ -1,6 +1,10 @@
 """End-to-end runner. Every stage is a function so the null model can replay
 stages 3-5 on permuted data (Build Guide, Step 6).
 
+Presentation route: start here for the command-line workflow. The live web
+demo follows the same analysis in server/runner.py and reports its progress to
+server/static/index.html. The final tables and figure are written to results/.
+
     python -m src.run_pipeline --simulate            # synthetic validation run
     python -m src.run_pipeline --pgn data/raw/x.pgn  # real archive slice
 """
@@ -41,6 +45,8 @@ def main():
         a.pgn = BASE.format(month=a.month)
 
     if a.simulate or not a.pgn:
+        # Synthetic games are a check that the method can recover a known rule.
+        # The reported January findings come from real Lichess games instead.
         print("[1/8] simulating games with a planted complex-contagion rule ...")
         info = simulate.simulate(n_players=a.sim_players, n_games=a.sim_games)
         pgn = Path(info["path"])
@@ -69,6 +75,8 @@ def main():
         return
 
     print("[3/8] building exposure/adoption trials ...")
+    # A trial asks: after seeing an opening, did this player use it within the
+    # observation window? events.py creates one row per eligible exposure.
     trials = events.run(games_path,
                         config.PROCESSED / "trials.parquet")
     report["trials"] = {"n": len(trials), "adoptions": int(trials.adopted.sum()),
@@ -81,6 +89,8 @@ def main():
     report["early_adopters"] = by_early.round(4).to_dict()
 
     print(f"[5/8] {a.null_kind} null ({a.null_reps} replicates) ...")
+    # Re-running the trial construction after shuffling game times gives the
+    # baseline expected from popularity/activity without the original order.
     cmp = nulls.run(games_path,
                     config.PROCESSED / "trials.parquet",
                     n_reps=a.null_reps, kind=a.null_kind)
@@ -97,6 +107,8 @@ def main():
     print("      ", v)
 
     print("[7/8] matched controls + held-out AUC ...")
+    # These are independent checks: similar unexposed players for comparison,
+    # and prediction on player-opening spells the model did not train on.
     report["matched_controls"] = matching.run(games_path)
     report["predictive"] = predict.run(config.PROCESSED / "trials.parquet",
                                        games_path)

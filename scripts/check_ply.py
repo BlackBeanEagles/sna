@@ -24,6 +24,7 @@ from src import config, curve, events, nulls  # noqa: E402
 
 
 def analyse(df: pd.DataFrame, granularity: str, reps: int) -> dict:
+    """Repeat the core comparison with one opening definition at a time."""
     trials = events.build_trials(df, granularity=granularity)
     if not len(trials):
         return {"granularity": granularity, "error": "no trials"}

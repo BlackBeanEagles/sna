@@ -1,3 +1,6 @@
+/* Findings page theme: chessboard greens and warm paper. The repeated
+   background gradients are decoration; charts and findings use separate
+   semantic colours so the evidence remains readable. */
 :root {
   color-scheme: light;
   --paper: #eee9db;

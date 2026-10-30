@@ -189,6 +189,11 @@ def lookup_opening(sans: list[str]) -> dict | None:
 
 
 class Run:
+    """One analysis attempt, with a manifest and append-only progress events.
+
+    The manifest gives Recent runs its status. The JSONL event file lets a
+    browser reopen a run and replay every stage after a refresh or disconnect.
+    """
     def __init__(self, month: str, max_games: int | None, null_reps: int,
                  window_days: int, refresh: bool = False,
                  run_id: str | None = None):
@@ -288,6 +293,7 @@ def list_runs(limit: int = 20) -> list[dict]:
 
 
 def _launch(run: Run):
+    """Start the computation in a separate process from the web server."""
     flags = 0
     if os.name == "nt":
         flags = (subprocess.CREATE_NO_WINDOW | subprocess.DETACHED_PROCESS
@@ -379,6 +385,11 @@ def _execute(run: Run):
         beat.join(timeout=3)
 
 def _pipeline(run: Run):
+    """Load a real game slice, using the bundled sample for classroom demos.
+
+    The demo sample still runs the analysis; it only skips network downloading
+    and avoids depending on a classroom internet connection.
+    """
     import pandas as pd
     from src import parse
 
@@ -450,6 +461,11 @@ def _pipeline(run: Run):
 
 
 def _analyse(run: "Run", df):
+    """Execute the same research stages as the CLI and emit UI events.
+
+    Follow this method during a demo: trials -> graph -> curve -> shuffled
+    reference -> matched controls -> held-out prediction -> verdict.
+    """
     import pandas as pd
     from src import curve, events as ev, matching, nulls, predict, structure
 

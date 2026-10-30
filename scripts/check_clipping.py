@@ -26,6 +26,10 @@ from src import config  # noqa: E402
 
 
 def main():
+    """Widen plotted exposure buckets and rerun the real/null comparison.
+
+    This checks whether the 6+ group hides a different pattern in its tail.
+    """
     ap = argparse.ArgumentParser()
     ap.add_argument("--games", default=str(config.INTERIM / "slice_2016-01_full.parquet"))
     ap.add_argument("--cap", type=int, default=12)

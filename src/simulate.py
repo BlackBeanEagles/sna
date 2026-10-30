@@ -96,6 +96,11 @@ def play_out(eco: str, rng: random.Random, extra_plies: int = 12) -> str:
 def simulate(n_players=600, n_games=40000, days=30, n_communities=6,
              base=0.0015, gain=0.06, lam=0.55, seed=config.RANDOM_SEED,
              out_path=None):
+    """Write PGN with a planted distinct-opponent adoption rule.
+
+    Use this to check whether the pipeline can detect a rule we know was put
+    into the data. It is separate from the real January 2016 study.
+    """
     rng = random.Random(seed)
     players, community, rating, weight = build_population(n_players, n_communities, rng)
 
