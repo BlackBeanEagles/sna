@@ -191,4 +191,4 @@ tables under `results/tables/legacy_pre_followup/` are historical evidence.
 To view both frontends locally, run `python server/app.py` and open
 <http://localhost:8124>. The **Read the corrected findings** link opens the
 report page from that same server. Alternatively, run `python site/build.py`
-and serve `site/` as static files.
+and serve `site/` as static files. Edit `site/page.html` and `site/style.css`, then rebuild to refresh the generated `site/index.html`.

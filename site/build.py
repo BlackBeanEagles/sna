@@ -40,6 +40,7 @@ __FRAGMENT__
 
 def build() -> Path:
     fragment = (SITE / "page.html").read_text(encoding="utf-8")
+    fragment = fragment.replace("__SITE_CSS__", (SITE / "style.css").read_text(encoding="utf-8"))
     report = json.loads((SITE.parent / "results" / "report.json").read_text(encoding="utf-8"))
     # Escape angle brackets before embedding JSON in an inline script.
     embedded = json.dumps(report, separators=(",", ":")).replace("<", "\\u003c")

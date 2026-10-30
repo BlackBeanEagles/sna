@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
@@ -505,6 +505,45 @@ select{background:#fffaf1}
 .panel,.controls,.logwrap,.verdict,.history,.m,.sg,.sg:nth-child(even){background:var(--surface)}
 .verdict.on{background:linear-gradient(125deg,#edf1e7,#fffaf1 68%)}
 
+/* Keep the setup view focused on controls; reveal live data when a run is opened. */
+body:not(.has-run) .rail,
+body:not(.has-run) .metrics,
+body:not(.has-run) .verdict,
+body:not(.has-run) .grid { display: none; }
+body.has-run .start-guide { display: none; }
+header::before { display: none; }
+header {
+  background:
+    linear-gradient(90deg, rgba(25,55,37,.98) 0%, rgba(26,56,38,.95) 44%, rgba(24,51,36,.63) 72%, rgba(24,51,36,.38) 100%),
+    url("/assets/chess-diffusion-walnut.png") 65% center / cover no-repeat;
+}
+.start-guide {
+  margin: 23px 0 12px;
+  padding: 26px 28px 29px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  box-shadow: 0 7px 22px rgba(71,62,40,.045);
+}
+.start-guide h2 { font-family: Georgia,serif; font-size: 24px; line-height: 1.2; margin: 0 0 18px; }
+.start-steps { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 15px; }
+.start-steps div { border-top: 2px solid var(--rule); padding-top: 13px; }
+.start-steps b { display: block; color: var(--s-blue); font-size: 12px; margin-bottom: 5px; }
+.start-steps p { margin: 0; color: var(--ink-2); font-size: 13px; }
+.run-message { margin: 12px 0 0; padding: 13px 16px; color: var(--bad); background: #f8ebe4; border: 1px solid #e7c7b8; border-radius: 9px; font-size: 13px; }
+@media(max-width:650px){
+  .start-guide { padding: 22px; }
+  .start-steps { grid-template-columns: 1fr; }
+}
+.controls { grid-template-columns: repeat(3,minmax(0,1fr)); }
+#run { grid-column: 1 / 3; }
+#stop { grid-column: 3; }
+.advanced-options { margin: -3px 0 18px; color: var(--ink-2); font-size: 12px; }
+.advanced-options summary { display: inline-block; cursor: pointer; color: var(--s-blue); font-weight: 700; }
+.advanced-options[open] { padding: 11px 14px 13px; background: var(--surface); border: 1px solid var(--rule); border-radius: 9px; }
+.advanced-options .toggle { display: flex; width: fit-content; margin-top: 10px; }
+@media(max-width:760px) { .controls { grid-template-columns: repeat(2,minmax(0,1fr)); } #run { grid-column: 1; } #stop { grid-column: 2; } }
+@media(max-width:470px) { .controls { grid-template-columns: 1fr; } #run,#stop { grid-column: 1; } }
 </style>
 </head>
 <body>
@@ -543,17 +582,17 @@ select{background:#fffaf1}
       <option value="20" selected>20 — matches the report</option>
     </select>
   </div>
-  <div class="ctl">
-    <label for="refresh">Source</label>
-    <label class="toggle" for="refresh" style="margin:0">
-      <input type="checkbox" id="refresh">
-      <span class="sw" aria-hidden="true"></span><span>Force re-download</span>
-    </label>
-  </div>
-  <div class="grow"></div>
+
   <button id="run">Run analysis</button>
   <button id="stop" class="ghost" disabled>Cancel</button>
 </div>
+<details class="advanced-options">
+  <summary>Advanced options</summary>
+  <label class="toggle" for="refresh">
+    <input type="checkbox" id="refresh">
+    <span class="sw" aria-hidden="true"></span><span>Force re-download the archive</span>
+  </label>
+</details>
 
 <details class="history">
   <summary>Recent runs <span>Reopen or retry a previous analysis</span></summary>
@@ -564,6 +603,15 @@ select{background:#fffaf1}
     </div>
   </div>
 </details>
+<p class="run-message" id="runMessage" role="alert" hidden></p>
+<section class="start-guide" aria-label="How the analysis works">
+  <h2>See the evidence build</h2>
+  <div class="start-steps">
+    <div><b>01 · Choose a month</b><p>Use the full archive for a complete 14-day observation window, or scan fewer games for a quick look.</p></div>
+    <div><b>02 · Run the analysis</b><p>Follow the archive scan, player connections and adoption curve as each stage finishes.</p></div>
+    <div><b>03 · Explore the result</b><p>Play a line on the board and compare observed adoption with shuffled timing.</p></div>
+  </div>
+</section>
 <div class="rail" id="rail"></div>
 
 <dl class="metrics">
@@ -1607,6 +1655,8 @@ function refreshHistory(restore){
 function attachRun(id){
   if(es)es.close();
   runId=id; streamWarned=false;
+  document.body.classList.add("has-run");
+  $("runMessage").hidden=true;
   localStorage.setItem("sna:lastRun",id);
   reset();
   $("run").disabled=true; $("stop").disabled=false;
@@ -1631,6 +1681,7 @@ $("refreshHistory").addEventListener("click",function(){refreshHistory(false);})
 /* ---------- run control ---------- */
 $("run").addEventListener("click",function(){
   $("run").disabled=true; $("stop").disabled=false;
+  $("runMessage").hidden=true;
   started=Date.now();
   fetch("/api/run",{method:"POST",headers:{"Content-Type":"application/json"},
     body:JSON.stringify({
@@ -1640,12 +1691,12 @@ $("run").addEventListener("click",function(){
       window_days:14,
       refresh:$("refresh").checked
     })}).then(function(r){return r.json();}).then(function(d){
-      if(d.error){logLine(0,"Could not start: "+d.error,"error");
+      if(d.error){$("runMessage").textContent="Could not start: "+d.error;$("runMessage").hidden=false;
         $("run").disabled=false;$("stop").disabled=true;return;}
       attachRun(d.run_id);
       refreshHistory(false);
     }).catch(function(){
-      logLine(0,"Could not start the analysis. Check the connection and try again.","error");
+      $("runMessage").textContent="Could not start the analysis. Check the connection and try again.";$("runMessage").hidden=false;
       $("run").disabled=false; $("stop").disabled=true;
     });
 });
