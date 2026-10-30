@@ -60,6 +60,9 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/findings":
             html = (ROOT / "site" / "index.html").read_bytes()
             return self._send(200, html, "text/html; charset=utf-8")
+        if path == "/assets/favicon.svg":
+            icon = (ROOT / "site" / "assets" / "favicon.svg").read_bytes()
+            return self._send(200, icon, "image/svg+xml")
         if path in ("/assets/chess-network-hero.png",
                     "/assets/chess-diffusion-landscape.png",
                     "/assets/chess-diffusion-walnut.png"):
