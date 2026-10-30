@@ -10,3 +10,6 @@ __pycache__/
 data/interim/slice_*.parquet
 data/interim/probe.parquet
 data/interim/simulated_games.parquet
+
+# Saved console runs are local demo data, not source code.
+results/runs/

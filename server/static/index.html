@@ -1591,6 +1591,12 @@ function handle(e){
     case "verdict": showVerdict(e); break;
     case "done":
       $("run").disabled=false; $("stop").disabled=true;
+      if(!e.ok){
+        $("verdict").classList.add("on");
+        $("vClaim").textContent=e.cancelled?"Run cancelled.":e.interrupted?
+          "Run interrupted. Choose Retry in Recent runs.":
+          "Run stopped before results were available. Choose Retry in Recent runs.";
+      }
       if(e.ok) logLine(e.t,"Done in "+e.seconds+"s.","ok");
       else if(e.cancelled) logLine(e.t,"Run cancelled.","warn");
       else if(e.interrupted) logLine(e.t,"Run interrupted. Choose Retry in Recent runs to restart from the cached slice.","warn");
@@ -1624,6 +1630,7 @@ function refreshHistory(restore){
       var wrap=document.createElement("div"); wrap.className="history-list";
       d.runs.forEach(function(r){
         var b=document.createElement("button"); b.type="button";
+        b.dataset.runId=r.id;
         b.setAttribute("aria-current",r.id===runId?"true":"false");
         b.textContent=r.month+" · "+r.status;
         var sm=document.createElement("small");
@@ -1649,13 +1656,18 @@ function refreshHistory(restore){
       list.appendChild(wrap);
       if(restore){
         var saved=localStorage.getItem("sna:lastRun");
-        if(saved&&d.runs.some(function(r){return r.id===saved;}))attachRun(saved);
+        var chosen=d.runs.find(function(r){return r.id===saved&&(r.status==="running"||r.status==="completed");})||
+          d.runs.find(function(r){return r.status==="completed";});
+        if(chosen)attachRun(chosen.id);
       }
     }).catch(function(){$("runHistory").textContent="Recent runs are unavailable right now.";});
 }
 function attachRun(id){
   if(es)es.close();
   runId=id; streamWarned=false;
+  document.querySelectorAll("#runHistory button[data-run-id]").forEach(function(b){
+    b.setAttribute("aria-current",b.dataset.runId===id?"true":"false");
+  });
   document.body.classList.add("has-run");
   $("runMessage").hidden=true;
   localStorage.setItem("sna:lastRun",id);

@@ -19,9 +19,7 @@ import traceback
 import uuid
 from pathlib import Path
 
-import pandas as pd
-
-from src import config, curve, events as ev, matching, nulls, parse, predict, structure
+from src import config
 from src.fetch import BASE
 
 RUNS_DIR = config.RESULTS / "runs"
@@ -114,6 +112,8 @@ def lookup_opening(sans: list[str]) -> dict | None:
     Matches on the SAN prefix, so the answer sharpens move by move: after 1.e4
     it reports every e4 game, after 1.e4 c5 only the Sicilians.
     """
+    import pandas as pd
+
     df = LAST.get("df")
     if df is None or not len(sans):
         return None
@@ -327,6 +327,8 @@ def resume(run_id: str) -> Run | None:
     return run
 
 def load_board_data(run_id: str) -> bool:
+    import pandas as pd
+
     run = get(run_id)
     if run is None:
         return False
@@ -371,6 +373,9 @@ def _execute(run: Run):
         beat.join(timeout=3)
 
 def _pipeline(run: Run):
+    import pandas as pd
+    from src import parse
+
     url = BASE.format(month=run.month)
     run.emit("init", stages=[{"key": k, "label": l} for k, l in STAGES],
              month=run.month, url=url, max_games=run.max_games)
@@ -433,6 +438,9 @@ def _pipeline(run: Run):
 
 
 def _analyse(run: "Run", df):
+    import pandas as pd
+    from src import curve, events as ev, matching, nulls, predict, structure
+
     span_days = (df["ts"].max() - df["ts"].min()).total_seconds() / 86400
     players = len(set(df["white"]) | set(df["black"]))
     skipped = df.attrs.get("skipped", {})

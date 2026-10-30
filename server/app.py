@@ -161,10 +161,13 @@ class Handler(BaseHTTPRequestHandler):
                         self.wfile.flush()
                         return
                     continue
-                if stream is not None and run.manifest_path.is_file():
+                if run.manifest_path.is_file():
                     status = runner.current_status(json.loads(run.manifest_path.read_text(encoding="utf-8")))
                     if status != "running" and position >= after:
-                        if status == "interrupted":
+                        if stream is None:
+                            self.wfile.write(b'data: {"kind":"log","msg":"No saved progress for this run. Choose Retry in Recent runs.","level":"warn"}\n\n')
+                            self.wfile.write(b'data: {"kind":"done","ok":false}\n\n')
+                        elif status == "interrupted":
                             self.wfile.write(b'data: {"kind":"done","ok":false,"interrupted":true}\n\n')
                         self.wfile.write(b"event: end\ndata: {}\n\n")
                         self.wfile.flush()
