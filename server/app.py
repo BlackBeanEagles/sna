@@ -88,6 +88,9 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json({"error": "unknown month"}, 400)
             cap = cfg.get("max_games")
             cap = int(cap) if cap else None
+            if month == runner.DEMO_MONTH:
+                cap = None
+                cfg["refresh"] = False
             run = runner.start(month, cap,
                                int(cfg.get("null_reps", 20)),
                                int(cfg.get("window_days", 14)),

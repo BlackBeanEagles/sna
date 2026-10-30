@@ -27,7 +27,12 @@ RUNS_DIR.mkdir(parents=True, exist_ok=True)
 
 # Months worth offering. Sizes are the compressed archive; a whole month is
 # streamed and decompressed on the fly, never written to disk.
+DEMO_MONTH = "demo-2016-01"
+DEMO_SLICE = config.ROOT / "data" / "demo" / "january_2016_classroom_sample.parquet"
+
 MONTHS = [
+    {"id": DEMO_MONTH, "label": "January 2016 · quick live demo", "mb": 2.4,
+     "games": "60,000 sampled real"},
     {"id": "2014-07", "label": "July 2014",    "mb": 200,  "games": "~1.0M"},
     {"id": "2015-01", "label": "January 2015", "mb": 285,  "games": "~1.5M"},
     {"id": "2015-07", "label": "July 2015",    "mb": 482,  "games": "~2.4M"},
@@ -334,7 +339,8 @@ def load_board_data(run_id: str) -> bool:
         return False
     if LAST.get("run_id") == run_id and LAST.get("df") is not None:
         return True
-    cache = config.INTERIM / f"slice_{run.month}_{run.max_games or 'full'}.parquet"
+    cache = (DEMO_SLICE if run.month == DEMO_MONTH else
+             config.INTERIM / f"slice_{run.month}_{run.max_games or 'full'}.parquet")
     trials_path = run.dir / "trials.parquet"
     if not cache.is_file() or not trials_path.is_file():
         return False
@@ -376,12 +382,18 @@ def _pipeline(run: Run):
     import pandas as pd
     from src import parse
 
-    url = BASE.format(month=run.month)
+    url = "bundled real January 2016 sample" if run.month == DEMO_MONTH else BASE.format(month=run.month)
     run.emit("init", stages=[{"key": k, "label": l} for k, l in STAGES],
              month=run.month, url=url, max_games=run.max_games)
 
     # ---------------- 1. stream & filter ----------------
     run.stage("stream", "running")
+    if run.month == DEMO_MONTH:
+        df = pd.read_parquet(DEMO_SLICE)
+        df.attrs["skipped"] = {}
+        run.log(f"Loaded {len(df):,} real January 2016 games from the bundled classroom sample.", "ok")
+        run.emit("scan", scanned=len(df), kept=len(df), rate=0, game=None)
+        return _analyse(run, df)
 
     # A parsed slice is cached so a second demo of the same month is instant.
     # Lichess throttles repeated downloads, and a stalled stream in front of an

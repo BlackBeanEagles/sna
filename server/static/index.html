@@ -539,6 +539,7 @@ header {
 .controls { grid-template-columns: repeat(3,minmax(0,1fr)); }
 #run { grid-column: 1 / 3; }
 #stop { grid-column: 3; }
+.demo-note { margin: -5px 2px 16px; color: var(--ink-2); font-size: 12px; }
 .advanced-options { margin: -3px 0 18px; color: var(--ink-2); font-size: 12px; }
 .advanced-options summary { display: inline-block; cursor: pointer; color: var(--s-blue); font-weight: 700; }
 .advanced-options[open] { padding: 11px 14px 13px; background: var(--surface); border: 1px solid var(--rule); border-radius: 9px; }
@@ -587,6 +588,7 @@ header {
   <button id="run">Run analysis</button>
   <button id="stop" class="ghost" disabled>Cancel</button>
 </div>
+<p class="demo-note" id="demoNote">Quick demo: 60,000 sampled real January games are bundled with the project. This run recomputes the analysis; use Findings for the full-study result.</p>
 <details class="advanced-options">
   <summary>Advanced options</summary>
   <label class="toggle" for="refresh">
@@ -734,7 +736,7 @@ header {
 (function(){
 "use strict";
 var NS="http://www.w3.org/2000/svg";
-var es=null, runId=null, started=0, streamWarned=false;
+var es=null, runId=null, started=0, streamWarned=false, runMonth=null;
 var $=function(id){return document.getElementById(id);};
 var fmt=function(n){return (n==null?"—":Number(n).toLocaleString("en-US"));};
 var pct=function(x,d){return (x*100).toFixed(d==null?1:d)+"%";};
@@ -748,6 +750,7 @@ addEventListener("error",function(){
 /* ---------- controls ---------- */
 var capEl=$("cap"), capVal=$("capVal");
 capEl.addEventListener("input",function(){
+  if($("month").value==="demo-2016-01")return;
   capVal.textContent=Number(capEl.value).toLocaleString("en-US")+
     (capEl.value>=capEl.max?" (full month)":"");
 });
@@ -758,12 +761,20 @@ fetch("/api/months").then(function(r){return r.json();}).then(function(d){
   d.months.forEach(function(m,i){
     var o=document.createElement("option");
     o.value=m.id; o.textContent=m.label;
-    if(m.id==="2016-01") o.selected=true;
+    if(m.id==="demo-2016-01") o.selected=true;
     sel.appendChild(o);
   });
   function updateMonthMeta(){
     var m=d.months.find(function(x){return x.id===sel.value;});
     $("monthMeta").textContent=m?m.mb+" MB · "+m.games+" games":"";
+    var demo=sel.value==="demo-2016-01";
+    capEl.disabled=demo;
+    capVal.textContent=demo?"60,000 sampled real games":
+      Number(capEl.value).toLocaleString("en-US")+
+      (Number(capEl.value)>=Number(capEl.max)?" (full month)":"");
+    $("refresh").disabled=demo;
+    if(demo){$("refresh").checked=false;$("reps").value="1";}
+    $("demoNote").hidden=!demo;
   }
   sel.addEventListener("change",updateMonthMeta);
   updateMonthMeta();
@@ -1505,8 +1516,9 @@ function reset(){
 function handle(e){
   switch(e.kind){
     case "init":
+      runMonth=e.month;
       buildRail(e.stages);
-      logLine(e.t,"Run started · month "+e.month+
+      logLine(e.t,"Run started · "+(e.month==="demo-2016-01"?"classroom sample":"month "+e.month)+
         (e.max_games?(" · cap "+fmt(e.max_games)+" games"):" · full month"),"hl");
       break;
     case "log": if(e.level!=="trace")logLine(e.t,e.msg,e.level); break;
@@ -1615,6 +1627,7 @@ function showVerdict(v){
   if(v.separated_at_fixed_k!=null) bits.push(["fixed-k separation",v.separated_at_fixed_k?"yes":"no"]);
   var m=window.__matched;
   if(m&&m.n_pairs) bits.push(["matched diff",(m.difference*100).toFixed(2)+" pp"]);
+  if(runMonth==="demo-2016-01")bits.push(["sample","60,000 real games / exploratory"]);
   bits.forEach(function(b){
     var s=document.createElement("span");
     s.innerHTML=b[0]+" <b>"+b[1]+"</b>"; ev.appendChild(s);
@@ -1631,18 +1644,24 @@ function refreshHistory(restore){
       d.runs.forEach(function(r){
         var b=document.createElement("button"); b.type="button";
         b.dataset.runId=r.id;
+        b.dataset.month=r.month;
+        b.dataset.reps=r.null_reps;
+        b.dataset.maxGames=r.max_games||"";
         b.setAttribute("aria-current",r.id===runId?"true":"false");
-        b.textContent=r.month+" · "+r.status;
+        var monthOption=Array.from($("month").options).find(function(o){return o.value===r.month;});
+        var monthLabel=monthOption?monthOption.textContent:r.month;
+        b.textContent=monthLabel+" · "+r.status;
         var sm=document.createElement("small");
         sm.textContent=new Date(r.started*1000).toLocaleString()+" · "+
-          (r.max_games?fmt(r.max_games)+" scanned cap":"full month")+
+          (r.month==="demo-2016-01"?"60,000-game sample":
+            (r.max_games?fmt(r.max_games)+" scanned cap":"full month"))+
           " · "+r.null_reps+" shuffles";
         b.appendChild(sm);
         b.addEventListener("click",function(){attachRun(r.id);});
         wrap.appendChild(b);
         if(r.status==="interrupted"||r.status==="failed"){
           var retry=document.createElement("button");retry.type="button";
-          retry.textContent="Retry "+r.month;
+          retry.textContent="Retry "+monthLabel;
           retry.addEventListener("click",function(){
             fetch("/api/resume?run="+encodeURIComponent(r.id),{method:"POST"})
               .then(function(res){return res.json();}).then(function(data){
@@ -1665,6 +1684,16 @@ function refreshHistory(restore){
 function attachRun(id){
   if(es)es.close();
   runId=id; streamWarned=false;
+  var savedButton=document.querySelector('#runHistory button[data-run-id="'+id+'"]');
+  if(savedButton){
+    $("month").value=savedButton.dataset.month;
+    $("month").dispatchEvent(new Event("change"));
+    $("reps").value=savedButton.dataset.reps;
+    if(savedButton.dataset.maxGames){
+      $("cap").value=savedButton.dataset.maxGames;
+      $("cap").dispatchEvent(new Event("input"));
+    }
+  }
   document.querySelectorAll("#runHistory button[data-run-id]").forEach(function(b){
     b.setAttribute("aria-current",b.dataset.runId===id?"true":"false");
   });
@@ -1699,7 +1728,7 @@ $("run").addEventListener("click",function(){
   fetch("/api/run",{method:"POST",headers:{"Content-Type":"application/json"},
     body:JSON.stringify({
       month:$("month").value,
-      max_games:Number(capEl.value)>=Number(capEl.max)?null:Number(capEl.value),
+      max_games:$("month").value==="demo-2016-01"||Number(capEl.value)>=Number(capEl.max)?null:Number(capEl.value),
       null_reps:Number($("reps").value),
       window_days:14,
       refresh:$("refresh").checked
