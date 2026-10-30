@@ -1,0 +1,523 @@
+SOURCE: scripts/build_annotated_code.py
+SAY FIRST: Reference copy of scripts/build_annotated_code.py; follow the line numbers while presenting.
+Each numbered source line is followed by a plain-English comment.
+These files are speaking references; run the originals in src/, server/, site/ and scripts/.
+
+0001 | """Create line-by-line speaking copies of the source for a code presentation.
+0002 | 
+0003 | The .explained.txt files are reference copies, never imported or served. Run
+0004 | `python scripts/build_annotated_code.py` after changing source code so their
+0005 | line numbers and explanations stay aligned with the working files.
+0006 | """
+0007 | 
+0008 | from __future__ import annotations
+     # Imports a library or project module needed below.
+0009 | 
+0010 | import ast
+     # Imports a library or project module needed below.
+0011 | import re
+     # Imports a library or project module needed below.
+0012 | import tokenize
+     # Imports a library or project module needed below.
+0013 | from io import StringIO
+     # Imports a library or project module needed below.
+0014 | from pathlib import Path
+     # Imports a library or project module needed below.
+0015 | 
+0016 | 
+0017 | ROOT = Path(__file__).resolve().parents[1]
+     # Keeps this intermediate result under the name `ROOT`.
+0018 | OUT = ROOT / "presentation_notes" / "code_explained"
+     # Keeps this intermediate result under the name `OUT`.
+0019 | FOLDERS = ("src", "server", "site", "scripts", "tests")
+     # Keeps this intermediate result under the name `FOLDERS`.
+0020 | EXTENSIONS = {".py", ".html", ".css"}
+     # Keeps this intermediate result under the name `EXTENSIONS`.
+0021 | 
+0022 | # These are the short sentences to say before opening each important file.
+0023 | OVERVIEW = {
+     # Keeps this intermediate result under the name `OVERVIEW`.
+0024 |     "server/app.py": "The browser sends requests here. This file routes them to the runner and streams progress back.",
+0025 |     "server/runner.py": "This is the live workflow: load games, build trials, measure the network, run checks, and emit results.",
+0026 |     "server/static/index.html": "This page draws the live dashboard from the runner's JSON events and sends board moves to Python.",
+0027 |     "src/parse.py": "This reads Lichess PGN records and applies the fixed study filters.",
+0028 |     "src/events.py": "This turns encounters into exposure trials and first-use outcomes.",
+0029 |     "src/structure.py": "This constructs the player network and measures communities and centrality.",
+0030 |     "src/curve.py": "This calculates adoption rates by exposure and applies the verdict rules.",
+0031 |     "src/nulls.py": "This shuffles game times to build the reference curve for comparison.",
+0032 |     "src/matching.py": "This compares exposed players with similar players still at risk.",
+0033 |     "src/features.py": "This builds earlier-only player, repertoire and network features.",
+0034 |     "src/predict.py": "This tests whether those features improve prediction on held-out player-opening spells.",
+0035 |     "src/run_pipeline.py": "This is the command-line version of the end-to-end analysis.",
+0036 |     "site/page.html": "This is the editable findings-page template, using saved report data.",
+0037 |     "site/build.py": "This embeds the saved results and stylesheet into the local findings page.",
+0038 |     "tests/test_events.py": "These small known cases check that the trial and comparison logic counts correctly.",
+0039 | }
+     # Closes the data structure or function call started above.
+0040 | 
+0041 | TERMS = {
+     # Keeps this intermediate result under the name `TERMS`.
+0042 |     "df": "game table", "trials": "exposure-trial table", "g": "player graph",
+0043 |     "k": "total exposure count", "d": "distinct-opponent count",
+0044 |     "sd": "structural-diversity count", "beh": "opening-and-colour behaviour",
+0045 |     "t0": "exposure time", "t_end": "last observed game time",
+0046 |     "cmp": "observed-versus-reference comparison", "null": "shuffled reference",
+0047 |     "feats": "network features", "report": "saved study results",
+0048 |     "run": "current analysis run", "out": "output value",
+0049 |     "exposures": "encounter log keyed by player and behaviour",
+0050 |     "first_perf": "first-use time for each player and behaviour",
+0051 |     "edge_first_t": "first meeting time for each opponent pair",
+0052 |     "parent": "union-find parent list for grouping connected exposers",
+0053 |     "seen": "set of opponents already counted",
+0054 |     "distinct": "ordered list of different exposing opponents",
+0055 |     "adopted": "14-day first-use outcome",
+0056 |     "rows": "result rows collected for the output table",
+0057 |     "t": "current game or exposure time",
+0058 | }
+     # Closes the data structure or function call started above.
+0059 | 
+0060 | 
+0061 | def function_summaries(source: str) -> dict[int, str]:
+     # Use the source's own docstrings when explaining function definitions.
+0062 |     """Use the source's own docstrings when explaining function definitions."""
+0063 |     try:
+     # Starts an operation that may need error handling.
+0064 |         tree = ast.parse(source)
+     # Keeps this intermediate result under the name `tree`.
+0065 |     except SyntaxError:
+     # Handles this specific failure without hiding other errors.
+0066 |         return {}
+     # Hands this result back to the stage that called this function.
+0067 |     result = {}
+     # Keeps this intermediate result under the name `result`.
+0068 |     for node in ast.walk(tree):
+     # Processes each item from this collection in turn.
+0069 |         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+     # Checks this condition before running the next indented block.
+0070 |             doc = ast.get_docstring(node) or ""
+     # Keeps this intermediate result under the name `doc`.
+0071 |             first = " ".join(doc.strip().split("\n\n", 1)[0].split()) if doc.strip() else ""
+     # Keeps this intermediate result under the name `first`.
+0072 |             if first:
+     # Checks this condition before running the next indented block.
+0073 |                 result[node.lineno] = first.split(". ", 1)[0].rstrip(".") + "."
+     # Continues the current calculation or control flow.
+0074 |     return result
+     # Hands this result back to the stage that called this function.
+0075 | 
+0076 | 
+0077 | def documentation_lines(source: str) -> set[int]:
+     # Docstrings and comments explain themselves; annotate executable lines.
+0078 |     """Docstrings and comments explain themselves; annotate executable lines."""
+0079 |     covered = set()
+     # Keeps this intermediate result under the name `covered`.
+0080 |     try:
+     # Starts an operation that may need error handling.
+0081 |         for token in tokenize.generate_tokens(StringIO(source).readline):
+     # Processes each item from this collection in turn.
+0082 |             if token.type in (tokenize.STRING, tokenize.COMMENT):
+     # Checks this condition before running the next indented block.
+0083 |                 # A standalone string is a module/function docstring; an
+0084 |                 # ordinary literal inside code is left to the code note.
+0085 |                 standalone_comment = (token.type == tokenize.COMMENT and
+     # Keeps this intermediate result under the name `standalone_comment`.
+0086 |                                       not source.splitlines()[token.start[0] - 1][:token.start[1]].strip())
+     # Continues the current calculation or control flow.
+0087 |                 if standalone_comment or (token.type == tokenize.STRING and
+     # Checks this condition before running the next indented block.
+0088 |                                           ("\n" in token.string or token.start[1] <= 4)):
+     # Part of the value, collection, or call spanning several lines.
+0089 |                     covered.update(range(token.start[0], token.end[0] + 1))
+     # Continues the current calculation or control flow.
+0090 |     except tokenize.TokenError:
+     # Handles this specific failure without hiding other errors.
+0091 |         pass
+     # Leaves this branch intentionally without extra work.
+0092 |     return covered
+     # Hands this result back to the stage that called this function.
+0093 | 
+0094 | 
+0095 | def describe_python(line: str, number: int, summaries: dict[int, str]) -> str:
+     # Defines a reusable step; the following indented lines are its body.
+0096 |     s = line.strip()
+     # Keeps this intermediate result under the name `s`.
+0097 |     special = (
+     # Keeps this intermediate result under the name `special`.
+0098 |         ("e = frozenset((w, b))", "Makes an unordered opponent pair, so White–Black order cannot create two links."),
+     # Makes an unordered opponent pair, so White–Black order cannot create two links.
+0099 |         ("if e not in edge_first_t", "Adds only the first meeting time for this opponent pair."),
+     # Adds only the first meeting time for this opponent pair.
+0100 |         ("for actor, observer, colour", "Processes both sides of each game as a performance and an exposure."),
+     # Processes both sides of each game as a performance and an exposure.
+0101 |         ("first_perf.setdefault", "Records first use without overwriting it on later games."),
+     # Records first use without overwriting it on later games.
+0102 |         ("exposures[(observer, beh)].append", "Adds an exposure event for the player who watched the opponent play this behaviour."),
+     # Adds an exposure event for the player who watched the opponent play this behaviour.
+0103 |         ("parent[i] = parent[parent[i]]", "Shortens the search path while finding a connected exposer group."),
+     # Shortens the search path while finding a connected exposer group.
+0104 |         ("parent[ri] = rj", "Joins two exposer groups after finding a link between them."),
+     # Joins two exposer groups after finding a link between them.
+0105 |         ("len({find(i) for i in range(n)})", "Counts how many separate social sources the exposing opponents form."),
+     # Counts how many separate social sources the exposing opponents form.
+0106 |         ("if exposer not in seen", "Counts a repeat opponent once for d, even if they played many games."),
+     # Counts a repeat opponent once for d, even if they played many games.
+0107 |         ("seen.add(exposer)", "Marks this opponent as already included in the distinct count."),
+     # Marks this opponent as already included in the distinct count.
+0108 |         ("distinct.append(exposer)", "Keeps this new opponent for the structural-diversity calculation."),
+     # Keeps this new opponent for the structural-diversity calculation.
+0109 |         ("if adopt_t is not None and adopt_t <= t", "Stops creating trials after the player has already performed this behaviour."),
+     # Stops creating trials after the player has already performed this behaviour.
+0110 |         ("edge_first_t[e] = ts", "Remembers when these two players first met, so later structure uses only past links."),
+     # Remembers when these two players first met, so later structure uses only past links.
+0111 |         ("t + window > t_end", "Excludes late encounters that cannot receive a complete follow-up window."),
+     # Excludes late encounters that cannot receive a complete follow-up window.
+0112 |         ("adopted = int(", "Marks adoption only when first use occurs after exposure and within the follow-up window."),
+     # Marks adoption only when first use occurs after exposure and within the follow-up window.
+0113 |         ("sd = _components", "Counts independent groups among the distinct exposing opponents."),
+     # Counts independent groups among the distinct exposing opponents.
+0114 |         ("rng.permutation", "Randomly reassigns game timestamps while keeping each game's players and opening."),
+     # Randomly reassigns game timestamps while keeping each game's players and opening.
+0115 |         ("lift_over_null", "Compares the observed adoption rate with the shuffled-time reference rate."),
+     # Compares the observed adoption rate with the shuffled-time reference rate.
+0116 |         ("roc_auc_score", "Measures how well the model ranks adopters above non-adopters on held-out data."),
+     # Measures how well the model ranks adopters above non-adopters on held-out data.
+0117 |         ("GroupShuffleSplit", "Keeps whole player-opening-colour spells together in train or test data."),
+     # Keeps whole player-opening-colour spells together in train or test data.
+0118 |         (".predict_proba", "Gets each trial's predicted probability of later adoption."),
+     # Gets each trial's predicted probability of later adoption.
+0119 |         (".groupby(", "Groups rows sharing these keys before counting or averaging them."),
+     # Groups rows sharing these keys before counting or averaging them.
+0120 |         (".merge(", "Joins two tables on shared identifiers so their columns can be compared."),
+     # Joins two tables on shared identifiers so their columns can be compared.
+0121 |         (".value_counts(", "Counts how often each player or opening occurs."),
+     # Counts how often each player or opening occurs.
+0122 |         (".sort_values(", "Orders the rows by this field before the next calculation."),
+     # Orders the rows by this field before the next calculation.
+0123 |         (".clip(", "Caps large counts into the final chart bucket, such as six or more opponents."),
+     # Caps large counts into the final chart bucket, such as six or more opponents.
+0124 |         (".to_dict(", "Converts table values into JSON-friendly records for a report or UI event."),
+     # Converts table values into JSON-friendly records for a report or UI event.
+0125 |         ("json.loads(", "Decodes saved JSON text into Python data."),
+     # Decodes saved JSON text into Python data.
+0126 |         ("json.dumps(", "Encodes Python values as JSON for saving or sending to the browser."),
+     # Encodes Python values as JSON for saving or sending to the browser.
+0127 |         ("run.emit(", "Appends a structured progress event that the browser can replay."),
+     # Appends a structured progress event that the browser can replay.
+0128 |         ("run.stage(", "Sets the status shown in the live stage list."),
+     # Sets the status shown in the live stage list.
+0129 |         ("run.log(", "Adds a short explanation to the live progress log."),
+     # Adds a short explanation to the live progress log.
+0130 |         ("pd.DataFrame(", "Creates a labelled table from the collected rows."),
+     # Creates a labelled table from the collected rows.
+0131 |         ("nx.community.louvain_communities", "Finds groups of players with relatively dense internal connections."),
+     # Finds groups of players with relatively dense internal connections.
+0132 |         ("nx.betweenness_centrality", "Estimates how often players bridge shortest routes through the graph."),
+     # Estimates how often players bridge shortest routes through the graph.
+0133 |         ("nx.core_number", "Measures how deeply each player lies in a mutually connected core."),
+     # Measures how deeply each player lies in a mutually connected core.
+0134 |         ("first_exp_ns", "Tracks when a control player was first exposed, so matching uses only people still at risk."),
+     # Tracks when a control player was first exposed, so matching uses only people still at risk.
+0135 |         ("first_perf_ns", "Tracks first performance time to exclude people who already adopted before matching."),
+     # Tracks first performance time to exclude people who already adopted before matching.
+0136 |     )
+     # Closes the data structure or function call started above.
+0137 |     for needle, explanation in special:
+     # Processes each item from this collection in turn.
+0138 |         if needle in s:
+     # Checks this condition before running the next indented block.
+0139 |             return explanation
+     # Hands this result back to the stage that called this function.
+0140 |     if s.startswith(("from ", "import ")):
+     # Checks this condition before running the next indented block.
+0141 |         return "Imports a library or project module needed below."
+     # Hands this result back to the stage that called this function.
+0142 |     if s.startswith("class "):
+     # Checks this condition before running the next indented block.
+0143 |         return summaries.get(number, "Defines an object used by this module.")
+     # Hands this result back to the stage that called this function.
+0144 |     if s.startswith(("def ", "async def ")):
+     # Checks this condition before running the next indented block.
+0145 |         return summaries.get(number, "Defines a reusable step; the following indented lines are its body.")
+     # Hands this result back to the stage that called this function.
+0146 |     if s.startswith("if __name__"):
+     # Checks this condition before running the next indented block.
+0147 |         return "Runs the command-line entry point only when this file is executed directly."
+     # Hands this result back to the stage that called this function.
+0148 |     if s.startswith("if ") or s.startswith("elif "):
+     # Checks this condition before running the next indented block.
+0149 |         if "not len(" in s or "len(" in s and "<" in s:
+     # Checks whether enough records exist for a trustworthy next step.
+0150 |             return "Checks whether enough records exist for a trustworthy next step."
+     # Hands this result back to the stage that called this function.
+0151 |         if "stopped()" in s:
+     # Stops the analysis when the user has cancelled the live run.
+0152 |             return "Stops the analysis when the user has cancelled the live run."
+     # Hands this result back to the stage that called this function.
+0153 |         if "adopt_t" in s:
+     # Checks whether this player had already adopted before the current exposure.
+0154 |             return "Checks whether this player had already adopted before the current exposure."
+     # Hands this result back to the stage that called this function.
+0155 |         return "Checks this condition before running the next indented block."
+     # Hands this result back to the stage that called this function.
+0156 |     if s.startswith("else:"):
+     # Checks this condition before running the next indented block.
+0157 |         return "Handles the alternative when the preceding condition was false."
+     # Hands this result back to the stage that called this function.
+0158 |     if s.startswith("for "):
+     # Checks this condition before running the next indented block.
+0159 |         return "Processes each item from this collection in turn."
+     # Hands this result back to the stage that called this function.
+0160 |     if s.startswith("while "):
+     # Checks this condition before running the next indented block.
+0161 |         return "Repeats the indented block until this condition stops holding."
+     # Hands this result back to the stage that called this function.
+0162 |     if s.startswith("with "):
+     # Checks this condition before running the next indented block.
+0163 |         return "Opens a resource and guarantees cleanup when the block ends."
+     # Hands this result back to the stage that called this function.
+0164 |     if s.startswith("try:"):
+     # Checks this condition before running the next indented block.
+0165 |         return "Starts an operation that may need error handling."
+     # Hands this result back to the stage that called this function.
+0166 |     if s.startswith("except "):
+     # Checks this condition before running the next indented block.
+0167 |         return "Handles this specific failure without hiding other errors."
+     # Hands this result back to the stage that called this function.
+0168 |     if s.startswith("finally:"):
+     # Checks this condition before running the next indented block.
+0169 |         return "Runs cleanup whether the operation succeeds or fails."
+     # Hands this result back to the stage that called this function.
+0170 |     if s.startswith("return "):
+     # Checks this condition before running the next indented block.
+0171 |         return "Hands this result back to the stage that called this function."
+     # Hands this result back to the stage that called this function.
+0172 |     if s == "return":
+     # Checks this condition before running the next indented block.
+0173 |         return "Stops this function here."
+     # Hands this result back to the stage that called this function.
+0174 |     if s.startswith("raise "):
+     # Checks this condition before running the next indented block.
+0175 |         return "Stops with an explicit error when this requirement is violated."
+     # Hands this result back to the stage that called this function.
+0176 |     if s == "continue":
+     # Checks this condition before running the next indented block.
+0177 |         return "Skips this item and moves to the next loop iteration."
+     # Hands this result back to the stage that called this function.
+0178 |     if s == "break":
+     # Checks this condition before running the next indented block.
+0179 |         return "Ends the current loop."
+     # Hands this result back to the stage that called this function.
+0180 |     if s.startswith("assert "):
+     # Checks this condition before running the next indented block.
+0181 |         return "Checks an invariant; the script fails if it is false."
+     # Hands this result back to the stage that called this function.
+0182 |     if s.startswith("print("):
+     # Checks this condition before running the next indented block.
+0183 |         return "Prints this reading so a command-line run can be followed."
+     # Hands this result back to the stage that called this function.
+0184 |     if ".to_parquet(" in s:
+     # Checks this condition before running the next indented block.
+0185 |         return "Saves a compact table for later analysis stages."
+     # Hands this result back to the stage that called this function.
+0186 |     if ".to_csv(" in s:
+     # Checks this condition before running the next indented block.
+0187 |         return "Writes a result table that can be inspected or downloaded."
+     # Hands this result back to the stage that called this function.
+0188 |     if "read_parquet(" in s:
+     # Checks this condition before running the next indented block.
+0189 |         return "Loads a previously prepared game or trial table."
+     # Hands this result back to the stage that called this function.
+0190 |     if "run.emit(" in s:
+     # Appends a structured progress event that the browser can replay.
+0191 |         return "Records a JSON event so the live dashboard can update or replay it."
+     # Hands this result back to the stage that called this function.
+0192 |     if "run.stage(" in s:
+     # Sets the status shown in the live stage list.
+0193 |         return "Updates the visible progress stage of the live run."
+     # Hands this result back to the stage that called this function.
+0194 |     if "run.log(" in s:
+     # Adds a short explanation to the live progress log.
+0195 |         return "Adds a human-readable message to the live run log."
+     # Hands this result back to the stage that called this function.
+0196 |     if s.startswith(("ap.add_argument(", "parser.add_argument(")):
+     # Checks this condition before running the next indented block.
+0197 |         return "Defines a command-line option for this script."
+     # Hands this result back to the stage that called this function.
+0198 |     if s in {"}", "]", ")", "},", "],", "),"}:
+     # Checks this condition before running the next indented block.
+0199 |         return "Closes the data structure or function call started above."
+     # Hands this result back to the stage that called this function.
+0200 |     m = re.match(r"([A-Za-z_][\w.]*)\s*(?::[^=]+)?=\s*", s)
+     # Keeps this intermediate result under the name `m`.
+0201 |     if m:
+     # Checks this condition before running the next indented block.
+0202 |         name = m.group(1).split(".")[-1]
+     # Keeps this intermediate result under the name `name`.
+0203 |         meaning = TERMS.get(name)
+     # Keeps this intermediate result under the name `meaning`.
+0204 |         return f"Calculates or stores the {meaning} for this stage." if meaning else f"Keeps this intermediate result under the name `{name}`."
+     # Hands this result back to the stage that called this function.
+0205 |     if s.startswith("@"):
+     # Checks this condition before running the next indented block.
+0206 |         return "Configures the function or class immediately below it."
+     # Hands this result back to the stage that called this function.
+0207 |     if s.startswith(("elif", "case ")):
+     # Checks this condition before running the next indented block.
+0208 |         return "Handles this alternative case."
+     # Hands this result back to the stage that called this function.
+0209 |     if s.startswith(("pass", "...")):
+     # Checks this condition before running the next indented block.
+0210 |         return "Leaves this branch intentionally without extra work."
+     # Hands this result back to the stage that called this function.
+0211 |     if s.startswith(("[", "(", "{", "\"", "'")) or s.endswith((",", "(", "[", "{")):
+     # Checks this condition before running the next indented block.
+0212 |         return "Part of the value, collection, or call spanning several lines."
+     # Hands this result back to the stage that called this function.
+0213 |     return "Continues the current calculation or control flow."
+     # Hands this result back to the stage that called this function.
+0214 | 
+0215 | 
+0216 | def describe_web(line: str, suffix: str) -> str:
+     # Defines a reusable step; the following indented lines are its body.
+0217 |     s = line.strip()
+     # Keeps this intermediate result under the name `s`.
+0218 |     if s.startswith(("<!--", "/*", "*", "//")):
+     # Checks this condition before running the next indented block.
+0219 |         return "Existing developer note about this section."
+     # Hands this result back to the stage that called this function.
+0220 |     if s.startswith("</") or s in {"}", "};", "});", "</script>"}:
+     # Checks this condition before running the next indented block.
+0221 |         return "Closes the preceding element or code block."
+     # Hands this result back to the stage that called this function.
+0222 |     if s.startswith("<script"):
+     # Checks this condition before running the next indented block.
+0223 |         return "Starts the browser-side code for interaction and charts."
+     # Hands this result back to the stage that called this function.
+0224 |     if s.startswith("<style"):
+     # Checks this condition before running the next indented block.
+0225 |         return "Starts styles used to lay out and colour the page."
+     # Hands this result back to the stage that called this function.
+0226 |     if s.startswith("<"):
+     # Checks this condition before running the next indented block.
+0227 |         tag = re.match(r"<([\w-]+)", s)
+     # Keeps this intermediate result under the name `tag`.
+0228 |         return f"Adds the `{tag.group(1)}` page element shown or read by the browser." if tag else "Defines page structure."
+     # Hands this result back to the stage that called this function.
+0229 |     if suffix == ".css":
+     # Checks this condition before running the next indented block.
+0230 |         if s.endswith("{"):
+     # Checks this condition before running the next indented block.
+0231 |             return "Starts the style rules for this page element or state."
+     # Hands this result back to the stage that called this function.
+0232 |         if ":" in s:
+     # Checks this condition before running the next indented block.
+0233 |             prop = s.split(":", 1)[0].strip()
+     # Keeps this intermediate result under the name `prop`.
+0234 |             return f"Sets `{prop}` for the current page element."
+     # Hands this result back to the stage that called this function.
+0235 |         return "Continues the current style rule."
+     # Hands this result back to the stage that called this function.
+0236 |     if re.search(r"(?:async )?function\s+[\w$]+", s):
+     # Checks this condition before running the next indented block.
+0237 |         return "Defines a browser function used by a chart, control, or live event."
+     # Hands this result back to the stage that called this function.
+0238 |     if "fetch(" in s:
+     # Checks this condition before running the next indented block.
+0239 |         return "Calls a local server API and handles its response."
+     # Hands this result back to the stage that called this function.
+0240 |     if "addEventListener(" in s:
+     # Checks this condition before running the next indented block.
+0241 |         return "Responds to a user action or browser event."
+     # Hands this result back to the stage that called this function.
+0242 |     if s.startswith("case "):
+     # Checks this condition before running the next indented block.
+0243 |         return "Handles one type of progress event sent by the Python runner."
+     # Hands this result back to the stage that called this function.
+0244 |     if "textContent" in s or "innerHTML" in s:
+     # Checks this condition before running the next indented block.
+0245 |         return "Updates visible text or markup on the page."
+     # Hands this result back to the stage that called this function.
+0246 |     if "appendChild(" in s:
+     # Checks this condition before running the next indented block.
+0247 |         return "Adds a newly built visual element to the page."
+     # Hands this result back to the stage that called this function.
+0248 |     if "setAttribute(" in s:
+     # Checks this condition before running the next indented block.
+0249 |         return "Sets an element property used for display or accessibility."
+     # Hands this result back to the stage that called this function.
+0250 |     if s.startswith(("if ", "if(", "else", "for ", "for(", "while ")):
+     # Checks this condition before running the next indented block.
+0251 |         return "Controls which browser steps run or repeats them for data items."
+     # Hands this result back to the stage that called this function.
+0252 |     if s.startswith(("var ", "let ", "const ")):
+     # Checks this condition before running the next indented block.
+0253 |         return "Keeps a value used by the page's next steps."
+     # Hands this result back to the stage that called this function.
+0254 |     if s.startswith("return "):
+     # Checks this condition before running the next indented block.
+0255 |         return "Hands the calculated value back to the calling function."
+     # Hands this result back to the stage that called this function.
+0256 |     return "Continues the page structure, styling, or browser logic above."
+     # Hands this result back to the stage that called this function.
+0257 | 
+0258 | 
+0259 | def main() -> None:
+     # Defines a reusable step; the following indented lines are its body.
+0260 |     count = 0
+     # Keeps this intermediate result under the name `count`.
+0261 |     for folder in FOLDERS:
+     # Processes each item from this collection in turn.
+0262 |         for source in (ROOT / folder).rglob("*"):
+     # Processes each item from this collection in turn.
+0263 |             if not source.is_file() or source.suffix not in EXTENSIONS:
+     # Checks this condition before running the next indented block.
+0264 |                 continue
+     # Skips this item and moves to the next loop iteration.
+0265 |             relative = source.relative_to(ROOT)
+     # Keeps this intermediate result under the name `relative`.
+0266 |             raw = source.read_text(encoding="utf-8")
+     # Keeps this intermediate result under the name `raw`.
+0267 |             summaries = function_summaries(raw) if source.suffix == ".py" else {}
+     # Keeps this intermediate result under the name `summaries`.
+0268 |             documented = documentation_lines(raw) if source.suffix == ".py" else set()
+     # Keeps this intermediate result under the name `documented`.
+0269 |             key = relative.as_posix()
+     # Keeps this intermediate result under the name `key`.
+0270 |             title = OVERVIEW.get(key, f"Reference copy of {key}; follow the line numbers while presenting.")
+     # Keeps this intermediate result under the name `title`.
+0271 |             lines = [f"SOURCE: {key}", f"SAY FIRST: {title}",
+     # Keeps this intermediate result under the name `lines`.
+0272 |                      "Each numbered source line is followed by a plain-English comment.",
+     # Part of the value, collection, or call spanning several lines.
+0273 |                      "These files are speaking references; run the originals in src/, server/, site/ and scripts/.", ""]
+     # Part of the value, collection, or call spanning several lines.
+0274 |             for number, line in enumerate(raw.splitlines(), 1):
+     # Processes each item from this collection in turn.
+0275 |                 lines.append(f"{number:04d} | {line}")
+     # Continues the current calculation or control flow.
+0276 |                 if line.strip() and number not in documented:
+     # Checks this condition before running the next indented block.
+0277 |                     explanation = (describe_python(line, number, summaries)
+     # Keeps this intermediate result under the name `explanation`.
+0278 |                                    if source.suffix == ".py"
+     # Checks this condition before running the next indented block.
+0279 |                                    else describe_web(line, source.suffix))
+     # Continues the current calculation or control flow.
+0280 |                     lines.append(f"     # {explanation}")
+     # Continues the current calculation or control flow.
+0281 |             target = OUT / relative.parent / (relative.name + ".explained.txt")
+     # Keeps this intermediate result under the name `target`.
+0282 |             target.parent.mkdir(parents=True, exist_ok=True)
+     # Continues the current calculation or control flow.
+0283 |             target.write_text("\n".join(lines) + "\n", encoding="utf-8")
+     # Continues the current calculation or control flow.
+0284 |             count += 1
+     # Continues the current calculation or control flow.
+0285 |     print(f"Built line-by-line references for {count} source files in {OUT}")
+     # Prints this reading so a command-line run can be followed.
+0286 | 
+0287 | 
+0288 | if __name__ == "__main__":
+     # Runs the command-line entry point only when this file is executed directly.
+0289 |     main()
+     # Continues the current calculation or control flow.

@@ -1,0 +1,1082 @@
+SOURCE: site/index.html
+SAY FIRST: Reference copy of site/index.html; follow the line numbers while presenting.
+Each numbered source line is followed by a plain-English comment.
+These files are speaking references; run the originals in src/, server/, site/ and scripts/.
+
+0001 | <!doctype html>
+     # Defines page structure.
+0002 | <html lang="en">
+     # Adds the `html` page element shown or read by the browser.
+0003 | <head>
+     # Adds the `head` page element shown or read by the browser.
+0004 | <meta charset="utf-8">
+     # Adds the `meta` page element shown or read by the browser.
+0005 | <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+     # Adds the `meta` page element shown or read by the browser.
+0006 | <style>
+     # Starts styles used to lay out and colour the page.
+0007 |   :root{
+     # Continues the page structure, styling, or browser logic above.
+0008 |     color-scheme: light dark;
+     # Continues the page structure, styling, or browser logic above.
+0009 |     padding-top: env(safe-area-inset-top, 0px);
+     # Continues the page structure, styling, or browser logic above.
+0010 |     padding-bottom: env(safe-area-inset-bottom, 0px);
+     # Continues the page structure, styling, or browser logic above.
+0011 |   }
+     # Closes the preceding element or code block.
+0012 |   body{ margin:0; font:14px/1.5 system-ui, -apple-system, sans-serif; background:#fafaf9; }
+     # Continues the page structure, styling, or browser logic above.
+0013 |   img{ max-width:100%; }
+     # Continues the page structure, styling, or browser logic above.
+0014 |   [hidden]{ display:none !important; }
+     # Continues the page structure, styling, or browser logic above.
+0015 | </style>
+     # Closes the preceding element or code block.
+0016 | <title>Opening Diffusion · Research Dashboard</title>
+     # Adds the `title` page element shown or read by the browser.
+0017 | <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+     # Adds the `link` page element shown or read by the browser.
+0018 | <meta name="description" content="An observational analysis of chess-opening adoption in a Lichess player network.">
+     # Adds the `meta` page element shown or read by the browser.
+0019 | <style>/* Findings page theme: chessboard greens and warm paper. The repeated
+     # Starts styles used to lay out and colour the page.
+0020 |    background gradients are decoration; charts and findings use separate
+     # Continues the page structure, styling, or browser logic above.
+0021 |    semantic colours so the evidence remains readable. */
+     # Continues the page structure, styling, or browser logic above.
+0022 | :root {
+     # Continues the page structure, styling, or browser logic above.
+0023 |   color-scheme: light;
+     # Continues the page structure, styling, or browser logic above.
+0024 |   --paper: #eee9db;
+     # Continues the page structure, styling, or browser logic above.
+0025 |   --surface: #fffdf7;
+     # Continues the page structure, styling, or browser logic above.
+0026 |   --ink: #25291f;
+     # Continues the page structure, styling, or browser logic above.
+0027 |   --soft: #4c5448;
+     # Continues the page structure, styling, or browser logic above.
+0028 |   --muted: #687064;
+     # Continues the page structure, styling, or browser logic above.
+0029 |   --line: #d9d6c8;
+     # Continues the page structure, styling, or browser logic above.
+0030 |   --green: #24563c;
+     # Continues the page structure, styling, or browser logic above.
+0031 |   --green-dark: #173d2a;
+     # Continues the page structure, styling, or browser logic above.
+0032 |   --rust: #a65d38;
+     # Continues the page structure, styling, or browser logic above.
+0033 |   --wash: #e7eee6;
+     # Continues the page structure, styling, or browser logic above.
+0034 |   --body: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+     # Continues the page structure, styling, or browser logic above.
+0035 |   --display: Georgia, "Times New Roman", serif;
+     # Continues the page structure, styling, or browser logic above.
+0036 |   font-synthesis: none;
+     # Continues the page structure, styling, or browser logic above.
+0037 | }
+     # Closes the preceding element or code block.
+0038 | * { box-sizing: border-box; }
+     # Existing developer note about this section.
+0039 | html { scroll-behavior: smooth; scroll-padding-top: 92px; }
+     # Continues the page structure, styling, or browser logic above.
+0040 | body {
+     # Continues the page structure, styling, or browser logic above.
+0041 |   margin: 0;
+     # Continues the page structure, styling, or browser logic above.
+0042 |   color: var(--ink);
+     # Continues the page structure, styling, or browser logic above.
+0043 |   font: 15px/1.58 var(--body);
+     # Continues the page structure, styling, or browser logic above.
+0044 |   background:
+     # Continues the page structure, styling, or browser logic above.
+0045 |     radial-gradient(ellipse 64% 38% at 4% 2%, #d9deca 0%, transparent 78%),
+     # Continues the page structure, styling, or browser logic above.
+0046 |     radial-gradient(ellipse 53% 42% at 100% 26%, #ded6bc 0%, transparent 79%),
+     # Continues the page structure, styling, or browser logic above.
+0047 |     radial-gradient(ellipse 62% 48% at 0% 72%, #d4dfd5 0%, transparent 76%),
+     # Continues the page structure, styling, or browser logic above.
+0048 |     radial-gradient(ellipse 53% 42% at 95% 100%, #decdbc 0%, transparent 78%),
+     # Continues the page structure, styling, or browser logic above.
+0049 |     var(--paper);
+     # Continues the page structure, styling, or browser logic above.
+0050 |   background-attachment: fixed;
+     # Continues the page structure, styling, or browser logic above.
+0051 | }
+     # Closes the preceding element or code block.
+0052 | body::before {
+     # Continues the page structure, styling, or browser logic above.
+0053 |   content: "";
+     # Continues the page structure, styling, or browser logic above.
+0054 |   position: fixed;
+     # Continues the page structure, styling, or browser logic above.
+0055 |   inset: 0;
+     # Continues the page structure, styling, or browser logic above.
+0056 |   pointer-events: none;
+     # Continues the page structure, styling, or browser logic above.
+0057 |   background: linear-gradient(90deg, transparent 49.5%, rgba(45,65,42,.035) 50%) 0 0/90px 90px,
+     # Continues the page structure, styling, or browser logic above.
+0058 |               linear-gradient(transparent 49.5%, rgba(45,65,42,.035) 50%) 0 0/90px 90px;
+     # Continues the page structure, styling, or browser logic above.
+0059 |   mask-image: linear-gradient(110deg, transparent, black 50%, transparent);
+     # Continues the page structure, styling, or browser logic above.
+0060 | }
+     # Closes the preceding element or code block.
+0061 | [hidden] { display: none !important; }
+     # Continues the page structure, styling, or browser logic above.
+0062 | button, select { font: inherit; }
+     # Continues the page structure, styling, or browser logic above.
+0063 | button, a, select, input { outline-offset: 4px; }
+     # Continues the page structure, styling, or browser logic above.
+0064 | button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--green); }
+     # Continues the page structure, styling, or browser logic above.
+0065 | a { color: inherit; }
+     # Continues the page structure, styling, or browser logic above.
+0066 | h1, h2, h3, p { margin-top: 0; }
+     # Continues the page structure, styling, or browser logic above.
+0067 | .wrap { width: min(1240px, calc(100% - 64px)); margin-inline: auto; }
+     # Continues the page structure, styling, or browser logic above.
+0068 | main.wrap, footer.wrap { position: relative; }
+     # Continues the page structure, styling, or browser logic above.
+0069 | .topbar {
+     # Continues the page structure, styling, or browser logic above.
+0070 |   position: sticky;
+     # Continues the page structure, styling, or browser logic above.
+0071 |   top: 0;
+     # Continues the page structure, styling, or browser logic above.
+0072 |   z-index: 10;
+     # Continues the page structure, styling, or browser logic above.
+0073 |   background: rgba(255,253,247,.94);
+     # Continues the page structure, styling, or browser logic above.
+0074 |   border-bottom: 1px solid rgba(49,70,49,.12);
+     # Continues the page structure, styling, or browser logic above.
+0075 |   backdrop-filter: blur(18px);
+     # Continues the page structure, styling, or browser logic above.
+0076 | }
+     # Closes the preceding element or code block.
+0077 | .topbar-inner { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+     # Continues the page structure, styling, or browser logic above.
+0078 | .brand { display: inline-flex; align-items: center; gap: 13px; font-weight: 780; font-size: 17px; letter-spacing: -.035em; text-decoration: none; white-space: nowrap; }
+     # Continues the page structure, styling, or browser logic above.
+0079 | .mark { display: grid; grid-template-columns: repeat(2, 10px); grid-template-rows: repeat(2, 10px); gap: 3px; transform: rotate(-8deg); }
+     # Continues the page structure, styling, or browser logic above.
+0080 | .mark i { display: block; background: var(--green); border-radius: 2px; }
+     # Continues the page structure, styling, or browser logic above.
+0081 | .mark i:nth-child(2), .mark i:nth-child(3) { background: #ae8150; }
+     # Continues the page structure, styling, or browser logic above.
+0082 | .nav { display: flex; align-items: center; gap: clamp(15px, 2.5vw, 34px); }
+     # Continues the page structure, styling, or browser logic above.
+0083 | .nav a { text-decoration: none; color: var(--soft); font-size: 13px; font-weight: 700; }
+     # Continues the page structure, styling, or browser logic above.
+0084 | .nav a:hover { color: var(--green); }
+     # Continues the page structure, styling, or browser logic above.
+0085 | .nav .live-link {
+     # Continues the page structure, styling, or browser logic above.
+0086 |   color: #fff;
+     # Continues the page structure, styling, or browser logic above.
+0087 |   background: var(--green);
+     # Continues the page structure, styling, or browser logic above.
+0088 |   padding: 11px 17px;
+     # Continues the page structure, styling, or browser logic above.
+0089 |   border-radius: 10px;
+     # Continues the page structure, styling, or browser logic above.
+0090 |   box-shadow: 0 7px 17px rgba(20,64,41,.17);
+     # Continues the page structure, styling, or browser logic above.
+0091 | }
+     # Closes the preceding element or code block.
+0092 | .nav .live-link:hover { color: #fff; background: var(--green-dark); }
+     # Continues the page structure, styling, or browser logic above.
+0093 | .hero {
+     # Continues the page structure, styling, or browser logic above.
+0094 |   position: relative;
+     # Continues the page structure, styling, or browser logic above.
+0095 |   isolation: isolate;
+     # Continues the page structure, styling, or browser logic above.
+0096 |   display: flex;
+     # Continues the page structure, styling, or browser logic above.
+0097 |   align-items: center;
+     # Continues the page structure, styling, or browser logic above.
+0098 |   min-height: 485px;
+     # Continues the page structure, styling, or browser logic above.
+0099 |   margin-top: 30px;
+     # Continues the page structure, styling, or browser logic above.
+0100 |   overflow: hidden;
+     # Continues the page structure, styling, or browser logic above.
+0101 |   padding: clamp(44px, 5.5vw, 78px);
+     # Continues the page structure, styling, or browser logic above.
+0102 |   border: 1px solid rgba(77,67,47,.15);
+     # Continues the page structure, styling, or browser logic above.
+0103 |   border-radius: 25px;
+     # Continues the page structure, styling, or browser logic above.
+0104 |   background:
+     # Continues the page structure, styling, or browser logic above.
+0105 |     linear-gradient(90deg, rgba(255,250,239,.99) 0%, rgba(255,249,236,.98) 29%, rgba(255,248,235,.74) 47%, rgba(255,248,235,.07) 71%),
+     # Continues the page structure, styling, or browser logic above.
+0106 |     url("assets/chess-diffusion-walnut.png") 50% 51% / cover no-repeat;
+     # Continues the page structure, styling, or browser logic above.
+0107 |   box-shadow: 0 22px 52px rgba(62,56,39,.14);
+     # Continues the page structure, styling, or browser logic above.
+0108 | }
+     # Closes the preceding element or code block.
+0109 | .hero > div { max-width: 540px; }
+     # Continues the page structure, styling, or browser logic above.
+0110 | .kicker, .eyebrow, .section-index, .summary-label, .stats dt, .compare-item .label, .explorer-tools label {
+     # Continues the page structure, styling, or browser logic above.
+0111 |   font-size: 11px;
+     # Continues the page structure, styling, or browser logic above.
+0112 |   font-weight: 800;
+     # Continues the page structure, styling, or browser logic above.
+0113 |   letter-spacing: .12em;
+     # Continues the page structure, styling, or browser logic above.
+0114 |   text-transform: uppercase;
+     # Continues the page structure, styling, or browser logic above.
+0115 | }
+     # Closes the preceding element or code block.
+0116 | .kicker { display: inline-block; color: var(--green); background: rgba(255,253,245,.85); border: 1px solid #d8d5bf; border-radius: 999px; padding: 8px 13px; margin-bottom: 26px; }
+     # Continues the page structure, styling, or browser logic above.
+0117 | h1 { color: #25271e; font: 700 clamp(48px, 5.5vw, 76px)/.99 var(--display); letter-spacing: -.055em; max-width: 10ch; margin-bottom: 25px; text-wrap: balance; }
+     # Continues the page structure, styling, or browser logic above.
+0118 | .hero-lead { max-width: 45ch; margin: 0; color: #454b3e; font-size: clamp(16px, 1.5vw, 19px); line-height: 1.55; }
+     # Continues the page structure, styling, or browser logic above.
+0119 | .summary {
+     # Continues the page structure, styling, or browser logic above.
+0120 |   display: grid;
+     # Continues the page structure, styling, or browser logic above.
+0121 |   grid-template-columns: 125px minmax(0, 1fr) 230px;
+     # Continues the page structure, styling, or browser logic above.
+0122 |   gap: 24px;
+     # Continues the page structure, styling, or browser logic above.
+0123 |   align-items: center;
+     # Continues the page structure, styling, or browser logic above.
+0124 |   margin-top: 20px;
+     # Continues the page structure, styling, or browser logic above.
+0125 |   padding: 26px 31px;
+     # Continues the page structure, styling, or browser logic above.
+0126 |   background: var(--green-dark);
+     # Continues the page structure, styling, or browser logic above.
+0127 |   color: #fff;
+     # Continues the page structure, styling, or browser logic above.
+0128 |   border-radius: 17px;
+     # Continues the page structure, styling, or browser logic above.
+0129 |   box-shadow: 0 14px 35px rgba(20,61,42,.13);
+     # Continues the page structure, styling, or browser logic above.
+0130 | }
+     # Closes the preceding element or code block.
+0131 | .summary-label { color: #bdd6be; }
+     # Continues the page structure, styling, or browser logic above.
+0132 | .summary-copy { margin: 0; font: 600 22px/1.32 var(--display); letter-spacing: -.018em; }
+     # Continues the page structure, styling, or browser logic above.
+0133 | .summary-note { border-left: 1px solid rgba(255,255,255,.2); padding-left: 23px; margin: 0; color: #d4e2d3; font-size: 12px; line-height: 1.55; }
+     # Continues the page structure, styling, or browser logic above.
+0134 | .stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin: 16px 0 7px; }
+     # Continues the page structure, styling, or browser logic above.
+0135 | .stats div { background: var(--surface); border: 1px solid var(--line); border-radius: 15px; padding: 23px 25px; box-shadow: 0 7px 20px rgba(71,62,40,.045); }
+     # Continues the page structure, styling, or browser logic above.
+0136 | .stats dt { color: var(--muted); margin-bottom: 13px; }
+     # Continues the page structure, styling, or browser logic above.
+0137 | .stats dd { margin: 0; font-size: clamp(26px, 2.8vw, 37px); font-weight: 750; line-height: 1.1; letter-spacing: -.045em; font-variant-numeric: tabular-nums; }
+     # Continues the page structure, styling, or browser logic above.
+0138 | .section { padding: 75px 0 0; }
+     # Continues the page structure, styling, or browser logic above.
+0139 | .section-head { display: grid; grid-template-columns: 156px minmax(0,1fr); gap: 20px; align-items: start; margin-bottom: 27px; }
+     # Continues the page structure, styling, or browser logic above.
+0140 | .section-index { color: var(--green); padding-top: 12px; }
+     # Continues the page structure, styling, or browser logic above.
+0141 | h2 { font: 700 clamp(34px, 3.8vw, 49px)/1.07 var(--display); letter-spacing: -.04em; margin-bottom: 13px; text-wrap: balance; }
+     # Continues the page structure, styling, or browser logic above.
+0142 | .section-head p { max-width: 72ch; color: var(--soft); margin: 0; font-size: 15px; }
+     # Continues the page structure, styling, or browser logic above.
+0143 | .card, .explorer-tools, .compare-item, .method-step, .limit-list li { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 7px 22px rgba(71,62,40,.045); }
+     # Continues the page structure, styling, or browser logic above.
+0144 | .card { overflow: hidden; }
+     # Continues the page structure, styling, or browser logic above.
+0145 | .card-head { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 27px 30px 17px; }
+     # Continues the page structure, styling, or browser logic above.
+0146 | h3 { font: 700 23px/1.2 var(--display); letter-spacing: -.025em; margin-bottom: 6px; }
+     # Continues the page structure, styling, or browser logic above.
+0147 | .card-head p { color: var(--muted); font-size: 13px; margin: 0; }
+     # Continues the page structure, styling, or browser logic above.
+0148 | .explorer-tools { display: flex; align-items: end; gap: 12px; flex-wrap: wrap; padding: 19px 21px; margin-bottom: 14px; }
+     # Continues the page structure, styling, or browser logic above.
+0149 | .explorer-tools label { display: grid; gap: 7px; color: var(--muted); }
+     # Continues the page structure, styling, or browser logic above.
+0150 | .explorer-tools select { min-width: 170px; max-width: 255px; min-height: 43px; padding: 0 33px 0 12px; background: #fff; color: var(--ink); border: 1px solid #bfc9b9; border-radius: 9px; font-size: 13px; font-weight: 650; letter-spacing: 0; text-transform: none; }
+     # Continues the page structure, styling, or browser logic above.
+0151 | .explorer-tools button { min-height: 43px; padding: 0 15px; cursor: pointer; background: var(--wash); color: var(--green-dark); border: 1px solid #cbdaca; border-radius: 9px; font-size: 12px; font-weight: 750; }
+     # Continues the page structure, styling, or browser logic above.
+0152 | .explorer-tools button:hover { background: #dce9db; }
+     # Continues the page structure, styling, or browser logic above.
+0153 | .explorer-tools p { flex-basis: 100%; margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+     # Continues the page structure, styling, or browser logic above.
+0154 | .chart-wrap { min-height: 320px; display: grid; place-items: center; padding: 0 20px 16px; }
+     # Continues the page structure, styling, or browser logic above.
+0155 | .chart { display: block; width: 100%; height: auto; overflow: visible; }
+     # Continues the page structure, styling, or browser logic above.
+0156 | .chart-empty { color: var(--soft); text-align: center; max-width: 35ch; padding: 40px 20px; }
+     # Continues the page structure, styling, or browser logic above.
+0157 | .chart .grid { stroke: #e5e9dd; }
+     # Continues the page structure, styling, or browser logic above.
+0158 | .chart .axis { stroke: #aebaaa; }
+     # Continues the page structure, styling, or browser logic above.
+0159 | .chart text { font: 11px var(--body); fill: #616d60; }
+     # Continues the page structure, styling, or browser logic above.
+0160 | .chart .axis-title { fill: #637062; font-size: 10px; }
+     # Continues the page structure, styling, or browser logic above.
+0161 | .chart .observed { stroke: var(--green); fill: none; stroke-width: 3.4; stroke-linejoin: round; stroke-linecap: round; }
+     # Continues the page structure, styling, or browser logic above.
+0162 | .chart .null { stroke: var(--rust); fill: none; stroke-width: 2.7; stroke-dasharray: 7 6; stroke-linecap: round; }
+     # Continues the page structure, styling, or browser logic above.
+0163 | .chart .point-observed { fill: var(--green); stroke: #fff; stroke-width: 2.7; }
+     # Continues the page structure, styling, or browser logic above.
+0164 | .chart .point-null { fill: var(--rust); stroke: #fff; stroke-width: 2.3; }
+     # Continues the page structure, styling, or browser logic above.
+0165 | .chart .uncertainty { stroke: var(--green); stroke-width: 1.5; opacity: .4; }
+     # Continues the page structure, styling, or browser logic above.
+0166 | .toggle { display: inline-flex; align-items: center; gap: 9px; white-space: nowrap; color: var(--soft); font-size: 12px; font-weight: 650; cursor: pointer; }
+     # Continues the page structure, styling, or browser logic above.
+0167 | .toggle input { accent-color: var(--green); }
+     # Continues the page structure, styling, or browser logic above.
+0168 | .chart-note { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 15px 30px 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+     # Continues the page structure, styling, or browser logic above.
+0169 | .legend { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; color: var(--soft); font-weight: 700; }
+     # Continues the page structure, styling, or browser logic above.
+0170 | .legend i { display: inline-block; width: 22px; border-top: 3px solid var(--green); vertical-align: middle; margin-right: 8px; }
+     # Continues the page structure, styling, or browser logic above.
+0171 | .legend i.null-key { border-color: var(--rust); border-top-style: dashed; }
+     # Continues the page structure, styling, or browser logic above.
+0172 | .compare { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; margin-top: 14px; }
+     # Continues the page structure, styling, or browser logic above.
+0173 | .compare-item { position: relative; overflow: hidden; padding: 24px 28px; }
+     # Continues the page structure, styling, or browser logic above.
+0174 | .compare-item::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 5px; background: var(--green); }
+     # Continues the page structure, styling, or browser logic above.
+0175 | .compare-item:last-child::before { background: var(--rust); }
+     # Continues the page structure, styling, or browser logic above.
+0176 | .compare-item .label { color: var(--muted); }
+     # Continues the page structure, styling, or browser logic above.
+0177 | .compare-item strong { display: block; margin: 7px 0 2px; font-size: 37px; line-height: 1.13; font-weight: 760; letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
+     # Continues the page structure, styling, or browser logic above.
+0178 | .compare-item:first-child strong { color: var(--green); }
+     # Continues the page structure, styling, or browser logic above.
+0179 | .compare-item:last-child strong { color: var(--rust); }
+     # Continues the page structure, styling, or browser logic above.
+0180 | .compare-item p { color: var(--soft); font-size: 12px; margin: 0; }
+     # Continues the page structure, styling, or browser logic above.
+0181 | .footnote { color: var(--muted); font-size: 12px; line-height: 1.65; margin: 16px 0 0; }
+     # Continues the page structure, styling, or browser logic above.
+0182 | .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+     # Continues the page structure, styling, or browser logic above.
+0183 | .analysis-card { padding: 27px 30px; }
+     # Continues the page structure, styling, or browser logic above.
+0184 | .analysis-card h3 { margin-bottom: 20px; }
+     # Continues the page structure, styling, or browser logic above.
+0185 | .bar-row { display: grid; grid-template-columns: 100px 1fr 75px; gap: 12px; align-items: center; margin: 15px 0; font-size: 12px; font-weight: 700; }
+     # Continues the page structure, styling, or browser logic above.
+0186 | .bar { height: 12px; background: #e8ede4; border-radius: 999px; overflow: hidden; }
+     # Continues the page structure, styling, or browser logic above.
+0187 | .bar i { display: block; height: 100%; border-radius: inherit; background: var(--green); }
+     # Continues the page structure, styling, or browser logic above.
+0188 | .bar-row.control .bar i { background: var(--rust); }
+     # Continues the page structure, styling, or browser logic above.
+0189 | .bar-row b { text-align: right; font-variant-numeric: tabular-nums; }
+     # Continues the page structure, styling, or browser logic above.
+0190 | .big-delta { color: var(--green); font-size: 31px; font-weight: 780; letter-spacing: -.04em; margin: 22px 0 5px; }
+     # Continues the page structure, styling, or browser logic above.
+0191 | .small { color: var(--muted); font-size: 12px; line-height: 1.6; margin-bottom: 0; }
+     # Continues the page structure, styling, or browser logic above.
+0192 | .callout { padding: 17px 19px; background: #eef2e9; border: 1px solid #dce6d6; border-radius: 10px; color: var(--soft); font-size: 13px; }
+     # Continues the page structure, styling, or browser logic above.
+0193 | .callout p { margin: 0; }
+     # Continues the page structure, styling, or browser logic above.
+0194 | .callout b { color: var(--ink); }
+     # Continues the page structure, styling, or browser logic above.
+0195 | .table-scroll { overflow-x: auto; }
+     # Continues the page structure, styling, or browser logic above.
+0196 | table { border-collapse: collapse; width: 100%; min-width: 540px; font-variant-numeric: tabular-nums; }
+     # Continues the page structure, styling, or browser logic above.
+0197 | th, td { padding: 15px 24px; border-bottom: 1px solid var(--line); text-align: left; }
+     # Continues the page structure, styling, or browser logic above.
+0198 | th { background: #f1f3eb; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+     # Continues the page structure, styling, or browser logic above.
+0199 | td { font-size: 13px; }
+     # Continues the page structure, styling, or browser logic above.
+0200 | tr:last-child td { border-bottom: 0; }
+     # Continues the page structure, styling, or browser logic above.
+0201 | td.num { text-align: right; font-weight: 800; }
+     # Continues the page structure, styling, or browser logic above.
+0202 | tr.highlight { background: #ebf1e9; }
+     # Continues the page structure, styling, or browser logic above.
+0203 | .method-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+     # Continues the page structure, styling, or browser logic above.
+0204 | .method-step { padding: 24px 26px 26px; }
+     # Continues the page structure, styling, or browser logic above.
+0205 | .method-step b { display: inline-grid; place-items: center; width: 31px; height: 31px; border-radius: 8px; background: var(--wash); color: var(--green); font-size: 11px; }
+     # Continues the page structure, styling, or browser logic above.
+0206 | .method-step h3 { margin: 20px 0 9px; font-size: 20px; }
+     # Continues the page structure, styling, or browser logic above.
+0207 | .method-step p { color: var(--soft); font-size: 13px; margin: 0; }
+     # Continues the page structure, styling, or browser logic above.
+0208 | .limit-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; list-style: none; padding: 0; margin: 0; }
+     # Continues the page structure, styling, or browser logic above.
+0209 | .limit-list li { padding: 20px 23px; color: var(--soft); font-size: 13px; }
+     # Continues the page structure, styling, or browser logic above.
+0210 | .limit-list b { display: block; color: var(--ink); margin-bottom: 5px; font-size: 14px; }
+     # Continues the page structure, styling, or browser logic above.
+0211 | footer { display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; padding: 55px 0 39px; color: var(--muted); font-size: 12px; }
+     # Continues the page structure, styling, or browser logic above.
+0212 | footer a { color: var(--green); font-weight: 750; }
+     # Continues the page structure, styling, or browser logic above.
+0213 | @media (max-width: 900px) {
+     # Continues the page structure, styling, or browser logic above.
+0214 |   .summary { grid-template-columns: 110px 1fr; }
+     # Continues the page structure, styling, or browser logic above.
+0215 |   .summary-note { grid-column: 2; border: 0; padding-left: 0; }
+     # Continues the page structure, styling, or browser logic above.
+0216 |   .section-head { grid-template-columns: 1fr; gap: 6px; }
+     # Continues the page structure, styling, or browser logic above.
+0217 |   .section-index { padding-top: 0; }
+     # Continues the page structure, styling, or browser logic above.
+0218 |   .two-col { grid-template-columns: 1fr; }
+     # Continues the page structure, styling, or browser logic above.
+0219 | }
+     # Closes the preceding element or code block.
+0220 | @media (max-width: 650px) {
+     # Continues the page structure, styling, or browser logic above.
+0221 |   html { scroll-padding-top: 70px; }
+     # Continues the page structure, styling, or browser logic above.
+0222 |   body { background-attachment: scroll; }
+     # Continues the page structure, styling, or browser logic above.
+0223 |   .wrap { width: calc(100% - 28px); }
+     # Continues the page structure, styling, or browser logic above.
+0224 |   .topbar-inner { min-height: 64px; gap: 10px; }
+     # Continues the page structure, styling, or browser logic above.
+0225 |   .brand { font-size: 14px; gap: 9px; }
+     # Continues the page structure, styling, or browser logic above.
+0226 |   .mark { grid-template-columns: repeat(2,8px); grid-template-rows: repeat(2,8px); }
+     # Continues the page structure, styling, or browser logic above.
+0227 |   .nav { gap: 9px; }
+     # Continues the page structure, styling, or browser logic above.
+0228 |   .nav a:not(.live-link) { display: none; }
+     # Continues the page structure, styling, or browser logic above.
+0229 |   .nav .live-link { font-size: 11px; padding: 9px 11px; }
+     # Continues the page structure, styling, or browser logic above.
+0230 |   .hero { min-height: 570px; align-items: flex-start; margin-top: 14px; padding: 31px 26px; border-radius: 18px;
+     # Continues the page structure, styling, or browser logic above.
+0231 |     background: linear-gradient(180deg, rgba(255,250,240,.99) 0%, rgba(255,250,240,.99) 48%, rgba(255,250,240,.76) 63%, rgba(255,250,240,.06) 86%), url("assets/chess-diffusion-walnut.png") 66% center / cover no-repeat; }
+     # Continues the page structure, styling, or browser logic above.
+0232 |   .kicker { font-size: 9px; margin-bottom: 22px; }
+     # Continues the page structure, styling, or browser logic above.
+0233 |   h1 { font-size: clamp(42px, 11vw, 58px); max-width: 10ch; margin-bottom: 18px; }
+     # Continues the page structure, styling, or browser logic above.
+0234 |   .hero-lead { max-width: 38ch; font-size: 15px; }
+     # Continues the page structure, styling, or browser logic above.
+0235 |   .summary { display: block; padding: 22px 23px; }
+     # Continues the page structure, styling, or browser logic above.
+0236 |   .summary-label { display: block; margin-bottom: 10px; }
+     # Continues the page structure, styling, or browser logic above.
+0237 |   .summary-copy { font-size: 20px; }
+     # Continues the page structure, styling, or browser logic above.
+0238 |   .summary-note { border-top: 1px solid rgba(255,255,255,.2); padding-top: 12px; margin-top: 15px; }
+     # Continues the page structure, styling, or browser logic above.
+0239 |   .stats { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
+     # Continues the page structure, styling, or browser logic above.
+0240 |   .stats div { padding: 18px; }
+     # Continues the page structure, styling, or browser logic above.
+0241 |   .stats dt { font-size: 9px; margin-bottom: 9px; }
+     # Continues the page structure, styling, or browser logic above.
+0242 |   .stats dd { font-size: 27px; }
+     # Continues the page structure, styling, or browser logic above.
+0243 |   .section { padding-top: 59px; }
+     # Continues the page structure, styling, or browser logic above.
+0244 |   h2 { font-size: 36px; }
+     # Continues the page structure, styling, or browser logic above.
+0245 |   .section-head p { font-size: 13px; }
+     # Continues the page structure, styling, or browser logic above.
+0246 |   .explorer-tools { padding: 16px; }
+     # Continues the page structure, styling, or browser logic above.
+0247 |   .explorer-tools label { flex: 1 1 135px; }
+     # Continues the page structure, styling, or browser logic above.
+0248 |   .explorer-tools select { width: 100%; min-width: 0; }
+     # Continues the page structure, styling, or browser logic above.
+0249 |   .explorer-tools button { flex: 1 1 auto; }
+     # Continues the page structure, styling, or browser logic above.
+0250 |   .card-head { display: block; padding: 21px 20px 13px; }
+     # Continues the page structure, styling, or browser logic above.
+0251 |   .card-head .toggle { margin-top: 14px; white-space: normal; }
+     # Continues the page structure, styling, or browser logic above.
+0252 |   .chart-wrap { min-height: 250px; padding: 0 7px 7px; }
+     # Continues the page structure, styling, or browser logic above.
+0253 |   .chart-note { padding: 14px 19px; }
+     # Continues the page structure, styling, or browser logic above.
+0254 |   .compare, .method-grid, .limit-list { grid-template-columns: 1fr; }
+     # Continues the page structure, styling, or browser logic above.
+0255 |   .compare-item { padding: 21px 23px; }
+     # Continues the page structure, styling, or browser logic above.
+0256 |   .analysis-card { padding: 22px; }
+     # Continues the page structure, styling, or browser logic above.
+0257 |   .bar-row { grid-template-columns: 72px 1fr 65px; gap: 8px; }
+     # Continues the page structure, styling, or browser logic above.
+0258 |   footer { padding-top: 44px; }
+     # Continues the page structure, styling, or browser logic above.
+0259 | }
+     # Closes the preceding element or code block.
+0260 | @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+     # Continues the page structure, styling, or browser logic above.
+0261 | </style>
+     # Closes the preceding element or code block.
+0262 | </head>
+     # Closes the preceding element or code block.
+0263 | <body>
+     # Adds the `body` page element shown or read by the browser.
+0264 | <div class="topbar"><div class="wrap topbar-inner">
+     # Adds the `div` page element shown or read by the browser.
+0265 |   <a class="brand" href="#top"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span> Opening Lab</a>
+     # Adds the `a` page element shown or read by the browser.
+0266 |   <nav class="nav" aria-label="Sections">
+     # Adds the `nav` page element shown or read by the browser.
+0267 |     <a href="#evidence">Explore</a><a href="#controls">Compare</a><a href="#method">Method</a><a class="live-link" href="http://localhost:8124/">Live console ↗</a>
+     # Adds the `a` page element shown or read by the browser.
+0268 |   </nav>
+     # Closes the preceding element or code block.
+0269 | </div></div>
+     # Closes the preceding element or code block.
+0270 | <main class="wrap" id="top">
+     # Adds the `main` page element shown or read by the browser.
+0271 |   <header class="hero">
+     # Adds the `header` page element shown or read by the browser.
+0272 |     <div>
+     # Adds the `div` page element shown or read by the browser.
+0273 |       <p class="kicker">Lichess research · January 2016</p>
+     # Adds the `p` page element shown or read by the browser.
+0274 |       <h1>Do chess openings spread?</h1>
+     # Adds the `h1` page element shown or read by the browser.
+0275 |       <p class="hero-lead">Explore how seeing an opening across games relates to playing it later—and whether meeting it through more opponents changes the pattern.</p>
+     # Adds the `p` page element shown or read by the browser.
+0276 |     </div>
+     # Closes the preceding element or code block.
+0277 |   </header>
+     # Closes the preceding element or code block.
+0278 |   <div class="summary" role="note">
+     # Adds the `div` page element shown or read by the browser.
+0279 |     <span class="summary-label">Key finding</span>
+     # Adds the `span` page element shown or read by the browser.
+0280 |     <p class="summary-copy" id="summary-copy">Loading corrected results…</p>
+     # Adds the `p` page element shown or read by the browser.
+0281 |     <p class="summary-note">One month, one rating band. These comparisons describe associations; they do not identify a causal effect.</p>
+     # Adds the `p` page element shown or read by the browser.
+0282 |   </div>
+     # Closes the preceding element or code block.
+0283 |   <dl class="stats" id="stats">
+     # Adds the `dl` page element shown or read by the browser.
+0284 |     <div><dt>Games</dt><dd id="stat-games">—</dd></div>
+     # Adds the `div` page element shown or read by the browser.
+0285 |     <div><dt>Players</dt><dd id="stat-players">—</dd></div>
+     # Adds the `div` page element shown or read by the browser.
+0286 |     <div><dt>Complete trials</dt><dd id="stat-trials">—</dd></div>
+     # Adds the `div` page element shown or read by the browser.
+0287 |     <div><dt>Trial adoption rate</dt><dd id="stat-rate">—</dd></div>
+     # Adds the `div` page element shown or read by the browser.
+0288 |   </dl>
+     # Closes the preceding element or code block.
+0289 | 
+0290 |   <section class="section" id="evidence">
+     # Adds the `section` page element shown or read by the browser.
+0291 |     <div class="section-head"><span class="section-index">01 / Explore</span><div>
+     # Adds the `div` page element shown or read by the browser.
+0292 |       <h2>More exposure is not the whole story</h2>
+     # Adds the `h2` page element shown or read by the browser.
+0293 |       <p>Players with more distinct exposers adopt more often. Shuffling game times keeps the opponents and openings while changing their ordering; the comparison tests whether the raw rise exceeds that reference.</p>
+     # Adds the `p` page element shown or read by the browser.
+0294 |     </div></div>
+     # Closes the preceding element or code block.
+0295 |     <div class="explorer-tools" aria-label="Explore adoption rates">
+     # Adds the `div` page element shown or read by the browser.
+0296 |       <label>Opening <select id="opening-filter"><option value="">All openings</option></select></label>
+     # Adds the `label` page element shown or read by the browser.
+0297 |       <label>Colour <select id="colour-filter"><option value="">Both colours</option><option value="W">White</option><option value="B">Black</option></select></label>
+     # Adds the `label` page element shown or read by the browser.
+0298 |       <button type="button" id="download-csv">Download CSV</button>
+     # Adds the `button` page element shown or read by the browser.
+0299 |       <button type="button" id="download-svg">Save chart SVG</button>
+     # Adds the `button` page element shown or read by the browser.
+0300 |       <p id="filter-note">All openings and colours · shuffled-time reference available.</p>
+     # Adds the `p` page element shown or read by the browser.
+0301 |     </div>
+     # Closes the preceding element or code block.
+0302 |     <div class="card">
+     # Adds the `div` page element shown or read by the browser.
+0303 |       <div class="card-head"><div><h3>Adoption within 14 days</h3><p id="chart-subtitle">Observed trial rate and shuffled-time reference by distinct exposers</p></div>
+     # Adds the `div` page element shown or read by the browser.
+0304 |         <label class="toggle" id="show-null-wrap"><input type="checkbox" id="show-null" checked> Show shuffled-time reference</label>
+     # Adds the `label` page element shown or read by the browser.
+0305 |       </div>
+     # Closes the preceding element or code block.
+0306 |       <div class="chart-wrap"><svg class="chart" id="curve-chart" viewBox="0 0 800 350" role="img" aria-label="Adoption rates by distinct exposers"></svg><p class="chart-empty" id="chart-empty" hidden>No complete trials match this selection. Try another opening or colour.</p></div>
+     # Adds the `div` page element shown or read by the browser.
+0307 |       <div class="chart-note"><span class="legend"><span><i></i>Observed</span><span id="null-legend"><i class="null-key"></i>Shuffled time</span></span><span id="curve-note"></span></div>
+     # Adds the `div` page element shown or read by the browser.
+0308 |     </div>
+     # Closes the preceding element or code block.
+0309 |     <div class="compare">
+     # Adds the `div` page element shown or read by the browser.
+0310 |       <div class="compare-item"><span class="label" id="first-label">First distinct exposer</span><strong id="first-lift">—</strong><p id="first-detail">Observed / shuffled-time rate</p></div>
+     # Adds the `div` page element shown or read by the browser.
+0311 |       <div class="compare-item"><span class="label" id="last-label">Six or more distinct exposers</span><strong id="last-lift">—</strong><p id="last-detail">Observed / shuffled-time rate</p></div>
+     # Adds the `div` page element shown or read by the browser.
+0312 |     </div>
+     # Closes the preceding element or code block.
+0313 |     <p class="footnote">Counting one observation per player-opening spell gives the same direction: observed/shuffled lift falls from 1.050 at the first exposer to 0.928 at six or more. The main chart counts exposure trials, which can repeat within a spell.</p>
+     # Adds the `p` page element shown or read by the browser.
+0314 |   </section>
+     # Closes the preceding element or code block.
+0315 | 
+0316 |   <section class="section" id="controls">
+     # Adds the `section` page element shown or read by the browser.
+0317 |     <div class="section-head"><span class="section-index">02 / Compare</span><div>
+     # Adds the `div` page element shown or read by the browser.
+0318 |       <h2>Look beyond the curve</h2>
+     # Adds the `h2` page element shown or read by the browser.
+0319 |       <p>The matched comparison and held-out models offer context. Neither turns an observational dataset into a randomized experiment.</p>
+     # Adds the `p` page element shown or read by the browser.
+0320 |     </div></div>
+     # Closes the preceding element or code block.
+0321 |     <div class="two-col">
+     # Adds the `div` page element shown or read by the browser.
+0322 |       <div class="card analysis-card">
+     # Adds the `div` page element shown or read by the browser.
+0323 |         <h3>Matched at first exposure</h3>
+     # Adds the `h3` page element shown or read by the browser.
+0324 |         <div class="bar-row"><span>Exposed</span><span class="bar"><i id="exposed-bar"></i></span><b id="exposed-rate">—</b></div>
+     # Adds the `div` page element shown or read by the browser.
+0325 |         <div class="bar-row control"><span>Control</span><span class="bar"><i id="control-bar"></i></span><b id="control-rate">—</b></div>
+     # Adds the `div` page element shown or read by the browser.
+0326 |         <div class="big-delta" id="matched-delta">—</div>
+     # Adds the `div` page element shown or read by the browser.
+0327 |         <p class="small" id="matched-meta"></p>
+     # Adds the `p` page element shown or read by the browser.
+0328 |       </div>
+     # Closes the preceding element or code block.
+0329 |       <div class="card analysis-card">
+     # Adds the `div` page element shown or read by the browser.
+0330 |         <h3>How to read the match</h3>
+     # Adds the `h3` page element shown or read by the browser.
+0331 |         <div class="callout"><p>Controls were eligible if they had neither played nor encountered the target opening at the matching time. <b>Later exposure is counted as a crossover</b>, not used to choose controls with knowledge of the future.</p></div>
+     # Adds the `div` page element shown or read by the browser.
+0332 |         <p class="small">Rating and activity are measured before matching. The player-cluster bootstrap reflects repeated players in both pair roles; opponent choice and repertoire remain confounders.</p>
+     # Adds the `p` page element shown or read by the browser.
+0333 |       </div>
+     # Closes the preceding element or code block.
+0334 |     </div>
+     # Closes the preceding element or code block.
+0335 |     <div class="card" style="margin-top:18px">
+     # Adds the `div` page element shown or read by the browser.
+0336 |       <div class="card-head"><div><h3>Held-out prediction</h3><p>Player-opening-colour spells held out together; background features measured before evaluated trials</p></div></div>
+     # Adds the `div` page element shown or read by the browser.
+0337 |       <div class="table-scroll"><table><thead><tr><th>Model</th><th>Added information</th><th style="text-align:right">AUC</th></tr></thead><tbody id="model-rows"></tbody></table></div>
+     # Adds the `div` page element shown or read by the browser.
+0338 |       <p class="footnote" style="padding:0 24px 20px">AUC measures ranking on held-out spells. Differences between models describe predictive value, not causal influence.</p>
+     # Adds the `p` page element shown or read by the browser.
+0339 |     </div>
+     # Closes the preceding element or code block.
+0340 |   </section>
+     # Closes the preceding element or code block.
+0341 | 
+0342 |   <section class="section" id="method">
+     # Adds the `section` page element shown or read by the browser.
+0343 |     <div class="section-head"><span class="section-index">03 / Method</span><div>
+     # Adds the `div` page element shown or read by the browser.
+0344 |       <h2>From games to trials</h2>
+     # Adds the `h2` page element shown or read by the browser.
+0345 |       <p>These figures use the available January 2016 game sample. Rechecking the original archive and testing another month remain open.</p>
+     # Adds the `p` page element shown or read by the browser.
+0346 |     </div></div>
+     # Closes the preceding element or code block.
+0347 |     <div class="method-grid">
+     # Adds the `div` page element shown or read by the browser.
+0348 |       <div class="method-step"><b>01</b><h3>Define exposure</h3><p>An opponent plays an ECO opening against a player. Opening and colour stay together in the behaviour key.</p></div>
+     # Adds the `div` page element shown or read by the browser.
+0349 |       <div class="method-step"><b>02</b><h3>Follow for 14 days</h3><p>Each included exposure has a fully observable 14-day window. Late positive and negative trials are both excluded.</p></div>
+     # Adds the `div` page element shown or read by the browser.
+0350 |       <div class="method-step"><b>03</b><h3>Compare alternatives</h3><p>Use 20 timestamp shuffles, eligible matched controls, and group-held-out prediction to challenge a simple reading of the raw curve.</p></div>
+     # Adds the `div` page element shown or read by the browser.
+0351 |     </div>
+     # Closes the preceding element or code block.
+0352 |   </section>
+     # Closes the preceding element or code block.
+0353 |   <section class="section" id="limits">
+     # Adds the `section` page element shown or read by the browser.
+0354 |     <div class="section-head"><span class="section-index">04 / Limits</span><div><h2>What the result cannot settle</h2></div></div>
+     # Adds the `div` page element shown or read by the browser.
+0355 |     <ul class="limit-list">
+     # Adds the `ul` page element shown or read by the browser.
+0356 |       <li><b>Single-month evidence.</b> The analysis has not yet been replicated on a second archive month.</li>
+     # Adds the `li` page element shown or read by the browser.
+0357 |       <li><b>Observational exposure.</b> Opponent choice, repertoire, activity and changing opening popularity can shape both exposure and adoption.</li>
+     # Adds the `li` page element shown or read by the browser.
+0358 |       <li><b>Repeated observations.</b> One player and one eventual adoption can contribute multiple exposure trials; trial-level intervals overstate precision.</li>
+     # Adds the `li` page element shown or read by the browser.
+0359 |       <li><b>Archive recheck pending.</b> The analysis uses previously saved games. Reading the original archive again is a separate validation step.</li>
+     # Adds the `li` page element shown or read by the browser.
+0360 |     </ul>
+     # Closes the preceding element or code block.
+0361 |   </section>
+     # Closes the preceding element or code block.
+0362 | </main>
+     # Closes the preceding element or code block.
+0363 | <footer class="wrap"><span>Source: Lichess open database · January 2016 · 1800–2200 Elo</span><span>Analysis: complete 14-day follow-up · <a href="#top">Back to top ↑</a></span></footer>
+     # Adds the `footer` page element shown or read by the browser.
+0364 | <script>
+     # Starts the browser-side code for interaction and charts.
+0365 | (function(){
+     # Continues the page structure, styling, or browser logic above.
+0366 |   "use strict";
+     # Continues the page structure, styling, or browser logic above.
+0367 |   /* This is the saved findings page. site/build.py embeds results/report.json
+     # Existing developer note about this section.
+0368 |      at build time; the live console is a separate route backed by runner.py. */
+     # Continues the page structure, styling, or browser logic above.
+0369 |   var report={"parse":{"games":249505,"skipped":{"rating_band":2587133,"speed":1643553,"no_eco":977,"no_rating":25,"rare_eco":224268,"low_activity":64896},"players":6881,"span":["2015-12-31 23:00:34","2016-01-31 22:59:24"],"openings":40},"trials":{"n":214317,"adoptions":30011,"rate":0.14,"unit":"exposure trials with a full 14-day observation window"},"network":{"nodes":6881,"edges":173944,"density":0.007349,"components":1,"communities":5,"modularity":0.4926,"mean_degree":50.56,"pre_adoption_exposures":47268,"within_community":34064,"across_community":13204,"share_within":0.7207},"early_adopters":{"degree":{"0":60.7703,"1":84.2914},"kcore":{"0":28.3465,"1":30.8857},"betweenness":{"0":0.0003,"1":0.0006},"clustering":{"0":0.0705,"1":0.0687}},"curve_by_d":[{"d":1,"n":83397,"adopted":11305,"rate":0.1356,"lo":0.1332,"hi":0.1379},{"d":2,"n":39528,"adopted":5107,"rate":0.1292,"lo":0.1259,"hi":0.1325},{"d":3,"n":23074,"adopted":3110,"rate":0.1348,"lo":0.1304,"hi":0.1393},{"d":4,"n":14816,"adopted":2086,"rate":0.1408,"lo":0.1353,"hi":0.1465},{"d":5,"n":10362,"adopted":1498,"rate":0.1446,"lo":0.1379,"hi":0.1515},{"d":6,"n":43140,"adopted":6905,"rate":0.1601,"lo":0.1566,"hi":0.1636}],"verdict":{"raw_lift_d_last_over_first":1.181,"rate_d_min":0.1356,"rate_d_max":0.1601,"raw_curve_rises":true,"separated_at_fixed_k":false,"lift_over_null_at_min_d":1.084,"lift_over_null_at_max_d":0.959,"excess_over_null_grows_with_d":false,"beats_null_anywhere":true,"verdict":"simple contagion pattern: first-exposure association exceeds the shuffled null; no clear evidence that distinct exposers reinforce adoption"},"null_comparison":[{"d":1,"n_real":83397,"rate_real":0.135556,"rate_null":0.125029,"rate_sd":0.00096,"lift_over_null":1.084196,"z_vs_null":10.962666},{"d":2,"n_real":39528,"rate_real":0.1292,"rate_null":0.124446,"rate_sd":0.001488,"lift_over_null":1.038195,"z_vs_null":3.195075},{"d":3,"n_real":23074,"rate_real":0.134784,"rate_null":0.132214,"rate_sd":0.001732,"lift_over_null":1.019433,"z_vs_null":1.483208},{"d":4,"n_real":14816,"rate_real":0.140794,"rate_null":0.138437,"rate_sd":0.002272,"lift_over_null":1.017027,"z_vs_null":1.037622},{"d":5,"n_real":10362,"rate_real":0.144567,"rate_null":0.14407,"rate_sd":0.002969,"lift_over_null":1.003447,"z_vs_null":0.167241},{"d":6,"n_real":43140,"rate_real":0.16006,"rate_null":0.166825,"rate_sd":0.004114,"lift_over_null":0.959451,"z_vs_null":-1.644214}],"matched_controls":{"n_pairs":56459,"exposed_adoption_rate":0.1297,"control_adoption_rate":0.1042,"difference":0.0255,"ci95":[0.0182,0.0313],"ci95_method":"player-cluster Poisson bootstrap; both pair members","bootstrap_reps":400,"risk_ratio":1.244,"control_crossover_rate":0.1616,"pre_match_balance":{"exposed_rating_mean":1936.8,"control_rating_mean":1935.4,"exposed_games_mean":18.4,"control_games_mean":17.6}},"predictive":{"n_train":120523,"n_test":50929,"split_method":"held-out player-opening-colour spells","feature_cutoff":"2016-01-04 09:26:44","leakage_free":true,"base_rate_train":0.1266,"base_rate_test":0.1296,"auc_baseline":0.5952,"train_auc_baseline":0.8118,"logistic_baseline":0.5879,"auc_repertoire":0.6075,"train_auc_repertoire":0.8403,"logistic_repertoire":0.5859,"auc_network":0.6331,"train_auc_network":0.8528,"logistic_network":0.6175,"gain_repertoire_over_baseline":0.0123,"gain_network_over_repertoire":0.0256,"auc_plus_k_only":0.6319,"gain_plus_k_only":0.0244,"auc_plus_diversity_only":0.6147,"gain_plus_diversity_only":0.0072,"auc_plus_centrality_only":0.6103,"gain_plus_centrality_only":0.0028,"reading":"repertoire proximity is worth +0.0123 AUC over the baseline; knowing who played the opening at the player adds at most +0.0244 on top of it"},"animation":{"behaviour":"A00/B","gif":"results/figures/diffusion.gif","panels":"results/figures/diffusion_panels.png","nodes_drawn":"400","adopters":"394"},"corrections":["Only exposure trials with full 14-day follow-up are included, regardless of outcome.","Matched controls are unexposed and unadopted at t0; rating and activity use only prior games.","Player-cluster bootstrap weights both exposed and control players in the matched interval.","Prediction uses background features before evaluated trials and group-held-out spells.","The shuffled-time reference uses 20 permutations on the cached January slice."],"analysis_revision":{"follow_up":"complete windows only; late positive and negative trials excluded","controls":"risk-set controls; rating and activity measured strictly before each matching time","prediction":"background features before trials; held-out player-opening-colour spells","source":"cached January 2016 game slice; archive not reparsed","uncertainty":"400-replicate player-cluster Poisson bootstrap for matched difference"},"historical_robustness_tables":"Secondary robustness CSVs have not yet been rerun after the follow-up correction.","null_replicates":20,"explorer":[{"opening":"A00","colour":"B","d":1,"n":812,"adopted":459,"rate":0.565271,"lo":0.530946,"hi":0.598982},{"opening":"A00","colour":"B","d":2,"n":402,"adopted":234,"rate":0.58209,"lo":0.53332,"hi":0.629305},{"opening":"A00","colour":"B","d":3,"n":293,"adopted":170,"rate":0.580205,"lo":0.523013,"hi":0.63532},{"opening":"A00","colour":"B","d":4,"n":246,"adopted":140,"rate":0.569106,"lo":0.506629,"hi":0.629458},{"opening":"A00","colour":"B","d":5,"n":195,"adopted":107,"rate":0.548718,"lo":0.478603,"hi":0.61695},{"opening":"A00","colour":"B","d":6,"n":1628,"adopted":1028,"rate":0.63145,"lo":0.607732,"hi":0.654549},{"opening":"A00","colour":"W","d":1,"n":3253,"adopted":502,"rate":0.154319,"lo":0.142313,"hi":0.167141},{"opening":"A00","colour":"W","d":2,"n":1355,"adopted":194,"rate":0.143173,"lo":0.125532,"hi":0.162833},{"opening":"A00","colour":"W","d":3,"n":632,"adopted":105,"rate":0.166139,"lo":0.139155,"hi":0.197158},{"opening":"A00","colour":"W","d":4,"n":281,"adopted":45,"rate":0.160142,"lo":0.12189,"hi":0.207562},{"opening":"A00","colour":"W","d":5,"n":144,"adopted":25,"rate":0.173611,"lo":0.120449,"hi":0.243736},{"opening":"A00","colour":"W","d":6,"n":157,"adopted":30,"rate":0.191083,"lo":0.137254,"hi":0.259668},{"opening":"A01","colour":"B","d":1,"n":210,"adopted":41,"rate":0.195238,"lo":0.147303,"hi":0.254123},{"opening":"A01","colour":"B","d":2,"n":118,"adopted":28,"rate":0.237288,"lo":0.169579,"hi":0.321564},{"opening":"A01","colour":"B","d":3,"n":90,"adopted":23,"rate":0.255556,"lo":0.176746,"hi":0.354378},{"opening":"A01","colour":"B","d":4,"n":67,"adopted":16,"rate":0.238806,"lo":0.15268,"hi":0.35326},{"opening":"A01","colour":"B","d":5,"n":68,"adopted":15,"rate":0.220588,"lo":0.138489,"hi":0.33257},{"opening":"A01","colour":"B","d":6,"n":875,"adopted":265,"rate":0.302857,"lo":0.273327,"hi":0.334111},{"opening":"A01","colour":"W","d":1,"n":1480,"adopted":20,"rate":0.013514,"lo":0.008765,"hi":0.020781},{"opening":"A01","colour":"W","d":2,"n":250,"adopted":4,"rate":0.016,"lo":0.006239,"hi":0.04041},{"opening":"A01","colour":"W","d":3,"n":38,"adopted":0,"rate":0.0,"lo":0.0,"hi":0.091813},{"opening":"A01","colour":"W","d":4,"n":6,"adopted":0,"rate":0.0,"lo":0.0,"hi":0.390343},{"opening":"A01","colour":"W","d":5,"n":2,"adopted":0,"rate":0.0,"lo":0.0,"hi":0.657628},{"opening":"A02","colour":"B","d":1,"n":230,"adopted":70,"rate":0.304348,"lo":0.248498,"hi":0.366626},{"opening":"A02","colour":"B","d":2,"n":126,"adopted":41,"rate":0.325397,"lo":0.249808,"hi":0.411318},{"opening":"A02","colour":"B","d":3,"n":95,"adopted":30,"rate":0.315789,"lo":0.231031,"hi":0.414867},{"opening":"A02","colour":"B","d":4,"n":79,"adopted":29,"rate":0.367089,"lo":0.269271,"hi":0.477233},{"opening":"A02","colour":"B","d":5,"n":65,"adopted":26,"rate":0.4,"lo":0.289718,"hi":0.521442},{"opening":"A02","colour":"B","d":6,"n":579,"adopted":220,"rate":0.379965,"lo":0.341343,"hi":0.42017},{"opening":"A02","colour":"W","d":1,"n":1240,"adopted":33,"rate":0.026613,"lo":0.019012,"hi":0.037138},{"opening":"A02","colour":"W","d":2,"n":266,"adopted":5,"rate":0.018797,"lo":0.008055,"hi":0.04324},{"opening":"A02","colour":"W","d":3,"n":82,"adopted":2,"rate":0.02439,"lo":0.006714,"hi":0.084635},{"opening":"A02","colour":"W","d":4,"n":19,"adopted":0,"rate":0.0,"lo":0.0,"hi":0.168184},{"opening":"A02","colour":"W","d":5,"n":2,"adopted":0,"rate":0.0,"lo":0.0,"hi":0.657628},{"opening":"A02","colour":"W","d":6,"n":1,"adopted":0,"rate":0.0,"lo":0.0,"hi":0.793457},{"opening":"A04","colour":"B","d":1,"n":517,"adopted":158,"rate":0.305609,"lo":0.267454,"hi":0.346632},{"opening":"A04","colour":"B","d":2,"n":304,"adopted":88,"rate":0.289474,"lo":0.24137,"hi":0.342831},{"opening":"A04","colour":"B","d":3,"n":233,"adopted":66,"rate":0.283262,"lo":0.229284,"hi":0.34427},{"opening":"A04","colour":"B","d":4,"n":187,"adopted":46,"rate":0.245989,"lo":0.189785,"hi":0.31242},{"opening":"A04","colour":"B","d":5,"n":156,"adopted":33,"rate":0.211538,"lo":0.154779,"hi":0.282163},{"opening":"A04","colour":"B","d":6,"n":881,"adopted":272,"rate":0.30874,"lo":0.279119,"hi":0.340021},{"opening":"A04","colour":"W","d":1,"n":1721,"adopted":92,"rate":0.053457,"lo":0.043789,"hi":0.065114},{"opening":"A04","colour":"W","d":2,"n":659,"adopted":27,"rate":0.040971,"lo":0.028308,"hi":0.058955},{"opening":"A04","colour":"W","d":3,"n":281,"adopted":14,"rate":0.049822,"lo":0.029907,"hi":0.081881},{"opening":"A04","colour":"W","d":4,"n":138,"adopted":5,"rate":0.036232,"lo":0.015573,"hi":0.082012},{"opening":"A04","colour":"W","d":5,"n":71,"adopted":2,"rate":0.028169,"lo":0.007759,"hi":0.097017},{"opening":"A04","colour":"W","d":6,"n":85,"adopted":0,"rate":0.0,"lo":0.0,"hi":0.043241},{"opening":"A10","colour":"B","d":1,"n":376,"adopted":52,"rate":0.138298,"lo":0.107047,"hi":0.176865},{"opening":"A10","colour":"B","d":2,"n":205,"adopted":33,"rate":0.160976,"lo":0.116979,"hi":0.217445},{"opening":"A10","colour":"B","d":3,"n":150,"adopted":21,"rate":0.14,"lo":0.093426,"hi":0.204553},{"opening":"A10","colour":"B","d":4,"n":112,"adopted":11,"rate":0.098214,"lo":0.055729,"hi":0.167348},{"opening":"A10","colour":"B","d":5,"n":102,"adopted":12,"rate":0.117647,"lo":0.068594,"hi":0.194456},{"opening":"A10","colour":"B","d":6,"n":452,"adopted":42,"rate":0.09292,"lo":0.069479,"hi":0.123223},{"opening":"A10","colour":"W","d":1,"n":862,"adopted":35,"rate":0.040603,"lo":0.029338,"hi":0.055945},{"opening":"A10","colour":"W","d":2,"n":286,"adopted":5,"rate":0.017483,"lo":0.00749,"hi":0.040266},{"opening":"A10","colour":"W","d":3,"n":141,"adopted":6,"rate":0.042553,"lo":0.019646,"hi":0.089726},{"opening":"A10","colour":"W","d":4,"n":69,"adopted":1,"rate":0.014493,"lo":0.002563,"hi":0.077633},{"opening":"A10","colour":"W","d":5,"n":43,"adopted":0,"rate":0.0,"lo":0.0,"hi":0.082013},{"opening":"A10","colour":"W","d":6,"n":71,"adopted":8,"rate":0.112676,"lo":0.058212,"hi":0.206903},{"opening":"A40","colour":"B","d":1,"n":1698,"adopted":412,"rate":0.242638,"lo":0.222844,"hi":0.263595},{"opening":"A40","colour":"B","d":2,"n":1059,"adopted":224,"rate":0.21152,"lo":0.187989,"hi":0.237137},{"opening":"A40","colour":"B","d":3,"n":708,"adopted":128,"rate":0.180791,"lo":0.15419,"hi":0.210838},{"opening":"A40","colour":"B","d":4,"n":509,"adopted":96,"rate":0.188605,"lo":0.157,"hi":0.224876},{"opening":"A40","colour":"B","d":5,"n":363,"adopted":66,"rate":0.181818,"lo":0.14554,"hi":0.22476},{"opening":"A40","colour":"B","d":6,"n":1358,"adopted":328,"rate":0.241532,"lo":0.219517,"hi":0.265005},{"opening":"A40","colour":"W","d":1,"n":1677,"adopted":380,"rate":0.226595,"lo":0.207197,"hi":0.247243},{"opening":"A40","colour":"W","d":2,"n":885,"adopted":143,"rate":0.161582,"lo":0.138803,"hi":0.187286},{"opening":"A40","colour":"W","d":3,"n":639,"adopted":83,"rate":0.12989,"lo":0.10602,"hi":0.158185},{"opening":"A40","colour":"W","d":4,"n":476,"adopted":56,"rate":0.117647,"lo":0.091718,"hi":0.149699},{"opening":"A40","colour":"W","d":5,"n":361,"adopted":38,"rate":0.105263,"lo":0.077655,"hi":0.141184},{"opening":"A40","colour":"W","d":6,"n":1655,"adopted":115,"rate":0.069486,"lo":0.058206,"hi":0.082761},{"opening":"A41","colour":"B","d":1,"n":907,"adopted":63,"rate":0.06946,"lo":0.054665,"hi":0.087886},{"opening":"A41","colour":"B","d":2,"n":315,"adopted":29,"rate":0.092063,"lo":0.064865,"hi":0.129092},{"opening":"A41","colour":"B","d":3,"n":154,"adopted":13,"rate":0.084416,"lo":0.049995,"hi":0.139066},{"opening":"A41","colour":"B","d":4,"n":74,"adopted":4,"rate":0.054054,"lo":0.021219,"hi":0.130906},{"opening":"A41","colour":"B","d":5,"n":34,"adopted":0,"rate":0.0,"lo":0.0,"hi":0.101518},{"opening":"A41","colour":"B","d":6,"n":52,"adopted":0,"rate":0.0,"lo":0.0,"hi":0.068795},{"opening":"A41","colour":"W","d":1,"n":466,"adopted":58,"rate":0.124464,"lo":0.097527,"hi":0.157541},{"opening":"A41","colour":"W","d":2,"n":214,"adopted":30,"rate":0.140187,"lo":0.099993,"hi":0.193071},{"opening":"A41","colour":"W","d":3,"n":127,"adopted":15,"rate":0.11811,"lo":0.072896,"hi":0.185749},{"opening":"A41","colour":"W","d":4,"n":100,"adopted":9,"rate":0.09,"lo":0.048072,"hi":0.162264},{"opening":"A41","colour":"W","d":5,"n":73,"adopted":8,"rate":0.109589,"lo":0.056586,"hi":0.201628},{"opening":"A41","colour":"W","d":6,"n":477,"adopted":36,"rate":0.075472,"lo":0.05501,"hi":0.102716},{"opening":"A43","colour":"B","d":1,"n":1159,"adopted":76,"rate":0.065574,"lo":0.052709,"hi":0.081309},{"opening":"A43","colour":"B","d":2,"n":458,"adopted":21,"rate":0.045852,"lo":0.030182,"hi":0.069076},{"opening":"A43","colour":"B","d":3,"n":220,"adopted":17,"rate":0.077273,"lo":0.048802,"hi":0.120253},{"opening":"A43","colour":"B","d":4,"n":109,"adopted":9,"rate":0.082569,"lo":0.044046,"hi":0.149514},{"opening":"A43","colour":"B","d":5,"n":60,"adopted":6,"rate":0.1,"lo":0.046642,"hi":0.201497},{"opening":"A43","colour":"B","d":6,"n":76,"adopted":3,"rate":0.039474,"lo":0.013514,"hi":0.10975},{"opening":"A43","colour":"W","d":1,"n":595,"adopted":96,"rate":0.161345,"lo":0.133975,"hi":0.193059},{"opening":"A43","colour":"W","d":2,"n":298,"adopted":46,"rate":0.154362,"lo":0.117765,"hi":0.199758},{"opening":"A43","colour":"W","d":3,"n":185,"adopted":35,"rate":0.189189,"lo":0.139293,"hi":0.251731},{"opening":"A43","colour":"W","d":4,"n":139,"adopted":28,"rate":0.201439,"lo":0.143206,"hi":0.275731},{"opening":"A43","colour":"W","d":5,"n":105,"adopted":20,"rate":0.190476,"lo":0.126824,"hi":0.275978},{"opening":"A43","colour":"W","d":6,"n":519,"adopted":101,"rate":0.194605,"lo":0.162839,"hi":0.230858},{"opening":"A45","colour":"B","d":1,"n":749,"adopted":108,"rate":0.144192,"lo":0.120849,"hi":0.171167},{"opening":"A45","colour":"B","d":2,"n":442,"adopted":45,"rate":0.10181,"lo":0.076962,"hi":0.13352},{"opening":"A45","colour":"B","d":3,"n":318,"adopted":29,"rate":0.091195,"lo":0.064246,"hi":0.127903},{"opening":"A45","colour":"B","d":4,"n":246,"adopted":17,"rate":0.069106,"lo":0.04359,"hi":0.107872},{"opening":"A45","colour":"B","d":5,"n":212,"adopted":12,"rate":0.056604,"lo":0.032672,"hi":0.096318},{"opening":"A45","colour":"B","d":6,"n":1555,"adopted":77,"rate":0.049518,"lo":0.039801,"hi":0.061455},{"opening":"A45","colour":"W","d":1,"n":1689,"adopted":136,"rate":0.080521,"lo":0.068476,"hi":0.09447},{"opening":"A45","colour":"W","d":2,"n":843,"adopted":59,"rate":0.069988,"lo":0.054645,"hi":0.089233},{"opening":"A45","colour":"W","d":3,"n":478,"adopted":34,"rate":0.07113,"lo":0.051344,"hi":0.097754},{"opening":"A45","colour":"W","d":4,"n":264,"adopted":19,"rate":0.07197,"lo":0.046555,"hi":0.109663},{"opening":"A45","colour":"W","d":5,"n":146,"adopted":14,"rate":0.09589,"lo":0.057981,"hi":0.154521},{"opening":"A45","colour":"W","d":6,"n":202,"adopted":13,"rate":0.064356,"lo":0.037992,"hi":0.106981},{"opening":"A46","colour":"B","d":1,"n":559,"adopted":78,"rate":0.139535,"lo":0.113263,"hi":0.170727},{"opening":"A46","colour":"B","d":2,"n":285,"adopted":31,"rate":0.108772,"lo":0.077693,"hi":0.150257},{"opening":"A46","colour":"B","d":3,"n":201,"adopted":23,"rate":0.114428,"lo":0.077469,"hi":0.165848},{"opening":"A46","colour":"B","d":4,"n":138,"adopted":16,"rate":0.115942,"lo":0.072638,"hi":0.180049},{"opening":"A46","colour":"B","d":5,"n":94,"adopted":8,"rate":0.085106,"lo":0.043755,"hi":0.159038},{"opening":"A46","colour":"B","d":6,"n":412,"adopted":9,"rate":0.021845,"lo":0.011534,"hi":0.04099},{"opening":"A46","colour":"W","d":1,"n":929,"adopted":79,"rate":0.085038,"lo":0.068765,"hi":0.104728},{"opening":"A46","colour":"W","d":2,"n":395,"adopted":31,"rate":0.078481,"lo":0.055837,"hi":0.109245},{"opening":"A46","colour":"W","d":3,"n":190,"adopted":17,"rate":0.089474,"lo":0.056613,"hi":0.138607},{"opening":"A46","colour":"W","d":4,"n":92,"adopted":14,"rate":0.152174,"lo":0.092865,"hi":0.239367},{"opening":"A46","colour":"W","d":5,"n":49,"adopted":9,"rate":0.183673,"lo":0.099762,"hi":0.313579},{"opening":"A46","colour":"W","d":6,"n":79,"adopted":3,"rate":0.037975,"lo":0.012998,"hi":0.105802},{"opening":"B00","colour":"B","d":1,"n":2352,"adopted":360,"rate":0.153061,"lo":0.139077,"hi":0.168177},{"opening":"B00","colour":"B","d":2,"n":1070,"adopted":159,"rate":0.148598,"lo":0.128544,"hi":0.171167},{"opening":"B00","colour":"B","d":3,"n":519,"adopted":79,"rate":0.152216,"lo":0.123873,"hi":0.185669},{"opening":"B00","colour":"B","d":4,"n":285,"adopted":47,"rate":0.164912,"lo":0.12634,"hi":0.212398},{"opening":"B00","colour":"B","d":5,"n":169,"adopted":27,"rate":0.159763,"lo":0.112182,"hi":0.222469},{"opening":"B00","colour":"B","d":6,"n":249,"adopted":56,"rate":0.2249,"lo":0.177446,"hi":0.280713},{"opening":"B00","colour":"W","d":1,"n":918,"adopted":317,"rate":0.345316,"lo":0.31526,"hi":0.376661},{"opening":"B00","colour":"W","d":2,"n":432,"adopted":145,"rate":0.335648,"lo":0.29274,"hi":0.381454},{"opening":"B00","colour":"W","d":3,"n":307,"adopted":113,"rate":0.368078,"lo":0.316069,"hi":0.423349},{"opening":"B00","colour":"W","d":4,"n":237,"adopted":94,"rate":0.396624,"lo":0.336468,"hi":0.460079},{"opening":"B00","colour":"W","d":5,"n":186,"adopted":62,"rate":0.333333,"lo":0.269563,"hi":0.403849},{"opening":"B00","colour":"W","d":6,"n":1684,"adopted":501,"rate":0.297506,"lo":0.276152,"hi":0.319782},{"opening":"B01","colour":"B","d":1,"n":2648,"adopted":298,"rate":0.112538,"lo":0.101058,"hi":0.125141},{"opening":"B01","colour":"B","d":2,"n":1467,"adopted":140,"rate":0.095433,"lo":0.081437,"hi":0.111542},{"opening":"B01","colour":"B","d":3,"n":880,"adopted":68,"rate":0.077273,"lo":0.06141,"hi":0.09681},{"opening":"B01","colour":"B","d":4,"n":535,"adopted":50,"rate":0.093458,"lo":0.071609,"hi":0.121104},{"opening":"B01","colour":"B","d":5,"n":367,"adopted":32,"rate":0.087193,"lo":0.062439,"hi":0.1205},{"opening":"B01","colour":"B","d":6,"n":849,"adopted":77,"rate":0.090695,"lo":0.073177,"hi":0.1119},{"opening":"B01","colour":"W","d":1,"n":820,"adopted":327,"rate":0.39878,"lo":0.365813,"hi":0.432692},{"opening":"B01","colour":"W","d":2,"n":542,"adopted":193,"rate":0.356089,"lo":0.316917,"hi":0.397285},{"opening":"B01","colour":"W","d":3,"n":420,"adopted":144,"rate":0.342857,"lo":0.299069,"hi":0.389494},{"opening":"B01","colour":"W","d":4,"n":338,"adopted":109,"rate":0.322485,"lo":0.274888,"hi":0.374072},{"opening":"B01","colour":"W","d":5,"n":313,"adopted":93,"rate":0.297125,"lo":0.249204,"hi":0.349965},{"opening":"B01","colour":"W","d":6,"n":2561,"adopted":434,"rate":0.169465,"lo":0.155432,"hi":0.184488},{"opening":"B02","colour":"B","d":1,"n":1132,"adopted":53,"rate":0.04682,"lo":0.035972,"hi":0.060733},{"opening":"B02","colour":"B","d":2,"n":323,"adopted":21,"rate":0.065015,"lo":0.042914,"hi":0.097343},{"opening":"B02","colour":"B","d":3,"n":105,"adopted":5,"rate":0.047619,"lo":0.020509,"hi":0.106663},{"opening":"B02","colour":"B","d":4,"n":53,"adopted":3,"rate":0.056604,"lo":0.019436,"hi":0.153704},{"opening":"B02","colour":"B","d":5,"n":30,"adopted":2,"rate":0.066667,"lo":0.018477,"hi":0.213238},{"opening":"B02","colour":"B","d":6,"n":26,"adopted":1,"rate":0.038462,"lo":0.006822,"hi":0.188932},{"opening":"B02","colour":"W","d":1,"n":362,"adopted":56,"rate":0.154696,"lo":0.121089,"hi":0.195555},{"opening":"B02","colour":"W","d":2,"n":210,"adopted":30,"rate":0.142857,"lo":0.101935,"hi":0.196612},{"opening":"B02","colour":"W","d":3,"n":174,"adopted":26,"rate":0.149425,"lo":0.104057,"hi":0.20994},{"opening":"B02","colour":"W","d":4,"n":133,"adopted":18,"rate":0.135338,"lo":0.087352,"hi":0.203799},{"opening":"B02","colour":"W","d":5,"n":108,"adopted":14,"rate":0.12963,"lo":0.078812,"hi":0.205891},{"opening":"B02","colour":"W","d":6,"n":550,"adopted":109,"rate":0.198182,"lo":0.16701,"hi":0.233541},{"opening":"B06","colour":"B","d":1,"n":2087,"adopted":133,"rate":0.063728,"lo":0.054028,"hi":0.07503},{"opening":"B06","colour":"B","d":2,"n":845,"adopted":49,"rate":0.057988,"lo":0.044139,"hi":0.075839},{"opening":"B06","colour":"B","d":3,"n":391,"adopted":26,"rate":0.066496,"lo":0.045779,"hi":0.095649},{"opening":"B06","colour":"B","d":4,"n":175,"adopted":9,"rate":0.051429,"lo":0.027289,"hi":0.094839},{"opening":"B06","colour":"B","d":5,"n":98,"adopted":9,"rate":0.091837,"lo":0.049069,"hi":0.165398},{"opening":"B06","colour":"B","d":6,"n":83,"adopted":2,"rate":0.024096,"lo":0.006633,"hi":0.083665},{"opening":"B06","colour":"W","d":1,"n":609,"adopted":163,"rate":0.267652,"lo":0.234025,"hi":0.304192},{"opening":"B06","colour":"W","d":2,"n":346,"adopted":97,"rate":0.280347,"lo":0.235629,"hi":0.329889},{"opening":"B06","colour":"W","d":3,"n":245,"adopted":63,"rate":0.257143,"lo":0.206458,"hi":0.315326},{"opening":"B06","colour":"W","d":4,"n":201,"adopted":43,"rate":0.21393,"lo":0.162881,"hi":0.275709},{"opening":"B06","colour":"W","d":5,"n":159,"adopted":33,"rate":0.207547,"lo":0.151775,"hi":0.277117},{"opening":"B06","colour":"W","d":6,"n":1629,"adopted":340,"rate":0.208717,"lo":0.189678,"hi":0.229126},{"opening":"B07","colour":"B","d":1,"n":2316,"adopted":235,"rate":0.101468,"lo":0.089823,"hi":0.114433},{"opening":"B07","colour":"B","d":2,"n":1023,"adopted":91,"rate":0.088954,"lo":0.073012,"hi":0.107972},{"opening":"B07","colour":"B","d":3,"n":475,"adopted":42,"rate":0.088421,"lo":0.06608,"hi":0.117366},{"opening":"B07","colour":"B","d":4,"n":237,"adopted":19,"rate":0.080169,"lo":0.051921,"hi":0.121809},{"opening":"B07","colour":"B","d":5,"n":132,"adopted":9,"rate":0.068182,"lo":0.036282,"hi":0.124505},{"opening":"B07","colour":"B","d":6,"n":145,"adopted":8,"rate":0.055172,"lo":0.028218,"hi":0.105088},{"opening":"B07","colour":"W","d":1,"n":742,"adopted":241,"rate":0.324798,"lo":0.292079,"hi":0.359321},{"opening":"B07","colour":"W","d":2,"n":394,"adopted":110,"rate":0.279188,"lo":0.237187,"hi":0.325453},{"opening":"B07","colour":"W","d":3,"n":288,"adopted":85,"rate":0.295139,"lo":0.245436,"hi":0.350235},{"opening":"B07","colour":"W","d":4,"n":225,"adopted":61,"rate":0.271111,"lo":0.217229,"hi":0.332678},{"opening":"B07","colour":"W","d":5,"n":182,"adopted":54,"rate":0.296703,"lo":0.235094,"hi":0.366717},{"opening":"B07","colour":"W","d":6,"n":1509,"adopted":303,"rate":0.200795,"lo":0.181354,"hi":0.221756},{"opening":"B10","colour":"B","d":1,"n":1292,"adopted":67,"rate":0.051858,"lo":0.04104,"hi":0.065332},{"opening":"B10","colour":"B","d":2,"n":586,"adopted":24,"rate":0.040956,"lo":0.027674,"hi":0.060217},{"opening":"B10","colour":"B","d":3,"n":344,"adopted":15,"rate":0.043605,"lo":0.0266,"hi":0.07069},{"opening":"B10","colour":"B","d":4,"n":219,"adopted":14,"rate":0.063927,"lo":0.038458,"hi":0.104431},{"opening":"B10","colour":"B","d":5,"n":152,"adopted":13,"rate":0.085526,"lo":0.050662,"hi":0.140825},{"opening":"B10","colour":"B","d":6,"n":386,"adopted":25,"rate":0.064767,"lo":0.044251,"hi":0.093861},{"opening":"B10","colour":"W","d":1,"n":730,"adopted":110,"rate":0.150685,"lo":0.126565,"hi":0.178462},{"opening":"B10","colour":"W","d":2,"n":463,"adopted":56,"rate":0.12095,"lo":0.094327,"hi":0.153812},{"opening":"B10","colour":"W","d":3,"n":365,"adopted":45,"rate":0.123288,"lo":0.09343,"hi":0.160992},{"opening":"B10","colour":"W","d":4,"n":281,"adopted":34,"rate":0.120996,"lo":0.087891,"hi":0.164325},{"opening":"B10","colour":"W","d":5,"n":203,"adopted":24,"rate":0.118227,"lo":0.080747,"hi":0.169887},{"opening":"B10","colour":"W","d":6,"n":736,"adopted":84,"rate":0.11413,"lo":0.093134,"hi":0.139134},{"opening":"B12","colour":"B","d":1,"n":1274,"adopted":72,"rate":0.056515,"lo":0.045117,"hi":0.070579},{"opening":"B12","colour":"B","d":2,"n":555,"adopted":19,"rate":0.034234,"lo":0.022024,"hi":0.052848},{"opening":"B12","colour":"B","d":3,"n":315,"adopted":4,"rate":0.012698,"lo":0.004949,"hi":0.032191},{"opening":"B12","colour":"B","d":4,"n":199,"adopted":2,"rate":0.01005,"lo":0.00276,"hi":0.035898},{"opening":"B12","colour":"B","d":5,"n":132,"adopted":0,"rate":0.0,"lo":0.0,"hi":0.02828},{"opening":"B12","colour":"B","d":6,"n":344,"adopted":2,"rate":0.005814,"lo":0.001596,"hi":0.020948},{"opening":"B12","colour":"W","d":1,"n":737,"adopted":108,"rate":0.14654,"lo":0.122841,"hi":0.173905},{"opening":"B12","colour":"W","d":2,"n":435,"adopted":50,"rate":0.114943,"lo":0.088282,"hi":0.148345},{"opening":"B12","colour":"W","d":3,"n":301,"adopted":32,"rate":0.106312,"lo":0.076317,"hi":0.14623},{"opening":"B12","colour":"W","d":4,"n":229,"adopted":26,"rate":0.113537,"lo":0.078668,"hi":0.161159},{"opening":"B12","colour":"W","d":5,"n":175,"adopted":22,"rate":0.125714,"lo":0.084504,"hi":0.183004},{"opening":"B12","colour":"W","d":6,"n":767,"adopted":83,"rate":0.108214,"lo":0.088149,"hi":0.132183},{"opening":"B13","colour":"B","d":1,"n":757,"adopted":56,"rate":0.073976,"lo":0.057405,"hi":0.094849},{"opening":"B13","colour":"B","d":2,"n":320,"adopted":12,"rate":0.0375,"lo":0.021579,"hi":0.064394},{"opening":"B13","colour":"B","d":3,"n":179,"adopted":8,"rate":0.044693,"lo":0.022818,"hi":0.0857},{"opening":"B13","colour":"B","d":4,"n":97,"adopted":4,"rate":0.041237,"lo":0.016151,"hi":0.101277},{"opening":"B13","colour":"B","d":5,"n":65,"adopted":4,"rate":0.061538,"lo":0.024189,"hi":0.147824},{"opening":"B13","colour":"B","d":6,"n":126,"adopted":11,"rate":0.087302,"lo":0.049446,"hi":0.149578},{"opening":"B13","colour":"W","d":1,"n":571,"adopted":63,"rate":0.110333,"lo":0.087193,"hi":0.138681},{"opening":"B13","colour":"W","d":2,"n":302,"adopted":33,"rate":0.109272,"lo":0.078872,"hi":0.149487},{"opening":"B13","colour":"W","d":3,"n":191,"adopted":20,"rate":0.104712,"lo":0.068812,"hi":0.156199},{"opening":"B13","colour":"W","d":4,"n":128,"adopted":13,"rate":0.101562,"lo":0.060318,"hi":0.166026},{"opening":"B13","colour":"W","d":5,"n":85,"adopted":7,"rate":0.082353,"lo":0.040463,"hi":0.160362},{"opening":"B13","colour":"W","d":6,"n":191,"adopted":63,"rate":0.329843,"lo":0.267095,"hi":0.3993},{"opening":"B20","colour":"B","d":1,"n":912,"adopted":110,"rate":0.120614,"lo":0.101053,"hi":0.143358},{"opening":"B20","colour":"B","d":2,"n":492,"adopted":32,"rate":0.065041,"lo":0.046445,"hi":0.090376},{"opening":"B20","colour":"B","d":3,"n":358,"adopted":22,"rate":0.061453,"lo":0.040929,"hi":0.091288},{"opening":"B20","colour":"B","d":4,"n":259,"adopted":14,"rate":0.054054,"lo":0.032468,"hi":0.088675},{"opening":"B20","colour":"B","d":5,"n":207,"adopted":10,"rate":0.048309,"lo":0.026449,"hi":0.086629},{"opening":"B20","colour":"B","d":6,"n":1414,"adopted":22,"rate":0.015559,"lo":0.010297,"hi":0.023446},{"opening":"B20","colour":"W","d":1,"n":1562,"adopted":128,"rate":0.081946,"lo":0.069348,"hi":0.096596},{"opening":"B20","colour":"W","d":2,"n":868,"adopted":68,"rate":0.078341,"lo":0.062266,"hi":0.098132},{"opening":"B20","colour":"W","d":3,"n":507,"adopted":33,"rate":0.065089,"lo":0.046719,"hi":0.09},{"opening":"B20","colour":"W","d":4,"n":300,"adopted":17,"rate":0.056667,"lo":0.035677,"hi":0.088867},{"opening":"B20","colour":"W","d":5,"n":185,"adopted":13,"rate":0.07027,"lo":0.041523,"hi":0.116502},{"opening":"B20","colour":"W","d":6,"n":306,"adopted":21,"rate":0.068627,"lo":0.045321,"hi":0.102631},{"opening":"B21","colour":"B","d":1,"n":846,"adopted":155,"rate":0.183215,"lo":0.158599,"hi":0.210695},{"opening":"B21","colour":"B","d":2,"n":487,"adopted":79,"rate":0.162218,"lo":0.132141,"hi":0.197582},{"opening":"B21","colour":"B","d":3,"n":313,"adopted":45,"rate":0.14377,"lo":0.109215,"hi":0.186963},{"opening":"B21","colour":"B","d":4,"n":257,"adopted":38,"rate":0.14786,"lo":0.109658,"hi":0.196434},{"opening":"B21","colour":"B","d":5,"n":204,"adopted":24,"rate":0.117647,"lo":0.080345,"hi":0.169083},{"opening":"B21","colour":"B","d":6,"n":1211,"adopted":43,"rate":0.035508,"lo":0.026467,"hi":0.047486},{"opening":"B21","colour":"W","d":1,"n":1534,"adopted":148,"rate":0.09648,"lo":0.082697,"hi":0.112279},{"opening":"B21","colour":"W","d":2,"n":798,"adopted":70,"rate":0.087719,"lo":0.070015,"hi":0.109374},{"opening":"B21","colour":"W","d":3,"n":459,"adopted":27,"rate":0.058824,"lo":0.040738,"hi":0.084232},{"opening":"B21","colour":"W","d":4,"n":279,"adopted":12,"rate":0.043011,"lo":0.024772,"hi":0.073663},{"opening":"B21","colour":"W","d":5,"n":165,"adopted":9,"rate":0.054545,"lo":0.028958,"hi":0.100403},{"opening":"B21","colour":"W","d":6,"n":280,"adopted":20,"rate":0.071429,"lo":0.046711,"hi":0.107747},{"opening":"B22","colour":"B","d":1,"n":509,"adopted":66,"rate":0.129666,"lo":0.103233,"hi":0.161647},{"opening":"B22","colour":"B","d":2,"n":282,"adopted":34,"rate":0.120567,"lo":0.087575,"hi":0.163759},{"opening":"B22","colour":"B","d":3,"n":198,"adopted":18,"rate":0.090909,"lo":0.058278,"hi":0.139113},{"opening":"B22","colour":"B","d":4,"n":152,"adopted":13,"rate":0.085526,"lo":0.050662,"hi":0.140825},{"opening":"B22","colour":"B","d":5,"n":124,"adopted":13,"rate":0.104839,"lo":0.062297,"hi":0.171129},{"opening":"B22","colour":"B","d":6,"n":801,"adopted":23,"rate":0.028714,"lo":0.019209,"hi":0.042719},{"opening":"B22","colour":"W","d":1,"n":1165,"adopted":52,"rate":0.044635,"lo":0.034199,"hi":0.058065},{"opening":"B22","colour":"W","d":2,"n":519,"adopted":20,"rate":0.038536,"lo":0.025082,"hi":0.05877},{"opening":"B22","colour":"W","d":3,"n":244,"adopted":11,"rate":0.045082,"lo":0.025356,"hi":0.07891},{"opening":"B22","colour":"W","d":4,"n":108,"adopted":8,"rate":0.074074,"lo":0.03801,"hi":0.139398},{"opening":"B22","colour":"W","d":5,"n":52,"adopted":4,"rate":0.076923,"lo":0.030319,"hi":0.181738},{"opening":"B22","colour":"W","d":6,"n":62,"adopted":1,"rate":0.016129,"lo":0.002853,"hi":0.085869},{"opening":"B23","colour":"B","d":1,"n":530,"adopted":76,"rate":0.143396,"lo":0.116121,"hi":0.175804},{"opening":"B23","colour":"B","d":2,"n":310,"adopted":44,"rate":0.141935,"lo":0.10746,"hi":0.185177},{"opening":"B23","colour":"B","d":3,"n":204,"adopted":24,"rate":0.117647,"lo":0.080345,"hi":0.169083},{"opening":"B23","colour":"B","d":4,"n":154,"adopted":17,"rate":0.11039,"lo":0.070072,"hi":0.169672},{"opening":"B23","colour":"B","d":5,"n":105,"adopted":11,"rate":0.104762,"lo":0.05951,"hi":0.177914},{"opening":"B23","colour":"B","d":6,"n":559,"adopted":29,"rate":0.051878,"lo":0.036361,"hi":0.073513},{"opening":"B23","colour":"W","d":1,"n":1090,"adopted":56,"rate":0.051376,"lo":0.039774,"hi":0.066129},{"opening":"B23","colour":"W","d":2,"n":444,"adopted":16,"rate":0.036036,"lo":0.022301,"hi":0.057731},{"opening":"B23","colour":"W","d":3,"n":197,"adopted":10,"rate":0.050761,"lo":0.027803,"hi":0.090906},{"opening":"B23","colour":"W","d":4,"n":111,"adopted":6,"rate":0.054054,"lo":0.025006,"hi":0.112937},{"opening":"B23","colour":"W","d":5,"n":59,"adopted":1,"rate":0.016949,"lo":0.002998,"hi":0.089959},{"opening":"B23","colour":"W","d":6,"n":96,"adopted":0,"rate":0.0,"lo":0.0,"hi":0.038477},{"opening":"B30","colour":"B","d":1,"n":1063,"adopted":107,"rate":0.100659,"lo":0.083984,"hi":0.120209},{"opening":"B30","colour":"B","d":2,"n":540,"adopted":48,"rate":0.088889,"lo":0.067699,"hi":0.115887},{"opening":"B30","colour":"B","d":3,"n":300,"adopted":30,"rate":0.1,"lo":0.070947,"hi":0.139167},{"opening":"B30","colour":"B","d":4,"n":185,"adopted":15,"rate":0.081081,"lo":0.049749,"hi":0.129457},{"opening":"B30","colour":"B","d":5,"n":131,"adopted":7,"rate":0.053435,"lo":0.026122,"hi":0.106193},{"opening":"B30","colour":"B","d":6,"n":270,"adopted":4,"rate":0.014815,"lo":0.005776,"hi":0.037467},{"opening":"B30","colour":"W","d":1,"n":829,"adopted":153,"rate":0.18456,"lo":0.159627,"hi":0.212402},{"opening":"B30","colour":"W","d":2,"n":463,"adopted":63,"rate":0.136069,"lo":0.107818,"hi":0.17031},{"opening":"B30","colour":"W","d":3,"n":297,"adopted":32,"rate":0.107744,"lo":0.07736,"hi":0.148146},{"opening":"B30","colour":"W","d":4,"n":199,"adopted":21,"rate":0.105528,"lo":0.070063,"hi":0.155934},{"opening":"B30","colour":"W","d":5,"n":142,"adopted":10,"rate":0.070423,"lo":0.038698,"hi":0.124778},{"opening":"B30","colour":"W","d":6,"n":489,"adopted":30,"rate":0.06135,"lo":0.043308,"hi":0.08623},{"opening":"B32","colour":"B","d":1,"n":905,"adopted":82,"rate":0.090608,"lo":0.073596,"hi":0.111081},{"opening":"B32","colour":"B","d":2,"n":375,"adopted":36,"rate":0.096,"lo":0.07015,"hi":0.130043},{"opening":"B32","colour":"B","d":3,"n":168,"adopted":13,"rate":0.077381,"lo":0.045777,"hi":0.127881},{"opening":"B32","colour":"B","d":4,"n":84,"adopted":9,"rate":0.107143,"lo":0.0574,"hi":0.191248},{"opening":"B32","colour":"B","d":5,"n":46,"adopted":5,"rate":0.108696,"lo":0.047331,"hi":0.230381},{"opening":"B32","colour":"B","d":6,"n":63,"adopted":5,"rate":0.079365,"lo":0.034375,"hi":0.172705},{"opening":"B32","colour":"W","d":1,"n":609,"adopted":93,"rate":0.152709,"lo":0.126324,"hi":0.183449},{"opening":"B32","colour":"W","d":2,"n":282,"adopted":26,"rate":0.092199,"lo":0.063695,"hi":0.131663},{"opening":"B32","colour":"W","d":3,"n":188,"adopted":15,"rate":0.079787,"lo":0.048946,"hi":0.127458},{"opening":"B32","colour":"W","d":4,"n":125,"adopted":11,"rate":0.088,"lo":0.049848,"hi":0.150721},{"opening":"B32","colour":"W","d":5,"n":90,"adopted":9,"rate":0.1,"lo":0.053506,"hi":0.179244},{"opening":"B32","colour":"W","d":6,"n":293,"adopted":14,"rate":0.047782,"lo":0.028673,"hi":0.078595},{"opening":"B40","colour":"B","d":1,"n":1322,"adopted":78,"rate":0.059002,"lo":0.047532,"hi":0.073027},{"opening":"B40","colour":"B","d":2,"n":503,"adopted":24,"rate":0.047714,"lo":0.03227,"hi":0.070014},{"opening":"B40","colour":"B","d":3,"n":233,"adopted":13,"rate":0.055794,"lo":0.032892,"hi":0.093106},{"opening":"B40","colour":"B","d":4,"n":119,"adopted":3,"rate":0.02521,"lo":0.00861,"hi":0.071506},{"opening":"B40","colour":"B","d":5,"n":73,"adopted":5,"rate":0.068493,"lo":0.029609,"hi":0.150523},{"opening":"B40","colour":"B","d":6,"n":123,"adopted":5,"rate":0.04065,"lo":0.017486,"hi":0.091639},{"opening":"B40","colour":"W","d":1,"n":604,"adopted":112,"rate":0.18543,"lo":0.156458,"hi":0.218379},{"opening":"B40","colour":"W","d":2,"n":366,"adopted":58,"rate":0.15847,"lo":0.12463,"hi":0.199404},{"opening":"B40","colour":"W","d":3,"n":258,"adopted":37,"rate":0.143411,"lo":0.105868,"hi":0.191417},{"opening":"B40","colour":"W","d":4,"n":184,"adopted":28,"rate":0.152174,"lo":0.10743,"hi":0.211145},{"opening":"B40","colour":"W","d":5,"n":129,"adopted":20,"rate":0.155039,"lo":0.102661,"hi":0.227368},{"opening":"B40","colour":"W","d":6,"n":490,"adopted":81,"rate":0.165306,"lo":0.135044,"hi":0.200775},{"opening":"B50","colour":"B","d":1,"n":833,"adopted":51,"rate":0.061224,"lo":0.046871,"hi":0.079607},{"opening":"B50","colour":"B","d":2,"n":400,"adopted":12,"rate":0.03,"lo":0.017243,"hi":0.051699},{"opening":"B50","colour":"B","d":3,"n":220,"adopted":6,"rate":0.027273,"lo":0.012558,"hi":0.058214},{"opening":"B50","colour":"B","d":4,"n":140,"adopted":3,"rate":0.021429,"lo":0.007314,"hi":0.061106},{"opening":"B50","colour":"B","d":5,"n":101,"adopted":4,"rate":0.039604,"lo":0.015507,"hi":0.097441},{"opening":"B50","colour":"B","d":6,"n":175,"adopted":7,"rate":0.04,"lo":0.019509,"hi":0.080253},{"opening":"B50","colour":"W","d":1,"n":689,"adopted":46,"rate":0.066763,"lo":0.050424,"hi":0.087907},{"opening":"B50","colour":"W","d":2,"n":416,"adopted":30,"rate":0.072115,"lo":0.050979,"hi":0.101083},{"opening":"B50","colour":"W","d":3,"n":279,"adopted":23,"rate":0.082437,"lo":0.055558,"hi":0.120659},{"opening":"B50","colour":"W","d":4,"n":160,"adopted":10,"rate":0.0625,"lo":0.034299,"hi":0.111217},{"opening":"B50","colour":"W","d":5,"n":100,"adopted":10,"rate":0.1,"lo":0.055229,"hi":0.174367},{"opening":"B50","colour":"W","d":6,"n":213,"adopted":20,"rate":0.093897,"lo":0.061606,"hi":0.140576},{"opening":"C00","colour":"B","d":1,"n":2661,"adopted":391,"rate":0.146937,"lo":0.133994,"hi":0.160898},{"opening":"C00","colour":"B","d":2,"n":1474,"adopted":178,"rate":0.12076,"lo":0.105103,"hi":0.138388},{"opening":"C00","colour":"B","d":3,"n":904,"adopted":112,"rate":0.123894,"lo":0.103995,"hi":0.146976},{"opening":"C00","colour":"B","d":4,"n":547,"adopted":62,"rate":0.113346,"lo":0.089431,"hi":0.142653},{"opening":"C00","colour":"B","d":5,"n":411,"adopted":60,"rate":0.145985,"lo":0.115128,"hi":0.1834},{"opening":"C00","colour":"B","d":6,"n":1382,"adopted":123,"rate":0.089001,"lo":0.075106,"hi":0.105176},{"opening":"C00","colour":"W","d":1,"n":1191,"adopted":424,"rate":0.356003,"lo":0.329312,"hi":0.38362},{"opening":"C00","colour":"W","d":2,"n":797,"adopted":224,"rate":0.281054,"lo":0.250953,"hi":0.313255},{"opening":"C00","colour":"W","d":3,"n":602,"adopted":154,"rate":0.255814,"lo":0.222584,"hi":0.292141},{"opening":"C00","colour":"W","d":4,"n":472,"adopted":109,"rate":0.230932,"lo":0.195176,"hi":0.271033},{"opening":"C00","colour":"W","d":5,"n":372,"adopted":95,"rate":0.255376,"lo":0.213719,"hi":0.302035},{"opening":"C00","colour":"W","d":6,"n":2856,"adopted":460,"rate":0.161064,"lo":0.148039,"hi":0.175},{"opening":"C01","colour":"B","d":1,"n":1082,"adopted":120,"rate":0.110906,"lo":0.093554,"hi":0.131011},{"opening":"C01","colour":"B","d":2,"n":527,"adopted":47,"rate":0.089184,"lo":0.06773,"hi":0.116584},{"opening":"C01","colour":"B","d":3,"n":309,"adopted":26,"rate":0.084142,"lo":0.058066,"hi":0.120432},{"opening":"C01","colour":"B","d":4,"n":215,"adopted":22,"rate":0.102326,"lo":0.068549,"hi":0.150064},{"opening":"C01","colour":"B","d":5,"n":144,"adopted":11,"rate":0.076389,"lo":0.043187,"hi":0.131606},{"opening":"C01","colour":"B","d":6,"n":337,"adopted":15,"rate":0.04451,"lo":0.027156,"hi":0.072132},{"opening":"C01","colour":"W","d":1,"n":818,"adopted":121,"rate":0.147922,"lo":0.125239,"hi":0.173896},{"opening":"C01","colour":"W","d":2,"n":469,"adopted":55,"rate":0.117271,"lo":0.091213,"hi":0.149547},{"opening":"C01","colour":"W","d":3,"n":310,"adopted":38,"rate":0.122581,"lo":0.090624,"hi":0.163777},{"opening":"C01","colour":"W","d":4,"n":240,"adopted":26,"rate":0.108333,"lo":0.075008,"hi":0.154},{"opening":"C01","colour":"W","d":5,"n":181,"adopted":22,"rate":0.121547,"lo":0.081653,"hi":0.177172},{"opening":"C01","colour":"W","d":6,"n":501,"adopted":46,"rate":0.091816,"lo":0.069542,"hi":0.120303},{"opening":"C02","colour":"B","d":1,"n":1001,"adopted":121,"rate":0.120879,"lo":0.10212,"hi":0.142537},{"opening":"C02","colour":"B","d":2,"n":472,"adopted":49,"rate":0.103814,"lo":0.07942,"hi":0.134604},{"opening":"C02","colour":"B","d":3,"n":286,"adopted":20,"rate":0.06993,"lo":0.045721,"hi":0.105539},{"opening":"C02","colour":"B","d":4,"n":190,"adopted":13,"rate":0.068421,"lo":0.040418,"hi":0.11353},{"opening":"C02","colour":"B","d":5,"n":131,"adopted":9,"rate":0.068702,"lo":0.036562,"hi":0.125418},{"opening":"C02","colour":"B","d":6,"n":423,"adopted":22,"rate":0.052009,"lo":0.034594,"hi":0.077489},{"opening":"C02","colour":"W","d":1,"n":933,"adopted":116,"rate":0.12433,"lo":0.104685,"hi":0.147056},{"opening":"C02","colour":"W","d":2,"n":477,"adopted":45,"rate":0.09434,"lo":0.071254,"hi":0.123908},{"opening":"C02","colour":"W","d":3,"n":328,"adopted":29,"rate":0.088415,"lo":0.062264,"hi":0.124095},{"opening":"C02","colour":"W","d":4,"n":209,"adopted":26,"rate":0.124402,"lo":0.086326,"hi":0.176036},{"opening":"C02","colour":"W","d":5,"n":147,"adopted":16,"rate":0.108844,"lo":0.068115,"hi":0.169496},{"opening":"C02","colour":"W","d":6,"n":420,"adopted":68,"rate":0.161905,"lo":0.129766,"hi":0.200172},{"opening":"C20","colour":"B","d":1,"n":444,"adopted":75,"rate":0.168919,"lo":0.136941,"hi":0.206577},{"opening":"C20","colour":"B","d":2,"n":183,"adopted":33,"rate":0.180328,"lo":0.131382,"hi":0.242419},{"opening":"C20","colour":"B","d":3,"n":99,"adopted":16,"rate":0.161616,"lo":0.101999,"hi":0.246514},{"opening":"C20","colour":"B","d":4,"n":65,"adopted":12,"rate":0.184615,"lo":0.108888,"hi":0.295542},{"opening":"C20","colour":"B","d":5,"n":51,"adopted":9,"rate":0.176471,"lo":0.095723,"hi":0.302544},{"opening":"C20","colour":"B","d":6,"n":342,"adopted":71,"rate":0.207602,"lo":0.16798,"hi":0.25372},{"opening":"C20","colour":"W","d":1,"n":907,"adopted":87,"rate":0.095921,"lo":0.078424,"hi":0.116825},{"opening":"C20","colour":"W","d":2,"n":295,"adopted":35,"rate":0.118644,"lo":0.086557,"hi":0.160536},{"opening":"C20","colour":"W","d":3,"n":110,"adopted":23,"rate":0.209091,"lo":0.143563,"hi":0.294253},{"opening":"C20","colour":"W","d":4,"n":48,"adopted":12,"rate":0.25,"lo":0.149205,"hi":0.387846},{"opening":"C20","colour":"W","d":5,"n":19,"adopted":1,"rate":0.052632,"lo":0.009352,"hi":0.246392},{"opening":"C20","colour":"W","d":6,"n":7,"adopted":1,"rate":0.142857,"lo":0.025679,"hi":0.513135},{"opening":"C41","colour":"B","d":1,"n":1954,"adopted":156,"rate":0.079836,"lo":0.068626,"hi":0.092695},{"opening":"C41","colour":"B","d":2,"n":890,"adopted":45,"rate":0.050562,"lo":0.038,"hi":0.066987},{"opening":"C41","colour":"B","d":3,"n":469,"adopted":27,"rate":0.057569,"lo":0.039863,"hi":0.082464},{"opening":"C41","colour":"B","d":4,"n":235,"adopted":19,"rate":0.080851,"lo":0.052369,"hi":0.122817},{"opening":"C41","colour":"B","d":5,"n":135,"adopted":9,"rate":0.066667,"lo":0.035466,"hi":0.121847},{"opening":"C41","colour":"B","d":6,"n":188,"adopted":6,"rate":0.031915,"lo":0.014707,"hi":0.067869},{"opening":"C41","colour":"W","d":1,"n":700,"adopted":189,"rate":0.27,"lo":0.238432,"hi":0.304078},{"opening":"C41","colour":"W","d":2,"n":403,"adopted":102,"rate":0.253102,"lo":0.213119,"hi":0.297747},{"opening":"C41","colour":"W","d":3,"n":300,"adopted":69,"rate":0.23,"lo":0.185971,"hi":0.280856},{"opening":"C41","colour":"W","d":4,"n":230,"adopted":45,"rate":0.195652,"lo":0.149561,"hi":0.251744},{"opening":"C41","colour":"W","d":5,"n":199,"adopted":46,"rate":0.231156,"lo":0.178008,"hi":0.294487},{"opening":"C41","colour":"W","d":6,"n":1428,"adopted":182,"rate":0.127451,"lo":0.111148,"hi":0.145753},{"opening":"C42","colour":"B","d":1,"n":967,"adopted":51,"rate":0.05274,"lo":0.040339,"hi":0.068681},{"opening":"C42","colour":"B","d":2,"n":286,"adopted":16,"rate":0.055944,"lo":0.034725,"hi":0.088934},{"opening":"C42","colour":"B","d":3,"n":81,"adopted":8,"rate":0.098765,"lo":0.0509,"hi":0.182967},{"opening":"C42","colour":"B","d":4,"n":28,"adopted":1,"rate":0.035714,"lo":0.006332,"hi":0.177126},{"opening":"C42","colour":"B","d":5,"n":12,"adopted":0,"rate":0.0,"lo":0.0,"hi":0.242501},{"opening":"C42","colour":"B","d":6,"n":3,"adopted":0,"rate":0.0,"lo":0.0,"hi":0.561506},{"opening":"C42","colour":"W","d":1,"n":366,"adopted":59,"rate":0.161202,"lo":0.12708,"hi":0.202363},{"opening":"C42","colour":"W","d":2,"n":176,"adopted":25,"rate":0.142045,"lo":0.0981,"hi":0.201283},{"opening":"C42","colour":"W","d":3,"n":119,"adopted":22,"rate":0.184874,"lo":0.125376,"hi":0.264081},{"opening":"C42","colour":"W","d":4,"n":94,"adopted":16,"rate":0.170213,"lo":0.107575,"hi":0.258747},{"opening":"C42","colour":"W","d":5,"n":73,"adopted":15,"rate":0.205479,"lo":0.128669,"hi":0.311739},{"opening":"C42","colour":"W","d":6,"n":447,"adopted":94,"rate":0.210291,"lo":0.175061,"hi":0.250458},{"opening":"C44","colour":"B","d":1,"n":697,"adopted":89,"rate":0.12769,"lo":0.104937,"hi":0.154524},{"opening":"C44","colour":"B","d":2,"n":320,"adopted":38,"rate":0.11875,"lo":0.08775,"hi":0.158795},{"opening":"C44","colour":"B","d":3,"n":185,"adopted":17,"rate":0.091892,"lo":0.058164,"hi":0.142224},{"opening":"C44","colour":"B","d":4,"n":119,"adopted":14,"rate":0.117647,"lo":0.071387,"hi":0.187822},{"opening":"C44","colour":"B","d":5,"n":86,"adopted":12,"rate":0.139535,"lo":0.081658,"hi":0.228239},{"opening":"C44","colour":"B","d":6,"n":211,"adopted":11,"rate":0.052133,"lo":0.029356,"hi":0.090926},{"opening":"C44","colour":"W","d":1,"n":879,"adopted":97,"rate":0.110353,"lo":0.09131,"hi":0.132786},{"opening":"C44","colour":"W","d":2,"n":351,"adopted":36,"rate":0.102564,"lo":0.075008,"hi":0.138726},{"opening":"C44","colour":"W","d":3,"n":176,"adopted":19,"rate":0.107955,"lo":0.070207,"hi":0.162451},{"opening":"C44","colour":"W","d":4,"n":103,"adopted":10,"rate":0.097087,"lo":0.053593,"hi":0.169556},{"opening":"C44","colour":"W","d":5,"n":61,"adopted":5,"rate":0.081967,"lo":0.035519,"hi":0.177949},{"opening":"C44","colour":"W","d":6,"n":80,"adopted":7,"rate":0.0875,"lo":0.043031,"hi":0.16977},{"opening":"C45","colour":"B","d":1,"n":671,"adopted":95,"rate":0.14158,"lo":0.117238,"hi":0.170002},{"opening":"C45","colour":"B","d":2,"n":342,"adopted":46,"rate":0.134503,"lo":0.102375,"hi":0.174751},{"opening":"C45","colour":"B","d":3,"n":206,"adopted":21,"rate":0.101942,"lo":0.067646,"hi":0.150812},{"opening":"C45","colour":"B","d":4,"n":140,"adopted":11,"rate":0.078571,"lo":0.044437,"hi":0.135216},{"opening":"C45","colour":"B","d":5,"n":104,"adopted":10,"rate":0.096154,"lo":0.053069,"hi":0.16801},{"opening":"C45","colour":"B","d":6,"n":437,"adopted":37,"rate":0.084668,"lo":0.062049,"hi":0.114526},{"opening":"C45","colour":"W","d":1,"n":968,"adopted":108,"rate":0.11157,"lo":0.093252,"hi":0.13296},{"opening":"C45","colour":"W","d":2,"n":447,"adopted":46,"rate":0.102908,"lo":0.078041,"hi":0.134542},{"opening":"C45","colour":"W","d":3,"n":230,"adopted":25,"rate":0.108696,"lo":0.074715,"hi":0.155533},{"opening":"C45","colour":"W","d":4,"n":132,"adopted":9,"rate":0.068182,"lo":0.036282,"hi":0.124505},{"opening":"C45","colour":"W","d":5,"n":85,"adopted":5,"rate":0.058824,"lo":0.025385,"hi":0.130416},{"opening":"C45","colour":"W","d":6,"n":135,"adopted":6,"rate":0.044444,"lo":0.020526,"hi":0.093573},{"opening":"C50","colour":"B","d":1,"n":954,"adopted":163,"rate":0.17086,"lo":0.148307,"hi":0.196053},{"opening":"C50","colour":"B","d":2,"n":415,"adopted":71,"rate":0.171084,"lo":0.13791,"hi":0.210293},{"opening":"C50","colour":"B","d":3,"n":212,"adopted":32,"rate":0.150943,"lo":0.108994,"hi":0.205318},{"opening":"C50","colour":"B","d":4,"n":129,"adopted":22,"rate":0.170543,"lo":0.115405,"hi":0.244735},{"opening":"C50","colour":"B","d":5,"n":80,"adopted":10,"rate":0.125,"lo":0.069335,"hi":0.21503},{"opening":"C50","colour":"B","d":6,"n":125,"adopted":14,"rate":0.112,"lo":0.067898,"hi":0.17924},{"opening":"C50","colour":"W","d":1,"n":826,"adopted":180,"rate":0.217918,"lo":0.191105,"hi":0.247343},{"opening":"C50","colour":"W","d":2,"n":390,"adopted":83,"rate":0.212821,"lo":0.175101,"hi":0.256143},{"opening":"C50","colour":"W","d":3,"n":227,"adopted":39,"rate":0.171806,"lo":0.128301,"hi":0.226235},{"opening":"C50","colour":"W","d":4,"n":153,"adopted":17,"rate":0.111111,"lo":0.070538,"hi":0.170735},{"opening":"C50","colour":"W","d":5,"n":111,"adopted":8,"rate":0.072072,"lo":0.03697,"hi":0.135804},{"opening":"C50","colour":"W","d":6,"n":210,"adopted":13,"rate":0.061905,"lo":0.036531,"hi":0.10302},{"opening":"C55","colour":"B","d":1,"n":673,"adopted":97,"rate":0.144131,"lo":0.119613,"hi":0.172688},{"opening":"C55","colour":"B","d":2,"n":251,"adopted":36,"rate":0.143426,"lo":0.105432,"hi":0.19217},{"opening":"C55","colour":"B","d":3,"n":123,"adopted":20,"rate":0.162602,"lo":0.107795,"hi":0.237846},{"opening":"C55","colour":"B","d":4,"n":72,"adopted":11,"rate":0.152778,"lo":0.087506,"hi":0.253225},{"opening":"C55","colour":"B","d":5,"n":43,"adopted":6,"rate":0.139535,"lo":0.065556,"hi":0.272639},{"opening":"C55","colour":"B","d":6,"n":61,"adopted":13,"rate":0.213115,"lo":0.128997,"hi":0.331227},{"opening":"C55","colour":"W","d":1,"n":595,"adopted":90,"rate":0.151261,"lo":0.124713,"hi":0.182283},{"opening":"C55","colour":"W","d":2,"n":251,"adopted":36,"rate":0.143426,"lo":0.105432,"hi":0.19217},{"opening":"C55","colour":"W","d":3,"n":133,"adopted":19,"rate":0.142857,"lo":0.093402,"hi":0.212365},{"opening":"C55","colour":"W","d":4,"n":82,"adopted":15,"rate":0.182927,"lo":0.114109,"hi":0.280124},{"opening":"C55","colour":"W","d":5,"n":44,"adopted":4,"rate":0.090909,"lo":0.035922,"hi":0.211595},{"opening":"C55","colour":"W","d":6,"n":122,"adopted":13,"rate":0.106557,"lo":0.063336,"hi":0.1738},{"opening":"D00","colour":"B","d":1,"n":816,"adopted":278,"rate":0.340686,"lo":0.308982,"hi":0.373884},{"opening":"D00","colour":"B","d":2,"n":459,"adopted":153,"rate":0.333333,"lo":0.291747,"hi":0.377686},{"opening":"D00","colour":"B","d":3,"n":326,"adopted":108,"rate":0.331288,"lo":0.28242,"hi":0.384087},{"opening":"D00","colour":"B","d":4,"n":262,"adopted":91,"rate":0.347328,"lo":0.292257,"hi":0.406812},{"opening":"D00","colour":"B","d":5,"n":175,"adopted":59,"rate":0.337143,"lo":0.271268,"hi":0.410014},{"opening":"D00","colour":"B","d":6,"n":1232,"adopted":377,"rate":0.306006,"lo":0.280909,"hi":0.33231},{"opening":"D00","colour":"W","d":1,"n":2041,"adopted":226,"rate":0.11073,"lo":0.097841,"hi":0.125082},{"opening":"D00","colour":"W","d":2,"n":942,"adopted":88,"rate":0.093418,"lo":0.07645,"hi":0.11369},{"opening":"D00","colour":"W","d":3,"n":529,"adopted":51,"rate":0.096408,"lo":0.074089,"hi":0.124548},{"opening":"D00","colour":"W","d":4,"n":274,"adopted":33,"rate":0.120438,"lo":0.087057,"hi":0.164315},{"opening":"D00","colour":"W","d":5,"n":175,"adopted":24,"rate":0.137143,"lo":0.093921,"hi":0.195953},{"opening":"D00","colour":"W","d":6,"n":281,"adopted":39,"rate":0.13879,"lo":0.103217,"hi":0.184106},{"opening":"D02","colour":"B","d":1,"n":984,"adopted":323,"rate":0.328252,"lo":0.299629,"hi":0.358211},{"opening":"D02","colour":"B","d":2,"n":533,"adopted":178,"rate":0.333959,"lo":0.295233,"hi":0.375061},{"opening":"D02","colour":"B","d":3,"n":349,"adopted":116,"rate":0.332378,"lo":0.285017,"hi":0.38339},{"opening":"D02","colour":"B","d":4,"n":257,"adopted":82,"rate":0.319066,"lo":0.265102,"hi":0.37836},{"opening":"D02","colour":"B","d":5,"n":204,"adopted":56,"rate":0.27451,"lo":0.217863,"hi":0.339492},{"opening":"D02","colour":"B","d":6,"n":961,"adopted":267,"rate":0.277836,"lo":0.250442,"hi":0.306998},{"opening":"D02","colour":"W","d":1,"n":2005,"adopted":247,"rate":0.123192,"lo":0.109522,"hi":0.138303},{"opening":"D02","colour":"W","d":2,"n":942,"adopted":90,"rate":0.095541,"lo":0.078378,"hi":0.11599},{"opening":"D02","colour":"W","d":3,"n":496,"adopted":58,"rate":0.116935,"lo":0.091555,"hi":0.148204},{"opening":"D02","colour":"W","d":4,"n":263,"adopted":32,"rate":0.121673,"lo":0.087519,"hi":0.16672},{"opening":"D02","colour":"W","d":5,"n":162,"adopted":15,"rate":0.092593,"lo":0.056916,"hi":0.147144},{"opening":"D02","colour":"W","d":6,"n":331,"adopted":19,"rate":0.057402,"lo":0.037052,"hi":0.087907},{"opening":"D10","colour":"B","d":1,"n":690,"adopted":80,"rate":0.115942,"lo":0.094151,"hi":0.141986},{"opening":"D10","colour":"B","d":2,"n":366,"adopted":53,"rate":0.144809,"lo":0.112443,"hi":0.184553},{"opening":"D10","colour":"B","d":3,"n":216,"adopted":28,"rate":0.12963,"lo":0.09123,"hi":0.180973},{"opening":"D10","colour":"B","d":4,"n":149,"adopted":17,"rate":0.114094,"lo":0.072465,"hi":0.175122},{"opening":"D10","colour":"B","d":5,"n":103,"adopted":12,"rate":0.116505,"lo":0.067915,"hi":0.192673},{"opening":"D10","colour":"B","d":6,"n":259,"adopted":5,"rate":0.019305,"lo":0.008273,"hi":0.044388},{"opening":"D10","colour":"W","d":1,"n":803,"adopted":96,"rate":0.119552,"lo":0.098903,"hi":0.143823},{"opening":"D10","colour":"W","d":2,"n":429,"adopted":47,"rate":0.109557,"lo":0.083394,"hi":0.142651},{"opening":"D10","colour":"W","d":3,"n":216,"adopted":21,"rate":0.097222,"lo":0.06447,"hi":0.144051},{"opening":"D10","colour":"W","d":4,"n":117,"adopted":11,"rate":0.094017,"lo":0.05331,"hi":0.160537},{"opening":"D10","colour":"W","d":5,"n":61,"adopted":5,"rate":0.081967,"lo":0.035519,"hi":0.177949},{"opening":"D10","colour":"W","d":6,"n":156,"adopted":8,"rate":0.051282,"lo":0.026211,"hi":0.097922},{"opening":"D31","colour":"B","d":1,"n":695,"adopted":52,"rate":0.07482,"lo":0.057511,"hi":0.096804},{"opening":"D31","colour":"B","d":2,"n":339,"adopted":25,"rate":0.073746,"lo":0.050447,"hi":0.106598},{"opening":"D31","colour":"B","d":3,"n":188,"adopted":14,"rate":0.074468,"lo":0.044874,"hi":0.121105},{"opening":"D31","colour":"B","d":4,"n":129,"adopted":8,"rate":0.062016,"lo":0.031756,"hi":0.117607},{"opening":"D31","colour":"B","d":5,"n":76,"adopted":7,"rate":0.092105,"lo":0.045333,"hi":0.178129},{"opening":"D31","colour":"B","d":6,"n":149,"adopted":5,"rate":0.033557,"lo":0.014417,"hi":0.076145},{"opening":"D31","colour":"W","d":1,"n":598,"adopted":54,"rate":0.090301,"lo":0.069869,"hi":0.115964},{"opening":"D31","colour":"W","d":2,"n":279,"adopted":20,"rate":0.071685,"lo":0.04688,"hi":0.108124},{"opening":"D31","colour":"W","d":3,"n":168,"adopted":13,"rate":0.077381,"lo":0.045777,"hi":0.127881},{"opening":"D31","colour":"W","d":4,"n":123,"adopted":8,"rate":0.065041,"lo":0.033322,"hi":0.123106},{"opening":"D31","colour":"W","d":5,"n":103,"adopted":6,"rate":0.058252,"lo":0.026968,"hi":0.121304},{"opening":"D31","colour":"W","d":6,"n":262,"adopted":9,"rate":0.034351,"lo":0.018175,"hi":0.063985}]};
+     # Keeps a value used by the page's next steps.
+0370 |   var byD=report.curve_by_d||[];
+     # Keeps a value used by the page's next steps.
+0371 |   var nullRows=report.null_comparison||[];
+     # Keeps a value used by the page's next steps.
+0372 |   var explorer=report.explorer||[];
+     # Keeps a value used by the page's next steps.
+0373 |   var nullByD={};
+     # Keeps a value used by the page's next steps.
+0374 |   function id(x){return document.getElementById(x);}
+     # Defines a browser function used by a chart, control, or live event.
+0375 |   document.querySelector(".live-link").href=location.pathname==="/findings"?"/":"http://localhost:8124/";
+     # Continues the page structure, styling, or browser logic above.
+0376 |   function txt(x,v){id(x).textContent=v;}
+     # Defines a browser function used by a chart, control, or live event.
+0377 |   function count(v){return Number(v||0).toLocaleString("en-US");}
+     # Defines a browser function used by a chart, control, or live event.
+0378 |   function pct(v,d){return (100*Number(v||0)).toFixed(d==null?1:d)+"%";}
+     # Defines a browser function used by a chart, control, or live event.
+0379 |   var ns="http://www.w3.org/2000/svg";
+     # Keeps a value used by the page's next steps.
+0380 |   function svgEl(name,attrs,text){var e=document.createElementNS(ns,name);Object.keys(attrs||{}).forEach(function(k){e.setAttribute(k,attrs[k]);});if(text!=null)e.textContent=text;return e;}
+     # Defines a browser function used by a chart, control, or live event.
+0381 |   var verdict=report.verdict||{};
+     # Keeps a value used by the page's next steps.
+0382 |   txt("summary-copy",verdict.excess_over_null_grows_with_d===false?
+     # Continues the page structure, styling, or browser logic above.
+0383 |       "More distinct opponents do not show clear reinforcement above the shuffled-time reference.":
+     # Continues the page structure, styling, or browser logic above.
+0384 |       "The corrected comparison is inconclusive about reinforcement.");
+     # Continues the page structure, styling, or browser logic above.
+0385 |   txt("stat-games",count(report.parse&&report.parse.games));
+     # Continues the page structure, styling, or browser logic above.
+0386 |   txt("stat-players",count(report.parse&&report.parse.players));
+     # Continues the page structure, styling, or browser logic above.
+0387 |   txt("stat-trials",count(report.trials&&report.trials.n));
+     # Continues the page structure, styling, or browser logic above.
+0388 |   txt("stat-rate",pct(report.trials&&report.trials.rate,1));
+     # Continues the page structure, styling, or browser logic above.
+0389 |   function renderCurve(){
+     # Defines a browser function used by a chart, control, or live event.
+0390 |     /* Replot observed adoption and shuffled-time reference for the current
+     # Existing developer note about this section.
+0391 |        opening/colour selection. The reference prevents a raw rising curve
+     # Continues the page structure, styling, or browser logic above.
+0392 |        from being mistaken for evidence of reinforcement. */
+     # Continues the page structure, styling, or browser logic above.
+0393 |     var chart=id("curve-chart"),empty=id("chart-empty");
+     # Keeps a value used by the page's next steps.
+0394 |     nullByD={};
+     # Continues the page structure, styling, or browser logic above.
+0395 |     if(!byD.length){
+     # Controls which browser steps run or repeats them for data items.
+0396 |       chart.textContent="";chart.hidden=true;empty.hidden=false;
+     # Updates visible text or markup on the page.
+0397 |       id("show-null-wrap").hidden=true;id("null-legend").hidden=true;
+     # Continues the page structure, styling, or browser logic above.
+0398 |       id("download-svg").disabled=true;
+     # Continues the page structure, styling, or browser logic above.
+0399 |       txt("first-lift","—");txt("last-lift","—");
+     # Continues the page structure, styling, or browser logic above.
+0400 |       txt("first-detail","No trials in selection");txt("last-detail","No trials in selection");
+     # Continues the page structure, styling, or browser logic above.
+0401 |       txt("curve-note","No complete exposure trials");
+     # Continues the page structure, styling, or browser logic above.
+0402 |       return;
+     # Continues the page structure, styling, or browser logic above.
+0403 |     }
+     # Closes the preceding element or code block.
+0404 |     chart.hidden=false;empty.hidden=true;id("download-svg").disabled=false;nullRows.forEach(function(r){nullByD[r.d]=r;});
+     # Continues the page structure, styling, or browser logic above.
+0405 |     var hasNull=!!nullRows.length;
+     # Keeps a value used by the page's next steps.
+0406 |     var first=byD[0],last=byD[byD.length-1],nf=nullByD[first.d]||{},nl=nullByD[last.d]||{};
+     # Keeps a value used by the page's next steps.
+0407 |     txt("first-label",first.d===1?"First distinct exposer":first.d+" distinct exposers");
+     # Continues the page structure, styling, or browser logic above.
+0408 |     txt("last-label",last.d===6?"Six or more distinct exposers":last.d+" distinct exposers");
+     # Continues the page structure, styling, or browser logic above.
+0409 |     txt("first-lift",hasNull?(nf.lift_over_null||0).toFixed(3)+"×":pct(first.rate,2));
+     # Continues the page structure, styling, or browser logic above.
+0410 |     txt("last-lift",hasNull?(nl.lift_over_null||0).toFixed(3)+"×":pct(last.rate,2));
+     # Continues the page structure, styling, or browser logic above.
+0411 |     txt("first-detail",hasNull?pct(first.rate,1)+" observed · "+pct(nf.rate_null,1)+" reference":count(first.n)+" complete trials");
+     # Continues the page structure, styling, or browser logic above.
+0412 |     txt("last-detail",hasNull?pct(last.rate,1)+" observed · "+pct(nl.rate_null,1)+" reference":count(last.n)+" complete trials");
+     # Continues the page structure, styling, or browser logic above.
+0413 |     txt("curve-note"," " + count(byD.reduce(function(a,r){return a+r.n;},0))+" complete exposure trials");
+     # Continues the page structure, styling, or browser logic above.
+0414 |     var chart=id("curve-chart"),mobile=window.matchMedia("(max-width:620px)").matches;
+     # Keeps a value used by the page's next steps.
+0415 |     chart.setAttribute("viewBox",mobile?"0 0 420 320":"0 0 800 350");
+     # Sets an element property used for display or accessibility.
+0416 |     var L=mobile?43:60,R=mobile?403:755,T=mobile?18:25,B=mobile?250:275;
+     # Keeps a value used by the page's next steps.
+0417 |     chart.textContent="";
+     # Updates visible text or markup on the page.
+0418 |     var vals=byD.map(function(r){return r.rate;}).concat(nullRows.map(function(r){return r.rate_null;}));
+     # Keeps a value used by the page's next steps.
+0419 |     var low=Math.max(0,Math.floor((Math.min.apply(null,vals)-.025)*20)/20);
+     # Keeps a value used by the page's next steps.
+0420 |     var high=Math.ceil((Math.max.apply(null,vals)+.025)*20)/20;
+     # Keeps a value used by the page's next steps.
+0421 |     if(high<=low)high=low+.1;
+     # Controls which browser steps run or repeats them for data items.
+0422 |     function X(i){return L+i*(R-L)/Math.max(1,byD.length-1);}
+     # Defines a browser function used by a chart, control, or live event.
+0423 |     function Y(v){return B-(v-low)/(high-low)*(B-T);}
+     # Defines a browser function used by a chart, control, or live event.
+0424 |     for(var i=0;i<=5;i++){
+     # Controls which browser steps run or repeats them for data items.
+0425 |       var v=low+(high-low)*i/5,y=Y(v);
+     # Keeps a value used by the page's next steps.
+0426 |       chart.appendChild(svgEl("line",{x1:L,x2:R,y1:y,y2:y,class:"grid"}));
+     # Adds a newly built visual element to the page.
+0427 |       chart.appendChild(svgEl("text",{x:L-11,y:y+4,"text-anchor":"end"},pct(v,0)));
+     # Adds a newly built visual element to the page.
+0428 |     }
+     # Closes the preceding element or code block.
+0429 |     chart.appendChild(svgEl("line",{x1:L,x2:R,y1:B,y2:B,class:"axis"}));
+     # Adds a newly built visual element to the page.
+0430 |     byD.forEach(function(r,i){chart.appendChild(svgEl("text",{x:X(i),y:B+22,"text-anchor":"middle"},r.d===6?String(r.d)+"+":String(r.d)));});
+     # Adds a newly built visual element to the page.
+0431 |     chart.appendChild(svgEl("text",{x:(L+R)/2,y:B+52,"text-anchor":"middle",class:"axis-title"},"Distinct exposing opponents (d)"));
+     # Adds a newly built visual element to the page.
+0432 |     if(!mobile)chart.appendChild(svgEl("text",{x:16,y:(T+B)/2,"text-anchor":"middle",transform:"rotate(-90 16 "+((T+B)/2)+")",class:"axis-title"},"Adoption rate (%)"));
+     # Adds a newly built visual element to the page.
+0433 |     function path(rows,value){return rows.map(function(r,i){return (i?"L":"M")+X(i).toFixed(1)+" "+Y(value(r)).toFixed(1);}).join(" ");}
+     # Defines a browser function used by a chart, control, or live event.
+0434 |     byD.forEach(function(r,i){
+     # Continues the page structure, styling, or browser logic above.
+0435 |       chart.appendChild(svgEl("line",{x1:X(i),x2:X(i),y1:Y(r.lo==null?r.rate:r.lo),
+     # Adds a newly built visual element to the page.
+0436 |         y2:Y(r.hi==null?r.rate:r.hi),class:"uncertainty"}));
+     # Continues the page structure, styling, or browser logic above.
+0437 |     });
+     # Closes the preceding element or code block.
+0438 |     chart.appendChild(svgEl("path",{d:path(byD,function(r){return r.rate;}),class:"observed"}));
+     # Adds a newly built visual element to the page.
+0439 |     var nullGroup=svgEl("g",{id:"null-series"});
+     # Keeps a value used by the page's next steps.
+0440 |     if(hasNull)nullGroup.appendChild(svgEl("path",{d:path(byD,function(r){return (nullByD[r.d]||{}).rate_null||0;}),class:"null"}));
+     # Adds a newly built visual element to the page.
+0441 |     byD.forEach(function(r,i){
+     # Continues the page structure, styling, or browser logic above.
+0442 |       var observed=svgEl("circle",{cx:X(i),cy:Y(r.rate),r:6,class:"point-observed"});
+     # Keeps a value used by the page's next steps.
+0443 |       observed.appendChild(svgEl("title",{},String(r.d)+" exposer(s): "+pct(r.rate,2)+" observed; "+count(r.n)+" trials"));
+     # Adds a newly built visual element to the page.
+0444 |       chart.appendChild(observed);
+     # Adds a newly built visual element to the page.
+0445 |       var nr=nullByD[r.d];
+     # Keeps a value used by the page's next steps.
+0446 |       if(nr){var point=svgEl("circle",{cx:X(i),cy:Y(nr.rate_null),r:5,class:"point-null"});
+     # Controls which browser steps run or repeats them for data items.
+0447 |         point.appendChild(svgEl("title",{},String(r.d)+" exposer(s): "+pct(nr.rate_null,2)+" shuffled reference"));
+     # Adds a newly built visual element to the page.
+0448 |         nullGroup.appendChild(point);}
+     # Adds a newly built visual element to the page.
+0449 |     });
+     # Closes the preceding element or code block.
+0450 |     chart.appendChild(nullGroup);
+     # Adds a newly built visual element to the page.
+0451 |     id("show-null-wrap").hidden=!hasNull;
+     # Continues the page structure, styling, or browser logic above.
+0452 |     id("null-legend").hidden=!hasNull;
+     # Continues the page structure, styling, or browser logic above.
+0453 |     id("show-null").checked=hasNull;
+     # Continues the page structure, styling, or browser logic above.
+0454 |     id("show-null").onchange=function(){
+     # Continues the page structure, styling, or browser logic above.
+0455 |       nullGroup.style.display=this.checked?"":"none";
+     # Continues the page structure, styling, or browser logic above.
+0456 |       id("null-legend").style.opacity=this.checked?"1":".45";
+     # Continues the page structure, styling, or browser logic above.
+0457 |     };
+     # Closes the preceding element or code block.
+0458 |   }
+     # Closes the preceding element or code block.
+0459 |   function wilson(adopted,n){
+     # Defines a browser function used by a chart, control, or live event.
+0460 |     var p=adopted/n,z=1.96,den=1+z*z/n;
+     # Keeps a value used by the page's next steps.
+0461 |     var center=(p+z*z/(2*n))/den;
+     # Keeps a value used by the page's next steps.
+0462 |     var half=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n))/den;
+     # Keeps a value used by the page's next steps.
+0463 |     return [center-half,center+half];
+     # Hands the calculated value back to the calling function.
+0464 |   }
+     # Closes the preceding element or code block.
+0465 |   function updateSelection(){
+     # Defines a browser function used by a chart, control, or live event.
+0466 |     var opening=id("opening-filter").value,colour=id("colour-filter").value;
+     # Keeps a value used by the page's next steps.
+0467 |     var all=!opening&&!colour;
+     # Keeps a value used by the page's next steps.
+0468 |     if(all){byD=report.curve_by_d||[];nullRows=report.null_comparison||[];}
+     # Controls which browser steps run or repeats them for data items.
+0469 |     else{
+     # Controls which browser steps run or repeats them for data items.
+0470 |       var groups={};
+     # Keeps a value used by the page's next steps.
+0471 |       explorer.forEach(function(r){
+     # Continues the page structure, styling, or browser logic above.
+0472 |         if((opening&&r.opening!==opening)||(colour&&r.colour!==colour))return;
+     # Controls which browser steps run or repeats them for data items.
+0473 |         var d=Number(r.d);
+     # Keeps a value used by the page's next steps.
+0474 |         if(!groups[d])groups[d]={d:d,n:0,adopted:0};
+     # Controls which browser steps run or repeats them for data items.
+0475 |         groups[d].n+=Number(r.n);groups[d].adopted+=Number(r.adopted);
+     # Continues the page structure, styling, or browser logic above.
+0476 |       });
+     # Closes the preceding element or code block.
+0477 |       byD=Object.keys(groups).map(function(k){
+     # Continues the page structure, styling, or browser logic above.
+0478 |         var r=groups[k],interval=wilson(r.adopted,r.n);
+     # Keeps a value used by the page's next steps.
+0479 |         r.rate=r.adopted/r.n;r.lo=interval[0];r.hi=interval[1];return r;
+     # Continues the page structure, styling, or browser logic above.
+0480 |       }).sort(function(a,b){return a.d-b.d;});
+     # Continues the page structure, styling, or browser logic above.
+0481 |       nullRows=[];
+     # Continues the page structure, styling, or browser logic above.
+0482 |     }
+     # Closes the preceding element or code block.
+0483 |     txt("chart-subtitle",all?"Observed trial rate and shuffled-time reference by distinct exposers":"Observed trial rate for this opening and colour");
+     # Continues the page structure, styling, or browser logic above.
+0484 |     txt("filter-note",all?
+     # Continues the page structure, styling, or browser logic above.
+0485 |       "All openings and colours · shuffled-time reference shown. Error bars are trial-level Wilson intervals.":
+     # Continues the page structure, styling, or browser logic above.
+0486 |       "Subset shows observed rates only; no shuffled-time reference was computed for this filter. Error bars are descriptive trial-level intervals.");
+     # Continues the page structure, styling, or browser logic above.
+0487 |     renderCurve();
+     # Continues the page structure, styling, or browser logic above.
+0488 |   }
+     # Closes the preceding element or code block.
+0489 |   var openings=Array.from(new Set(explorer.map(function(r){return r.opening;}))).sort();
+     # Keeps a value used by the page's next steps.
+0490 |   openings.forEach(function(opening){
+     # Continues the page structure, styling, or browser logic above.
+0491 |     var o=document.createElement("option");o.value=opening;o.textContent=opening;
+     # Updates visible text or markup on the page.
+0492 |     id("opening-filter").appendChild(o);
+     # Adds a newly built visual element to the page.
+0493 |   });
+     # Closes the preceding element or code block.
+0494 |   id("opening-filter").addEventListener("change",updateSelection);
+     # Responds to a user action or browser event.
+0495 |   id("colour-filter").addEventListener("change",updateSelection);
+     # Responds to a user action or browser event.
+0496 |   function download(name,content,type){
+     # Defines a browser function used by a chart, control, or live event.
+0497 |     var a=document.createElement("a"),url=URL.createObjectURL(new Blob([content],{type:type}));
+     # Keeps a value used by the page's next steps.
+0498 |     a.href=url;a.download=name;a.click();setTimeout(function(){URL.revokeObjectURL(url);},1000);
+     # Continues the page structure, styling, or browser logic above.
+0499 |   }
+     # Closes the preceding element or code block.
+0500 |   id("download-csv").addEventListener("click",function(){
+     # Responds to a user action or browser event.
+0501 |     var lines=["opening,colour,d,n,adopted,rate,lo,hi,shuffled_rate"];
+     # Keeps a value used by the page's next steps.
+0502 |     byD.forEach(function(r){
+     # Continues the page structure, styling, or browser logic above.
+0503 |       lines.push([id("opening-filter").value||"ALL",id("colour-filter").value||"ALL",
+     # Continues the page structure, styling, or browser logic above.
+0504 |         r.d,r.n,r.adopted==null?Math.round(r.rate*r.n):r.adopted,
+     # Continues the page structure, styling, or browser logic above.
+0505 |         r.rate,r.lo,r.hi,(nullByD[r.d]||{}).rate_null||""].join(","));
+     # Continues the page structure, styling, or browser logic above.
+0506 |     });
+     # Closes the preceding element or code block.
+0507 |     download("sna-adoption-curve.csv",lines.join("\n")+"\n","text/csv");
+     # Continues the page structure, styling, or browser logic above.
+0508 |   });
+     # Closes the preceding element or code block.
+0509 |   id("download-svg").addEventListener("click",function(){
+     # Responds to a user action or browser event.
+0510 |     var original=id("curve-chart"),copy=original.cloneNode(true);
+     # Keeps a value used by the page's next steps.
+0511 |     copy.setAttribute("xmlns",ns);
+     # Sets an element property used for display or accessibility.
+0512 |     var oldNodes=[original].concat(Array.from(original.querySelectorAll("*")));
+     # Keeps a value used by the page's next steps.
+0513 |     var newNodes=[copy].concat(Array.from(copy.querySelectorAll("*")));
+     # Keeps a value used by the page's next steps.
+0514 |     oldNodes.forEach(function(node,i){
+     # Continues the page structure, styling, or browser logic above.
+0515 |       var style=getComputedStyle(node);
+     # Keeps a value used by the page's next steps.
+0516 |       ["stroke","fill","stroke-width","stroke-dasharray","font-family","font-size","opacity"]
+     # Continues the page structure, styling, or browser logic above.
+0517 |         .forEach(function(key){var value=style.getPropertyValue(key);if(value)newNodes[i].setAttribute(key,value);});
+     # Sets an element property used for display or accessibility.
+0518 |     });
+     # Closes the preceding element or code block.
+0519 |     download("sna-adoption-curve.svg",new XMLSerializer().serializeToString(copy),"image/svg+xml");
+     # Continues the page structure, styling, or browser logic above.
+0520 |   });
+     # Closes the preceding element or code block.
+0521 |   updateSelection();
+     # Continues the page structure, styling, or browser logic above.
+0522 |   window.matchMedia("(max-width:620px)").addEventListener("change",renderCurve);
+     # Responds to a user action or browser event.
+0523 |   var m=report.matched_controls||{};
+     # Keeps a value used by the page's next steps.
+0524 |   txt("exposed-rate",pct(m.exposed_adoption_rate,2));
+     # Continues the page structure, styling, or browser logic above.
+0525 |   txt("control-rate",pct(m.control_adoption_rate,2));
+     # Continues the page structure, styling, or browser logic above.
+0526 |   id("exposed-bar").style.width=Math.min(100,100*(m.exposed_adoption_rate||0)/.2)+"%";
+     # Continues the page structure, styling, or browser logic above.
+0527 |   id("control-bar").style.width=Math.min(100,100*(m.control_adoption_rate||0)/.2)+"%";
+     # Continues the page structure, styling, or browser logic above.
+0528 |   txt("matched-delta",(m.difference>=0?"+":"")+(100*m.difference).toFixed(2)+" percentage points");
+     # Continues the page structure, styling, or browser logic above.
+0529 |   txt("matched-meta",count(m.n_pairs)+" pairs · "+pct(m.control_crossover_rate,1)+" controls later exposed · player-cluster bootstrap interval "+(m.ci95?"["+pct(m.ci95[0],2)+", "+pct(m.ci95[1],2)+"]":"unavailable"));
+     # Continues the page structure, styling, or browser logic above.
+0530 |   var p=report.predictive||{}, rows=[
+     # Keeps a value used by the page's next steps.
+0531 |     ["Baseline","Opening popularity, rating, activity",p.auc_baseline],
+     # Continues the page structure, styling, or browser logic above.
+0532 |     ["+ Repertoire","Prior opening proximity",p.auc_repertoire],
+     # Continues the page structure, styling, or browser logic above.
+0533 |     ["+ Network","Exposure and network position",p.auc_network]
+     # Continues the page structure, styling, or browser logic above.
+0534 |   ];
+     # Continues the page structure, styling, or browser logic above.
+0535 |   rows.forEach(function(r,i){if(r[2]==null)return;var tr=document.createElement("tr");if(i===2)tr.className="highlight";
+     # Continues the page structure, styling, or browser logic above.
+0536 |     [r[0],r[1],Number(r[2]).toFixed(3)].forEach(function(v,j){var td=document.createElement("td");td.textContent=v;if(j===2)td.className="num";tr.appendChild(td);});id("model-rows").appendChild(tr);});
+     # Updates visible text or markup on the page.
+0537 | })();
+     # Continues the page structure, styling, or browser logic above.
+0538 | </script>
+     # Closes the preceding element or code block.
+0539 | </body>
+     # Closes the preceding element or code block.
+0540 | </html>
+     # Closes the preceding element or code block.

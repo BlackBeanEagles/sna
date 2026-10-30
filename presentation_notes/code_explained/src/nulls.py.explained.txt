@@ -1,0 +1,222 @@
+SOURCE: src/nulls.py
+SAY FIRST: This shuffles game times to build the reference curve for comparison.
+Each numbered source line is followed by a plain-English comment.
+These files are speaking references; run the originals in src/, server/, site/ and scripts/.
+
+0001 | """Step 6 -- the timestamp-shuffled null model.
+0002 | 
+0003 | Permuting the timestamps across games destroys causal ordering while keeping
+0004 | the degree sequence, the rating distribution and the opening popularity
+0005 | distribution exactly as they are. Anything the curve still shows under that
+0006 | permutation is an artefact of activity and popularity, not of influence.
+0007 | The real effect has to clear it.
+0008 | """
+0009 | from __future__ import annotations
+     # Imports a library or project module needed below.
+0010 | 
+0011 | import argparse
+     # Imports a library or project module needed below.
+0012 | from pathlib import Path
+     # Imports a library or project module needed below.
+0013 | 
+0014 | import numpy as np
+     # Imports a library or project module needed below.
+0015 | import pandas as pd
+     # Imports a library or project module needed below.
+0016 | 
+0017 | from . import config, curve, events, parse
+     # Imports a library or project module needed below.
+0018 | 
+0019 | 
+0020 | def shuffle_timestamps(df: pd.DataFrame, rng: np.random.Generator) -> pd.DataFrame:
+     # Keep each game's players/opening, but remove the original time order.
+0021 |     """Keep each game's players/opening, but remove the original time order.
+0022 | 
+0023 |     Say: if the observed rise also appears after this shuffle, activity and
+0024 |     opening popularity may explain it without opponent-to-opponent spread.
+0025 |     """
+0026 |     out = df.copy()
+     # Calculates or stores the output value for this stage.
+0027 |     out["ts"] = rng.permutation(out["ts"].to_numpy())
+     # Randomly reassigns game timestamps while keeping each game's players and opening.
+0028 |     return out.sort_values("ts").reset_index(drop=True)
+     # Orders the rows by this field before the next calculation.
+0029 | 
+0030 | 
+0031 | def rewire_preserving_degree(df: pd.DataFrame, rng: np.random.Generator,
+     # Degree-preserving double-edge swap on the game list, timestamps kept.
+0032 |                              n_swaps_per_edge: int = 5) -> pd.DataFrame:
+     # Keeps this intermediate result under the name `n_swaps_per_edge`.
+0033 |     """Degree-preserving double-edge swap on the game list, timestamps kept."""
+0034 |     w = df["white"].to_numpy().copy()
+     # Keeps this intermediate result under the name `w`.
+0035 |     b = df["black"].to_numpy().copy()
+     # Keeps this intermediate result under the name `b`.
+0036 |     m = len(w)
+     # Keeps this intermediate result under the name `m`.
+0037 |     for _ in range(n_swaps_per_edge * m):
+     # Processes each item from this collection in turn.
+0038 |         i, j = rng.integers(0, m, 2)
+     # Continues the current calculation or control flow.
+0039 |         if i == j:
+     # Checks this condition before running the next indented block.
+0040 |             continue
+     # Skips this item and moves to the next loop iteration.
+0041 |         if b[i] == w[j] or b[j] == w[i]:
+     # Checks this condition before running the next indented block.
+0042 |             continue
+     # Skips this item and moves to the next loop iteration.
+0043 |         b[i], b[j] = b[j], b[i]
+     # Continues the current calculation or control flow.
+0044 |     out = df.copy()
+     # Calculates or stores the output value for this stage.
+0045 |     out["white"], out["black"] = w, b
+     # Continues the current calculation or control flow.
+0046 |     return out
+     # Hands this result back to the stage that called this function.
+0047 | 
+0048 | 
+0049 | def run_null(df: pd.DataFrame, n_reps: int = None, kind: str = "shuffle",
+     # Build the null trials with EXACTLY the same parameters as the real ones.
+0050 |              seed: int = config.RANDOM_SEED,
+     # Keeps this intermediate result under the name `seed`.
+0051 |              window_days: int = None, by: str = "d",
+     # Keeps this intermediate result under the name `window_days`.
+0052 |              granularity: str = None, should_stop=None,
+     # Keeps this intermediate result under the name `granularity`.
+0053 |              on_progress=None) -> pd.DataFrame:
+     # Keeps this intermediate result under the name `on_progress`.
+0054 |     """Build the null trials with EXACTLY the same parameters as the real ones.
+0055 | 
+0056 |     Both window_days and granularity must match, or the comparison is not a
+0057 |     comparison. Two ways this has already gone wrong:
+0058 | 
+0059 |     * a window wider than the observed span censors every non-adopter, so the
+0060 |       null adoption rate goes to 1.0 and the lift collapses;
+0061 |     * leaving granularity at the default while the real trials are keyed by
+0062 |       ply compares a 0.6%-adoption ply world against a ECO-adoption
+0063 |       world, which manufactures a spurious "complex contagion" verdict.
+0064 |     """
+0065 |     n_reps = n_reps or config.N_NULL_REPLICATES
+     # Keeps this intermediate result under the name `n_reps`.
+0066 |     rng = np.random.default_rng(seed)
+     # Keeps this intermediate result under the name `rng`.
+0067 |     frames = []
+     # Keeps this intermediate result under the name `frames`.
+0068 |     for rep in range(n_reps):
+     # Processes each item from this collection in turn.
+0069 |         if should_stop is not None and should_stop():
+     # Checks this condition before running the next indented block.
+0070 |             break
+     # Ends the current loop.
+0071 |         null_df = (shuffle_timestamps(df, rng) if kind == "shuffle"
+     # Keeps this intermediate result under the name `null_df`.
+0072 |                    else rewire_preserving_degree(df, rng))
+     # Continues the current calculation or control flow.
+0073 |         trials = events.build_trials(null_df, window_days=window_days,
+     # Calculates or stores the exposure-trial table for this stage.
+0074 |                                      granularity=granularity)
+     # Keeps this intermediate result under the name `granularity`.
+0075 |         if not len(trials):
+     # Checks whether enough records exist for a trustworthy next step.
+0076 |             continue
+     # Skips this item and moves to the next loop iteration.
+0077 |         tb = curve.analyse(trials)["by_" + by]
+     # Keeps this intermediate result under the name `tb`.
+0078 |         tb["rep"] = rep
+     # Continues the current calculation or control flow.
+0079 |         frames.append(tb)
+     # Continues the current calculation or control flow.
+0080 |         if on_progress is not None:
+     # Checks this condition before running the next indented block.
+0081 |             on_progress(rep + 1, n_reps)
+     # Continues the current calculation or control flow.
+0082 |     if not frames:
+     # Checks this condition before running the next indented block.
+0083 |         return pd.DataFrame()
+     # Creates a labelled table from the collected rows.
+0084 |     allreps = pd.concat(frames, ignore_index=True)
+     # Keeps this intermediate result under the name `allreps`.
+0085 |     return (allreps.groupby(by)
+     # Groups rows sharing these keys before counting or averaging them.
+0086 |             .agg(n=("n", "sum"), rate=("rate", "mean"), rate_sd=("rate", "std"))
+     # Continues the current calculation or control flow.
+0087 |             .reset_index())
+     # Continues the current calculation or control flow.
+0088 | 
+0089 | 
+0090 | def compare(real_by_d: pd.DataFrame, null_by_d: pd.DataFrame,
+     # Put observed and shuffled rates side by side for each d value.
+0091 |             by: str = "d") -> pd.DataFrame:
+     # Keeps this intermediate result under the name `by`.
+0092 |     """Put observed and shuffled rates side by side for each d value.
+0093 | 
+0094 |     `lift_over_null` is observed rate / shuffled rate. Above 1 means excess
+0095 |     over that reference, not a causal effect estimate.
+0096 |     """
+0097 |     m = real_by_d.merge(null_by_d, on=by, suffixes=("_real", "_null"))
+     # Joins two tables on shared identifiers so their columns can be compared.
+0098 |     m["lift_over_null"] = m["rate_real"] / m["rate_null"].replace(0, np.nan)
+     # Compares the observed adoption rate with the shuffled-time reference rate.
+0099 | 
+0100 |     # Spread of the null rate across replicates. With a single replicate there
+0101 |     # is no spread to measure (std of one value is NaN), which would silently
+0102 |     # make every z NaN and collapse the verdict to "nothing detected". Fall
+0103 |     # back to the binomial standard error of the null rate, which is a valid
+0104 |     # estimate of the same quantity and lets one replicate still be informative.
+0105 |     se = m["rate_sd"].replace(0, np.nan)
+     # Keeps this intermediate result under the name `se`.
+0106 |     binom = np.sqrt(m["rate_null"] * (1 - m["rate_null"]) / m["n_null"].clip(lower=1))
+     # Caps large counts into the final chart bucket, such as six or more opponents.
+0107 |     m["null_se"] = se.fillna(binom)
+     # Continues the current calculation or control flow.
+0108 |     m["z_vs_null"] = (m["rate_real"] - m["rate_null"]) / m["null_se"].replace(0, np.nan)
+     # Continues the current calculation or control flow.
+0109 |     return m[[by, "n_real", "rate_real", "rate_null", "rate_sd",
+     # Hands this result back to the stage that called this function.
+0110 |               "lift_over_null", "z_vs_null"]]
+     # Compares the observed adoption rate with the shuffled-time reference rate.
+0111 | 
+0112 | 
+0113 | def run(games_path: Path, trials_path: Path, n_reps: int = None,
+     # Defines a reusable step; the following indented lines are its body.
+0114 |         kind: str = "shuffle"):
+     # Keeps this intermediate result under the name `kind`.
+0115 |     df = parse.load_games(games_path)
+     # Calculates or stores the game table for this stage.
+0116 |     real = curve.analyse(pd.read_parquet(trials_path))["by_d"]
+     # Loads a previously prepared game or trial table.
+0117 |     null = run_null(df, n_reps=n_reps, kind=kind)
+     # Calculates or stores the shuffled reference for this stage.
+0118 |     cmp = compare(real, null) if len(null) else pd.DataFrame()
+     # Creates a labelled table from the collected rows.
+0119 |     if len(cmp):
+     # Checks this condition before running the next indented block.
+0120 |         suffix = "" if kind == "shuffle" else f"_{kind}"
+     # Keeps this intermediate result under the name `suffix`.
+0121 |         cmp.to_csv(config.TABLES / f"null_comparison{suffix}.csv", index=False)
+     # Writes a result table that can be inspected or downloaded.
+0122 |     return cmp
+     # Hands this result back to the stage that called this function.
+0123 | 
+0124 | 
+0125 | if __name__ == "__main__":
+     # Runs the command-line entry point only when this file is executed directly.
+0126 |     ap = argparse.ArgumentParser()
+     # Keeps this intermediate result under the name `ap`.
+0127 |     ap.add_argument("--games", default=str(config.INTERIM / "games.parquet"))
+     # Defines a command-line option for this script.
+0128 |     ap.add_argument("--trials", default=str(config.PROCESSED / "trials.parquet"))
+     # Defines a command-line option for this script.
+0129 |     ap.add_argument("--reps", type=int, default=config.N_NULL_REPLICATES)
+     # Defines a command-line option for this script.
+0130 |     ap.add_argument("--kind", default="shuffle", choices=["shuffle", "rewire"],
+     # Defines a command-line option for this script.
+0131 |                     help="shuffle timestamps, or degree-preserving edge rewiring")
+     # Keeps this intermediate result under the name `help`.
+0132 |     a = ap.parse_args()
+     # Keeps this intermediate result under the name `a`.
+0133 |     c = run(Path(a.games), Path(a.trials), a.reps, a.kind)
+     # Keeps this intermediate result under the name `c`.
+0134 |     print(c.to_string(index=False) if len(c) else "null produced no trials")
+     # Prints this reading so a command-line run can be followed.

@@ -1,0 +1,39 @@
+CODE PRESENTATION QUICK REFERENCE
+
+Open code_explained/ alongside the working project. Each .explained.txt file
+repeats the original source line number and puts a plain-English # note after
+each nonblank executable line. The original files are the ones the project
+runs; the explained copies are for speaking and can be searched by line number.
+
+If the teacher asks for the full workflow, follow this order:
+
+1. server/app.py — The browser sends Run to /api/run. The server starts a run.
+2. server/runner.py — A worker loads real games, builds trials, calculates
+   the network and curve, then runs the shuffled, matched and prediction checks.
+3. src/parse.py — PGN is streamed and filtered to the chosen study population.
+4. src/events.py — Each game can expose both players to an opening/colour.
+   A complete trial asks if first use happens within 14 days.
+5. src/structure.py — Players become nodes; opponent pairs become edges.
+6. src/curve.py — Adoption rates are grouped by distinct exposing opponents.
+7. src/nulls.py — Shuffled timestamps give a reference for the raw curve.
+8. src/matching.py and src/predict.py — Two further checks compare similar
+   players and measure predictive signal on held-out spells.
+9. server/static/index.html — The live event stream updates the dashboard.
+10. site/page.html — The findings page displays the saved full-study results.
+
+Useful answers to remember:
+
+- k = total exposure events; d = different opponents; sd = separate connected
+  groups among those opponents.
+- An opening played as White and as Black counts as two behaviours.
+- A trial needs a complete 14-day follow-up. Late trials are excluded whether
+  their outcome would be positive or negative.
+- The classroom demo recomputes on a real 60,000-game sample. The reported
+  January findings use the larger filtered study slice.
+- A rise in the raw curve alone is insufficient. Compare it with shuffled
+  time to see whether the excess grows with different opponents.
+- Matching and held-out prediction are checks on the pattern. They do not
+  turn the observational study into proof of causation.
+
+After changing source files, regenerate these copies with:
+  .venv\Scripts\python.exe scripts\build_annotated_code.py

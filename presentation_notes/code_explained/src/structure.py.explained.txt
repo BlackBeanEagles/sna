@@ -1,0 +1,228 @@
+SOURCE: src/structure.py
+SAY FIRST: This constructs the player network and measures communities and centrality.
+Each numbered source line is followed by a plain-English comment.
+These files are speaking references; run the originals in src/, server/, site/ and scripts/.
+
+0001 | """Objective 4 -- who are the early adopters, structurally?
+0002 | 
+0003 | Builds the aggregate player-interaction graph, computes centrality and
+0004 | Louvain communities, and asks whether the first players to take up an
+0005 | opening sit at the core (hubs) or the periphery, and whether diffusion is
+0006 | mostly within-community with brokers carrying it across.
+0007 | """
+0008 | from __future__ import annotations
+     # Imports a library or project module needed below.
+0009 | 
+0010 | import argparse
+     # Imports a library or project module needed below.
+0011 | from pathlib import Path
+     # Imports a library or project module needed below.
+0012 | 
+0013 | import networkx as nx
+     # Imports a library or project module needed below.
+0014 | import pandas as pd
+     # Imports a library or project module needed below.
+0015 | 
+0016 | from . import config, events, parse
+     # Imports a library or project module needed below.
+0017 | 
+0018 | 
+0019 | def build_graph(df: pd.DataFrame) -> nx.Graph:
+     # Make one player node per account and one edge per opponent pair.
+0020 |     """Make one player node per account and one edge per opponent pair.
+0021 | 
+0022 |     Repeated games increase the edge's `games` weight; they do not make extra
+0023 |     nodes or edges. This is the network displayed during the live demo.
+0024 |     """
+0025 |     g = nx.Graph()
+     # Calculates or stores the player graph for this stage.
+0026 |     w = df.groupby(["white", "black"]).size().reset_index(name="games")
+     # Groups rows sharing these keys before counting or averaging them.
+0027 |     for u, v, n in w.itertuples(index=False):
+     # Processes each item from this collection in turn.
+0028 |         if g.has_edge(u, v):
+     # Checks this condition before running the next indented block.
+0029 |             g[u][v]["games"] += int(n)
+     # Continues the current calculation or control flow.
+0030 |         else:
+     # Handles the alternative when the preceding condition was false.
+0031 |             g.add_edge(u, v, games=int(n))
+     # Continues the current calculation or control flow.
+0032 |     return g
+     # Hands this result back to the stage that called this function.
+0033 | 
+0034 | 
+0035 | def node_features(g: nx.Graph, betweenness_k: int = 200) -> pd.DataFrame:
+     # Describe each player's position and detect groups in the network.
+0036 |     """Describe each player's position and detect groups in the network.
+0037 | 
+0038 |     Degree counts opponents, k-core measures membership in a dense centre,
+0039 |     and betweenness approximates how often a player bridges shortest paths.
+0040 |     Louvain groups players who are more connected to one another.
+0041 |     """
+0042 |     deg = dict(g.degree())
+     # Keeps this intermediate result under the name `deg`.
+0043 |     core = nx.core_number(g)
+     # Measures how deeply each player lies in a mutually connected core.
+0044 |     k = min(betweenness_k, g.number_of_nodes())
+     # Calculates or stores the total exposure count for this stage.
+0045 |     btw = nx.betweenness_centrality(g, k=k, seed=config.RANDOM_SEED) if k > 2 else {}
+     # Estimates how often players bridge shortest routes through the graph.
+0046 |     clus = nx.clustering(g)
+     # Keeps this intermediate result under the name `clus`.
+0047 |     comms = nx.community.louvain_communities(g, seed=config.RANDOM_SEED)
+     # Finds groups of players with relatively dense internal connections.
+0048 |     comm_of = {n: i for i, c in enumerate(comms) for n in c}
+     # Keeps this intermediate result under the name `comm_of`.
+0049 |     feats = pd.DataFrame({
+     # Creates a labelled table from the collected rows.
+0050 |         "player": list(g.nodes()),
+     # Part of the value, collection, or call spanning several lines.
+0051 |         "degree": [deg.get(n, 0) for n in g.nodes()],
+     # Part of the value, collection, or call spanning several lines.
+0052 |         "kcore": [core.get(n, 0) for n in g.nodes()],
+     # Part of the value, collection, or call spanning several lines.
+0053 |         "betweenness": [btw.get(n, 0.0) for n in g.nodes()],
+     # Part of the value, collection, or call spanning several lines.
+0054 |         "clustering": [clus.get(n, 0.0) for n in g.nodes()],
+     # Part of the value, collection, or call spanning several lines.
+0055 |         "community": [comm_of.get(n, -1) for n in g.nodes()],
+     # Part of the value, collection, or call spanning several lines.
+0056 |     })
+     # Continues the current calculation or control flow.
+0057 |     feats.attrs["n_communities"] = len(comms)
+     # Continues the current calculation or control flow.
+0058 |     feats.attrs["modularity"] = nx.community.modularity(g, comms)
+     # Continues the current calculation or control flow.
+0059 |     return feats
+     # Hands this result back to the stage that called this function.
+0060 | 
+0061 | 
+0062 | def early_adopters(df: pd.DataFrame, quantile: float = 0.1) -> pd.DataFrame:
+     # First `quantile` of adopters of each behaviour, by adoption time.
+0063 |     """First `quantile` of adopters of each behaviour, by adoption time."""
+0064 |     _, first_perf, _ = events.sweep(df)
+     # Continues the current calculation or control flow.
+0065 |     rows = [(p, beh[0], beh[1], t) for (p, beh), t in first_perf.items()]
+     # Calculates or stores the result rows collected for the output table for this stage.
+0066 |     fp = pd.DataFrame(rows, columns=["player", "opening", "colour", "t"])
+     # Creates a labelled table from the collected rows.
+0067 |     fp["rank"] = fp.groupby(["opening", "colour"])["t"].rank(method="first", pct=True)
+     # Groups rows sharing these keys before counting or averaging them.
+0068 |     fp["is_early"] = (fp["rank"] <= quantile).astype(int)
+     # Continues the current calculation or control flow.
+0069 |     return fp
+     # Hands this result back to the stage that called this function.
+0070 | 
+0071 | 
+0072 | def cross_community_flow(df: pd.DataFrame, feats: pd.DataFrame) -> dict:
+     # Count pre-adoption encounters within and across detected communities.
+0073 |     """Count pre-adoption encounters within and across detected communities.
+0074 | 
+0075 |     This is descriptive: sharing a community does not prove one opponent
+0076 |     caused another player to choose an opening.
+0077 |     """
+0078 |     comm = dict(zip(feats["player"], feats["community"]))
+     # Keeps this intermediate result under the name `comm`.
+0079 |     exposures, first_perf, _ = events.sweep(df)
+     # Continues the current calculation or control flow.
+0080 |     within = across = 0
+     # Keeps this intermediate result under the name `within`.
+0081 |     for (p, beh), evs in exposures.items():
+     # Processes each item from this collection in turn.
+0082 |         adopt_t = first_perf.get((p, beh))
+     # Keeps this intermediate result under the name `adopt_t`.
+0083 |         if adopt_t is None:
+     # Checks whether this player had already adopted before the current exposure.
+0084 |             continue
+     # Skips this item and moves to the next loop iteration.
+0085 |         for t, exposer in evs:
+     # Processes each item from this collection in turn.
+0086 |             if t >= adopt_t:
+     # Checks whether this player had already adopted before the current exposure.
+0087 |                 break
+     # Ends the current loop.
+0088 |             if comm.get(p, -1) == comm.get(exposer, -2):
+     # Checks this condition before running the next indented block.
+0089 |                 within += 1
+     # Continues the current calculation or control flow.
+0090 |             else:
+     # Handles the alternative when the preceding condition was false.
+0091 |                 across += 1
+     # Continues the current calculation or control flow.
+0092 |     total = within + across
+     # Keeps this intermediate result under the name `total`.
+0093 |     return {"pre_adoption_exposures": total,
+     # Hands this result back to the stage that called this function.
+0094 |             "within_community": within,
+     # Part of the value, collection, or call spanning several lines.
+0095 |             "across_community": across,
+     # Part of the value, collection, or call spanning several lines.
+0096 |             "share_within": round(within / total, 4) if total else None}
+     # Part of the value, collection, or call spanning several lines.
+0097 | 
+0098 | 
+0099 | def run(games_path: Path):
+     # Defines a reusable step; the following indented lines are its body.
+0100 |     df = parse.load_games(games_path)
+     # Calculates or stores the game table for this stage.
+0101 |     g = build_graph(df)
+     # Calculates or stores the player graph for this stage.
+0102 |     feats = node_features(g)
+     # Calculates or stores the network features for this stage.
+0103 |     fp = early_adopters(df)
+     # Keeps this intermediate result under the name `fp`.
+0104 | 
+0105 |     merged = fp.merge(feats, on="player", how="left")
+     # Joins two tables on shared identifiers so their columns can be compared.
+0106 |     by_early = merged.groupby("is_early")[
+     # Groups rows sharing these keys before counting or averaging them.
+0107 |         ["degree", "kcore", "betweenness", "clustering"]].mean()
+     # Part of the value, collection, or call spanning several lines.
+0108 |     by_early.to_csv(config.TABLES / "early_adopter_structure.csv")
+     # Writes a result table that can be inspected or downloaded.
+0109 |     feats.to_parquet(config.PROCESSED / "node_features.parquet", index=False)
+     # Saves a compact table for later analysis stages.
+0110 | 
+0111 |     summary = {
+     # Keeps this intermediate result under the name `summary`.
+0112 |         "nodes": g.number_of_nodes(),
+     # Part of the value, collection, or call spanning several lines.
+0113 |         "edges": g.number_of_edges(),
+     # Part of the value, collection, or call spanning several lines.
+0114 |         "density": round(nx.density(g), 6),
+     # Part of the value, collection, or call spanning several lines.
+0115 |         "components": nx.number_connected_components(g),
+     # Part of the value, collection, or call spanning several lines.
+0116 |         "communities": feats.attrs["n_communities"],
+     # Part of the value, collection, or call spanning several lines.
+0117 |         "modularity": round(feats.attrs["modularity"], 4),
+     # Part of the value, collection, or call spanning several lines.
+0118 |         "mean_degree": round(sum(dict(g.degree()).values()) / g.number_of_nodes(), 2),
+     # Part of the value, collection, or call spanning several lines.
+0119 |         **cross_community_flow(df, feats),
+     # Part of the value, collection, or call spanning several lines.
+0120 |     }
+     # Closes the data structure or function call started above.
+0121 |     pd.DataFrame([summary]).to_csv(config.TABLES / "network_summary.csv", index=False)
+     # Creates a labelled table from the collected rows.
+0122 |     return g, feats, by_early, summary
+     # Hands this result back to the stage that called this function.
+0123 | 
+0124 | 
+0125 | if __name__ == "__main__":
+     # Runs the command-line entry point only when this file is executed directly.
+0126 |     ap = argparse.ArgumentParser()
+     # Keeps this intermediate result under the name `ap`.
+0127 |     ap.add_argument("--games", default=str(config.INTERIM / "games.parquet"))
+     # Defines a command-line option for this script.
+0128 |     a = ap.parse_args()
+     # Keeps this intermediate result under the name `a`.
+0129 |     _, _, by_early, summary = run(Path(a.games))
+     # Continues the current calculation or control flow.
+0130 |     print("network:", summary)
+     # Prints this reading so a command-line run can be followed.
+0131 |     print("\nearly adopters (is_early=1) vs the rest:")
+     # Prints this reading so a command-line run can be followed.
+0132 |     print(by_early.to_string())
+     # Prints this reading so a command-line run can be followed.

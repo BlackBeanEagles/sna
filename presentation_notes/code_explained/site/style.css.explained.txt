@@ -1,0 +1,489 @@
+SOURCE: site/style.css
+SAY FIRST: Reference copy of site/style.css; follow the line numbers while presenting.
+Each numbered source line is followed by a plain-English comment.
+These files are speaking references; run the originals in src/, server/, site/ and scripts/.
+
+0001 | /* Findings page theme: chessboard greens and warm paper. The repeated
+     # Existing developer note about this section.
+0002 |    background gradients are decoration; charts and findings use separate
+     # Continues the current style rule.
+0003 |    semantic colours so the evidence remains readable. */
+     # Continues the current style rule.
+0004 | :root {
+     # Starts the style rules for this page element or state.
+0005 |   color-scheme: light;
+     # Sets `color-scheme` for the current page element.
+0006 |   --paper: #eee9db;
+     # Sets `--paper` for the current page element.
+0007 |   --surface: #fffdf7;
+     # Sets `--surface` for the current page element.
+0008 |   --ink: #25291f;
+     # Sets `--ink` for the current page element.
+0009 |   --soft: #4c5448;
+     # Sets `--soft` for the current page element.
+0010 |   --muted: #687064;
+     # Sets `--muted` for the current page element.
+0011 |   --line: #d9d6c8;
+     # Sets `--line` for the current page element.
+0012 |   --green: #24563c;
+     # Sets `--green` for the current page element.
+0013 |   --green-dark: #173d2a;
+     # Sets `--green-dark` for the current page element.
+0014 |   --rust: #a65d38;
+     # Sets `--rust` for the current page element.
+0015 |   --wash: #e7eee6;
+     # Sets `--wash` for the current page element.
+0016 |   --body: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+     # Sets `--body` for the current page element.
+0017 |   --display: Georgia, "Times New Roman", serif;
+     # Sets `--display` for the current page element.
+0018 |   font-synthesis: none;
+     # Sets `font-synthesis` for the current page element.
+0019 | }
+     # Closes the preceding element or code block.
+0020 | * { box-sizing: border-box; }
+     # Existing developer note about this section.
+0021 | html { scroll-behavior: smooth; scroll-padding-top: 92px; }
+     # Sets `html { scroll-behavior` for the current page element.
+0022 | body {
+     # Starts the style rules for this page element or state.
+0023 |   margin: 0;
+     # Sets `margin` for the current page element.
+0024 |   color: var(--ink);
+     # Sets `color` for the current page element.
+0025 |   font: 15px/1.58 var(--body);
+     # Sets `font` for the current page element.
+0026 |   background:
+     # Sets `background` for the current page element.
+0027 |     radial-gradient(ellipse 64% 38% at 4% 2%, #d9deca 0%, transparent 78%),
+     # Continues the current style rule.
+0028 |     radial-gradient(ellipse 53% 42% at 100% 26%, #ded6bc 0%, transparent 79%),
+     # Continues the current style rule.
+0029 |     radial-gradient(ellipse 62% 48% at 0% 72%, #d4dfd5 0%, transparent 76%),
+     # Continues the current style rule.
+0030 |     radial-gradient(ellipse 53% 42% at 95% 100%, #decdbc 0%, transparent 78%),
+     # Continues the current style rule.
+0031 |     var(--paper);
+     # Continues the current style rule.
+0032 |   background-attachment: fixed;
+     # Sets `background-attachment` for the current page element.
+0033 | }
+     # Closes the preceding element or code block.
+0034 | body::before {
+     # Starts the style rules for this page element or state.
+0035 |   content: "";
+     # Sets `content` for the current page element.
+0036 |   position: fixed;
+     # Sets `position` for the current page element.
+0037 |   inset: 0;
+     # Sets `inset` for the current page element.
+0038 |   pointer-events: none;
+     # Sets `pointer-events` for the current page element.
+0039 |   background: linear-gradient(90deg, transparent 49.5%, rgba(45,65,42,.035) 50%) 0 0/90px 90px,
+     # Sets `background` for the current page element.
+0040 |               linear-gradient(transparent 49.5%, rgba(45,65,42,.035) 50%) 0 0/90px 90px;
+     # Continues the current style rule.
+0041 |   mask-image: linear-gradient(110deg, transparent, black 50%, transparent);
+     # Sets `mask-image` for the current page element.
+0042 | }
+     # Closes the preceding element or code block.
+0043 | [hidden] { display: none !important; }
+     # Sets `[hidden] { display` for the current page element.
+0044 | button, select { font: inherit; }
+     # Sets `button, select { font` for the current page element.
+0045 | button, a, select, input { outline-offset: 4px; }
+     # Sets `button, a, select, input { outline-offset` for the current page element.
+0046 | button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--green); }
+     # Sets `button` for the current page element.
+0047 | a { color: inherit; }
+     # Sets `a { color` for the current page element.
+0048 | h1, h2, h3, p { margin-top: 0; }
+     # Sets `h1, h2, h3, p { margin-top` for the current page element.
+0049 | .wrap { width: min(1240px, calc(100% - 64px)); margin-inline: auto; }
+     # Sets `.wrap { width` for the current page element.
+0050 | main.wrap, footer.wrap { position: relative; }
+     # Sets `main.wrap, footer.wrap { position` for the current page element.
+0051 | .topbar {
+     # Starts the style rules for this page element or state.
+0052 |   position: sticky;
+     # Sets `position` for the current page element.
+0053 |   top: 0;
+     # Sets `top` for the current page element.
+0054 |   z-index: 10;
+     # Sets `z-index` for the current page element.
+0055 |   background: rgba(255,253,247,.94);
+     # Sets `background` for the current page element.
+0056 |   border-bottom: 1px solid rgba(49,70,49,.12);
+     # Sets `border-bottom` for the current page element.
+0057 |   backdrop-filter: blur(18px);
+     # Sets `backdrop-filter` for the current page element.
+0058 | }
+     # Closes the preceding element or code block.
+0059 | .topbar-inner { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+     # Sets `.topbar-inner { min-height` for the current page element.
+0060 | .brand { display: inline-flex; align-items: center; gap: 13px; font-weight: 780; font-size: 17px; letter-spacing: -.035em; text-decoration: none; white-space: nowrap; }
+     # Sets `.brand { display` for the current page element.
+0061 | .mark { display: grid; grid-template-columns: repeat(2, 10px); grid-template-rows: repeat(2, 10px); gap: 3px; transform: rotate(-8deg); }
+     # Sets `.mark { display` for the current page element.
+0062 | .mark i { display: block; background: var(--green); border-radius: 2px; }
+     # Sets `.mark i { display` for the current page element.
+0063 | .mark i:nth-child(2), .mark i:nth-child(3) { background: #ae8150; }
+     # Sets `.mark i` for the current page element.
+0064 | .nav { display: flex; align-items: center; gap: clamp(15px, 2.5vw, 34px); }
+     # Sets `.nav { display` for the current page element.
+0065 | .nav a { text-decoration: none; color: var(--soft); font-size: 13px; font-weight: 700; }
+     # Sets `.nav a { text-decoration` for the current page element.
+0066 | .nav a:hover { color: var(--green); }
+     # Sets `.nav a` for the current page element.
+0067 | .nav .live-link {
+     # Starts the style rules for this page element or state.
+0068 |   color: #fff;
+     # Sets `color` for the current page element.
+0069 |   background: var(--green);
+     # Sets `background` for the current page element.
+0070 |   padding: 11px 17px;
+     # Sets `padding` for the current page element.
+0071 |   border-radius: 10px;
+     # Sets `border-radius` for the current page element.
+0072 |   box-shadow: 0 7px 17px rgba(20,64,41,.17);
+     # Sets `box-shadow` for the current page element.
+0073 | }
+     # Closes the preceding element or code block.
+0074 | .nav .live-link:hover { color: #fff; background: var(--green-dark); }
+     # Sets `.nav .live-link` for the current page element.
+0075 | .hero {
+     # Starts the style rules for this page element or state.
+0076 |   position: relative;
+     # Sets `position` for the current page element.
+0077 |   isolation: isolate;
+     # Sets `isolation` for the current page element.
+0078 |   display: flex;
+     # Sets `display` for the current page element.
+0079 |   align-items: center;
+     # Sets `align-items` for the current page element.
+0080 |   min-height: 485px;
+     # Sets `min-height` for the current page element.
+0081 |   margin-top: 30px;
+     # Sets `margin-top` for the current page element.
+0082 |   overflow: hidden;
+     # Sets `overflow` for the current page element.
+0083 |   padding: clamp(44px, 5.5vw, 78px);
+     # Sets `padding` for the current page element.
+0084 |   border: 1px solid rgba(77,67,47,.15);
+     # Sets `border` for the current page element.
+0085 |   border-radius: 25px;
+     # Sets `border-radius` for the current page element.
+0086 |   background:
+     # Sets `background` for the current page element.
+0087 |     linear-gradient(90deg, rgba(255,250,239,.99) 0%, rgba(255,249,236,.98) 29%, rgba(255,248,235,.74) 47%, rgba(255,248,235,.07) 71%),
+     # Continues the current style rule.
+0088 |     url("assets/chess-diffusion-walnut.png") 50% 51% / cover no-repeat;
+     # Continues the current style rule.
+0089 |   box-shadow: 0 22px 52px rgba(62,56,39,.14);
+     # Sets `box-shadow` for the current page element.
+0090 | }
+     # Closes the preceding element or code block.
+0091 | .hero > div { max-width: 540px; }
+     # Sets `.hero > div { max-width` for the current page element.
+0092 | .kicker, .eyebrow, .section-index, .summary-label, .stats dt, .compare-item .label, .explorer-tools label {
+     # Starts the style rules for this page element or state.
+0093 |   font-size: 11px;
+     # Sets `font-size` for the current page element.
+0094 |   font-weight: 800;
+     # Sets `font-weight` for the current page element.
+0095 |   letter-spacing: .12em;
+     # Sets `letter-spacing` for the current page element.
+0096 |   text-transform: uppercase;
+     # Sets `text-transform` for the current page element.
+0097 | }
+     # Closes the preceding element or code block.
+0098 | .kicker { display: inline-block; color: var(--green); background: rgba(255,253,245,.85); border: 1px solid #d8d5bf; border-radius: 999px; padding: 8px 13px; margin-bottom: 26px; }
+     # Sets `.kicker { display` for the current page element.
+0099 | h1 { color: #25271e; font: 700 clamp(48px, 5.5vw, 76px)/.99 var(--display); letter-spacing: -.055em; max-width: 10ch; margin-bottom: 25px; text-wrap: balance; }
+     # Sets `h1 { color` for the current page element.
+0100 | .hero-lead { max-width: 45ch; margin: 0; color: #454b3e; font-size: clamp(16px, 1.5vw, 19px); line-height: 1.55; }
+     # Sets `.hero-lead { max-width` for the current page element.
+0101 | .summary {
+     # Starts the style rules for this page element or state.
+0102 |   display: grid;
+     # Sets `display` for the current page element.
+0103 |   grid-template-columns: 125px minmax(0, 1fr) 230px;
+     # Sets `grid-template-columns` for the current page element.
+0104 |   gap: 24px;
+     # Sets `gap` for the current page element.
+0105 |   align-items: center;
+     # Sets `align-items` for the current page element.
+0106 |   margin-top: 20px;
+     # Sets `margin-top` for the current page element.
+0107 |   padding: 26px 31px;
+     # Sets `padding` for the current page element.
+0108 |   background: var(--green-dark);
+     # Sets `background` for the current page element.
+0109 |   color: #fff;
+     # Sets `color` for the current page element.
+0110 |   border-radius: 17px;
+     # Sets `border-radius` for the current page element.
+0111 |   box-shadow: 0 14px 35px rgba(20,61,42,.13);
+     # Sets `box-shadow` for the current page element.
+0112 | }
+     # Closes the preceding element or code block.
+0113 | .summary-label { color: #bdd6be; }
+     # Sets `.summary-label { color` for the current page element.
+0114 | .summary-copy { margin: 0; font: 600 22px/1.32 var(--display); letter-spacing: -.018em; }
+     # Sets `.summary-copy { margin` for the current page element.
+0115 | .summary-note { border-left: 1px solid rgba(255,255,255,.2); padding-left: 23px; margin: 0; color: #d4e2d3; font-size: 12px; line-height: 1.55; }
+     # Sets `.summary-note { border-left` for the current page element.
+0116 | .stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin: 16px 0 7px; }
+     # Sets `.stats { display` for the current page element.
+0117 | .stats div { background: var(--surface); border: 1px solid var(--line); border-radius: 15px; padding: 23px 25px; box-shadow: 0 7px 20px rgba(71,62,40,.045); }
+     # Sets `.stats div { background` for the current page element.
+0118 | .stats dt { color: var(--muted); margin-bottom: 13px; }
+     # Sets `.stats dt { color` for the current page element.
+0119 | .stats dd { margin: 0; font-size: clamp(26px, 2.8vw, 37px); font-weight: 750; line-height: 1.1; letter-spacing: -.045em; font-variant-numeric: tabular-nums; }
+     # Sets `.stats dd { margin` for the current page element.
+0120 | .section { padding: 75px 0 0; }
+     # Sets `.section { padding` for the current page element.
+0121 | .section-head { display: grid; grid-template-columns: 156px minmax(0,1fr); gap: 20px; align-items: start; margin-bottom: 27px; }
+     # Sets `.section-head { display` for the current page element.
+0122 | .section-index { color: var(--green); padding-top: 12px; }
+     # Sets `.section-index { color` for the current page element.
+0123 | h2 { font: 700 clamp(34px, 3.8vw, 49px)/1.07 var(--display); letter-spacing: -.04em; margin-bottom: 13px; text-wrap: balance; }
+     # Sets `h2 { font` for the current page element.
+0124 | .section-head p { max-width: 72ch; color: var(--soft); margin: 0; font-size: 15px; }
+     # Sets `.section-head p { max-width` for the current page element.
+0125 | .card, .explorer-tools, .compare-item, .method-step, .limit-list li { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 7px 22px rgba(71,62,40,.045); }
+     # Sets `.card, .explorer-tools, .compare-item, .method-step, .limit-list li { background` for the current page element.
+0126 | .card { overflow: hidden; }
+     # Sets `.card { overflow` for the current page element.
+0127 | .card-head { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 27px 30px 17px; }
+     # Sets `.card-head { display` for the current page element.
+0128 | h3 { font: 700 23px/1.2 var(--display); letter-spacing: -.025em; margin-bottom: 6px; }
+     # Sets `h3 { font` for the current page element.
+0129 | .card-head p { color: var(--muted); font-size: 13px; margin: 0; }
+     # Sets `.card-head p { color` for the current page element.
+0130 | .explorer-tools { display: flex; align-items: end; gap: 12px; flex-wrap: wrap; padding: 19px 21px; margin-bottom: 14px; }
+     # Sets `.explorer-tools { display` for the current page element.
+0131 | .explorer-tools label { display: grid; gap: 7px; color: var(--muted); }
+     # Sets `.explorer-tools label { display` for the current page element.
+0132 | .explorer-tools select { min-width: 170px; max-width: 255px; min-height: 43px; padding: 0 33px 0 12px; background: #fff; color: var(--ink); border: 1px solid #bfc9b9; border-radius: 9px; font-size: 13px; font-weight: 650; letter-spacing: 0; text-transform: none; }
+     # Sets `.explorer-tools select { min-width` for the current page element.
+0133 | .explorer-tools button { min-height: 43px; padding: 0 15px; cursor: pointer; background: var(--wash); color: var(--green-dark); border: 1px solid #cbdaca; border-radius: 9px; font-size: 12px; font-weight: 750; }
+     # Sets `.explorer-tools button { min-height` for the current page element.
+0134 | .explorer-tools button:hover { background: #dce9db; }
+     # Sets `.explorer-tools button` for the current page element.
+0135 | .explorer-tools p { flex-basis: 100%; margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+     # Sets `.explorer-tools p { flex-basis` for the current page element.
+0136 | .chart-wrap { min-height: 320px; display: grid; place-items: center; padding: 0 20px 16px; }
+     # Sets `.chart-wrap { min-height` for the current page element.
+0137 | .chart { display: block; width: 100%; height: auto; overflow: visible; }
+     # Sets `.chart { display` for the current page element.
+0138 | .chart-empty { color: var(--soft); text-align: center; max-width: 35ch; padding: 40px 20px; }
+     # Sets `.chart-empty { color` for the current page element.
+0139 | .chart .grid { stroke: #e5e9dd; }
+     # Sets `.chart .grid { stroke` for the current page element.
+0140 | .chart .axis { stroke: #aebaaa; }
+     # Sets `.chart .axis { stroke` for the current page element.
+0141 | .chart text { font: 11px var(--body); fill: #616d60; }
+     # Sets `.chart text { font` for the current page element.
+0142 | .chart .axis-title { fill: #637062; font-size: 10px; }
+     # Sets `.chart .axis-title { fill` for the current page element.
+0143 | .chart .observed { stroke: var(--green); fill: none; stroke-width: 3.4; stroke-linejoin: round; stroke-linecap: round; }
+     # Sets `.chart .observed { stroke` for the current page element.
+0144 | .chart .null { stroke: var(--rust); fill: none; stroke-width: 2.7; stroke-dasharray: 7 6; stroke-linecap: round; }
+     # Sets `.chart .null { stroke` for the current page element.
+0145 | .chart .point-observed { fill: var(--green); stroke: #fff; stroke-width: 2.7; }
+     # Sets `.chart .point-observed { fill` for the current page element.
+0146 | .chart .point-null { fill: var(--rust); stroke: #fff; stroke-width: 2.3; }
+     # Sets `.chart .point-null { fill` for the current page element.
+0147 | .chart .uncertainty { stroke: var(--green); stroke-width: 1.5; opacity: .4; }
+     # Sets `.chart .uncertainty { stroke` for the current page element.
+0148 | .toggle { display: inline-flex; align-items: center; gap: 9px; white-space: nowrap; color: var(--soft); font-size: 12px; font-weight: 650; cursor: pointer; }
+     # Sets `.toggle { display` for the current page element.
+0149 | .toggle input { accent-color: var(--green); }
+     # Sets `.toggle input { accent-color` for the current page element.
+0150 | .chart-note { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 15px 30px 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+     # Sets `.chart-note { display` for the current page element.
+0151 | .legend { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; color: var(--soft); font-weight: 700; }
+     # Sets `.legend { display` for the current page element.
+0152 | .legend i { display: inline-block; width: 22px; border-top: 3px solid var(--green); vertical-align: middle; margin-right: 8px; }
+     # Sets `.legend i { display` for the current page element.
+0153 | .legend i.null-key { border-color: var(--rust); border-top-style: dashed; }
+     # Sets `.legend i.null-key { border-color` for the current page element.
+0154 | .compare { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; margin-top: 14px; }
+     # Sets `.compare { display` for the current page element.
+0155 | .compare-item { position: relative; overflow: hidden; padding: 24px 28px; }
+     # Sets `.compare-item { position` for the current page element.
+0156 | .compare-item::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 5px; background: var(--green); }
+     # Sets `.compare-item` for the current page element.
+0157 | .compare-item:last-child::before { background: var(--rust); }
+     # Sets `.compare-item` for the current page element.
+0158 | .compare-item .label { color: var(--muted); }
+     # Sets `.compare-item .label { color` for the current page element.
+0159 | .compare-item strong { display: block; margin: 7px 0 2px; font-size: 37px; line-height: 1.13; font-weight: 760; letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
+     # Sets `.compare-item strong { display` for the current page element.
+0160 | .compare-item:first-child strong { color: var(--green); }
+     # Sets `.compare-item` for the current page element.
+0161 | .compare-item:last-child strong { color: var(--rust); }
+     # Sets `.compare-item` for the current page element.
+0162 | .compare-item p { color: var(--soft); font-size: 12px; margin: 0; }
+     # Sets `.compare-item p { color` for the current page element.
+0163 | .footnote { color: var(--muted); font-size: 12px; line-height: 1.65; margin: 16px 0 0; }
+     # Sets `.footnote { color` for the current page element.
+0164 | .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+     # Sets `.two-col { display` for the current page element.
+0165 | .analysis-card { padding: 27px 30px; }
+     # Sets `.analysis-card { padding` for the current page element.
+0166 | .analysis-card h3 { margin-bottom: 20px; }
+     # Sets `.analysis-card h3 { margin-bottom` for the current page element.
+0167 | .bar-row { display: grid; grid-template-columns: 100px 1fr 75px; gap: 12px; align-items: center; margin: 15px 0; font-size: 12px; font-weight: 700; }
+     # Sets `.bar-row { display` for the current page element.
+0168 | .bar { height: 12px; background: #e8ede4; border-radius: 999px; overflow: hidden; }
+     # Sets `.bar { height` for the current page element.
+0169 | .bar i { display: block; height: 100%; border-radius: inherit; background: var(--green); }
+     # Sets `.bar i { display` for the current page element.
+0170 | .bar-row.control .bar i { background: var(--rust); }
+     # Sets `.bar-row.control .bar i { background` for the current page element.
+0171 | .bar-row b { text-align: right; font-variant-numeric: tabular-nums; }
+     # Sets `.bar-row b { text-align` for the current page element.
+0172 | .big-delta { color: var(--green); font-size: 31px; font-weight: 780; letter-spacing: -.04em; margin: 22px 0 5px; }
+     # Sets `.big-delta { color` for the current page element.
+0173 | .small { color: var(--muted); font-size: 12px; line-height: 1.6; margin-bottom: 0; }
+     # Sets `.small { color` for the current page element.
+0174 | .callout { padding: 17px 19px; background: #eef2e9; border: 1px solid #dce6d6; border-radius: 10px; color: var(--soft); font-size: 13px; }
+     # Sets `.callout { padding` for the current page element.
+0175 | .callout p { margin: 0; }
+     # Sets `.callout p { margin` for the current page element.
+0176 | .callout b { color: var(--ink); }
+     # Sets `.callout b { color` for the current page element.
+0177 | .table-scroll { overflow-x: auto; }
+     # Sets `.table-scroll { overflow-x` for the current page element.
+0178 | table { border-collapse: collapse; width: 100%; min-width: 540px; font-variant-numeric: tabular-nums; }
+     # Sets `table { border-collapse` for the current page element.
+0179 | th, td { padding: 15px 24px; border-bottom: 1px solid var(--line); text-align: left; }
+     # Sets `th, td { padding` for the current page element.
+0180 | th { background: #f1f3eb; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+     # Sets `th { background` for the current page element.
+0181 | td { font-size: 13px; }
+     # Sets `td { font-size` for the current page element.
+0182 | tr:last-child td { border-bottom: 0; }
+     # Sets `tr` for the current page element.
+0183 | td.num { text-align: right; font-weight: 800; }
+     # Sets `td.num { text-align` for the current page element.
+0184 | tr.highlight { background: #ebf1e9; }
+     # Sets `tr.highlight { background` for the current page element.
+0185 | .method-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+     # Sets `.method-grid { display` for the current page element.
+0186 | .method-step { padding: 24px 26px 26px; }
+     # Sets `.method-step { padding` for the current page element.
+0187 | .method-step b { display: inline-grid; place-items: center; width: 31px; height: 31px; border-radius: 8px; background: var(--wash); color: var(--green); font-size: 11px; }
+     # Sets `.method-step b { display` for the current page element.
+0188 | .method-step h3 { margin: 20px 0 9px; font-size: 20px; }
+     # Sets `.method-step h3 { margin` for the current page element.
+0189 | .method-step p { color: var(--soft); font-size: 13px; margin: 0; }
+     # Sets `.method-step p { color` for the current page element.
+0190 | .limit-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; list-style: none; padding: 0; margin: 0; }
+     # Sets `.limit-list { display` for the current page element.
+0191 | .limit-list li { padding: 20px 23px; color: var(--soft); font-size: 13px; }
+     # Sets `.limit-list li { padding` for the current page element.
+0192 | .limit-list b { display: block; color: var(--ink); margin-bottom: 5px; font-size: 14px; }
+     # Sets `.limit-list b { display` for the current page element.
+0193 | footer { display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; padding: 55px 0 39px; color: var(--muted); font-size: 12px; }
+     # Sets `footer { display` for the current page element.
+0194 | footer a { color: var(--green); font-weight: 750; }
+     # Sets `footer a { color` for the current page element.
+0195 | @media (max-width: 900px) {
+     # Starts the style rules for this page element or state.
+0196 |   .summary { grid-template-columns: 110px 1fr; }
+     # Sets `.summary { grid-template-columns` for the current page element.
+0197 |   .summary-note { grid-column: 2; border: 0; padding-left: 0; }
+     # Sets `.summary-note { grid-column` for the current page element.
+0198 |   .section-head { grid-template-columns: 1fr; gap: 6px; }
+     # Sets `.section-head { grid-template-columns` for the current page element.
+0199 |   .section-index { padding-top: 0; }
+     # Sets `.section-index { padding-top` for the current page element.
+0200 |   .two-col { grid-template-columns: 1fr; }
+     # Sets `.two-col { grid-template-columns` for the current page element.
+0201 | }
+     # Closes the preceding element or code block.
+0202 | @media (max-width: 650px) {
+     # Starts the style rules for this page element or state.
+0203 |   html { scroll-padding-top: 70px; }
+     # Sets `html { scroll-padding-top` for the current page element.
+0204 |   body { background-attachment: scroll; }
+     # Sets `body { background-attachment` for the current page element.
+0205 |   .wrap { width: calc(100% - 28px); }
+     # Sets `.wrap { width` for the current page element.
+0206 |   .topbar-inner { min-height: 64px; gap: 10px; }
+     # Sets `.topbar-inner { min-height` for the current page element.
+0207 |   .brand { font-size: 14px; gap: 9px; }
+     # Sets `.brand { font-size` for the current page element.
+0208 |   .mark { grid-template-columns: repeat(2,8px); grid-template-rows: repeat(2,8px); }
+     # Sets `.mark { grid-template-columns` for the current page element.
+0209 |   .nav { gap: 9px; }
+     # Sets `.nav { gap` for the current page element.
+0210 |   .nav a:not(.live-link) { display: none; }
+     # Sets `.nav a` for the current page element.
+0211 |   .nav .live-link { font-size: 11px; padding: 9px 11px; }
+     # Sets `.nav .live-link { font-size` for the current page element.
+0212 |   .hero { min-height: 570px; align-items: flex-start; margin-top: 14px; padding: 31px 26px; border-radius: 18px;
+     # Sets `.hero { min-height` for the current page element.
+0213 |     background: linear-gradient(180deg, rgba(255,250,240,.99) 0%, rgba(255,250,240,.99) 48%, rgba(255,250,240,.76) 63%, rgba(255,250,240,.06) 86%), url("assets/chess-diffusion-walnut.png") 66% center / cover no-repeat; }
+     # Sets `background` for the current page element.
+0214 |   .kicker { font-size: 9px; margin-bottom: 22px; }
+     # Sets `.kicker { font-size` for the current page element.
+0215 |   h1 { font-size: clamp(42px, 11vw, 58px); max-width: 10ch; margin-bottom: 18px; }
+     # Sets `h1 { font-size` for the current page element.
+0216 |   .hero-lead { max-width: 38ch; font-size: 15px; }
+     # Sets `.hero-lead { max-width` for the current page element.
+0217 |   .summary { display: block; padding: 22px 23px; }
+     # Sets `.summary { display` for the current page element.
+0218 |   .summary-label { display: block; margin-bottom: 10px; }
+     # Sets `.summary-label { display` for the current page element.
+0219 |   .summary-copy { font-size: 20px; }
+     # Sets `.summary-copy { font-size` for the current page element.
+0220 |   .summary-note { border-top: 1px solid rgba(255,255,255,.2); padding-top: 12px; margin-top: 15px; }
+     # Sets `.summary-note { border-top` for the current page element.
+0221 |   .stats { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
+     # Sets `.stats { grid-template-columns` for the current page element.
+0222 |   .stats div { padding: 18px; }
+     # Sets `.stats div { padding` for the current page element.
+0223 |   .stats dt { font-size: 9px; margin-bottom: 9px; }
+     # Sets `.stats dt { font-size` for the current page element.
+0224 |   .stats dd { font-size: 27px; }
+     # Sets `.stats dd { font-size` for the current page element.
+0225 |   .section { padding-top: 59px; }
+     # Sets `.section { padding-top` for the current page element.
+0226 |   h2 { font-size: 36px; }
+     # Sets `h2 { font-size` for the current page element.
+0227 |   .section-head p { font-size: 13px; }
+     # Sets `.section-head p { font-size` for the current page element.
+0228 |   .explorer-tools { padding: 16px; }
+     # Sets `.explorer-tools { padding` for the current page element.
+0229 |   .explorer-tools label { flex: 1 1 135px; }
+     # Sets `.explorer-tools label { flex` for the current page element.
+0230 |   .explorer-tools select { width: 100%; min-width: 0; }
+     # Sets `.explorer-tools select { width` for the current page element.
+0231 |   .explorer-tools button { flex: 1 1 auto; }
+     # Sets `.explorer-tools button { flex` for the current page element.
+0232 |   .card-head { display: block; padding: 21px 20px 13px; }
+     # Sets `.card-head { display` for the current page element.
+0233 |   .card-head .toggle { margin-top: 14px; white-space: normal; }
+     # Sets `.card-head .toggle { margin-top` for the current page element.
+0234 |   .chart-wrap { min-height: 250px; padding: 0 7px 7px; }
+     # Sets `.chart-wrap { min-height` for the current page element.
+0235 |   .chart-note { padding: 14px 19px; }
+     # Sets `.chart-note { padding` for the current page element.
+0236 |   .compare, .method-grid, .limit-list { grid-template-columns: 1fr; }
+     # Sets `.compare, .method-grid, .limit-list { grid-template-columns` for the current page element.
+0237 |   .compare-item { padding: 21px 23px; }
+     # Sets `.compare-item { padding` for the current page element.
+0238 |   .analysis-card { padding: 22px; }
+     # Sets `.analysis-card { padding` for the current page element.
+0239 |   .bar-row { grid-template-columns: 72px 1fr 65px; gap: 8px; }
+     # Sets `.bar-row { grid-template-columns` for the current page element.
+0240 |   footer { padding-top: 44px; }
+     # Sets `footer { padding-top` for the current page element.
+0241 | }
+     # Closes the preceding element or code block.
+0242 | @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+     # Sets `@media (prefers-reduced-motion` for the current page element.

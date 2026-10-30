@@ -1,0 +1,229 @@
+SOURCE: src/run_pipeline.py
+SAY FIRST: This is the command-line version of the end-to-end analysis.
+Each numbered source line is followed by a plain-English comment.
+These files are speaking references; run the originals in src/, server/, site/ and scripts/.
+
+0001 | """End-to-end runner. Every stage is a function so the null model can replay
+0002 | stages 3-5 on permuted data (Build Guide, Step 6).
+0003 | 
+0004 | Presentation route: start here for the command-line workflow. The live web
+0005 | demo follows the same analysis in server/runner.py and reports its progress to
+0006 | server/static/index.html. The final tables and figure are written to results/.
+0007 | 
+0008 |     python -m src.run_pipeline --simulate            # synthetic validation run
+0009 |     python -m src.run_pipeline --pgn data/raw/x.pgn  # real archive slice
+0010 | """
+0011 | from __future__ import annotations
+     # Imports a library or project module needed below.
+0012 | 
+0013 | import argparse
+     # Imports a library or project module needed below.
+0014 | import json
+     # Imports a library or project module needed below.
+0015 | import time
+     # Imports a library or project module needed below.
+0016 | from pathlib import Path
+     # Imports a library or project module needed below.
+0017 | 
+0018 | from . import (animate, config, curve, events, matching, nulls, parse,
+     # Imports a library or project module needed below.
+0019 |                predict, simulate, structure)
+     # Continues the current calculation or control flow.
+0020 | 
+0021 | 
+0022 | def main():
+     # Defines a reusable step; the following indented lines are its body.
+0023 |     ap = argparse.ArgumentParser()
+     # Keeps this intermediate result under the name `ap`.
+0024 |     ap.add_argument("--pgn", default=None,
+     # Defines a command-line option for this script.
+0025 |                     help="PGN / .pgn.zst path, or a database.lichess.org URL")
+     # Keeps this intermediate result under the name `help`.
+0026 |     ap.add_argument("--month", default=None,
+     # Defines a command-line option for this script.
+0027 |                     help="YYYY-MM: stream that Lichess month directly, no download")
+     # Keeps this intermediate result under the name `help`.
+0028 |     ap.add_argument("--simulate", action="store_true",
+     # Defines a command-line option for this script.
+0029 |                     help="generate synthetic data with a known contagion rule")
+     # Keeps this intermediate result under the name `help`.
+0030 |     ap.add_argument("--sim-players", type=int, default=2000)
+     # Defines a command-line option for this script.
+0031 |     ap.add_argument("--sim-games", type=int, default=80000)
+     # Defines a command-line option for this script.
+0032 |     ap.add_argument("--limit", type=int, default=None)
+     # Defines a command-line option for this script.
+0033 |     ap.add_argument("--null-reps", type=int, default=config.N_NULL_REPLICATES)
+     # Defines a command-line option for this script.
+0034 |     ap.add_argument("--null-kind", default="shuffle",
+     # Defines a command-line option for this script.
+0035 |                     choices=["shuffle", "rewire"],
+     # Keeps this intermediate result under the name `choices`.
+0036 |                     help="timestamp shuffling, or degree-preserving rewiring")
+     # Keeps this intermediate result under the name `help`.
+0037 |     ap.add_argument("--no-animation", action="store_true")
+     # Defines a command-line option for this script.
+0038 |     a = ap.parse_args()
+     # Keeps this intermediate result under the name `a`.
+0039 | 
+0040 |     t_start = time.time()
+     # Keeps this intermediate result under the name `t_start`.
+0041 |     report: dict = {}
+     # Calculates or stores the saved study results for this stage.
+0042 | 
+0043 |     if a.month:
+     # Checks this condition before running the next indented block.
+0044 |         from .fetch import BASE
+     # Imports a library or project module needed below.
+0045 |         a.pgn = BASE.format(month=a.month)
+     # Keeps this intermediate result under the name `pgn`.
+0046 | 
+0047 |     if a.simulate or not a.pgn:
+     # Checks this condition before running the next indented block.
+0048 |         # Synthetic games are a check that the method can recover a known rule.
+0049 |         # The reported January findings come from real Lichess games instead.
+0050 |         print("[1/8] simulating games with a planted complex-contagion rule ...")
+     # Prints this reading so a command-line run can be followed.
+0051 |         info = simulate.simulate(n_players=a.sim_players, n_games=a.sim_games)
+     # Keeps this intermediate result under the name `info`.
+0052 |         pgn = Path(info["path"])
+     # Keeps this intermediate result under the name `pgn`.
+0053 |         report["simulation"] = {k: str(v) for k, v in info.items()}
+     # Continues the current calculation or control flow.
+0054 |     else:
+     # Handles the alternative when the preceding condition was false.
+0055 |         pgn = a.pgn if str(a.pgn).startswith("http") else Path(a.pgn)
+     # Keeps this intermediate result under the name `pgn`.
+0056 | 
+0057 |     # Simulated runs write to their own filename so that games.parquet always
+0058 |     # means real data -- a stale synthetic table there gets analysed silently.
+0059 |     games_path = config.INTERIM / (
+     # Keeps this intermediate result under the name `games_path`.
+0060 |         "simulated_games.parquet" if (a.simulate or not a.pgn) else "games.parquet")
+     # Part of the value, collection, or call spanning several lines.
+0061 | 
+0062 |     label = str(pgn).rsplit("/", 1)[-1]
+     # Keeps this intermediate result under the name `label`.
+0063 |     print(f"[2/8] parsing {label} ...")
+     # Prints this reading so a command-line run can be followed.
+0064 |     games = parse.run(pgn, games_path, limit=a.limit,
+     # Keeps this intermediate result under the name `games`.
+0065 |                       progress=250000)
+     # Keeps this intermediate result under the name `progress`.
+0066 |     report["parse"] = {
+     # Part of the value, collection, or call spanning several lines.
+0067 |         "games": len(games), "skipped": games.attrs["skipped"],
+     # Part of the value, collection, or call spanning several lines.
+0068 |         "players": len(set(games.white) | set(games.black)),
+     # Part of the value, collection, or call spanning several lines.
+0069 |         "span": [str(games.ts.min()), str(games.ts.max())],
+     # Part of the value, collection, or call spanning several lines.
+0070 |         "openings": int(games.eco.nunique()),
+     # Part of the value, collection, or call spanning several lines.
+0071 |     }
+     # Closes the data structure or function call started above.
+0072 |     print("      ", report["parse"])
+     # Prints this reading so a command-line run can be followed.
+0073 |     if len(games) < 100:
+     # Checks whether enough records exist for a trustworthy next step.
+0074 |         print("!! too few games survived the filters -- widen the sample")
+     # Prints this reading so a command-line run can be followed.
+0075 |         return
+     # Stops this function here.
+0076 | 
+0077 |     print("[3/8] building exposure/adoption trials ...")
+     # Prints this reading so a command-line run can be followed.
+0078 |     # A trial asks: after seeing an opening, did this player use it within the
+0079 |     # observation window? events.py creates one row per eligible exposure.
+0080 |     trials = events.run(games_path,
+     # Calculates or stores the exposure-trial table for this stage.
+0081 |                         config.PROCESSED / "trials.parquet")
+     # Continues the current calculation or control flow.
+0082 |     report["trials"] = {"n": len(trials), "adoptions": int(trials.adopted.sum()),
+     # Part of the value, collection, or call spanning several lines.
+0083 |                         "rate": round(float(trials.adopted.mean()), 4)}
+     # Part of the value, collection, or call spanning several lines.
+0084 |     print("      ", report["trials"])
+     # Prints this reading so a command-line run can be followed.
+0085 | 
+0086 |     print("[4/8] network structure and early adopters ...")
+     # Prints this reading so a command-line run can be followed.
+0087 |     _, feats, by_early, net_summary = structure.run(games_path)
+     # Continues the current calculation or control flow.
+0088 |     report["network"] = net_summary
+     # Continues the current calculation or control flow.
+0089 |     report["early_adopters"] = by_early.round(4).to_dict()
+     # Converts table values into JSON-friendly records for a report or UI event.
+0090 | 
+0091 |     print(f"[5/8] {a.null_kind} null ({a.null_reps} replicates) ...")
+     # Prints this reading so a command-line run can be followed.
+0092 |     # Re-running the trial construction after shuffling game times gives the
+0093 |     # baseline expected from popularity/activity without the original order.
+0094 |     cmp = nulls.run(games_path,
+     # Calculates or stores the observed-versus-reference comparison for this stage.
+0095 |                     config.PROCESSED / "trials.parquet",
+     # Part of the value, collection, or call spanning several lines.
+0096 |                     n_reps=a.null_reps, kind=a.null_kind)
+     # Keeps this intermediate result under the name `n_reps`.
+0097 |     report["null_comparison"] = (cmp.round(4).to_dict(orient="records")
+     # Converts table values into JSON-friendly records for a report or UI event.
+0098 |                                  if len(cmp) else [])
+     # Checks this condition before running the next indented block.
+0099 |     if len(cmp):
+     # Checks this condition before running the next indented block.
+0100 |         print(cmp.round(3).to_string(index=False))
+     # Prints this reading so a command-line run can be followed.
+0101 | 
+0102 |     print("[6/8] adoption-probability curve + verdict ...")
+     # Prints this reading so a command-line run can be followed.
+0103 |     tables, v, fig = curve.run(config.PROCESSED / "trials.parquet",
+     # Part of the value, collection, or call spanning several lines.
+0104 |                                cmp if len(cmp) else None)
+     # Continues the current calculation or control flow.
+0105 |     report["curve_by_d"] = tables["by_d"].round(4).to_dict(orient="records")
+     # Converts table values into JSON-friendly records for a report or UI event.
+0106 |     report["verdict"] = v
+     # Continues the current calculation or control flow.
+0107 |     print("      ", v)
+     # Prints this reading so a command-line run can be followed.
+0108 | 
+0109 |     print("[7/8] matched controls + held-out AUC ...")
+     # Prints this reading so a command-line run can be followed.
+0110 |     # These are independent checks: similar unexposed players for comparison,
+0111 |     # and prediction on player-opening spells the model did not train on.
+0112 |     report["matched_controls"] = matching.run(games_path)
+     # Continues the current calculation or control flow.
+0113 |     report["predictive"] = predict.run(config.PROCESSED / "trials.parquet",
+     # Part of the value, collection, or call spanning several lines.
+0114 |                                        games_path)
+     # Continues the current calculation or control flow.
+0115 |     print("      ", report["matched_controls"])
+     # Prints this reading so a command-line run can be followed.
+0116 |     print("      ", {k: v for k, v in report["predictive"].items()
+     # Prints this reading so a command-line run can be followed.
+0117 |                      if k.startswith("auc")})
+     # Checks this condition before running the next indented block.
+0118 | 
+0119 |     if not a.no_animation:
+     # Checks this condition before running the next indented block.
+0120 |         print("[8/8] diffusion animation ...")
+     # Prints this reading so a command-line run can be followed.
+0121 |         report["animation"] = {k: str(v) for k, v in
+     # Continues the current calculation or control flow.
+0122 |                                animate.run(games_path).items()}
+     # Continues the current calculation or control flow.
+0123 | 
+0124 |     report["runtime_seconds"] = round(time.time() - t_start, 1)
+     # Continues the current calculation or control flow.
+0125 |     out = config.RESULTS / "report.json"
+     # Calculates or stores the output value for this stage.
+0126 |     out.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+     # Encodes Python values as JSON for saving or sending to the browser.
+0127 |     print(f"\ndone in {report['runtime_seconds']}s -> {out}")
+     # Prints this reading so a command-line run can be followed.
+0128 | 
+0129 | 
+0130 | if __name__ == "__main__":
+     # Runs the command-line entry point only when this file is executed directly.
+0131 |     main()
+     # Continues the current calculation or control flow.

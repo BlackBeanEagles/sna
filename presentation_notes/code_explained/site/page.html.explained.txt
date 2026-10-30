@@ -1,0 +1,560 @@
+SOURCE: site/page.html
+SAY FIRST: This is the editable findings-page template, using saved report data.
+Each numbered source line is followed by a plain-English comment.
+These files are speaking references; run the originals in src/, server/, site/ and scripts/.
+
+0001 | <title>Opening Diffusion · Research Dashboard</title>
+     # Adds the `title` page element shown or read by the browser.
+0002 | <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+     # Adds the `link` page element shown or read by the browser.
+0003 | <meta name="description" content="An observational analysis of chess-opening adoption in a Lichess player network.">
+     # Adds the `meta` page element shown or read by the browser.
+0004 | <style>__SITE_CSS__</style>
+     # Starts styles used to lay out and colour the page.
+0005 | <div class="topbar"><div class="wrap topbar-inner">
+     # Adds the `div` page element shown or read by the browser.
+0006 |   <a class="brand" href="#top"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span> Opening Lab</a>
+     # Adds the `a` page element shown or read by the browser.
+0007 |   <nav class="nav" aria-label="Sections">
+     # Adds the `nav` page element shown or read by the browser.
+0008 |     <a href="#evidence">Explore</a><a href="#controls">Compare</a><a href="#method">Method</a><a class="live-link" href="http://localhost:8124/">Live console ↗</a>
+     # Adds the `a` page element shown or read by the browser.
+0009 |   </nav>
+     # Closes the preceding element or code block.
+0010 | </div></div>
+     # Closes the preceding element or code block.
+0011 | <main class="wrap" id="top">
+     # Adds the `main` page element shown or read by the browser.
+0012 |   <header class="hero">
+     # Adds the `header` page element shown or read by the browser.
+0013 |     <div>
+     # Adds the `div` page element shown or read by the browser.
+0014 |       <p class="kicker">Lichess research · January 2016</p>
+     # Adds the `p` page element shown or read by the browser.
+0015 |       <h1>Do chess openings spread?</h1>
+     # Adds the `h1` page element shown or read by the browser.
+0016 |       <p class="hero-lead">Explore how seeing an opening across games relates to playing it later—and whether meeting it through more opponents changes the pattern.</p>
+     # Adds the `p` page element shown or read by the browser.
+0017 |     </div>
+     # Closes the preceding element or code block.
+0018 |   </header>
+     # Closes the preceding element or code block.
+0019 |   <div class="summary" role="note">
+     # Adds the `div` page element shown or read by the browser.
+0020 |     <span class="summary-label">Key finding</span>
+     # Adds the `span` page element shown or read by the browser.
+0021 |     <p class="summary-copy" id="summary-copy">Loading corrected results…</p>
+     # Adds the `p` page element shown or read by the browser.
+0022 |     <p class="summary-note">One month, one rating band. These comparisons describe associations; they do not identify a causal effect.</p>
+     # Adds the `p` page element shown or read by the browser.
+0023 |   </div>
+     # Closes the preceding element or code block.
+0024 |   <dl class="stats" id="stats">
+     # Adds the `dl` page element shown or read by the browser.
+0025 |     <div><dt>Games</dt><dd id="stat-games">—</dd></div>
+     # Adds the `div` page element shown or read by the browser.
+0026 |     <div><dt>Players</dt><dd id="stat-players">—</dd></div>
+     # Adds the `div` page element shown or read by the browser.
+0027 |     <div><dt>Complete trials</dt><dd id="stat-trials">—</dd></div>
+     # Adds the `div` page element shown or read by the browser.
+0028 |     <div><dt>Trial adoption rate</dt><dd id="stat-rate">—</dd></div>
+     # Adds the `div` page element shown or read by the browser.
+0029 |   </dl>
+     # Closes the preceding element or code block.
+0030 | 
+0031 |   <section class="section" id="evidence">
+     # Adds the `section` page element shown or read by the browser.
+0032 |     <div class="section-head"><span class="section-index">01 / Explore</span><div>
+     # Adds the `div` page element shown or read by the browser.
+0033 |       <h2>More exposure is not the whole story</h2>
+     # Adds the `h2` page element shown or read by the browser.
+0034 |       <p>Players with more distinct exposers adopt more often. Shuffling game times keeps the opponents and openings while changing their ordering; the comparison tests whether the raw rise exceeds that reference.</p>
+     # Adds the `p` page element shown or read by the browser.
+0035 |     </div></div>
+     # Closes the preceding element or code block.
+0036 |     <div class="explorer-tools" aria-label="Explore adoption rates">
+     # Adds the `div` page element shown or read by the browser.
+0037 |       <label>Opening <select id="opening-filter"><option value="">All openings</option></select></label>
+     # Adds the `label` page element shown or read by the browser.
+0038 |       <label>Colour <select id="colour-filter"><option value="">Both colours</option><option value="W">White</option><option value="B">Black</option></select></label>
+     # Adds the `label` page element shown or read by the browser.
+0039 |       <button type="button" id="download-csv">Download CSV</button>
+     # Adds the `button` page element shown or read by the browser.
+0040 |       <button type="button" id="download-svg">Save chart SVG</button>
+     # Adds the `button` page element shown or read by the browser.
+0041 |       <p id="filter-note">All openings and colours · shuffled-time reference available.</p>
+     # Adds the `p` page element shown or read by the browser.
+0042 |     </div>
+     # Closes the preceding element or code block.
+0043 |     <div class="card">
+     # Adds the `div` page element shown or read by the browser.
+0044 |       <div class="card-head"><div><h3>Adoption within 14 days</h3><p id="chart-subtitle">Observed trial rate and shuffled-time reference by distinct exposers</p></div>
+     # Adds the `div` page element shown or read by the browser.
+0045 |         <label class="toggle" id="show-null-wrap"><input type="checkbox" id="show-null" checked> Show shuffled-time reference</label>
+     # Adds the `label` page element shown or read by the browser.
+0046 |       </div>
+     # Closes the preceding element or code block.
+0047 |       <div class="chart-wrap"><svg class="chart" id="curve-chart" viewBox="0 0 800 350" role="img" aria-label="Adoption rates by distinct exposers"></svg><p class="chart-empty" id="chart-empty" hidden>No complete trials match this selection. Try another opening or colour.</p></div>
+     # Adds the `div` page element shown or read by the browser.
+0048 |       <div class="chart-note"><span class="legend"><span><i></i>Observed</span><span id="null-legend"><i class="null-key"></i>Shuffled time</span></span><span id="curve-note"></span></div>
+     # Adds the `div` page element shown or read by the browser.
+0049 |     </div>
+     # Closes the preceding element or code block.
+0050 |     <div class="compare">
+     # Adds the `div` page element shown or read by the browser.
+0051 |       <div class="compare-item"><span class="label" id="first-label">First distinct exposer</span><strong id="first-lift">—</strong><p id="first-detail">Observed / shuffled-time rate</p></div>
+     # Adds the `div` page element shown or read by the browser.
+0052 |       <div class="compare-item"><span class="label" id="last-label">Six or more distinct exposers</span><strong id="last-lift">—</strong><p id="last-detail">Observed / shuffled-time rate</p></div>
+     # Adds the `div` page element shown or read by the browser.
+0053 |     </div>
+     # Closes the preceding element or code block.
+0054 |     <p class="footnote">Counting one observation per player-opening spell gives the same direction: observed/shuffled lift falls from 1.050 at the first exposer to 0.928 at six or more. The main chart counts exposure trials, which can repeat within a spell.</p>
+     # Adds the `p` page element shown or read by the browser.
+0055 |   </section>
+     # Closes the preceding element or code block.
+0056 | 
+0057 |   <section class="section" id="controls">
+     # Adds the `section` page element shown or read by the browser.
+0058 |     <div class="section-head"><span class="section-index">02 / Compare</span><div>
+     # Adds the `div` page element shown or read by the browser.
+0059 |       <h2>Look beyond the curve</h2>
+     # Adds the `h2` page element shown or read by the browser.
+0060 |       <p>The matched comparison and held-out models offer context. Neither turns an observational dataset into a randomized experiment.</p>
+     # Adds the `p` page element shown or read by the browser.
+0061 |     </div></div>
+     # Closes the preceding element or code block.
+0062 |     <div class="two-col">
+     # Adds the `div` page element shown or read by the browser.
+0063 |       <div class="card analysis-card">
+     # Adds the `div` page element shown or read by the browser.
+0064 |         <h3>Matched at first exposure</h3>
+     # Adds the `h3` page element shown or read by the browser.
+0065 |         <div class="bar-row"><span>Exposed</span><span class="bar"><i id="exposed-bar"></i></span><b id="exposed-rate">—</b></div>
+     # Adds the `div` page element shown or read by the browser.
+0066 |         <div class="bar-row control"><span>Control</span><span class="bar"><i id="control-bar"></i></span><b id="control-rate">—</b></div>
+     # Adds the `div` page element shown or read by the browser.
+0067 |         <div class="big-delta" id="matched-delta">—</div>
+     # Adds the `div` page element shown or read by the browser.
+0068 |         <p class="small" id="matched-meta"></p>
+     # Adds the `p` page element shown or read by the browser.
+0069 |       </div>
+     # Closes the preceding element or code block.
+0070 |       <div class="card analysis-card">
+     # Adds the `div` page element shown or read by the browser.
+0071 |         <h3>How to read the match</h3>
+     # Adds the `h3` page element shown or read by the browser.
+0072 |         <div class="callout"><p>Controls were eligible if they had neither played nor encountered the target opening at the matching time. <b>Later exposure is counted as a crossover</b>, not used to choose controls with knowledge of the future.</p></div>
+     # Adds the `div` page element shown or read by the browser.
+0073 |         <p class="small">Rating and activity are measured before matching. The player-cluster bootstrap reflects repeated players in both pair roles; opponent choice and repertoire remain confounders.</p>
+     # Adds the `p` page element shown or read by the browser.
+0074 |       </div>
+     # Closes the preceding element or code block.
+0075 |     </div>
+     # Closes the preceding element or code block.
+0076 |     <div class="card" style="margin-top:18px">
+     # Adds the `div` page element shown or read by the browser.
+0077 |       <div class="card-head"><div><h3>Held-out prediction</h3><p>Player-opening-colour spells held out together; background features measured before evaluated trials</p></div></div>
+     # Adds the `div` page element shown or read by the browser.
+0078 |       <div class="table-scroll"><table><thead><tr><th>Model</th><th>Added information</th><th style="text-align:right">AUC</th></tr></thead><tbody id="model-rows"></tbody></table></div>
+     # Adds the `div` page element shown or read by the browser.
+0079 |       <p class="footnote" style="padding:0 24px 20px">AUC measures ranking on held-out spells. Differences between models describe predictive value, not causal influence.</p>
+     # Adds the `p` page element shown or read by the browser.
+0080 |     </div>
+     # Closes the preceding element or code block.
+0081 |   </section>
+     # Closes the preceding element or code block.
+0082 | 
+0083 |   <section class="section" id="method">
+     # Adds the `section` page element shown or read by the browser.
+0084 |     <div class="section-head"><span class="section-index">03 / Method</span><div>
+     # Adds the `div` page element shown or read by the browser.
+0085 |       <h2>From games to trials</h2>
+     # Adds the `h2` page element shown or read by the browser.
+0086 |       <p>These figures use the available January 2016 game sample. Rechecking the original archive and testing another month remain open.</p>
+     # Adds the `p` page element shown or read by the browser.
+0087 |     </div></div>
+     # Closes the preceding element or code block.
+0088 |     <div class="method-grid">
+     # Adds the `div` page element shown or read by the browser.
+0089 |       <div class="method-step"><b>01</b><h3>Define exposure</h3><p>An opponent plays an ECO opening against a player. Opening and colour stay together in the behaviour key.</p></div>
+     # Adds the `div` page element shown or read by the browser.
+0090 |       <div class="method-step"><b>02</b><h3>Follow for 14 days</h3><p>Each included exposure has a fully observable 14-day window. Late positive and negative trials are both excluded.</p></div>
+     # Adds the `div` page element shown or read by the browser.
+0091 |       <div class="method-step"><b>03</b><h3>Compare alternatives</h3><p>Use 20 timestamp shuffles, eligible matched controls, and group-held-out prediction to challenge a simple reading of the raw curve.</p></div>
+     # Adds the `div` page element shown or read by the browser.
+0092 |     </div>
+     # Closes the preceding element or code block.
+0093 |   </section>
+     # Closes the preceding element or code block.
+0094 |   <section class="section" id="limits">
+     # Adds the `section` page element shown or read by the browser.
+0095 |     <div class="section-head"><span class="section-index">04 / Limits</span><div><h2>What the result cannot settle</h2></div></div>
+     # Adds the `div` page element shown or read by the browser.
+0096 |     <ul class="limit-list">
+     # Adds the `ul` page element shown or read by the browser.
+0097 |       <li><b>Single-month evidence.</b> The analysis has not yet been replicated on a second archive month.</li>
+     # Adds the `li` page element shown or read by the browser.
+0098 |       <li><b>Observational exposure.</b> Opponent choice, repertoire, activity and changing opening popularity can shape both exposure and adoption.</li>
+     # Adds the `li` page element shown or read by the browser.
+0099 |       <li><b>Repeated observations.</b> One player and one eventual adoption can contribute multiple exposure trials; trial-level intervals overstate precision.</li>
+     # Adds the `li` page element shown or read by the browser.
+0100 |       <li><b>Archive recheck pending.</b> The analysis uses previously saved games. Reading the original archive again is a separate validation step.</li>
+     # Adds the `li` page element shown or read by the browser.
+0101 |     </ul>
+     # Closes the preceding element or code block.
+0102 |   </section>
+     # Closes the preceding element or code block.
+0103 | </main>
+     # Closes the preceding element or code block.
+0104 | <footer class="wrap"><span>Source: Lichess open database · January 2016 · 1800–2200 Elo</span><span>Analysis: complete 14-day follow-up · <a href="#top">Back to top ↑</a></span></footer>
+     # Adds the `footer` page element shown or read by the browser.
+0105 | <script>
+     # Starts the browser-side code for interaction and charts.
+0106 | (function(){
+     # Continues the page structure, styling, or browser logic above.
+0107 |   "use strict";
+     # Continues the page structure, styling, or browser logic above.
+0108 |   /* This is the saved findings page. site/build.py embeds results/report.json
+     # Existing developer note about this section.
+0109 |      at build time; the live console is a separate route backed by runner.py. */
+     # Continues the page structure, styling, or browser logic above.
+0110 |   var report=__REPORT_JSON__;
+     # Keeps a value used by the page's next steps.
+0111 |   var byD=report.curve_by_d||[];
+     # Keeps a value used by the page's next steps.
+0112 |   var nullRows=report.null_comparison||[];
+     # Keeps a value used by the page's next steps.
+0113 |   var explorer=report.explorer||[];
+     # Keeps a value used by the page's next steps.
+0114 |   var nullByD={};
+     # Keeps a value used by the page's next steps.
+0115 |   function id(x){return document.getElementById(x);}
+     # Defines a browser function used by a chart, control, or live event.
+0116 |   document.querySelector(".live-link").href=location.pathname==="/findings"?"/":"http://localhost:8124/";
+     # Continues the page structure, styling, or browser logic above.
+0117 |   function txt(x,v){id(x).textContent=v;}
+     # Defines a browser function used by a chart, control, or live event.
+0118 |   function count(v){return Number(v||0).toLocaleString("en-US");}
+     # Defines a browser function used by a chart, control, or live event.
+0119 |   function pct(v,d){return (100*Number(v||0)).toFixed(d==null?1:d)+"%";}
+     # Defines a browser function used by a chart, control, or live event.
+0120 |   var ns="http://www.w3.org/2000/svg";
+     # Keeps a value used by the page's next steps.
+0121 |   function svgEl(name,attrs,text){var e=document.createElementNS(ns,name);Object.keys(attrs||{}).forEach(function(k){e.setAttribute(k,attrs[k]);});if(text!=null)e.textContent=text;return e;}
+     # Defines a browser function used by a chart, control, or live event.
+0122 |   var verdict=report.verdict||{};
+     # Keeps a value used by the page's next steps.
+0123 |   txt("summary-copy",verdict.excess_over_null_grows_with_d===false?
+     # Continues the page structure, styling, or browser logic above.
+0124 |       "More distinct opponents do not show clear reinforcement above the shuffled-time reference.":
+     # Continues the page structure, styling, or browser logic above.
+0125 |       "The corrected comparison is inconclusive about reinforcement.");
+     # Continues the page structure, styling, or browser logic above.
+0126 |   txt("stat-games",count(report.parse&&report.parse.games));
+     # Continues the page structure, styling, or browser logic above.
+0127 |   txt("stat-players",count(report.parse&&report.parse.players));
+     # Continues the page structure, styling, or browser logic above.
+0128 |   txt("stat-trials",count(report.trials&&report.trials.n));
+     # Continues the page structure, styling, or browser logic above.
+0129 |   txt("stat-rate",pct(report.trials&&report.trials.rate,1));
+     # Continues the page structure, styling, or browser logic above.
+0130 |   function renderCurve(){
+     # Defines a browser function used by a chart, control, or live event.
+0131 |     /* Replot observed adoption and shuffled-time reference for the current
+     # Existing developer note about this section.
+0132 |        opening/colour selection. The reference prevents a raw rising curve
+     # Continues the page structure, styling, or browser logic above.
+0133 |        from being mistaken for evidence of reinforcement. */
+     # Continues the page structure, styling, or browser logic above.
+0134 |     var chart=id("curve-chart"),empty=id("chart-empty");
+     # Keeps a value used by the page's next steps.
+0135 |     nullByD={};
+     # Continues the page structure, styling, or browser logic above.
+0136 |     if(!byD.length){
+     # Controls which browser steps run or repeats them for data items.
+0137 |       chart.textContent="";chart.hidden=true;empty.hidden=false;
+     # Updates visible text or markup on the page.
+0138 |       id("show-null-wrap").hidden=true;id("null-legend").hidden=true;
+     # Continues the page structure, styling, or browser logic above.
+0139 |       id("download-svg").disabled=true;
+     # Continues the page structure, styling, or browser logic above.
+0140 |       txt("first-lift","—");txt("last-lift","—");
+     # Continues the page structure, styling, or browser logic above.
+0141 |       txt("first-detail","No trials in selection");txt("last-detail","No trials in selection");
+     # Continues the page structure, styling, or browser logic above.
+0142 |       txt("curve-note","No complete exposure trials");
+     # Continues the page structure, styling, or browser logic above.
+0143 |       return;
+     # Continues the page structure, styling, or browser logic above.
+0144 |     }
+     # Closes the preceding element or code block.
+0145 |     chart.hidden=false;empty.hidden=true;id("download-svg").disabled=false;nullRows.forEach(function(r){nullByD[r.d]=r;});
+     # Continues the page structure, styling, or browser logic above.
+0146 |     var hasNull=!!nullRows.length;
+     # Keeps a value used by the page's next steps.
+0147 |     var first=byD[0],last=byD[byD.length-1],nf=nullByD[first.d]||{},nl=nullByD[last.d]||{};
+     # Keeps a value used by the page's next steps.
+0148 |     txt("first-label",first.d===1?"First distinct exposer":first.d+" distinct exposers");
+     # Continues the page structure, styling, or browser logic above.
+0149 |     txt("last-label",last.d===6?"Six or more distinct exposers":last.d+" distinct exposers");
+     # Continues the page structure, styling, or browser logic above.
+0150 |     txt("first-lift",hasNull?(nf.lift_over_null||0).toFixed(3)+"×":pct(first.rate,2));
+     # Continues the page structure, styling, or browser logic above.
+0151 |     txt("last-lift",hasNull?(nl.lift_over_null||0).toFixed(3)+"×":pct(last.rate,2));
+     # Continues the page structure, styling, or browser logic above.
+0152 |     txt("first-detail",hasNull?pct(first.rate,1)+" observed · "+pct(nf.rate_null,1)+" reference":count(first.n)+" complete trials");
+     # Continues the page structure, styling, or browser logic above.
+0153 |     txt("last-detail",hasNull?pct(last.rate,1)+" observed · "+pct(nl.rate_null,1)+" reference":count(last.n)+" complete trials");
+     # Continues the page structure, styling, or browser logic above.
+0154 |     txt("curve-note"," " + count(byD.reduce(function(a,r){return a+r.n;},0))+" complete exposure trials");
+     # Continues the page structure, styling, or browser logic above.
+0155 |     var chart=id("curve-chart"),mobile=window.matchMedia("(max-width:620px)").matches;
+     # Keeps a value used by the page's next steps.
+0156 |     chart.setAttribute("viewBox",mobile?"0 0 420 320":"0 0 800 350");
+     # Sets an element property used for display or accessibility.
+0157 |     var L=mobile?43:60,R=mobile?403:755,T=mobile?18:25,B=mobile?250:275;
+     # Keeps a value used by the page's next steps.
+0158 |     chart.textContent="";
+     # Updates visible text or markup on the page.
+0159 |     var vals=byD.map(function(r){return r.rate;}).concat(nullRows.map(function(r){return r.rate_null;}));
+     # Keeps a value used by the page's next steps.
+0160 |     var low=Math.max(0,Math.floor((Math.min.apply(null,vals)-.025)*20)/20);
+     # Keeps a value used by the page's next steps.
+0161 |     var high=Math.ceil((Math.max.apply(null,vals)+.025)*20)/20;
+     # Keeps a value used by the page's next steps.
+0162 |     if(high<=low)high=low+.1;
+     # Controls which browser steps run or repeats them for data items.
+0163 |     function X(i){return L+i*(R-L)/Math.max(1,byD.length-1);}
+     # Defines a browser function used by a chart, control, or live event.
+0164 |     function Y(v){return B-(v-low)/(high-low)*(B-T);}
+     # Defines a browser function used by a chart, control, or live event.
+0165 |     for(var i=0;i<=5;i++){
+     # Controls which browser steps run or repeats them for data items.
+0166 |       var v=low+(high-low)*i/5,y=Y(v);
+     # Keeps a value used by the page's next steps.
+0167 |       chart.appendChild(svgEl("line",{x1:L,x2:R,y1:y,y2:y,class:"grid"}));
+     # Adds a newly built visual element to the page.
+0168 |       chart.appendChild(svgEl("text",{x:L-11,y:y+4,"text-anchor":"end"},pct(v,0)));
+     # Adds a newly built visual element to the page.
+0169 |     }
+     # Closes the preceding element or code block.
+0170 |     chart.appendChild(svgEl("line",{x1:L,x2:R,y1:B,y2:B,class:"axis"}));
+     # Adds a newly built visual element to the page.
+0171 |     byD.forEach(function(r,i){chart.appendChild(svgEl("text",{x:X(i),y:B+22,"text-anchor":"middle"},r.d===6?String(r.d)+"+":String(r.d)));});
+     # Adds a newly built visual element to the page.
+0172 |     chart.appendChild(svgEl("text",{x:(L+R)/2,y:B+52,"text-anchor":"middle",class:"axis-title"},"Distinct exposing opponents (d)"));
+     # Adds a newly built visual element to the page.
+0173 |     if(!mobile)chart.appendChild(svgEl("text",{x:16,y:(T+B)/2,"text-anchor":"middle",transform:"rotate(-90 16 "+((T+B)/2)+")",class:"axis-title"},"Adoption rate (%)"));
+     # Adds a newly built visual element to the page.
+0174 |     function path(rows,value){return rows.map(function(r,i){return (i?"L":"M")+X(i).toFixed(1)+" "+Y(value(r)).toFixed(1);}).join(" ");}
+     # Defines a browser function used by a chart, control, or live event.
+0175 |     byD.forEach(function(r,i){
+     # Continues the page structure, styling, or browser logic above.
+0176 |       chart.appendChild(svgEl("line",{x1:X(i),x2:X(i),y1:Y(r.lo==null?r.rate:r.lo),
+     # Adds a newly built visual element to the page.
+0177 |         y2:Y(r.hi==null?r.rate:r.hi),class:"uncertainty"}));
+     # Continues the page structure, styling, or browser logic above.
+0178 |     });
+     # Closes the preceding element or code block.
+0179 |     chart.appendChild(svgEl("path",{d:path(byD,function(r){return r.rate;}),class:"observed"}));
+     # Adds a newly built visual element to the page.
+0180 |     var nullGroup=svgEl("g",{id:"null-series"});
+     # Keeps a value used by the page's next steps.
+0181 |     if(hasNull)nullGroup.appendChild(svgEl("path",{d:path(byD,function(r){return (nullByD[r.d]||{}).rate_null||0;}),class:"null"}));
+     # Adds a newly built visual element to the page.
+0182 |     byD.forEach(function(r,i){
+     # Continues the page structure, styling, or browser logic above.
+0183 |       var observed=svgEl("circle",{cx:X(i),cy:Y(r.rate),r:6,class:"point-observed"});
+     # Keeps a value used by the page's next steps.
+0184 |       observed.appendChild(svgEl("title",{},String(r.d)+" exposer(s): "+pct(r.rate,2)+" observed; "+count(r.n)+" trials"));
+     # Adds a newly built visual element to the page.
+0185 |       chart.appendChild(observed);
+     # Adds a newly built visual element to the page.
+0186 |       var nr=nullByD[r.d];
+     # Keeps a value used by the page's next steps.
+0187 |       if(nr){var point=svgEl("circle",{cx:X(i),cy:Y(nr.rate_null),r:5,class:"point-null"});
+     # Controls which browser steps run or repeats them for data items.
+0188 |         point.appendChild(svgEl("title",{},String(r.d)+" exposer(s): "+pct(nr.rate_null,2)+" shuffled reference"));
+     # Adds a newly built visual element to the page.
+0189 |         nullGroup.appendChild(point);}
+     # Adds a newly built visual element to the page.
+0190 |     });
+     # Closes the preceding element or code block.
+0191 |     chart.appendChild(nullGroup);
+     # Adds a newly built visual element to the page.
+0192 |     id("show-null-wrap").hidden=!hasNull;
+     # Continues the page structure, styling, or browser logic above.
+0193 |     id("null-legend").hidden=!hasNull;
+     # Continues the page structure, styling, or browser logic above.
+0194 |     id("show-null").checked=hasNull;
+     # Continues the page structure, styling, or browser logic above.
+0195 |     id("show-null").onchange=function(){
+     # Continues the page structure, styling, or browser logic above.
+0196 |       nullGroup.style.display=this.checked?"":"none";
+     # Continues the page structure, styling, or browser logic above.
+0197 |       id("null-legend").style.opacity=this.checked?"1":".45";
+     # Continues the page structure, styling, or browser logic above.
+0198 |     };
+     # Closes the preceding element or code block.
+0199 |   }
+     # Closes the preceding element or code block.
+0200 |   function wilson(adopted,n){
+     # Defines a browser function used by a chart, control, or live event.
+0201 |     var p=adopted/n,z=1.96,den=1+z*z/n;
+     # Keeps a value used by the page's next steps.
+0202 |     var center=(p+z*z/(2*n))/den;
+     # Keeps a value used by the page's next steps.
+0203 |     var half=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n))/den;
+     # Keeps a value used by the page's next steps.
+0204 |     return [center-half,center+half];
+     # Hands the calculated value back to the calling function.
+0205 |   }
+     # Closes the preceding element or code block.
+0206 |   function updateSelection(){
+     # Defines a browser function used by a chart, control, or live event.
+0207 |     var opening=id("opening-filter").value,colour=id("colour-filter").value;
+     # Keeps a value used by the page's next steps.
+0208 |     var all=!opening&&!colour;
+     # Keeps a value used by the page's next steps.
+0209 |     if(all){byD=report.curve_by_d||[];nullRows=report.null_comparison||[];}
+     # Controls which browser steps run or repeats them for data items.
+0210 |     else{
+     # Controls which browser steps run or repeats them for data items.
+0211 |       var groups={};
+     # Keeps a value used by the page's next steps.
+0212 |       explorer.forEach(function(r){
+     # Continues the page structure, styling, or browser logic above.
+0213 |         if((opening&&r.opening!==opening)||(colour&&r.colour!==colour))return;
+     # Controls which browser steps run or repeats them for data items.
+0214 |         var d=Number(r.d);
+     # Keeps a value used by the page's next steps.
+0215 |         if(!groups[d])groups[d]={d:d,n:0,adopted:0};
+     # Controls which browser steps run or repeats them for data items.
+0216 |         groups[d].n+=Number(r.n);groups[d].adopted+=Number(r.adopted);
+     # Continues the page structure, styling, or browser logic above.
+0217 |       });
+     # Closes the preceding element or code block.
+0218 |       byD=Object.keys(groups).map(function(k){
+     # Continues the page structure, styling, or browser logic above.
+0219 |         var r=groups[k],interval=wilson(r.adopted,r.n);
+     # Keeps a value used by the page's next steps.
+0220 |         r.rate=r.adopted/r.n;r.lo=interval[0];r.hi=interval[1];return r;
+     # Continues the page structure, styling, or browser logic above.
+0221 |       }).sort(function(a,b){return a.d-b.d;});
+     # Continues the page structure, styling, or browser logic above.
+0222 |       nullRows=[];
+     # Continues the page structure, styling, or browser logic above.
+0223 |     }
+     # Closes the preceding element or code block.
+0224 |     txt("chart-subtitle",all?"Observed trial rate and shuffled-time reference by distinct exposers":"Observed trial rate for this opening and colour");
+     # Continues the page structure, styling, or browser logic above.
+0225 |     txt("filter-note",all?
+     # Continues the page structure, styling, or browser logic above.
+0226 |       "All openings and colours · shuffled-time reference shown. Error bars are trial-level Wilson intervals.":
+     # Continues the page structure, styling, or browser logic above.
+0227 |       "Subset shows observed rates only; no shuffled-time reference was computed for this filter. Error bars are descriptive trial-level intervals.");
+     # Continues the page structure, styling, or browser logic above.
+0228 |     renderCurve();
+     # Continues the page structure, styling, or browser logic above.
+0229 |   }
+     # Closes the preceding element or code block.
+0230 |   var openings=Array.from(new Set(explorer.map(function(r){return r.opening;}))).sort();
+     # Keeps a value used by the page's next steps.
+0231 |   openings.forEach(function(opening){
+     # Continues the page structure, styling, or browser logic above.
+0232 |     var o=document.createElement("option");o.value=opening;o.textContent=opening;
+     # Updates visible text or markup on the page.
+0233 |     id("opening-filter").appendChild(o);
+     # Adds a newly built visual element to the page.
+0234 |   });
+     # Closes the preceding element or code block.
+0235 |   id("opening-filter").addEventListener("change",updateSelection);
+     # Responds to a user action or browser event.
+0236 |   id("colour-filter").addEventListener("change",updateSelection);
+     # Responds to a user action or browser event.
+0237 |   function download(name,content,type){
+     # Defines a browser function used by a chart, control, or live event.
+0238 |     var a=document.createElement("a"),url=URL.createObjectURL(new Blob([content],{type:type}));
+     # Keeps a value used by the page's next steps.
+0239 |     a.href=url;a.download=name;a.click();setTimeout(function(){URL.revokeObjectURL(url);},1000);
+     # Continues the page structure, styling, or browser logic above.
+0240 |   }
+     # Closes the preceding element or code block.
+0241 |   id("download-csv").addEventListener("click",function(){
+     # Responds to a user action or browser event.
+0242 |     var lines=["opening,colour,d,n,adopted,rate,lo,hi,shuffled_rate"];
+     # Keeps a value used by the page's next steps.
+0243 |     byD.forEach(function(r){
+     # Continues the page structure, styling, or browser logic above.
+0244 |       lines.push([id("opening-filter").value||"ALL",id("colour-filter").value||"ALL",
+     # Continues the page structure, styling, or browser logic above.
+0245 |         r.d,r.n,r.adopted==null?Math.round(r.rate*r.n):r.adopted,
+     # Continues the page structure, styling, or browser logic above.
+0246 |         r.rate,r.lo,r.hi,(nullByD[r.d]||{}).rate_null||""].join(","));
+     # Continues the page structure, styling, or browser logic above.
+0247 |     });
+     # Closes the preceding element or code block.
+0248 |     download("sna-adoption-curve.csv",lines.join("\n")+"\n","text/csv");
+     # Continues the page structure, styling, or browser logic above.
+0249 |   });
+     # Closes the preceding element or code block.
+0250 |   id("download-svg").addEventListener("click",function(){
+     # Responds to a user action or browser event.
+0251 |     var original=id("curve-chart"),copy=original.cloneNode(true);
+     # Keeps a value used by the page's next steps.
+0252 |     copy.setAttribute("xmlns",ns);
+     # Sets an element property used for display or accessibility.
+0253 |     var oldNodes=[original].concat(Array.from(original.querySelectorAll("*")));
+     # Keeps a value used by the page's next steps.
+0254 |     var newNodes=[copy].concat(Array.from(copy.querySelectorAll("*")));
+     # Keeps a value used by the page's next steps.
+0255 |     oldNodes.forEach(function(node,i){
+     # Continues the page structure, styling, or browser logic above.
+0256 |       var style=getComputedStyle(node);
+     # Keeps a value used by the page's next steps.
+0257 |       ["stroke","fill","stroke-width","stroke-dasharray","font-family","font-size","opacity"]
+     # Continues the page structure, styling, or browser logic above.
+0258 |         .forEach(function(key){var value=style.getPropertyValue(key);if(value)newNodes[i].setAttribute(key,value);});
+     # Sets an element property used for display or accessibility.
+0259 |     });
+     # Closes the preceding element or code block.
+0260 |     download("sna-adoption-curve.svg",new XMLSerializer().serializeToString(copy),"image/svg+xml");
+     # Continues the page structure, styling, or browser logic above.
+0261 |   });
+     # Closes the preceding element or code block.
+0262 |   updateSelection();
+     # Continues the page structure, styling, or browser logic above.
+0263 |   window.matchMedia("(max-width:620px)").addEventListener("change",renderCurve);
+     # Responds to a user action or browser event.
+0264 |   var m=report.matched_controls||{};
+     # Keeps a value used by the page's next steps.
+0265 |   txt("exposed-rate",pct(m.exposed_adoption_rate,2));
+     # Continues the page structure, styling, or browser logic above.
+0266 |   txt("control-rate",pct(m.control_adoption_rate,2));
+     # Continues the page structure, styling, or browser logic above.
+0267 |   id("exposed-bar").style.width=Math.min(100,100*(m.exposed_adoption_rate||0)/.2)+"%";
+     # Continues the page structure, styling, or browser logic above.
+0268 |   id("control-bar").style.width=Math.min(100,100*(m.control_adoption_rate||0)/.2)+"%";
+     # Continues the page structure, styling, or browser logic above.
+0269 |   txt("matched-delta",(m.difference>=0?"+":"")+(100*m.difference).toFixed(2)+" percentage points");
+     # Continues the page structure, styling, or browser logic above.
+0270 |   txt("matched-meta",count(m.n_pairs)+" pairs · "+pct(m.control_crossover_rate,1)+" controls later exposed · player-cluster bootstrap interval "+(m.ci95?"["+pct(m.ci95[0],2)+", "+pct(m.ci95[1],2)+"]":"unavailable"));
+     # Continues the page structure, styling, or browser logic above.
+0271 |   var p=report.predictive||{}, rows=[
+     # Keeps a value used by the page's next steps.
+0272 |     ["Baseline","Opening popularity, rating, activity",p.auc_baseline],
+     # Continues the page structure, styling, or browser logic above.
+0273 |     ["+ Repertoire","Prior opening proximity",p.auc_repertoire],
+     # Continues the page structure, styling, or browser logic above.
+0274 |     ["+ Network","Exposure and network position",p.auc_network]
+     # Continues the page structure, styling, or browser logic above.
+0275 |   ];
+     # Continues the page structure, styling, or browser logic above.
+0276 |   rows.forEach(function(r,i){if(r[2]==null)return;var tr=document.createElement("tr");if(i===2)tr.className="highlight";
+     # Continues the page structure, styling, or browser logic above.
+0277 |     [r[0],r[1],Number(r[2]).toFixed(3)].forEach(function(v,j){var td=document.createElement("td");td.textContent=v;if(j===2)td.className="num";tr.appendChild(td);});id("model-rows").appendChild(tr);});
+     # Updates visible text or markup on the page.
+0278 | })();
+     # Continues the page structure, styling, or browser logic above.
+0279 | </script>
+     # Closes the preceding element or code block.

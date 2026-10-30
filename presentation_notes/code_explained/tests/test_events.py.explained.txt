@@ -1,0 +1,707 @@
+SOURCE: tests/test_events.py
+SAY FIRST: These small known cases check that the trial and comparison logic counts correctly.
+Each numbered source line is followed by a plain-English comment.
+These files are speaking references; run the originals in src/, server/, site/ and scripts/.
+
+0001 | """Tests for the exposure/adoption core.
+0002 | 
+0003 | `events.build_trials` is where the science lives: if it miscounts exposures,
+0004 | mis-dates adoption or mis-measures structural diversity, every number
+0005 | downstream is wrong and still looks plausible. These build tiny games tables
+0006 | by hand where the right answer is known by inspection.
+0007 | 
+0008 |     python -m pytest tests -q
+0009 | """
+0010 | from __future__ import annotations
+     # Imports a library or project module needed below.
+0011 | 
+0012 | import sys
+     # Imports a library or project module needed below.
+0013 | from datetime import datetime, timedelta
+     # Imports a library or project module needed below.
+0014 | from pathlib import Path
+     # Imports a library or project module needed below.
+0015 | 
+0016 | import pandas as pd
+     # Imports a library or project module needed below.
+0017 | import pytest
+     # Imports a library or project module needed below.
+0018 | 
+0019 | sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+     # Continues the current calculation or control flow.
+0020 | 
+0021 | from src import curve, events, nulls  # noqa: E402
+     # Imports a library or project module needed below.
+0022 | 
+0023 | T0 = datetime(2016, 1, 1)
+     # Keeps this intermediate result under the name `T0`.
+0024 | 
+0025 | 
+0026 | def game(white, black, day, eco="B20", ply="e4 c5", wr=2000, br=2000):
+     # Make a tiny known game; tests vary just the detail under inspection.
+0027 |     """Make a tiny known game; tests vary just the detail under inspection."""
+0028 |     return {"game_id": f"g{day}", "ts": T0 + timedelta(days=day),
+     # Hands this result back to the stage that called this function.
+0029 |             "white": white, "black": black, "white_rating": wr,
+     # Part of the value, collection, or call spanning several lines.
+0030 |             "black_rating": br, "eco": eco, "opening": "Test",
+     # Part of the value, collection, or call spanning several lines.
+0031 |             "ply_key": ply, "speed": "Blitz", "result": "1-0"}
+     # Part of the value, collection, or call spanning several lines.
+0032 | 
+0033 | 
+0034 | def frame(rows):
+     # Defines a reusable step; the following indented lines are its body.
+0035 |     return pd.DataFrame(rows).sort_values("ts").reset_index(drop=True)
+     # Orders the rows by this field before the next calculation.
+0036 | 
+0037 | 
+0038 | # ---------------------------------------------------------------- sweep
+0039 | def test_one_game_makes_two_performances_and_two_exposures():
+     # u plays (X,W) and exposes v to it; v plays (X,B) and exposes u.
+0040 |     """u plays (X,W) and exposes v to it; v plays (X,B) and exposes u."""
+0041 |     df = frame([game("u", "v", 0)])
+     # Calculates or stores the game table for this stage.
+0042 |     exposures, first_perf, _ = events.sweep(df)
+     # Continues the current calculation or control flow.
+0043 | 
+0044 |     assert ("u", ("B20", "W")) in first_perf      # white performed it as White
+     # Checks an invariant; the script fails if it is false.
+0045 |     assert ("v", ("B20", "B")) in first_perf      # black performed it as Black
+     # Checks an invariant; the script fails if it is false.
+0046 |     assert exposures[("v", ("B20", "W"))] == [(df.ts[0], "u")]
+     # Checks an invariant; the script fails if it is false.
+0047 |     assert exposures[("u", ("B20", "B"))] == [(df.ts[0], "v")]
+     # Checks an invariant; the script fails if it is false.
+0048 | 
+0049 | 
+0050 | def test_colour_is_part_of_the_behaviour():
+     # Meeting the Sicilian as White is not the same behaviour as playing it as Black -- if colour dropped out of the key, adoption becomes meaningless.
+0051 |     """Meeting the Sicilian as White is not the same behaviour as playing it
+0052 |     as Black -- if colour dropped out of the key, adoption becomes meaningless."""
+0053 |     df = frame([game("u", "v", 0)])
+     # Calculates or stores the game table for this stage.
+0054 |     _, first_perf, _ = events.sweep(df)
+     # Continues the current calculation or control flow.
+0055 |     assert ("u", ("B20", "B")) not in first_perf
+     # Checks an invariant; the script fails if it is false.
+0056 |     assert ("v", ("B20", "W")) not in first_perf
+     # Checks an invariant; the script fails if it is false.
+0057 | 
+0058 | 
+0059 | def test_first_performance_wins():
+     # Defines a reusable step; the following indented lines are its body.
+0060 |     df = frame([game("u", "v", 0), game("u", "w", 5)])
+     # Calculates or stores the game table for this stage.
+0061 |     _, first_perf, _ = events.sweep(df)
+     # Continues the current calculation or control flow.
+0062 |     assert first_perf[("u", ("B20", "W"))] == T0        # not day 5
+     # Checks an invariant; the script fails if it is false.
+0063 | 
+0064 | 
+0065 | # ---------------------------------------------------------------- trials
+0066 | def test_adoption_inside_window_counts():
+     # Defines a reusable step; the following indented lines are its body.
+0067 |     # a exposes b on day 0; b plays it as White on day 3 -> adopted
+0068 |     df = frame([game("a", "b", 0), game("b", "z", 3), game("q", "r", 40)])
+     # Calculates or stores the game table for this stage.
+0069 |     trials = events.build_trials(df, window_days=14)
+     # Calculates or stores the exposure-trial table for this stage.
+0070 |     row = trials[(trials.player == "b") & (trials.colour == "W")]
+     # Keeps this intermediate result under the name `row`.
+0071 |     assert len(row) == 1
+     # Checks an invariant; the script fails if it is false.
+0072 |     assert row.iloc[0]["adopted"] == 1
+     # Checks an invariant; the script fails if it is false.
+0073 | 
+0074 | 
+0075 | def test_adoption_outside_window_does_not_count():
+     # Defines a reusable step; the following indented lines are its body.
+0076 |     # exposure day 0, first play day 20, window 14 -> not an adoption
+0077 |     df = frame([game("a", "b", 0), game("b", "z", 20), game("q", "r", 60)])
+     # Calculates or stores the game table for this stage.
+0078 |     trials = events.build_trials(df, window_days=14)
+     # Calculates or stores the exposure-trial table for this stage.
+0079 |     row = trials[(trials.player == "b") & (trials.colour == "W")]
+     # Keeps this intermediate result under the name `row`.
+0080 |     assert len(row) == 1
+     # Checks an invariant; the script fails if it is false.
+0081 |     assert row.iloc[0]["adopted"] == 0
+     # Checks an invariant; the script fails if it is false.
+0082 | 
+0083 | 
+0084 | def test_trials_censored_when_window_runs_past_the_data():
+     # A window that does not fit inside the observation period is dropped, not silently scored as a non-adoption.
+0085 |     """A window that does not fit inside the observation period is dropped,
+0086 |     not silently scored as a non-adoption."""
+0087 |     df = frame([game("a", "b", 0), game("c", "e", 1)])   # spans 1 day
+     # Calculates or stores the game table for this stage.
+0088 |     trials = events.build_trials(df, window_days=14)
+     # Calculates or stores the exposure-trial table for this stage.
+0089 |     assert len(trials) == 0
+     # Checks an invariant; the script fails if it is false.
+0090 | 
+0091 | 
+0092 | def test_late_adoption_is_censored_alongside_late_nonadoption():
+     # Defines a reusable step; the following indented lines are its body.
+0093 |     # A positive result is not complete follow-up when the 14-day window
+0094 |     # extends beyond the data. Including only positives biases the rate.
+0095 |     df = frame([game("a", "b", 0), game("b", "z", 3),
+     # Calculates or stores the game table for this stage.
+0096 |                 game("q", "r", 4)])
+     # Continues the current calculation or control flow.
+0097 |     trials = events.build_trials(df, window_days=14)
+     # Calculates or stores the exposure-trial table for this stage.
+0098 |     assert trials.empty
+     # Checks an invariant; the script fails if it is false.
+0099 | 
+0100 | 
+0101 | def test_prediction_holds_out_whole_spells_and_uses_earlier_features(monkeypatch):
+     # Defines a reusable step; the following indented lines are its body.
+0102 |     from src import predict
+     # Imports a library or project module needed below.
+0103 |     rows = []
+     # Calculates or stores the result rows collected for the output table for this stage.
+0104 |     for spell in range(30):
+     # Processes each item from this collection in turn.
+0105 |         for hour in range(6):
+     # Processes each item from this collection in turn.
+0106 |             rows.append({"player": f"p{spell}", "opening": "B20",
+     # Part of the value, collection, or call spanning several lines.
+0107 |                          "colour": "W", "t": T0 + timedelta(hours=spell * 6 + hour),
+     # Part of the value, collection, or call spanning several lines.
+0108 |                          "adopted": spell % 2})
+     # Part of the value, collection, or call spanning several lines.
+0109 |     trials = pd.DataFrame(rows)
+     # Creates a labelled table from the collected rows.
+0110 |     checked = []
+     # Keeps this intermediate result under the name `checked`.
+0111 | 
+0112 |     def fake_features(games, data, cutoff):
+     # Defines a reusable step; the following indented lines are its body.
+0113 |         assert (data.t > cutoff).all()
+     # Checks an invariant; the script fails if it is false.
+0114 |         checked.append(cutoff)
+     # Continues the current calculation or control flow.
+0115 |         return data.copy()
+     # Hands this result back to the stage that called this function.
+0116 | 
+0117 |     def fake_gbm(train, test, columns):
+     # Defines a reusable step; the following indented lines are its body.
+0118 |         train_spells = set(train.player)
+     # Keeps this intermediate result under the name `train_spells`.
+0119 |         test_spells = set(test.player)
+     # Keeps this intermediate result under the name `test_spells`.
+0120 |         assert train_spells.isdisjoint(test_spells)
+     # Checks an invariant; the script fails if it is false.
+0121 |         return 0.6, 0.6
+     # Hands this result back to the stage that called this function.
+0122 | 
+0123 |     monkeypatch.setattr(predict.features, "build", fake_features)
+     # Continues the current calculation or control flow.
+0124 |     monkeypatch.setattr(predict, "_gbm", fake_gbm)
+     # Continues the current calculation or control flow.
+0125 |     out = predict.evaluate(pd.DataFrame(), trials, full=False)
+     # Creates a labelled table from the collected rows.
+0126 |     assert checked and out["split_method"] == "held-out player-opening-colour spells"
+     # Checks an invariant; the script fails if it is false.
+0127 |     assert out["n_train"] + out["n_test"] < len(trials)  # burn-in removed
+     # Checks an invariant; the script fails if it is false.
+0128 | 
+0129 | 
+0130 | def test_matching_uses_risk_set_at_exposure_time():
+     # Defines a reusable step; the following indented lines are its body.
+0131 |     from src import matching
+     # Imports a library or project module needed below.
+0132 |     df = frame([
+     # Calculates or stores the game table for this stage.
+0133 |         game("b", "u", -2, eco="C00", wr=2000, br=2200),
+     # Part of the value, collection, or call spanning several lines.
+0134 |         game("d", "v", -2, eco="C00", wr=2000, br=2200),
+     # Part of the value, collection, or call spanning several lines.
+0135 |         game("c", "z", 0, wr=2000, br=2200),  # c already performed B20/W
+     # Continues the current calculation or control flow.
+0136 |         game("a", "b", 1, wr=2200, br=2000),  # b first exposed to B20/W
+     # Continues the current calculation or control flow.
+0137 |         game("d", "z", 3, eco="C00", wr=2200, br=2200),  # future rating
+     # Continues the current calculation or control flow.
+0138 |         game("e", "d", 4, wr=2200, br=2000),  # d exposed only later
+     # Continues the current calculation or control flow.
+0139 |         game("d", "x", 6, wr=2000, br=2200),  # d later adopts B20/W
+     # Continues the current calculation or control flow.
+0140 |         game("c", "y", 8, eco="C00", wr=2000, br=2200),
+     # Part of the value, collection, or call spanning several lines.
+0141 |         game("b", "h", 10, eco="C00", wr=2000, br=2200),
+     # Part of the value, collection, or call spanning several lines.
+0142 |         game("q", "r", 40, wr=2200, br=2200),
+     # Part of the value, collection, or call spanning several lines.
+0143 |     ])
+     # Continues the current calculation or control flow.
+0144 |     pairs = matching.build_matched(df, max_trials=None)
+     # Keeps this intermediate result under the name `pairs`.
+0145 |     row = pairs[(pairs.exposed == "b") & (pairs.opening == "B20")
+     # Keeps this intermediate result under the name `row`.
+0146 |                 & (pairs.colour == "W")]
+     # Continues the current calculation or control flow.
+0147 |     assert len(row) == 1
+     # Checks an invariant; the script fails if it is false.
+0148 |     assert row.iloc[0].control == "d"  # c is a prior adopter, so not at risk
+     # Checks an invariant; the script fails if it is false.
+0149 |     assert row.iloc[0].control_crossover == 1
+     # Checks an invariant; the script fails if it is false.
+0150 |     assert row.iloc[0].control_adopted == 1
+     # Checks an invariant; the script fails if it is false.
+0151 |     assert row.iloc[0].control_pre_games == 1
+     # Checks an invariant; the script fails if it is false.
+0152 |     assert row.iloc[0].control_pre_rating == 2000
+     # Checks an invariant; the script fails if it is false.
+0153 | 
+0154 | 
+0155 | def test_player_already_playing_it_is_not_at_risk():
+     # Defines a reusable step; the following indented lines are its body.
+0156 |     # b plays it on day 0 as White, is exposed to (X,W) later -> no trial
+0157 |     df = frame([game("b", "z", 0), game("a", "b", 2), game("q", "r", 40)])
+     # Calculates or stores the game table for this stage.
+0158 |     trials = events.build_trials(df, window_days=14)
+     # Calculates or stores the exposure-trial table for this stage.
+0159 |     assert trials[(trials.player == "b") & (trials.colour == "W")].empty
+     # Checks an invariant; the script fails if it is false.
+0160 | 
+0161 | 
+0162 | def test_distinct_exposers_counted_not_repeat_exposures():
+     # Three games from the same opponent is d=1 with k=3.
+0163 |     """Three games from the same opponent is d=1 with k=3."""
+0164 |     df = frame([game("a", "b", 0), game("a", "b", 1), game("a", "b", 2),
+     # Calculates or stores the game table for this stage.
+0165 |                 game("q", "r", 40)])
+     # Continues the current calculation or control flow.
+0166 |     trials = events.build_trials(df, window_days=14)
+     # Calculates or stores the exposure-trial table for this stage.
+0167 |     row = trials[(trials.player == "b") & (trials.colour == "W")]
+     # Keeps this intermediate result under the name `row`.
+0168 |     assert row["d"].max() == 1
+     # Checks an invariant; the script fails if it is false.
+0169 |     assert row["k"].max() == 3
+     # Checks an invariant; the script fails if it is false.
+0170 | 
+0171 | 
+0172 | def test_three_different_exposers_give_d_three():
+     # Defines a reusable step; the following indented lines are its body.
+0173 |     df = frame([game("a", "b", 0), game("c", "b", 1), game("e", "b", 2),
+     # Calculates or stores the game table for this stage.
+0174 |                 game("q", "r", 40)])
+     # Continues the current calculation or control flow.
+0175 |     trials = events.build_trials(df, window_days=14)
+     # Calculates or stores the exposure-trial table for this stage.
+0176 |     row = trials[(trials.player == "b") & (trials.colour == "W")]
+     # Keeps this intermediate result under the name `row`.
+0177 |     assert row["d"].max() == 3
+     # Checks an invariant; the script fails if it is false.
+0178 | 
+0179 | 
+0180 | # ------------------------------------------------- structural diversity
+0181 | def test_structural_diversity_separate_exposers_are_separate_components():
+     # Two exposers who have never met are two components -> sd = 2.
+0182 |     """Two exposers who have never met are two components -> sd = 2."""
+0183 |     df = frame([game("a", "b", 0), game("c", "b", 1), game("q", "r", 40)])
+     # Calculates or stores the game table for this stage.
+0184 |     trials = events.build_trials(df, window_days=14)
+     # Calculates or stores the exposure-trial table for this stage.
+0185 |     row = trials[(trials.player == "b") & (trials.colour == "W")]
+     # Keeps this intermediate result under the name `row`.
+0186 |     assert row["sd"].max() == 2
+     # Checks an invariant; the script fails if it is false.
+0187 | 
+0188 | 
+0189 | def test_structural_diversity_connected_exposers_collapse_to_one():
+     # If the two exposers have played each other, they are one social source.
+0190 |     """If the two exposers have played each other, they are one social source."""
+0191 |     df = frame([game("a", "c", 0),        # a and c know each other
+     # Calculates or stores the game table for this stage.
+0192 |                 game("a", "b", 1), game("c", "b", 2), game("q", "r", 40)])
+     # Continues the current calculation or control flow.
+0193 |     trials = events.build_trials(df, window_days=14)
+     # Calculates or stores the exposure-trial table for this stage.
+0194 |     row = trials[(trials.player == "b") & (trials.colour == "W")]
+     # Keeps this intermediate result under the name `row`.
+0195 |     assert row["d"].max() == 2          # still two distinct people
+     # Checks an invariant; the script fails if it is false.
+0196 |     assert row["sd"].max() == 1         # but only one component
+     # Checks an invariant; the script fails if it is false.
+0197 | 
+0198 | 
+0199 | def test_structural_diversity_ignores_edges_formed_later():
+     # The exposure subgraph may only use edges that existed at the time.
+0200 |     """The exposure subgraph may only use edges that existed at the time."""
+0201 |     df = frame([game("a", "b", 0), game("c", "b", 1),
+     # Calculates or stores the game table for this stage.
+0202 |                 game("a", "c", 30),      # they meet only AFTER the exposures
+     # Continues the current calculation or control flow.
+0203 |                 game("q", "r", 60)])
+     # Continues the current calculation or control flow.
+0204 |     trials = events.build_trials(df, window_days=14)
+     # Calculates or stores the exposure-trial table for this stage.
+0205 |     row = trials[(trials.player == "b") & (trials.colour == "W")]
+     # Keeps this intermediate result under the name `row`.
+0206 |     assert row["sd"].max() == 2
+     # Checks an invariant; the script fails if it is false.
+0207 | 
+0208 | 
+0209 | # ---------------------------------------------------------------- nulls
+0210 | def test_shuffling_timestamps_preserves_the_games_themselves():
+     # Defines a reusable step; the following indented lines are its body.
+0211 |     import numpy as np
+     # Imports a library or project module needed below.
+0212 |     df = frame([game("a", "b", i) for i in range(10)])
+     # Calculates or stores the game table for this stage.
+0213 |     out = nulls.shuffle_timestamps(df, np.random.default_rng(0))
+     # Calculates or stores the output value for this stage.
+0214 |     assert sorted(out["ts"]) == sorted(df["ts"])
+     # Checks an invariant; the script fails if it is false.
+0215 |     assert len(out) == len(df)
+     # Checks an invariant; the script fails if it is false.
+0216 | 
+0217 | 
+0218 | def test_aborted_game_does_not_leak_its_tags_into_the_next():
+     # Lichess contains games with headers but no movetext.
+0219 |     """Lichess contains games with headers but no movetext. If the scanner only
+0220 |     resets after a game WITH moves, the aborted game's ECO and Elo leak into
+0221 |     the following game and it is analysed under the wrong opening."""
+0222 |     import tempfile
+     # Imports a library or project module needed below.
+0223 |     from src import parse
+     # Imports a library or project module needed below.
+0224 | 
+0225 |     pgn = (
+     # Keeps this intermediate result under the name `pgn`.
+0226 |         '[Event "Rated Blitz game"]\n[White "ghost"]\n[ECO "Z99"]\n'
+     # Part of the value, collection, or call spanning several lines.
+0227 |         '[WhiteElo "2500"]\n\n'
+     # Part of the value, collection, or call spanning several lines.
+0228 |         '[Event "Rated Blitz game"]\n[White "real"]\n[Black "opp"]\n'
+     # Part of the value, collection, or call spanning several lines.
+0229 |         '[UTCDate "2016.01.03"]\n[UTCTime "00:00:03"]\n[BlackElo "2002"]\n\n'
+     # Part of the value, collection, or call spanning several lines.
+0230 |         'd4 d5 0-1\n'
+     # Part of the value, collection, or call spanning several lines.
+0231 |     )
+     # Closes the data structure or function call started above.
+0232 |     f = Path(tempfile.gettempdir()) / "sna_test_aborted.pgn"
+     # Keeps this intermediate result under the name `f`.
+0233 |     f.write_text(pgn, encoding="utf-8")
+     # Continues the current calculation or control flow.
+0234 | 
+0235 |     games = list(parse.iter_games(f))
+     # Keeps this intermediate result under the name `games`.
+0236 |     assert len(games) == 1                       # the aborted game is dropped
+     # Checks an invariant; the script fails if it is false.
+0237 |     tags, _ = games[0]
+     # Continues the current calculation or control flow.
+0238 |     assert tags["White"] == "real"
+     # Checks an invariant; the script fails if it is false.
+0239 |     assert "ECO" not in tags                     # not inherited from the ghost
+     # Checks an invariant; the script fails if it is false.
+0240 |     assert "WhiteElo" not in tags
+     # Checks an invariant; the script fails if it is false.
+0241 | 
+0242 | 
+0243 | def test_matching_pool_reaches_the_bottom_of_the_activity_tolerance():
+     # The activity index is log-spaced at the tolerance ratio, so the lowest acceptable activity can floor two buckets down.
+0244 |     """The activity index is log-spaced at the tolerance ratio, so the lowest
+0245 |     acceptable activity can floor two buckets down. Searching only one bucket
+0246 |     below quietly dropped valid controls and biased the pool upwards."""
+0247 |     import inspect
+     # Imports a library or project module needed below.
+0248 |     from src import matching
+     # Imports a library or project module needed below.
+0249 | 
+0250 |     src = inspect.getsource(matching.build_matched)
+     # Keeps this intermediate result under the name `src`.
+0251 |     assert "for da in (-2, -1, 0, 1, 2)" in src, (
+     # Checks an invariant; the script fails if it is false.
+0252 |         "activity bucket search is too narrow; controls in [0.75a, 0.8a] "
+     # Part of the value, collection, or call spanning several lines.
+0253 |         "can be missed")
+     # Part of the value, collection, or call spanning several lines.
+0254 | 
+0255 | 
+0256 | def test_rewire_preserves_degree_and_makes_no_self_loops():
+     # The proposal's second null: degree-preserving edge rewiring.
+0257 |     """The proposal's second null: degree-preserving edge rewiring. It has to
+0258 |     change who played whom while leaving every player's game count alone."""
+0259 |     import numpy as np
+     # Imports a library or project module needed below.
+0260 |     from collections import Counter
+     # Imports a library or project module needed below.
+0261 | 
+0262 |     df = pd.DataFrame({
+     # Creates a labelled table from the collected rows.
+0263 |         "white": [f"w{i % 7}" for i in range(60)],
+     # Part of the value, collection, or call spanning several lines.
+0264 |         "black": [f"b{i % 5}" for i in range(60)],
+     # Part of the value, collection, or call spanning several lines.
+0265 |         "ts": pd.date_range("2016-01-01", periods=60, freq="h"),
+     # Part of the value, collection, or call spanning several lines.
+0266 |     })
+     # Continues the current calculation or control flow.
+0267 |     out = nulls.rewire_preserving_degree(df, np.random.default_rng(0))
+     # Calculates or stores the output value for this stage.
+0268 | 
+0269 |     def degrees(d):
+     # Defines a reusable step; the following indented lines are its body.
+0270 |         c = Counter()
+     # Keeps this intermediate result under the name `c`.
+0271 |         for u, v in zip(d.white, d.black):
+     # Processes each item from this collection in turn.
+0272 |             c[u] += 1
+     # Continues the current calculation or control flow.
+0273 |             c[v] += 1
+     # Continues the current calculation or control flow.
+0274 |         return c
+     # Hands this result back to the stage that called this function.
+0275 | 
+0276 |     assert degrees(df) == degrees(out)
+     # Checks an invariant; the script fails if it is false.
+0277 |     assert (out.white != out.black).all()          # no self-loops
+     # Checks an invariant; the script fails if it is false.
+0278 |     assert set(zip(df.white, df.black)) != set(zip(out.white, out.black))
+     # Checks an invariant; the script fails if it is false.
+0279 | 
+0280 | 
+0281 | def test_null_honours_granularity():
+     # The null must build trials the same way the real analysis does.
+0282 |     """The null must build trials the same way the real analysis does.
+0283 | 
+0284 |     Leaving granularity at the default while the real trials are keyed by ply
+0285 |     compares a sparse ply world against a dense ECO world and manufactures a
+0286 |     spurious 'complex contagion' verdict. Same class of bug as the adoption
+0287 |     window mismatch, so it gets the same guard.
+0288 |     """
+0289 |     rows = [game(f"p{d}", f"q{d}", d,
+     # Calculates or stores the result rows collected for the output table for this stage.
+0290 |                  ply="e4 c5 Nf3 d6" if d % 2 == 0 else "e4 c5 Nc3 Nc6")
+     # Keeps this intermediate result under the name `ply`.
+0291 |             for d in range(6)]
+     # Processes each item from this collection in turn.
+0292 |     df = frame(rows)
+     # Calculates or stores the game table for this stage.
+0293 | 
+0294 |     # ply granularity must actually split the single ECO into two behaviours
+0295 |     eco_keys = {events.behaviour_key(r, "eco") for r in df.itertuples()}
+     # Keeps this intermediate result under the name `eco_keys`.
+0296 |     ply_keys = {events.behaviour_key(r, "ply") for r in df.itertuples()}
+     # Keeps this intermediate result under the name `ply_keys`.
+0297 |     assert len(eco_keys) == 1 and len(ply_keys) == 2
+     # Checks an invariant; the script fails if it is false.
+0298 | 
+0299 |     # and run_null must forward that choice to build_trials, not silently
+0300 |     # fall back to the configured default
+0301 |     seen = []
+     # Calculates or stores the set of opponents already counted for this stage.
+0302 |     real_build = events.build_trials
+     # Keeps this intermediate result under the name `real_build`.
+0303 | 
+0304 |     def spy(frame_, *args, **kwargs):
+     # Defines a reusable step; the following indented lines are its body.
+0305 |         seen.append(kwargs.get("granularity"))
+     # Continues the current calculation or control flow.
+0306 |         return real_build(frame_, *args, **kwargs)
+     # Hands this result back to the stage that called this function.
+0307 | 
+0308 |     events.build_trials = spy
+     # Keeps this intermediate result under the name `build_trials`.
+0309 |     try:
+     # Starts an operation that may need error handling.
+0310 |         nulls.run_null(df, n_reps=1, window_days=2, granularity="ply")
+     # Continues the current calculation or control flow.
+0311 |     finally:
+     # Runs cleanup whether the operation succeeds or fails.
+0312 |         events.build_trials = real_build
+     # Keeps this intermediate result under the name `build_trials`.
+0313 | 
+0314 |     assert seen and all(g == "ply" for g in seen), (
+     # Checks an invariant; the script fails if it is false.
+0315 |         f"run_null passed granularity={seen} to build_trials, expected 'ply'")
+     # Continues the current calculation or control flow.
+0316 | 
+0317 | 
+0318 | def test_compare_falls_back_to_binomial_se_with_one_replicate():
+     # A single replicate has no across-replicate spread.
+0319 |     """A single replicate has no across-replicate spread. Without a fallback
+0320 |     every z is NaN and the verdict silently collapses to 'nothing detected'."""
+0321 |     import numpy as np
+     # Imports a library or project module needed below.
+0322 |     real = pd.DataFrame({"d": [1, 2], "n": [100, 50], "rate": [0.20, 0.25],
+     # Creates a labelled table from the collected rows.
+0323 |                          "lo": [0, 0], "hi": [1, 1]})
+     # Part of the value, collection, or call spanning several lines.
+0324 |     one = pd.DataFrame({"d": [1, 2], "n": [100, 50], "rate": [0.15, 0.24],
+     # Creates a labelled table from the collected rows.
+0325 |                         "rate_sd": [np.nan, np.nan]})
+     # Part of the value, collection, or call spanning several lines.
+0326 |     z = nulls.compare(real, one)["z_vs_null"]
+     # Keeps this intermediate result under the name `z`.
+0327 |     assert z.notna().all()
+     # Checks an invariant; the script fails if it is false.
+0328 | 
+0329 | 
+0330 | # --------------------------------------------------------------- verdict
+0331 | def test_verdict_needs_the_null_before_it_will_call_complex_contagion():
+     # The bug this guards: a rising raw curve alone was enough to print 'complex contagion', even though the null reproduced the whole rise.
+0332 |     """The bug this guards: a rising raw curve alone was enough to print
+0333 |     'complex contagion', even though the null reproduced the whole rise."""
+0334 |     rising = pd.DataFrame({"d": [1, 2, 3], "n": [1000] * 3,
+     # Creates a labelled table from the collected rows.
+0335 |                            "adopted": [100, 200, 300],
+     # Part of the value, collection, or call spanning several lines.
+0336 |                            "rate": [0.10, 0.20, 0.30],
+     # Part of the value, collection, or call spanning several lines.
+0337 |                            "lo": [0.09, 0.19, 0.29], "hi": [0.11, 0.21, 0.31]})
+     # Part of the value, collection, or call spanning several lines.
+0338 |     tables = {"by_d": rising, "held_k_by_d": pd.DataFrame(
+     # Creates a labelled table from the collected rows.
+0339 |         columns=["k", "d", "n", "rate", "lo", "hi"])}
+     # Keeps this intermediate result under the name `columns`.
+0340 |     v = curve.verdict(tables, None)
+     # Keeps this intermediate result under the name `v`.
+0341 |     assert "complex contagion" != v["verdict"]
+     # Checks an invariant; the script fails if it is false.
+0342 |     assert "withheld" in v["verdict"] or "no null" in v["verdict"]
+     # Checks an invariant; the script fails if it is false.
+0343 | 
+0344 | 
+0345 | def test_verdict_reports_simple_when_null_matches_the_rise():
+     # Defines a reusable step; the following indented lines are its body.
+0346 |     rising = pd.DataFrame({"d": [1, 2, 3], "n": [1000] * 3,
+     # Creates a labelled table from the collected rows.
+0347 |                            "adopted": [100, 200, 300],
+     # Part of the value, collection, or call spanning several lines.
+0348 |                            "rate": [0.10, 0.20, 0.30],
+     # Part of the value, collection, or call spanning several lines.
+0349 |                            "lo": [0.09, 0.19, 0.29], "hi": [0.11, 0.21, 0.31]})
+     # Part of the value, collection, or call spanning several lines.
+0350 |     tables = {"by_d": rising, "held_k_by_d": pd.DataFrame(
+     # Creates a labelled table from the collected rows.
+0351 |         columns=["k", "d", "n", "rate", "lo", "hi"])}
+     # Keeps this intermediate result under the name `columns`.
+0352 |     cmp = pd.DataFrame({"d": [1, 2, 3],
+     # Creates a labelled table from the collected rows.
+0353 |                         "rate_real": [0.10, 0.20, 0.30],
+     # Part of the value, collection, or call spanning several lines.
+0354 |                         "rate_null": [0.08, 0.18, 0.30],
+     # Part of the value, collection, or call spanning several lines.
+0355 |                         "lift_over_null": [1.25, 1.11, 1.00],
+     # Compares the observed adoption rate with the shuffled-time reference rate.
+0356 |                         "z_vs_null": [9.0, 5.0, 0.1]})
+     # Part of the value, collection, or call spanning several lines.
+0357 |     v = curve.verdict(tables, cmp)
+     # Keeps this intermediate result under the name `v`.
+0358 |     assert v["excess_over_null_grows_with_d"] is False
+     # Checks an invariant; the script fails if it is false.
+0359 |     assert v["verdict"].startswith("simple contagion")
+     # Checks an invariant; the script fails if it is false.
+0360 | 
+0361 | 
+0362 | if __name__ == "__main__":
+     # Runs the command-line entry point only when this file is executed directly.
+0363 |     raise SystemExit(pytest.main([__file__, "-q"]))
+     # Stops with an explicit error when this requirement is violated.
+0364 | 
+0365 | 
+0366 | def test_saved_run_reopens_and_retries_without_losing_history(monkeypatch):
+     # Defines a reusable step; the following indented lines are its body.
+0367 |     from server import runner
+     # Imports a library or project module needed below.
+0368 |     from src import config
+     # Imports a library or project module needed below.
+0369 |     import tempfile
+     # Imports a library or project module needed below.
+0370 | 
+0371 |     with tempfile.TemporaryDirectory(dir=config.RESULTS) as folder:
+     # Opens a resource and guarantees cleanup when the block ends.
+0372 |         monkeypatch.setattr(runner, "RUNS_DIR", Path(folder))
+     # Continues the current calculation or control flow.
+0373 |         run = runner.Run("2016-01", None, 3, 14)
+     # Calculates or stores the current analysis run for this stage.
+0374 |         run.emit("init", month=run.month)
+     # Appends a structured progress event that the browser can replay.
+0375 |         run.stage("trials", "running")
+     # Sets the status shown in the live stage list.
+0376 |         run.emit("done", ok=False)
+     # Appends a structured progress event that the browser can replay.
+0377 |         assert runner.list_runs()[0]["status"] == "failed"
+     # Checks an invariant; the script fails if it is false.
+0378 | 
+0379 |         runner._RUNS.pop(run.id)
+     # Continues the current calculation or control flow.
+0380 |         reopened = runner.get(run.id)
+     # Keeps this intermediate result under the name `reopened`.
+0381 |         assert reopened is not None
+     # Checks an invariant; the script fails if it is false.
+0382 |         assert reopened.events_path.read_text(encoding="utf-8").count("\n") == 3
+     # Checks an invariant; the script fails if it is false.
+0383 | 
+0384 |         launched = []
+     # Keeps this intermediate result under the name `launched`.
+0385 |         monkeypatch.setattr(runner, "_launch", lambda r: launched.append(r.id))
+     # Continues the current calculation or control flow.
+0386 |         retried = runner.resume(run.id)
+     # Keeps this intermediate result under the name `retried`.
+0387 |         assert retried is not None and launched == [run.id]
+     # Checks an invariant; the script fails if it is false.
+0388 |         assert (run.dir / "events_attempt_1.jsonl").exists()
+     # Checks an invariant; the script fails if it is false.
+0389 |         assert runner.list_runs()[0]["status"] == "running"
+     # Checks an invariant; the script fails if it is false.
+0390 |         runner._RUNS.pop(run.id, None)
+     # Continues the current calculation or control flow.
+0391 | 
+0392 | def test_cluster_bootstrap_reports_repeated_players():
+     # Defines a reusable step; the following indented lines are its body.
+0393 |     from src import matching
+     # Imports a library or project module needed below.
+0394 | 
+0395 |     pairs = pd.DataFrame({
+     # Creates a labelled table from the collected rows.
+0396 |         "exposed": ["a", "a", "b", "c", "c", "d"],
+     # Part of the value, collection, or call spanning several lines.
+0397 |         "control": ["b", "c", "a", "d", "a", "b"],
+     # Part of the value, collection, or call spanning several lines.
+0398 |         "exposed_adopted": [1, 1, 0, 1, 0, 1],
+     # Part of the value, collection, or call spanning several lines.
+0399 |         "control_adopted": [0, 0, 0, 0, 0, 1],
+     # Part of the value, collection, or call spanning several lines.
+0400 |         "control_crossover": [0, 1, 0, 0, 1, 0],
+     # Part of the value, collection, or call spanning several lines.
+0401 |         "exposed_pre_rating": [1900] * 6,
+     # Part of the value, collection, or call spanning several lines.
+0402 |         "control_pre_rating": [1901] * 6,
+     # Part of the value, collection, or call spanning several lines.
+0403 |         "exposed_pre_games": [10] * 6,
+     # Part of the value, collection, or call spanning several lines.
+0404 |         "control_pre_games": [9] * 6,
+     # Part of the value, collection, or call spanning several lines.
+0405 |     })
+     # Continues the current calculation or control flow.
+0406 |     first = matching.summarise(pairs, bootstrap_reps=200, seed=3)
+     # Keeps this intermediate result under the name `first`.
+0407 |     second = matching.summarise(pairs, bootstrap_reps=200, seed=3)
+     # Keeps this intermediate result under the name `second`.
+0408 |     assert first == second
+     # Checks an invariant; the script fails if it is false.
+0409 |     assert first["ci95"][0] <= first["difference"] <= first["ci95"][1]
+     # Checks an invariant; the script fails if it is false.
+0410 |     assert first["ci95_method"].startswith("player-cluster")
+     # Checks an invariant; the script fails if it is false.
+0411 |     assert first["pre_match_balance"]["control_games_mean"] == 9
+     # Checks an invariant; the script fails if it is false.
+0412 | 
+0413 | 
+0414 | def test_null_run_can_stop_between_replicates():
+     # Defines a reusable step; the following indented lines are its body.
+0415 |     from src import nulls
+     # Imports a library or project module needed below.
+0416 |     stopped = nulls.run_null(pd.DataFrame(), n_reps=20, should_stop=lambda: True)
+     # Creates a labelled table from the collected rows.
+0417 |     assert stopped.empty
+     # Checks an invariant; the script fails if it is false.

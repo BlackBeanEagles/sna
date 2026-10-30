@@ -1,0 +1,97 @@
+SOURCE: site/build.py
+SAY FIRST: This embeds the saved results and stylesheet into the local findings page.
+Each numbered source line is followed by a plain-English comment.
+These files are speaking references; run the originals in src/, server/, site/ and scripts/.
+
+0001 | """Wrap the artifact fragment (site/page.html) into a standalone HTML document.
+0002 | 
+0003 | The published Artifact supplies its own <!doctype>/<head>/reset at publish time,
+0004 | so page.html is a fragment: it starts at <title> and has no document shell. To
+0005 | serve the same page from localhost we add that shell back, reproducing the
+0006 | publish skeleton so the page looks identical either way.
+0007 | 
+0008 |     python site/build.py        # regenerates site/index.html
+0009 | """
+0010 | import json
+     # Imports a library or project module needed below.
+0011 | from pathlib import Path
+     # Imports a library or project module needed below.
+0012 | 
+0013 | SITE = Path(__file__).resolve().parent
+     # Keeps this intermediate result under the name `SITE`.
+0014 | 
+0015 | # Mirrors what the Artifact publish skeleton injects, so local and published
+0016 | # renders match: light color-scheme, zero body margin, 14px system stack,
+0017 | # responsive images, and a [hidden] that actually wins.
+0018 | SKELETON = """<!doctype html>
+0019 | <html lang="en">
+0020 | <head>
+0021 | <meta charset="utf-8">
+0022 | <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+0023 | <style>
+0024 |   :root{
+0025 |     color-scheme: light dark;
+0026 |     padding-top: env(safe-area-inset-top, 0px);
+0027 |     padding-bottom: env(safe-area-inset-bottom, 0px);
+0028 |   }
+0029 |   body{ margin:0; font:14px/1.5 system-ui, -apple-system, sans-serif; background:#fafaf9; }
+0030 |   img{ max-width:100%; }
+0031 |   [hidden]{ display:none !important; }
+0032 | </style>
+0033 | __FRAGMENT__
+0034 | </head>
+0035 | <body>
+0036 | </body>
+0037 | </html>
+0038 | """
+0039 | 
+0040 | 
+0041 | def build() -> Path:
+     # Combine page, stylesheet and saved report into the static findings page.
+0042 |     """Combine page, stylesheet and saved report into the static findings page.
+0043 | 
+0044 |     This is a build step, not a new analysis: numbers come from report.json.
+0045 |     Re-run it after editing page.html or style.css for the local /findings view.
+0046 |     """
+0047 |     fragment = (SITE / "page.html").read_text(encoding="utf-8")
+     # Keeps this intermediate result under the name `fragment`.
+0048 |     fragment = fragment.replace("__SITE_CSS__", (SITE / "style.css").read_text(encoding="utf-8"))
+     # Keeps this intermediate result under the name `fragment`.
+0049 |     report = json.loads((SITE.parent / "results" / "report.json").read_text(encoding="utf-8"))
+     # Decodes saved JSON text into Python data.
+0050 |     # Escape angle brackets before embedding JSON in an inline script.
+0051 |     embedded = json.dumps(report, separators=(",", ":")).replace("<", "\\u003c")
+     # Encodes Python values as JSON for saving or sending to the browser.
+0052 |     fragment = fragment.replace("__REPORT_JSON__", embedded)
+     # Keeps this intermediate result under the name `fragment`.
+0053 | 
+0054 |     # The fragment mixes head content with body content.
+0055 |     marker = fragment.find('<div class="topbar"')
+     # Keeps this intermediate result under the name `marker`.
+0056 |     if marker == -1:
+     # Checks this condition before running the next indented block.
+0057 |         raise ValueError("site/page.html is missing its topbar body marker")
+     # Stops with an explicit error when this requirement is violated.
+0058 |     head_part, body_part = fragment[:marker], fragment[marker:]
+     # Continues the current calculation or control flow.
+0059 | 
+0060 |     # plain replace, not %-formatting: the skeleton's CSS contains "100%"
+0061 |     out = SKELETON.replace("__FRAGMENT__", head_part.strip())
+     # Calculates or stores the output value for this stage.
+0062 |     out = out.replace("<body>\n</body>", "<body>\n" + body_part.strip() + "\n</body>")
+     # Calculates or stores the output value for this stage.
+0063 | 
+0064 |     dest = SITE / "index.html"
+     # Keeps this intermediate result under the name `dest`.
+0065 |     dest.write_text(out, encoding="utf-8")
+     # Continues the current calculation or control flow.
+0066 |     return dest
+     # Hands this result back to the stage that called this function.
+0067 | 
+0068 | 
+0069 | if __name__ == "__main__":
+     # Runs the command-line entry point only when this file is executed directly.
+0070 |     p = build()
+     # Keeps this intermediate result under the name `p`.
+0071 |     print(f"built {p}  ({p.stat().st_size:,} bytes)")
+     # Prints this reading so a command-line run can be followed.

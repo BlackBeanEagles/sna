@@ -1,0 +1,6 @@
+SOURCE: src/__init__.py
+SAY FIRST: Reference copy of src/__init__.py; follow the line numbers while presenting.
+Each numbered source line is followed by a plain-English comment.
+These files are speaking references; run the originals in src/, server/, site/ and scripts/.
+
+0001 | """Research pipeline: parse games, construct trials, test and report adoption."""

@@ -1,0 +1,6 @@
+SOURCE: server/__init__.py
+SAY FIRST: Reference copy of server/__init__.py; follow the line numbers while presenting.
+Each numbered source line is followed by a plain-English comment.
+These files are speaking references; run the originals in src/, server/, site/ and scripts/.
+
+0001 | """Local demo server: HTTP routes in app.py and background runs in runner.py."""

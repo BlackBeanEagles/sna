@@ -1,0 +1,383 @@
+SOURCE: src/parse.py
+SAY FIRST: This reads Lichess PGN records and applies the fixed study filters.
+Each numbered source line is followed by a plain-English comment.
+These files are speaking references; run the originals in src/, server/, site/ and scripts/.
+
+0001 | """Step 2 -- PGN -> one Parquet event table. Nothing downstream re-reads PGN.
+0002 | 
+0003 | A hand-rolled header scanner, not python-chess's full game parser: on a real
+0004 | Lichess month we need millions of games/minute, and we only ever want the
+0005 | headers plus the first few plies. Handles plain .pgn and zstd-compressed
+0006 | .pgn.zst transparently.
+0007 | 
+0008 | Row schema:
+0009 |     game_id, ts, white, black, white_rating, black_rating,
+0010 |     eco, opening, ply_key, speed, result
+0011 | """
+0012 | from __future__ import annotations
+     # Imports a library or project module needed below.
+0013 | 
+0014 | import argparse
+     # Imports a library or project module needed below.
+0015 | import io
+     # Imports a library or project module needed below.
+0016 | import re
+     # Imports a library or project module needed below.
+0017 | import sys
+     # Imports a library or project module needed below.
+0018 | from collections import Counter
+     # Imports a library or project module needed below.
+0019 | from datetime import datetime
+     # Imports a library or project module needed below.
+0020 | from pathlib import Path
+     # Imports a library or project module needed below.
+0021 | 
+0022 | import pandas as pd
+     # Imports a library or project module needed below.
+0023 | 
+0024 | from . import config
+     # Imports a library or project module needed below.
+0025 | 
+0026 | TAG_RE = re.compile(r'^\[([A-Za-z0-9_]+)\s+"(.*)"\]\s*$')
+     # Keeps this intermediate result under the name `TAG_RE`.
+0027 | # strip move numbers, clock comments, NAGs, evals and result tokens
+0028 | CLEAN_RE = re.compile(r"\{[^}]*\}|\$\d+|\d+\.(\.\.)?|[?!]+|1-0|0-1|1/2-1/2|\*")
+     # Keeps this intermediate result under the name `CLEAN_RE`.
+0029 | 
+0030 | WANTED = ("Event", "Site", "White", "Black", "Result", "UTCDate", "UTCTime",
+     # Keeps this intermediate result under the name `WANTED`.
+0031 |           "WhiteElo", "BlackElo", "ECO", "Opening", "TimeControl", "Termination")
+     # Part of the value, collection, or call spanning several lines.
+0032 | 
+0033 | 
+0034 | def _open(path):
+     # Text stream over a local .pgn, a local .pgn.zst, or a remote .pgn.zst URL.
+0035 |     """Text stream over a local .pgn, a local .pgn.zst, or a remote .pgn.zst
+0036 |     URL. The remote case decompresses on the fly -- a full Lichess month is
+0037 |     ~5 GB of PGN that we never need to write to disk."""
+0038 |     src = str(path)
+     # Keeps this intermediate result under the name `src`.
+0039 |     if src.startswith(("http://", "https://")):
+     # Checks this condition before running the next indented block.
+0040 |         import urllib.request
+     # Imports a library or project module needed below.
+0041 |         import zstandard as zstd
+     # Imports a library or project module needed below.
+0042 |         req = urllib.request.Request(
+     # Keeps this intermediate result under the name `req`.
+0043 |             src, headers={"User-Agent": "sna-chess-contagion/0.1"})
+     # Continues the current calculation or control flow.
+0044 |         raw = urllib.request.urlopen(req)
+     # Keeps this intermediate result under the name `raw`.
+0045 |         dctx = zstd.ZstdDecompressor(max_window_size=2 ** 31)
+     # Keeps this intermediate result under the name `dctx`.
+0046 |         return io.TextIOWrapper(dctx.stream_reader(raw, read_size=1 << 20),
+     # Hands this result back to the stage that called this function.
+0047 |                                 encoding="utf-8", errors="replace")
+     # Keeps this intermediate result under the name `encoding`.
+0048 |     if src.endswith(".zst"):
+     # Checks this condition before running the next indented block.
+0049 |         import zstandard as zstd
+     # Imports a library or project module needed below.
+0050 |         fh = open(path, "rb")
+     # Keeps this intermediate result under the name `fh`.
+0051 |         dctx = zstd.ZstdDecompressor(max_window_size=2 ** 31)
+     # Keeps this intermediate result under the name `dctx`.
+0052 |         return io.TextIOWrapper(dctx.stream_reader(fh), encoding="utf-8",
+     # Hands this result back to the stage that called this function.
+0053 |                                 errors="replace")
+     # Keeps this intermediate result under the name `errors`.
+0054 |     return open(path, "r", encoding="utf-8", errors="replace")
+     # Hands this result back to the stage that called this function.
+0055 | 
+0056 | 
+0057 | def _ply_key(movetext: str, depth: int) -> str:
+     # Defines a reusable step; the following indented lines are its body.
+0058 |     toks = [t for t in CLEAN_RE.sub(" ", movetext).split() if t]
+     # Keeps this intermediate result under the name `toks`.
+0059 |     return " ".join(toks[:depth])
+     # Hands this result back to the stage that called this function.
+0060 | 
+0061 | 
+0062 | def _speed(event: str) -> str | None:
+     # Defines a reusable step; the following indented lines are its body.
+0063 |     for s in ("Bullet", "Blitz", "Rapid", "Classical", "Correspondence"):
+     # Processes each item from this collection in turn.
+0064 |         if s in event:
+     # Checks this condition before running the next indented block.
+0065 |             return s
+     # Hands this result back to the stage that called this function.
+0066 |     return None
+     # Hands this result back to the stage that called this function.
+0067 | 
+0068 | 
+0069 | def iter_games(path, limit: int | None = None):
+     # Yield header dicts + movetext, one per game, streaming.
+0070 |     """Yield header dicts + movetext, one per game, streaming."""
+0071 |     tags: dict[str, str] = {}
+     # Keeps this intermediate result under the name `tags`.
+0072 |     moves: list[str] = []
+     # Keeps this intermediate result under the name `moves`.
+0073 |     in_moves = False
+     # Keeps this intermediate result under the name `in_moves`.
+0074 |     n = 0
+     # Keeps this intermediate result under the name `n`.
+0075 |     with _open(path) as fh:
+     # Opens a resource and guarantees cleanup when the block ends.
+0076 |         for line in fh:
+     # Processes each item from this collection in turn.
+0077 |             line = line.rstrip("\n")
+     # Keeps this intermediate result under the name `line`.
+0078 |             if line.startswith("["):
+     # Checks this condition before running the next indented block.
+0079 |                 # [Event ...] starts a game. Reset on it rather than only after
+0080 |                 # a game with moves, or an aborted game (headers, no movetext --
+0081 |                 # Lichess does contain them) leaks its tags into the next game,
+0082 |                 # silently giving it the wrong opening and ratings.
+0083 |                 if line.startswith("[Event ") and tags:
+     # Checks this condition before running the next indented block.
+0084 |                     if in_moves:
+     # Checks this condition before running the next indented block.
+0085 |                         yield tags, " ".join(moves)
+     # Continues the current calculation or control flow.
+0086 |                         n += 1
+     # Continues the current calculation or control flow.
+0087 |                         if limit and n >= limit:
+     # Checks this condition before running the next indented block.
+0088 |                             return
+     # Stops this function here.
+0089 |                     tags, moves, in_moves = {}, [], False
+     # Continues the current calculation or control flow.
+0090 |                 m = TAG_RE.match(line)
+     # Keeps this intermediate result under the name `m`.
+0091 |                 if m and m.group(1) in WANTED:
+     # Checks this condition before running the next indented block.
+0092 |                     tags[m.group(1)] = m.group(2)
+     # Continues the current calculation or control flow.
+0093 |             elif line.strip():
+     # Checks this condition before running the next indented block.
+0094 |                 in_moves = True
+     # Keeps this intermediate result under the name `in_moves`.
+0095 |                 moves.append(line.strip())
+     # Continues the current calculation or control flow.
+0096 |     if tags and in_moves:
+     # Checks this condition before running the next indented block.
+0097 |         yield tags, " ".join(moves)
+     # Continues the current calculation or control flow.
+0098 | 
+0099 | 
+0100 | def parse(path, limit: int | None = None, ply_depth: int | None = None,
+     # Scan PGN into the filtered game table used throughout the project.
+0101 |           apply_filters: bool = True, progress: int = 0,
+     # Keeps this intermediate result under the name `apply_filters`.
+0102 |           on_progress=None, should_stop=None) -> pd.DataFrame:
+     # Keeps this intermediate result under the name `on_progress`.
+0103 |     """Scan PGN into the filtered game table used throughout the project.
+0104 | 
+0105 |     The input is streamed, so a compressed month need not fit in memory as
+0106 |     text. `on_progress` updates the live UI; `should_stop` lets it cancel.
+0107 |     Filtering here fixes the study population before network analysis.
+0108 |     """
+0109 |     ply_depth = ply_depth or config.PLY_KEY_DEPTH
+     # Keeps this intermediate result under the name `ply_depth`.
+0110 |     rows, skipped = [], Counter()
+     # Continues the current calculation or control flow.
+0111 |     seen = 0
+     # Calculates or stores the set of opponents already counted for this stage.
+0112 | 
+0113 |     for tags, movetext in iter_games(path, limit=limit):
+     # Processes each item from this collection in turn.
+0114 |         seen += 1
+     # Continues the current calculation or control flow.
+0115 |         if progress and seen % progress == 0:
+     # Checks this condition before running the next indented block.
+0116 |             if on_progress is not None:
+     # Checks this condition before running the next indented block.
+0117 |                 # hand back the most recent kept row so a UI can show what is
+0118 |                 # actually streaming past, not just a counter
+0119 |                 on_progress(seen, len(rows), rows[-1] if rows else None)
+     # Continues the current calculation or control flow.
+0120 |             else:
+     # Handles the alternative when the preceding condition was false.
+0121 |                 print(f"  scanned {seen:,} games, kept {len(rows):,}",
+     # Prints this reading so a command-line run can be followed.
+0122 |                       file=sys.stderr, flush=True)
+     # Keeps this intermediate result under the name `file`.
+0123 |             if should_stop is not None and should_stop():
+     # Checks this condition before running the next indented block.
+0124 |                 skipped["cancelled"] = 1
+     # Continues the current calculation or control flow.
+0125 |                 break
+     # Ends the current loop.
+0126 |         try:
+     # Starts an operation that may need error handling.
+0127 |             speed = _speed(tags.get("Event", ""))
+     # Keeps this intermediate result under the name `speed`.
+0128 |             if apply_filters and speed not in config.ALLOWED_SPEEDS:
+     # Checks this condition before running the next indented block.
+0129 |                 skipped["speed"] += 1
+     # Continues the current calculation or control flow.
+0130 |                 continue
+     # Skips this item and moves to the next loop iteration.
+0131 |             we, be = tags.get("WhiteElo", "?"), tags.get("BlackElo", "?")
+     # Continues the current calculation or control flow.
+0132 |             if not (we.isdigit() and be.isdigit()):
+     # Checks this condition before running the next indented block.
+0133 |                 skipped["no_rating"] += 1
+     # Continues the current calculation or control flow.
+0134 |                 continue
+     # Skips this item and moves to the next loop iteration.
+0135 |             we, be = int(we), int(be)
+     # Continues the current calculation or control flow.
+0136 |             if apply_filters and not all(
+     # Checks this condition before running the next indented block.
+0137 |                 config.RATING_MIN <= r <= config.RATING_MAX for r in (we, be)
+     # Continues the current calculation or control flow.
+0138 |             ):
+     # Continues the current calculation or control flow.
+0139 |                 skipped["rating_band"] += 1
+     # Continues the current calculation or control flow.
+0140 |                 continue
+     # Skips this item and moves to the next loop iteration.
+0141 |             eco = tags.get("ECO", "?")
+     # Keeps this intermediate result under the name `eco`.
+0142 |             if eco in ("?", ""):
+     # Checks this condition before running the next indented block.
+0143 |                 skipped["no_eco"] += 1
+     # Continues the current calculation or control flow.
+0144 |                 continue
+     # Skips this item and moves to the next loop iteration.
+0145 |             date, time = tags.get("UTCDate"), tags.get("UTCTime")
+     # Continues the current calculation or control flow.
+0146 |             if not date or not time:
+     # Checks this condition before running the next indented block.
+0147 |                 skipped["no_time"] += 1
+     # Continues the current calculation or control flow.
+0148 |                 continue
+     # Skips this item and moves to the next loop iteration.
+0149 |             ts = datetime.strptime(f"{date} {time}", "%Y.%m.%d %H:%M:%S")
+     # Keeps this intermediate result under the name `ts`.
+0150 |             rows.append((
+     # Part of the value, collection, or call spanning several lines.
+0151 |                 tags.get("Site", "").rsplit("/", 1)[-1], ts,
+     # Part of the value, collection, or call spanning several lines.
+0152 |                 tags.get("White", "?"), tags.get("Black", "?"), we, be,
+     # Part of the value, collection, or call spanning several lines.
+0153 |                 eco, tags.get("Opening", ""), _ply_key(movetext, ply_depth),
+     # Part of the value, collection, or call spanning several lines.
+0154 |                 speed, tags.get("Result", "*"),
+     # Part of the value, collection, or call spanning several lines.
+0155 |             ))
+     # Continues the current calculation or control flow.
+0156 |         except Exception:
+     # Handles this specific failure without hiding other errors.
+0157 |             skipped["error"] += 1
+     # Continues the current calculation or control flow.
+0158 | 
+0159 |     df = pd.DataFrame(rows, columns=[
+     # Creates a labelled table from the collected rows.
+0160 |         "game_id", "ts", "white", "black", "white_rating", "black_rating",
+     # Part of the value, collection, or call spanning several lines.
+0161 |         "eco", "opening", "ply_key", "speed", "result"])
+     # Part of the value, collection, or call spanning several lines.
+0162 | 
+0163 |     if apply_filters and len(df):
+     # Checks this condition before running the next indented block.
+0164 |         top = df["eco"].value_counts().head(config.TOP_N_OPENINGS).index
+     # Counts how often each player or opening occurs.
+0165 |         skipped["rare_eco"] = int((~df["eco"].isin(top)).sum())
+     # Continues the current calculation or control flow.
+0166 |         df = df[df["eco"].isin(top)]
+     # Calculates or stores the game table for this stage.
+0167 |         # drop low-activity players: their adoption timing is noise
+0168 |         games = pd.concat([df["white"], df["black"]]).value_counts()
+     # Counts how often each player or opening occurs.
+0169 |         keep = set(games[games >= config.MIN_GAMES_PER_PLAYER].index)
+     # Keeps this intermediate result under the name `keep`.
+0170 |         before = len(df)
+     # Keeps this intermediate result under the name `before`.
+0171 |         df = df[df["white"].isin(keep) & df["black"].isin(keep)]
+     # Calculates or stores the game table for this stage.
+0172 |         skipped["low_activity"] = before - len(df)
+     # Continues the current calculation or control flow.
+0173 | 
+0174 |     df = df.sort_values("ts").reset_index(drop=True)
+     # Orders the rows by this field before the next calculation.
+0175 |     df.attrs["skipped"] = dict(skipped)
+     # Continues the current calculation or control flow.
+0176 |     return df
+     # Hands this result back to the stage that called this function.
+0177 | 
+0178 | 
+0179 | def load_games(path) -> pd.DataFrame:
+     # Read a parsed games table, refusing simulated data.
+0180 |     """Read a parsed games table, refusing simulated data.
+0181 | 
+0182 |     src/simulate.py writes players named `sim_00001`. A synthetic table left
+0183 |     sitting at the default path is silently analysed as though it were real --
+0184 |     which is exactly what happened once, and the numbers looked plausible.
+0185 |     Simulated runs write to a filename containing "simulated"; anything else
+0186 |     holding sim_ players is a mistake, so say so loudly instead of returning it.
+0187 |     """
+0188 |     df = pd.read_parquet(path)
+     # Loads a previously prepared game or trial table.
+0189 |     if "simulated" in Path(path).name:
+     # Checks this condition before running the next indented block.
+0190 |         return df
+     # Hands this result back to the stage that called this function.
+0191 |     if len(df) and df["white"].astype(str).str.fullmatch(r"sim_\d+").any():
+     # Checks this condition before running the next indented block.
+0192 |         raise SystemExit(
+     # Stops with an explicit error when this requirement is violated.
+0193 |             f"{path} contains SIMULATED games (players named sim_*), not real "
+     # Continues the current calculation or control flow.
+0194 |             f"ones.\nRe-run the pipeline on a real month, or point --games at a "
+     # Continues the current calculation or control flow.
+0195 |             f"real slice such as slice_<month>_full.parquet.")
+     # Continues the current calculation or control flow.
+0196 |     return df
+     # Hands this result back to the stage that called this function.
+0197 | 
+0198 | 
+0199 | def run(src, out: Path, limit=None, apply_filters=True,
+     # Defines a reusable step; the following indented lines are its body.
+0200 |         progress: int = 0) -> pd.DataFrame:
+     # Keeps this intermediate result under the name `progress`.
+0201 |     df = parse(src, limit=limit, apply_filters=apply_filters, progress=progress)
+     # Calculates or stores the game table for this stage.
+0202 |     df.to_parquet(out, index=False)
+     # Saves a compact table for later analysis stages.
+0203 |     return df
+     # Hands this result back to the stage that called this function.
+0204 | 
+0205 | 
+0206 | if __name__ == "__main__":
+     # Runs the command-line entry point only when this file is executed directly.
+0207 |     ap = argparse.ArgumentParser()
+     # Keeps this intermediate result under the name `ap`.
+0208 |     ap.add_argument("--src", default=str(config.RAW / "simulated.pgn"))
+     # Defines a command-line option for this script.
+0209 |     ap.add_argument("--out", default=str(config.INTERIM / "games.parquet"))
+     # Defines a command-line option for this script.
+0210 |     ap.add_argument("--limit", type=int, default=None)
+     # Defines a command-line option for this script.
+0211 |     ap.add_argument("--no-filters", action="store_true")
+     # Defines a command-line option for this script.
+0212 |     ap.add_argument("--progress", type=int, default=0,
+     # Defines a command-line option for this script.
+0213 |                     help="print a line every N games scanned")
+     # Keeps this intermediate result under the name `help`.
+0214 |     a = ap.parse_args()
+     # Keeps this intermediate result under the name `a`.
+0215 |     src = a.src if a.src.startswith("http") else Path(a.src)
+     # Keeps this intermediate result under the name `src`.
+0216 |     d = run(src, Path(a.out), a.limit, not a.no_filters, a.progress)
+     # Calculates or stores the distinct-opponent count for this stage.
+0217 |     print(f"{len(d)} games kept -> {a.out}")
+     # Prints this reading so a command-line run can be followed.
+0218 |     print("skipped:", d.attrs["skipped"])
+     # Prints this reading so a command-line run can be followed.
+0219 |     print(f"players: {len(set(d.white) | set(d.black))}, "
+     # Prints this reading so a command-line run can be followed.
+0220 |           f"span: {d.ts.min()} .. {d.ts.max()}")
+     # Continues the current calculation or control flow.

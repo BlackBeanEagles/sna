@@ -1,0 +1,117 @@
+SOURCE: scripts/check_clipping.py
+SAY FIRST: Reference copy of scripts/check_clipping.py; follow the line numbers while presenting.
+Each numbered source line is followed by a plain-English comment.
+These files are speaking references; run the originals in src/, server/, site/ and scripts/.
+
+0001 | """Is the excess-over-null decay real, or an artefact of the d-bucket cap?
+0002 | 
+0003 | The headline result says the excess over the shuffled-time null decays to
+0004 | 1.000 by d = 6. But MAX_DIVERSITY = 6 makes d = 6 a *clipped* bucket holding
+0005 | every trial with six or more distinct exposers -- in the full-month run that
+0006 | was n = 46,846, larger than d = 4 and d = 5 combined. If the tail is doing the
+0007 | work, the convergence could be an artefact of lumping it together.
+0008 | 
+0009 | This re-runs the curve and the null with the cap raised, so the tail is spread
+0010 | out and the decay can be read move by move.
+0011 | 
+0012 |     python scripts/check_clipping.py --cap 12 --reps 3
+0013 | """
+0014 | from __future__ import annotations
+     # Imports a library or project module needed below.
+0015 | 
+0016 | import argparse
+     # Imports a library or project module needed below.
+0017 | import sys
+     # Imports a library or project module needed below.
+0018 | from pathlib import Path
+     # Imports a library or project module needed below.
+0019 | 
+0020 | import pandas as pd
+     # Imports a library or project module needed below.
+0021 | 
+0022 | ROOT = Path(__file__).resolve().parents[1]
+     # Keeps this intermediate result under the name `ROOT`.
+0023 | sys.path.insert(0, str(ROOT))
+     # Continues the current calculation or control flow.
+0024 | 
+0025 | from src import config  # noqa: E402
+     # Imports a library or project module needed below.
+0026 | 
+0027 | 
+0028 | def main():
+     # Widen plotted exposure buckets and rerun the real/null comparison.
+0029 |     """Widen plotted exposure buckets and rerun the real/null comparison.
+0030 | 
+0031 |     This checks whether the 6+ group hides a different pattern in its tail.
+0032 |     """
+0033 |     ap = argparse.ArgumentParser()
+     # Keeps this intermediate result under the name `ap`.
+0034 |     ap.add_argument("--games", default=str(config.INTERIM / "slice_2016-01_full.parquet"))
+     # Defines a command-line option for this script.
+0035 |     ap.add_argument("--cap", type=int, default=12)
+     # Defines a command-line option for this script.
+0036 |     ap.add_argument("--reps", type=int, default=3)
+     # Defines a command-line option for this script.
+0037 |     a = ap.parse_args()
+     # Keeps this intermediate result under the name `a`.
+0038 | 
+0039 |     # Raise the caps BEFORE importing the analysis modules read them at call
+0040 |     # time, so both the real curve and the null use the wider buckets.
+0041 |     config.MAX_DIVERSITY = a.cap
+     # Keeps this intermediate result under the name `MAX_DIVERSITY`.
+0042 |     config.MAX_EXPOSURE_COUNT = a.cap
+     # Keeps this intermediate result under the name `MAX_EXPOSURE_COUNT`.
+0043 | 
+0044 |     from src import curve, events, nulls  # noqa: E402  (after the cap change)
+     # Imports a library or project module needed below.
+0045 | 
+0046 |     df = pd.read_parquet(a.games)
+     # Loads a previously prepared game or trial table.
+0047 |     print(f"{len(df):,} games, cap d at {a.cap}, {a.reps} null replicate(s)\n")
+     # Prints this reading so a command-line run can be followed.
+0048 | 
+0049 |     trials = events.build_trials(df)
+     # Calculates or stores the exposure-trial table for this stage.
+0050 |     tables = curve.analyse(trials)
+     # Keeps this intermediate result under the name `tables`.
+0051 |     null_by_d = nulls.run_null(df, n_reps=a.reps, kind="shuffle",
+     # Keeps this intermediate result under the name `null_by_d`.
+0052 |                                window_days=config.ADOPTION_WINDOW_DAYS)
+     # Keeps this intermediate result under the name `window_days`.
+0053 |     cmp = nulls.compare(tables["by_d"], null_by_d)
+     # Calculates or stores the observed-versus-reference comparison for this stage.
+0054 | 
+0055 |     print(f"{'d':>3} {'n':>9} {'real':>8} {'null':>8} {'lift':>7} {'z':>8}")
+     # Prints this reading so a command-line run can be followed.
+0056 |     for r in cmp.itertuples(index=False):
+     # Processes each item from this collection in turn.
+0057 |         print(f"{int(r.d):>3} {int(r.n_real):>9,} {r.rate_real:>8.4f} "
+     # Prints this reading so a command-line run can be followed.
+0058 |               f"{r.rate_null:>8.4f} {r.lift_over_null:>7.3f} {r.z_vs_null:>8.1f}")
+     # Compares the observed adoption rate with the shuffled-time reference rate.
+0059 | 
+0060 |     v = curve.verdict(tables, cmp)
+     # Keeps this intermediate result under the name `v`.
+0061 |     print("\nverdict:", v["verdict"])
+     # Prints this reading so a command-line run can be followed.
+0062 |     for k in ("lift_over_null_at_min_d", "lift_over_null_at_max_d",
+     # Compares the observed adoption rate with the shuffled-time reference rate.
+0063 |               "separated_at_fixed_k", "excess_over_null_grows_with_d"):
+     # Part of the value, collection, or call spanning several lines.
+0064 |         if k in v:
+     # Checks this condition before running the next indented block.
+0065 |             print(f"  {k}: {v[k]}")
+     # Prints this reading so a command-line run can be followed.
+0066 | 
+0067 |     out = config.TABLES / f"null_comparison_cap{a.cap}.csv"
+     # Calculates or stores the output value for this stage.
+0068 |     cmp.to_csv(out, index=False)
+     # Writes a result table that can be inspected or downloaded.
+0069 |     print(f"\nwrote {out}")
+     # Prints this reading so a command-line run can be followed.
+0070 | 
+0071 | 
+0072 | if __name__ == "__main__":
+     # Runs the command-line entry point only when this file is executed directly.
+0073 |     main()
+     # Continues the current calculation or control flow.

@@ -1,0 +1,396 @@
+SOURCE: src/matching.py
+SAY FIRST: This compares exposed players with similar players still at risk.
+Each numbered source line is followed by a plain-English comment.
+These files are speaking references; run the originals in src/, server/, site/ and scripts/.
+
+0001 | """Step 7a -- rating-and-activity matched controls.
+0002 | 
+0003 | Each exposed (player, behaviour) spell is matched to a comparable player
+0004 | who had not yet performed or been exposed to that behaviour at the matching
+0005 | time. Rating and activity use only earlier games. Later exposure is recorded
+0006 | as a crossover. The resulting difference is observational.
+0007 | """
+0008 | from __future__ import annotations
+     # Imports a library or project module needed below.
+0009 | 
+0010 | import argparse
+     # Imports a library or project module needed below.
+0011 | from collections import defaultdict
+     # Imports a library or project module needed below.
+0012 | from pathlib import Path
+     # Imports a library or project module needed below.
+0013 | 
+0014 | import numpy as np
+     # Imports a library or project module needed below.
+0015 | import pandas as pd
+     # Imports a library or project module needed below.
+0016 | 
+0017 | from . import config, events, parse
+     # Imports a library or project module needed below.
+0018 | 
+0019 | 
+0020 | def _match_index(rating: pd.Series, games: pd.Series):
+     # Bucket players by (rating band, log-activity band) so finding a control is a dict lookup instead of a scan over every player.
+0021 |     """Bucket players by (rating band, log-activity band) so finding a control
+0022 |     is a dict lookup instead of a scan over every player. Bucket widths are the
+0023 |     matching tolerances; exact tolerance is still verified on each candidate,
+0024 |     so the index only narrows the search -- it never loosens it."""
+0025 |     r_w = config.RATING_MATCH_TOLERANCE
+     # Keeps this intermediate result under the name `r_w`.
+0026 |     a_ratio = 1.0 + config.ACTIVITY_MATCH_RATIO
+     # Keeps this intermediate result under the name `a_ratio`.
+0027 |     idx: dict[tuple[int, int], list[str]] = defaultdict(list)
+     # Keeps this intermediate result under the name `idx`.
+0028 |     meta: dict[str, tuple[float, float]] = {}
+     # Keeps this intermediate result under the name `meta`.
+0029 |     for p, r in rating.items():
+     # Processes each item from this collection in turn.
+0030 |         a = games.get(p, 0)
+     # Keeps this intermediate result under the name `a`.
+0031 |         if not np.isfinite(r) or a <= 0:
+     # Checks this condition before running the next indented block.
+0032 |             continue
+     # Skips this item and moves to the next loop iteration.
+0033 |         idx[(int(r // r_w), int(np.log(a) / np.log(a_ratio)))].append(p)
+     # Continues the current calculation or control flow.
+0034 |         meta[p] = (float(r), float(a))
+     # Continues the current calculation or control flow.
+0035 |     return idx, meta
+     # Hands this result back to the stage that called this function.
+0036 | 
+0037 | 
+0038 | def build_matched(df: pd.DataFrame, n_per_trial: int = 1,
+     # Compare an exposed player to a similar player still at risk at t0.
+0039 |                   max_trials: int | None = 100_000,
+     # Keeps this intermediate result under the name `max_trials`.
+0040 |                   seed: int = config.RANDOM_SEED,
+     # Keeps this intermediate result under the name `seed`.
+0041 |                   window_days: int = None) -> pd.DataFrame:
+     # Keeps this intermediate result under the name `window_days`.
+0042 |     """Compare an exposed player to a similar player still at risk at t0.
+0043 | 
+0044 |     Rating and game activity are taken only from games before t0. A control
+0045 |     cannot already have seen or played this opening/colour. This reduces some
+0046 |     differences between players, but it is still observational matching.
+0047 |     """
+0048 |     rng = np.random.default_rng(seed)
+     # Keeps this intermediate result under the name `rng`.
+0049 |     window = pd.Timedelta(days=window_days or config.ADOPTION_WINDOW_DAYS)
+     # Keeps this intermediate result under the name `window`.
+0050 |     t_end = df["ts"].max()
+     # Calculates or stores the last observed game time for this stage.
+0051 |     exposures, first_perf, _ = events.sweep(df)
+     # Continues the current calculation or control flow.
+0052 |     keys = list(exposures)
+     # Keeps this intermediate result under the name `keys`.
+0053 |     if max_trials and len(keys) > max_trials:
+     # Checks this condition before running the next indented block.
+0054 |         keys = [keys[i] for i in rng.choice(len(keys), max_trials, replace=False)]
+     # Keeps this intermediate result under the name `keys`.
+0055 |     keys.sort(key=lambda key: exposures[key][0][0])
+     # Continues the current calculation or control flow.
+0056 | 
+0057 |     players = pd.Index(pd.unique(pd.concat([df["white"], df["black"]])))
+     # Keeps this intermediate result under the name `players`.
+0058 |     player_idx = {p: i for i, p in enumerate(players)}
+     # Keeps this intermediate result under the name `player_idx`.
+0059 |     n_players = len(players)
+     # Keeps this intermediate result under the name `n_players`.
+0060 |     never = np.iinfo(np.int64).max
+     # Keeps this intermediate result under the name `never`.
+0061 |     first_exp_ns = defaultdict(lambda: np.full(n_players, never, dtype=np.int64))
+     # Tracks when a control player was first exposed, so matching uses only people still at risk.
+0062 |     first_perf_ns = defaultdict(lambda: np.full(n_players, never, dtype=np.int64))
+     # Tracks first performance time to exclude people who already adopted before matching.
+0063 |     for key, evs in exposures.items():
+     # Processes each item from this collection in turn.
+0064 |         first_exp_ns[key[1]][player_idx[key[0]]] = pd.Timestamp(evs[0][0]).value
+     # Tracks when a control player was first exposed, so matching uses only people still at risk.
+0065 |     for (p, beh), t in first_perf.items():
+     # Processes each item from this collection in turn.
+0066 |         first_perf_ns[beh][player_idx[p]] = pd.Timestamp(t).value
+     # Tracks first performance time to exclude people who already adopted before matching.
+0067 | 
+0068 |     # Advance a game-time sweep to strictly before each exposed player's t0.
+0069 |     # The bucket index changes as players accumulate games. No full-month
+0070 |     # covariate contributes to a control decision.
+0071 |     past_games = df.sort_values("ts")[["ts", "white", "black",
+     # Orders the rows by this field before the next calculation.
+0072 |                                        "white_rating", "black_rating"]]
+     # Part of the value, collection, or call spanning several lines.
+0073 |     game_rows = past_games.itertuples(index=False, name=None)
+     # Keeps this intermediate result under the name `game_rows`.
+0074 |     upcoming = next(game_rows, None)
+     # Keeps this intermediate result under the name `upcoming`.
+0075 |     activity = np.zeros(n_players, dtype=np.int64)
+     # Keeps this intermediate result under the name `activity`.
+0076 |     rating_sum = np.zeros(n_players, dtype=float)
+     # Keeps this intermediate result under the name `rating_sum`.
+0077 |     rating_n = np.zeros(n_players, dtype=np.int64)
+     # Keeps this intermediate result under the name `rating_n`.
+0078 |     bucket_of = [None] * n_players
+     # Keeps this intermediate result under the name `bucket_of`.
+0079 |     buckets: dict[tuple[int, int], set[int]] = defaultdict(set)
+     # Keeps this intermediate result under the name `buckets`.
+0080 |     r_w = config.RATING_MATCH_TOLERANCE
+     # Keeps this intermediate result under the name `r_w`.
+0081 |     a_ratio = 1.0 + config.ACTIVITY_MATCH_RATIO
+     # Keeps this intermediate result under the name `a_ratio`.
+0082 |     log_ratio = np.log(a_ratio)
+     # Keeps this intermediate result under the name `log_ratio`.
+0083 | 
+0084 |     def update_player(p: str, r: float):
+     # Defines a reusable step; the following indented lines are its body.
+0085 |         i = player_idx[p]
+     # Keeps this intermediate result under the name `i`.
+0086 |         old = bucket_of[i]
+     # Keeps this intermediate result under the name `old`.
+0087 |         if old is not None:
+     # Checks this condition before running the next indented block.
+0088 |             buckets[old].discard(i)
+     # Continues the current calculation or control flow.
+0089 |         activity[i] += 1
+     # Continues the current calculation or control flow.
+0090 |         if np.isfinite(r):
+     # Checks this condition before running the next indented block.
+0091 |             rating_sum[i] += float(r)
+     # Continues the current calculation or control flow.
+0092 |             rating_n[i] += 1
+     # Continues the current calculation or control flow.
+0093 |         if rating_n[i]:
+     # Checks this condition before running the next indented block.
+0094 |             mean = rating_sum[i] / rating_n[i]
+     # Keeps this intermediate result under the name `mean`.
+0095 |             new = (int(mean // r_w), int(np.log(activity[i]) / log_ratio))
+     # Keeps this intermediate result under the name `new`.
+0096 |             buckets[new].add(i)
+     # Continues the current calculation or control flow.
+0097 |             bucket_of[i] = new
+     # Continues the current calculation or control flow.
+0098 | 
+0099 |     rows = []
+     # Calculates or stores the result rows collected for the output table for this stage.
+0100 |     window_ns = window.value
+     # Keeps this intermediate result under the name `window_ns`.
+0101 |     eligible_until = {}
+     # Keeps this intermediate result under the name `eligible_until`.
+0102 |     for player, beh in keys:
+     # Processes each item from this collection in turn.
+0103 |         t0 = exposures[(player, beh)][0][0]
+     # Calculates or stores the exposure time for this stage.
+0104 |         while upcoming is not None and upcoming[0] < t0:
+     # Repeats the indented block until this condition stops holding.
+0105 |             _, white, black, wr, br = upcoming
+     # Continues the current calculation or control flow.
+0106 |             update_player(white, wr)
+     # Continues the current calculation or control flow.
+0107 |             update_player(black, br)
+     # Continues the current calculation or control flow.
+0108 |             upcoming = next(game_rows, None)
+     # Keeps this intermediate result under the name `upcoming`.
+0109 |         if t0 + window > t_end:
+     # Checks this condition before running the next indented block.
+0110 |             continue
+     # Skips this item and moves to the next loop iteration.
+0111 |         pi = player_idx[player]
+     # Keeps this intermediate result under the name `pi`.
+0112 |         if not rating_n[pi]:
+     # Checks this condition before running the next indented block.
+0113 |             continue
+     # Skips this item and moves to the next loop iteration.
+0114 |         t0_ns = pd.Timestamp(t0).value
+     # Keeps this intermediate result under the name `t0_ns`.
+0115 |         adopt_t = first_perf_ns[beh][pi]
+     # Tracks first performance time to exclude people who already adopted before matching.
+0116 |         if adopt_t <= t0_ns:
+     # Checks whether this player had already adopted before the current exposure.
+0117 |             continue
+     # Skips this item and moves to the next loop iteration.
+0118 |         r0 = rating_sum[pi] / rating_n[pi]
+     # Keeps this intermediate result under the name `r0`.
+0119 |         a0 = activity[pi]
+     # Keeps this intermediate result under the name `a0`.
+0120 |         rb, ab = bucket_of[pi]
+     # Continues the current calculation or control flow.
+0121 |         pool = set()
+     # Keeps this intermediate result under the name `pool`.
+0122 |         for dr in (-1, 0, 1):
+     # Processes each item from this collection in turn.
+0123 |             for da in (-2, -1, 0, 1, 2):
+     # Processes each item from this collection in turn.
+0124 |                 pool.update(buckets.get((rb + dr, ab + da), ()))
+     # Continues the current calculation or control flow.
+0125 |         pool.discard(pi)
+     # Continues the current calculation or control flow.
+0126 |         if not pool:
+     # Checks this condition before running the next indented block.
+0127 |             continue
+     # Skips this item and moves to the next loop iteration.
+0128 |         peers = np.fromiter(pool, dtype=np.int64)
+     # Keeps this intermediate result under the name `peers`.
+0129 |         peers = peers[
+     # Keeps this intermediate result under the name `peers`.
+0130 |             (np.abs(rating_sum[peers] / rating_n[peers] - r0) <= r_w)
+     # Part of the value, collection, or call spanning several lines.
+0131 |             & (np.abs(activity[peers] - a0)
+     # Continues the current calculation or control flow.
+0132 |                <= config.ACTIVITY_MATCH_RATIO * a0)
+     # Continues the current calculation or control flow.
+0133 |         ]
+     # Closes the data structure or function call started above.
+0134 |         if not len(peers):
+     # Checks whether enough records exist for a trustworthy next step.
+0135 |             continue
+     # Skips this item and moves to the next loop iteration.
+0136 |         if beh not in eligible_until:
+     # Checks this condition before running the next indented block.
+0137 |             eligible_until[beh] = np.minimum(first_exp_ns[beh],
+     # Tracks when a control player was first exposed, so matching uses only people still at risk.
+0138 |                                              first_perf_ns[beh])
+     # Tracks first performance time to exclude people who already adopted before matching.
+0139 |         valid = peers[eligible_until[beh][peers] > t0_ns]
+     # Keeps this intermediate result under the name `valid`.
+0140 |         if not len(valid):
+     # Checks whether enough records exist for a trustworthy next step.
+0141 |             continue
+     # Skips this item and moves to the next loop iteration.
+0142 |         take = min(n_per_trial, len(valid))
+     # Keeps this intermediate result under the name `take`.
+0143 |         treat = int(t0_ns < adopt_t <= t0_ns + window_ns)
+     # Keeps this intermediate result under the name `treat`.
+0144 |         for ci in rng.choice(valid, size=take, replace=False):
+     # Processes each item from this collection in turn.
+0145 |             ci = int(ci)
+     # Keeps this intermediate result under the name `ci`.
+0146 |             c_adopt = first_perf_ns[beh][ci]
+     # Tracks first performance time to exclude people who already adopted before matching.
+0147 |             c_exposed = first_exp_ns[beh][ci]
+     # Tracks when a control player was first exposed, so matching uses only people still at risk.
+0148 |             rows.append((player, str(players[ci]), beh[0], beh[1], t0,
+     # Part of the value, collection, or call spanning several lines.
+0149 |                          treat, int(t0_ns < c_adopt <= t0_ns + window_ns),
+     # Part of the value, collection, or call spanning several lines.
+0150 |                          int(t0_ns < c_exposed <= t0_ns + window_ns),
+     # Part of the value, collection, or call spanning several lines.
+0151 |                          float(r0), float(rating_sum[ci] / rating_n[ci]),
+     # Part of the value, collection, or call spanning several lines.
+0152 |                          int(a0), int(activity[ci])))
+     # Continues the current calculation or control flow.
+0153 | 
+0154 |     return pd.DataFrame(rows, columns=[
+     # Creates a labelled table from the collected rows.
+0155 |         "exposed", "control", "opening", "colour", "t0",
+     # Part of the value, collection, or call spanning several lines.
+0156 |         "exposed_adopted", "control_adopted", "control_crossover",
+     # Part of the value, collection, or call spanning several lines.
+0157 |         "exposed_pre_rating", "control_pre_rating",
+     # Part of the value, collection, or call spanning several lines.
+0158 |         "exposed_pre_games", "control_pre_games"])
+     # Part of the value, collection, or call spanning several lines.
+0159 | 
+0160 | 
+0161 | def summarise(pairs: pd.DataFrame, bootstrap_reps: int = 400,
+     # Summarise pairs, resampling both exposed and control player clusters.
+0162 |               seed: int = config.RANDOM_SEED) -> dict:
+     # Keeps this intermediate result under the name `seed`.
+0163 |     """Summarise pairs, resampling both exposed and control player clusters."""
+0164 |     if not len(pairs):
+     # Checks whether enough records exist for a trustworthy next step.
+0165 |         return {"n_pairs": 0}
+     # Hands this result back to the stage that called this function.
+0166 |     a = pairs["exposed_adopted"].to_numpy(dtype=float)
+     # Keeps this intermediate result under the name `a`.
+0167 |     b = pairs["control_adopted"].to_numpy(dtype=float)
+     # Keeps this intermediate result under the name `b`.
+0168 |     difference = a - b
+     # Keeps this intermediate result under the name `difference`.
+0169 |     diff = float(difference.mean())
+     # Keeps this intermediate result under the name `diff`.
+0170 |     names = pd.Index(pd.unique(pd.concat([pairs["exposed"], pairs["control"]])))
+     # Keeps this intermediate result under the name `names`.
+0171 |     indices = {p: i for i, p in enumerate(names)}
+     # Keeps this intermediate result under the name `indices`.
+0172 |     treated_idx = pairs["exposed"].map(indices).to_numpy(dtype=np.int64)
+     # Keeps this intermediate result under the name `treated_idx`.
+0173 |     control_idx = pairs["control"].map(indices).to_numpy(dtype=np.int64)
+     # Keeps this intermediate result under the name `control_idx`.
+0174 |     rng = np.random.default_rng(seed)
+     # Keeps this intermediate result under the name `rng`.
+0175 |     estimates = []
+     # Keeps this intermediate result under the name `estimates`.
+0176 |     for _ in range(bootstrap_reps):
+     # Processes each item from this collection in turn.
+0177 |         player_weight = rng.poisson(1, len(names))
+     # Keeps this intermediate result under the name `player_weight`.
+0178 |         pair_weight = player_weight[treated_idx] * player_weight[control_idx]
+     # Keeps this intermediate result under the name `pair_weight`.
+0179 |         total = pair_weight.sum()
+     # Keeps this intermediate result under the name `total`.
+0180 |         if total:
+     # Checks this condition before running the next indented block.
+0181 |             estimates.append(float(np.dot(pair_weight, difference) / total))
+     # Continues the current calculation or control flow.
+0182 |     ci = np.quantile(estimates, [0.025, 0.975]) if len(estimates) >= 20 else [np.nan, np.nan]
+     # Keeps this intermediate result under the name `ci`.
+0183 |     return {
+     # Hands this result back to the stage that called this function.
+0184 |         "n_pairs": int(len(pairs)),
+     # Part of the value, collection, or call spanning several lines.
+0185 |         "exposed_adoption_rate": round(float(a.mean()), 4),
+     # Part of the value, collection, or call spanning several lines.
+0186 |         "control_adoption_rate": round(float(b.mean()), 4),
+     # Part of the value, collection, or call spanning several lines.
+0187 |         "difference": round(diff, 4),
+     # Part of the value, collection, or call spanning several lines.
+0188 |         "ci95": [round(float(v), 4) for v in ci],
+     # Part of the value, collection, or call spanning several lines.
+0189 |         "ci95_method": "player-cluster Poisson bootstrap; both pair members",
+     # Part of the value, collection, or call spanning several lines.
+0190 |         "bootstrap_reps": len(estimates),
+     # Part of the value, collection, or call spanning several lines.
+0191 |         "risk_ratio": round(float(a.mean() / b.mean()), 3) if b.mean() else None,
+     # Part of the value, collection, or call spanning several lines.
+0192 |         "control_crossover_rate": round(float(pairs["control_crossover"].mean()), 4),
+     # Part of the value, collection, or call spanning several lines.
+0193 |         "pre_match_balance": {
+     # Part of the value, collection, or call spanning several lines.
+0194 |             "exposed_rating_mean": round(float(pairs["exposed_pre_rating"].mean()), 1),
+     # Part of the value, collection, or call spanning several lines.
+0195 |             "control_rating_mean": round(float(pairs["control_pre_rating"].mean()), 1),
+     # Part of the value, collection, or call spanning several lines.
+0196 |             "exposed_games_mean": round(float(pairs["exposed_pre_games"].mean()), 1),
+     # Part of the value, collection, or call spanning several lines.
+0197 |             "control_games_mean": round(float(pairs["control_pre_games"].mean()), 1),
+     # Part of the value, collection, or call spanning several lines.
+0198 |         },
+     # Closes the data structure or function call started above.
+0199 |     }
+     # Closes the data structure or function call started above.
+0200 | 
+0201 | 
+0202 | def run(games_path: Path):
+     # Defines a reusable step; the following indented lines are its body.
+0203 |     df = parse.load_games(games_path)
+     # Calculates or stores the game table for this stage.
+0204 |     pairs = build_matched(df)
+     # Keeps this intermediate result under the name `pairs`.
+0205 |     pairs.to_parquet(config.PROCESSED / "matched_pairs.parquet", index=False)
+     # Saves a compact table for later analysis stages.
+0206 |     s = summarise(pairs)
+     # Keeps this intermediate result under the name `s`.
+0207 |     pd.DataFrame([s]).to_csv(config.TABLES / "matched_controls.csv", index=False)
+     # Creates a labelled table from the collected rows.
+0208 |     return s
+     # Hands this result back to the stage that called this function.
+0209 | 
+0210 | 
+0211 | if __name__ == "__main__":
+     # Runs the command-line entry point only when this file is executed directly.
+0212 |     ap = argparse.ArgumentParser()
+     # Keeps this intermediate result under the name `ap`.
+0213 |     ap.add_argument("--games", default=str(config.INTERIM / "games.parquet"))
+     # Defines a command-line option for this script.
+0214 |     a = ap.parse_args()
+     # Keeps this intermediate result under the name `a`.
+0215 |     print(run(Path(a.games)))
+     # Prints this reading so a command-line run can be followed.
