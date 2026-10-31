@@ -1,6 +1,6 @@
 SOURCE: src/animate.py
 SAY FIRST: Reference copy of src/animate.py; follow the line numbers while presenting.
-Each numbered source line is followed by a plain-English comment.
+Each numbered code line has a plain-English comment beside it.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Step 8 -- animated diffusion of one opening across the player network.
@@ -10,207 +10,118 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0005 | as they adopt. Writes a GIF plus a static small-multiple panel for the
 0006 | report (GIFs do not paste into a PDF).
 0007 | """
-0008 | from __future__ import annotations
-     # Imports a library or project module needed below.
+0008 | from __future__ import annotations  # Loads code this file needs for the steps below.
 0009 |
-0010 | import argparse
-     # Imports a library or project module needed below.
-0011 | from pathlib import Path
-     # Imports a library or project module needed below.
+0010 | import argparse  # Loads the tool that reads command-line choices.
+0011 | from pathlib import Path  # Loads Path to find and save project files.
 0012 |
-0013 | import matplotlib
-     # Imports a library or project module needed below.
-0014 | matplotlib.use("Agg")
-     # Continues the current calculation or control flow.
-0015 | import matplotlib.pyplot as plt
-     # Imports a library or project module needed below.
-0016 | import networkx as nx
-     # Imports a library or project module needed below.
-0017 | import pandas as pd
-     # Imports a library or project module needed below.
-0018 | from matplotlib.animation import FuncAnimation, PillowWriter
-     # Imports a library or project module needed below.
+0013 | import matplotlib  # Loads code this file needs for the steps below.
+0014 | matplotlib.use("Agg")  # Runs this instruction as part of the current step.
+0015 | import matplotlib.pyplot as plt  # Loads code this file needs for the steps below.
+0016 | import networkx as nx  # Loads the library used to build and measure player links.
+0017 | import pandas as pd  # Loads the table library used to store games and trials.
+0018 | from matplotlib.animation import FuncAnimation, PillowWriter  # Loads code this file needs for the steps below.
 0019 |
-0020 | from . import config, events, parse, structure
-     # Imports a library or project module needed below.
+0020 | from . import config, events, parse, structure  # Loads the named parts of this project so this file can use their functions.
 0021 |
-0022 | UNADOPTED = "#d9d9d9"
-     # Keeps this intermediate result under the name `UNADOPTED`.
-0023 | ADOPTED = "#c2185b"
-     # Keeps this intermediate result under the name `ADOPTED`.
-0024 | NEW = "#f9a825"
-     # Keeps this intermediate result under the name `NEW`.
+0022 | UNADOPTED = "#d9d9d9"  # Saves a value named UNADOPTED so the next lines can use it.
+0023 | ADOPTED = "#c2185b"  # Saves a value named ADOPTED so the next lines can use it.
+0024 | NEW = "#f9a825"  # Saves a value named NEW so the next lines can use it.
 0025 |
 0026 |
-0027 | def pick_behaviour(df: pd.DataFrame):
-     # Defines a reusable step; the following indented lines are its body.
-0028 |     _, first_perf, _ = events.sweep(df)
-     # Continues the current calculation or control flow.
-0029 |     rows = [(p, beh[0], beh[1], t) for (p, beh), t in first_perf.items()]
-     # Calculates or stores the result rows collected for the output table for this stage.
-0030 |     fp = pd.DataFrame(rows, columns=["player", "opening", "colour", "t"])
-     # Creates a labelled table from the collected rows.
-0031 |     best = fp.groupby(["opening", "colour"]).size().idxmax()
-     # Groups rows sharing these keys before counting or averaging them.
-0032 |     sel = fp[(fp["opening"] == best[0]) & (fp["colour"] == best[1])]
-     # Keeps this intermediate result under the name `sel`.
-0033 |     return best, sel.sort_values("t")
-     # Orders the rows by this field before the next calculation.
+0027 | def pick_behaviour(df: pd.DataFrame):  # Defines a reusable step; the following indented lines are its body.
+0028 |     _, first_perf, _ = events.sweep(df)  # Runs this instruction as part of the current step.
+0029 |     rows = [(p, beh[0], beh[1], t) for (p, beh), t in first_perf.items()]  # Stores the result rows collected for the output table for the next step.
+0030 |     fp = pd.DataFrame(rows, columns=["player", "opening", "colour", "t"])  # Creates a labelled table from the collected rows.
+0031 |     best = fp.groupby(["opening", "colour"]).size().idxmax()  # Groups rows sharing these keys before counting or averaging them.
+0032 |     sel = fp[(fp["opening"] == best[0]) & (fp["colour"] == best[1])]  # Saves a value named sel so the next lines can use it.
+0033 |     return best, sel.sort_values("t")  # Orders the rows by this field before the next calculation.
 0034 |
 0035 |
-0036 | def animate(df: pd.DataFrame, out_gif: Path = None, out_png: Path = None,
-     # Draw first use of one opening over time on a network subset.
-0037 |             frames: int = 40, max_nodes: int = 400):
-     # Keeps this intermediate result under the name `frames`.
+0036 | def animate(df: pd.DataFrame, out_gif: Path = None, out_png: Path = None,  # Draw first use of one opening over time on a network subset.
+0037 |             frames: int = 40, max_nodes: int = 400):  # Saves a value named frames so the next lines can use it.
 0038 |     """Draw first use of one opening over time on a network subset.
 0039 |
 0040 |     The animation explains the idea of diffusion visually. The trial curves
 0041 |     and reference checks, rather than this picture, carry the study finding.
 0042 |     """
-0043 |     out_gif = out_gif or (config.FIGURES / "diffusion.gif")
-     # Keeps this intermediate result under the name `out_gif`.
-0044 |     out_png = out_png or (config.FIGURES / "diffusion_panels.png")
-     # Keeps this intermediate result under the name `out_png`.
+0043 |     out_gif = out_gif or (config.FIGURES / "diffusion.gif")  # Saves a value named out_gif so the next lines can use it.
+0044 |     out_png = out_png or (config.FIGURES / "diffusion_panels.png")  # Saves a value named out_png so the next lines can use it.
 0045 |
-0046 |     g = structure.build_graph(df)
-     # Calculates or stores the player graph for this stage.
-0047 |     if g.number_of_nodes() > max_nodes:
-     # Checks this condition before running the next indented block.
-0048 |         keep = [n for n, _ in sorted(g.degree(), key=lambda x: -x[1])[:max_nodes]]
-     # Keeps this intermediate result under the name `keep`.
-0049 |         g = g.subgraph(keep).copy()
-     # Calculates or stores the player graph for this stage.
-0050 |     (opening, colour), adopters = pick_behaviour(df)
-     # Part of the value, collection, or call spanning several lines.
-0051 |     adopters = adopters[adopters["player"].isin(g.nodes())]
-     # Keeps this intermediate result under the name `adopters`.
+0046 |     g = structure.build_graph(df)  # Connects players who faced each other in the selected games.
+0047 |     if g.number_of_nodes() > max_nodes:  # Runs the next indented steps only when this condition is true.
+0048 |         keep = [n for n, _ in sorted(g.degree(), key=lambda x: -x[1])[:max_nodes]]  # Saves a value named keep so the next lines can use it.
+0049 |         g = g.subgraph(keep).copy()  # Stores the player graph for the next step.
+0050 |     (opening, colour), adopters = pick_behaviour(df)  # Part of the value, collection, or call spanning several lines.
+0051 |     adopters = adopters[adopters["player"].isin(g.nodes())]  # Saves a value named adopters so the next lines can use it.
 0052 |
-0053 |     pos = nx.spring_layout(g, seed=config.RANDOM_SEED, k=1.6 / (g.number_of_nodes() ** .5))
-     # Keeps this intermediate result under the name `pos`.
-0054 |     t0, t1 = df["ts"].min(), df["ts"].max()
-     # Continues the current calculation or control flow.
-0055 |     cuts = pd.date_range(t0, t1, periods=frames)
-     # Keeps this intermediate result under the name `cuts`.
-0056 |     nodes = list(g.nodes())
-     # Keeps this intermediate result under the name `nodes`.
-0057 |     adopt_t = dict(zip(adopters["player"], adopters["t"]))
-     # Keeps this intermediate result under the name `adopt_t`.
+0053 |     pos = nx.spring_layout(g, seed=config.RANDOM_SEED, k=1.6 / (g.number_of_nodes() ** .5))  # Saves a value named pos so the next lines can use it.
+0054 |     t0, t1 = df["ts"].min(), df["ts"].max()  # Runs this instruction as part of the current step.
+0055 |     cuts = pd.date_range(t0, t1, periods=frames)  # Saves a value named cuts so the next lines can use it.
+0056 |     nodes = list(g.nodes())  # Saves a value named nodes so the next lines can use it.
+0057 |     adopt_t = dict(zip(adopters["player"], adopters["t"]))  # Saves a value named adopt_t so the next lines can use it.
 0058 |
-0059 |     def colours_at(i):
-     # Defines a reusable step; the following indented lines are its body.
-0060 |         cut, prev = cuts[i], cuts[max(i - 1, 0)]
-     # Continues the current calculation or control flow.
-0061 |         out = []
-     # Calculates or stores the output value for this stage.
-0062 |         for n in nodes:
-     # Processes each item from this collection in turn.
-0063 |             t = adopt_t.get(n)
-     # Calculates or stores the current game or exposure time for this stage.
-0064 |             if t is None or t > cut:
-     # Checks this condition before running the next indented block.
-0065 |                 out.append(UNADOPTED)
-     # Continues the current calculation or control flow.
-0066 |             elif t > prev:
-     # Checks this condition before running the next indented block.
-0067 |                 out.append(NEW)
-     # Continues the current calculation or control flow.
-0068 |             else:
-     # Handles the alternative when the preceding condition was false.
-0069 |                 out.append(ADOPTED)
-     # Continues the current calculation or control flow.
-0070 |         return out
-     # Hands this result back to the stage that called this function.
+0059 |     def colours_at(i):  # Defines a reusable step; the following indented lines are its body.
+0060 |         cut, prev = cuts[i], cuts[max(i - 1, 0)]  # Runs this instruction as part of the current step.
+0061 |         out = []  # Stores the output value for the next step.
+0062 |         for n in nodes:  # Repeats the next indented steps once for each item.
+0063 |             t = adopt_t.get(n)  # Saves a temporary value used by the next calculation.
+0064 |             if t is None or t > cut:  # Runs the next indented steps only when this condition is true.
+0065 |                 out.append(UNADOPTED)  # Adds this item to the list being built.
+0066 |             elif t > prev:  # Runs the next indented steps only when this condition is true.
+0067 |                 out.append(NEW)  # Adds this item to the list being built.
+0068 |             else:  # Handles the alternative when the preceding condition was false.
+0069 |                 out.append(ADOPTED)  # Adds this item to the list being built.
+0070 |         return out  # Gives this answer back to the code that called the function.
 0071 |
-0072 |     def sizes_at(i):
-     # Defines a reusable step; the following indented lines are its body.
-0073 |         return [70 if c == NEW else 26 for c in colours_at(i)]
-     # Hands this result back to the stage that called this function.
+0072 |     def sizes_at(i):  # Defines a reusable step; the following indented lines are its body.
+0073 |         return [70 if c == NEW else 26 for c in colours_at(i)]  # Gives this answer back to the code that called the function.
 0074 |
-0075 |     fig, ax = plt.subplots(figsize=(7.5, 7.5))
-     # Continues the current calculation or control flow.
-0076 |     nx.draw_networkx_edges(g, pos, ax=ax, alpha=.05, width=.5)
-     # Continues the current calculation or control flow.
-0077 |     scat = ax.scatter([pos[n][0] for n in nodes], [pos[n][1] for n in nodes],
-     # Keeps this intermediate result under the name `scat`.
-0078 |                       s=26, c=colours_at(0), zorder=3, linewidths=0)
-     # Keeps this intermediate result under the name `s`.
-0079 |     ax.set_axis_off()
-     # Continues the current calculation or control flow.
-0080 |     title = ax.set_title("")
-     # Keeps this intermediate result under the name `title`.
+0075 |     fig, ax = plt.subplots(figsize=(7.5, 7.5))  # Runs this instruction as part of the current step.
+0076 |     nx.draw_networkx_edges(g, pos, ax=ax, alpha=.05, width=.5)  # Runs this instruction as part of the current step.
+0077 |     scat = ax.scatter([pos[n][0] for n in nodes], [pos[n][1] for n in nodes],  # Saves a value named scat so the next lines can use it.
+0078 |                       s=26, c=colours_at(0), zorder=3, linewidths=0)  # Saves a value named s so the next lines can use it.
+0079 |     ax.set_axis_off()  # Runs this instruction as part of the current step.
+0080 |     title = ax.set_title("")  # Saves a value named title so the next lines can use it.
 0081 |
-0082 |     def update(i):
-     # Defines a reusable step; the following indented lines are its body.
-0083 |         scat.set_color(colours_at(i))
-     # Continues the current calculation or control flow.
-0084 |         scat.set_sizes(sizes_at(i))
-     # Continues the current calculation or control flow.
-0085 |         n_ad = sum(1 for n in nodes if adopt_t.get(n) is not None
-     # Keeps this intermediate result under the name `n_ad`.
-0086 |                    and adopt_t[n] <= cuts[i])
-     # Continues the current calculation or control flow.
-0087 |         title.set_text(f"{opening} as {colour}  |  {cuts[i]:%d %b %H:%M}  |  "
-     # Continues the current calculation or control flow.
-0088 |                        f"{n_ad}/{len(nodes)} playing it")
-     # Continues the current calculation or control flow.
-0089 |         return scat, title
-     # Hands this result back to the stage that called this function.
+0082 |     def update(i):  # Defines a reusable step; the following indented lines are its body.
+0083 |         scat.set_color(colours_at(i))  # Runs this instruction as part of the current step.
+0084 |         scat.set_sizes(sizes_at(i))  # Runs this instruction as part of the current step.
+0085 |         n_ad = sum(1 for n in nodes if adopt_t.get(n) is not None  # Saves a value named n_ad so the next lines can use it.
+0086 |                    and adopt_t[n] <= cuts[i])  # Runs this instruction as part of the current step.
+0087 |         title.set_text(f"{opening} as {colour}  |  {cuts[i]:%d %b %H:%M}  |  "  # Runs this instruction as part of the current step.
+0088 |                        f"{n_ad}/{len(nodes)} playing it")  # Runs this instruction as part of the current step.
+0089 |         return scat, title  # Gives this answer back to the code that called the function.
 0090 |
-0091 |     anim = FuncAnimation(fig, update, frames=len(cuts), blit=False)
-     # Keeps this intermediate result under the name `anim`.
-0092 |     anim.save(out_gif, writer=PillowWriter(fps=6))
-     # Continues the current calculation or control flow.
-0093 |     plt.close(fig)
-     # Continues the current calculation or control flow.
+0091 |     anim = FuncAnimation(fig, update, frames=len(cuts), blit=False)  # Saves a value named anim so the next lines can use it.
+0092 |     anim.save(out_gif, writer=PillowWriter(fps=6))  # Runs this instruction as part of the current step.
+0093 |     plt.close(fig)  # Runs this instruction as part of the current step.
 0094 |
 0095 |     # static small multiples for the written report
-0096 |     picks = [0, len(cuts) // 3, 2 * len(cuts) // 3, len(cuts) - 1]
-     # Keeps this intermediate result under the name `picks`.
-0097 |     fig, axes = plt.subplots(1, 4, figsize=(18, 4.8))
-     # Continues the current calculation or control flow.
-0098 |     for ax, i in zip(axes, picks):
-     # Processes each item from this collection in turn.
-0099 |         nx.draw_networkx_edges(g, pos, ax=ax, alpha=.05, width=.4)
-     # Continues the current calculation or control flow.
-0100 |         ax.scatter([pos[n][0] for n in nodes], [pos[n][1] for n in nodes],
-     # Part of the value, collection, or call spanning several lines.
-0101 |                    s=18, c=colours_at(i), zorder=3, linewidths=0)
-     # Keeps this intermediate result under the name `s`.
-0102 |         n_ad = sum(1 for n in nodes if adopt_t.get(n) is not None
-     # Keeps this intermediate result under the name `n_ad`.
-0103 |                    and adopt_t[n] <= cuts[i])
-     # Continues the current calculation or control flow.
-0104 |         ax.set_title(f"{cuts[i]:%d %b}  ({n_ad} adopters)", fontsize=10)
-     # Continues the current calculation or control flow.
-0105 |         ax.set_axis_off()
-     # Continues the current calculation or control flow.
-0106 |     fig.suptitle(f"Diffusion of {opening} played as {colour}", y=1.02)
-     # Continues the current calculation or control flow.
-0107 |     fig.tight_layout()
-     # Continues the current calculation or control flow.
-0108 |     fig.savefig(out_png, dpi=150, bbox_inches="tight")
-     # Continues the current calculation or control flow.
-0109 |     plt.close(fig)
-     # Continues the current calculation or control flow.
-0110 |     return {"behaviour": f"{opening}/{colour}", "gif": out_gif, "panels": out_png,
-     # Hands this result back to the stage that called this function.
-0111 |             "nodes_drawn": len(nodes), "adopters": len(adopt_t)}
-     # Part of the value, collection, or call spanning several lines.
+0096 |     picks = [0, len(cuts) // 3, 2 * len(cuts) // 3, len(cuts) - 1]  # Saves a value named picks so the next lines can use it.
+0097 |     fig, axes = plt.subplots(1, 4, figsize=(18, 4.8))  # Runs this instruction as part of the current step.
+0098 |     for ax, i in zip(axes, picks):  # Repeats the next indented steps once for each item.
+0099 |         nx.draw_networkx_edges(g, pos, ax=ax, alpha=.05, width=.4)  # Runs this instruction as part of the current step.
+0100 |         ax.scatter([pos[n][0] for n in nodes], [pos[n][1] for n in nodes],  # Part of the value, collection, or call spanning several lines.
+0101 |                    s=18, c=colours_at(i), zorder=3, linewidths=0)  # Saves a value named s so the next lines can use it.
+0102 |         n_ad = sum(1 for n in nodes if adopt_t.get(n) is not None  # Saves a value named n_ad so the next lines can use it.
+0103 |                    and adopt_t[n] <= cuts[i])  # Runs this instruction as part of the current step.
+0104 |         ax.set_title(f"{cuts[i]:%d %b}  ({n_ad} adopters)", fontsize=10)  # Runs this instruction as part of the current step.
+0105 |         ax.set_axis_off()  # Runs this instruction as part of the current step.
+0106 |     fig.suptitle(f"Diffusion of {opening} played as {colour}", y=1.02)  # Runs this instruction as part of the current step.
+0107 |     fig.tight_layout()  # Runs this instruction as part of the current step.
+0108 |     fig.savefig(out_png, dpi=150, bbox_inches="tight")  # Runs this instruction as part of the current step.
+0109 |     plt.close(fig)  # Runs this instruction as part of the current step.
+0110 |     return {"behaviour": f"{opening}/{colour}", "gif": out_gif, "panels": out_png,  # Gives this answer back to the code that called the function.
+0111 |             "nodes_drawn": len(nodes), "adopters": len(adopt_t)}    // Part of the value, collection, or call spanning several lines.
 0112 |
 0113 |
-0114 | def run(games_path: Path):
-     # Defines a reusable step; the following indented lines are its body.
-0115 |     return animate(parse.load_games(games_path))
-     # Hands this result back to the stage that called this function.
+0114 | def run(games_path: Path):  # Defines a reusable step; the following indented lines are its body.
+0115 |     return animate(parse.load_games(games_path))  # Gives this answer back to the code that called the function.
 0116 |
 0117 |
-0118 | if __name__ == "__main__":
-     # Runs the command-line entry point only when this file is executed directly.
-0119 |     ap = argparse.ArgumentParser()
-     # Keeps this intermediate result under the name `ap`.
-0120 |     ap.add_argument("--games", default=str(config.INTERIM / "games.parquet"))
-     # Defines a command-line option for this script.
-0121 |     a = ap.parse_args()
-     # Keeps this intermediate result under the name `a`.
-0122 |     print(run(Path(a.games)))
-     # Prints this reading so a command-line run can be followed.
+0118 | if __name__ == "__main__":  # Runs the command-line entry point only when this file is executed directly.
+0119 |     ap = argparse.ArgumentParser()  # Saves a value named ap so the next lines can use it.
+0120 |     ap.add_argument("--games", default=str(config.INTERIM / "games.parquet"))  # Defines a command-line option for this script.
+0121 |     a = ap.parse_args()  # Saves a value named a so the next lines can use it.
+0122 |     print(run(Path(a.games)))  # Prints this reading so a command-line run can be followed.

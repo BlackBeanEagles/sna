@@ -1,6 +1,6 @@
 SOURCE: src/config.py
 SAY FIRST: Reference copy of src/config.py; follow the line numbers while presenting.
-Each numbered source line is followed by a plain-English comment.
+Each numbered code line has a plain-English comment beside it.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Locked project decisions. Every module reads constants from here.
@@ -8,78 +8,50 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0003 | The Build Guide says to lock these early; changing them here changes the
 0004 | whole pipeline consistently.
 0005 | """
-0006 | import os
-     # Imports a library or project module needed below.
-0007 | from pathlib import Path
-     # Imports a library or project module needed below.
+0006 | import os  # Loads code this file needs for the steps below.
+0007 | from pathlib import Path  # Loads Path to find and save project files.
 0008 |
-0009 | ROOT = Path(__file__).resolve().parents[1]
-     # Keeps this intermediate result under the name `ROOT`.
+0009 | ROOT = Path(__file__).resolve().parents[1]  # Saves a value named ROOT so the next lines can use it.
 0010 |
 0011 | # Data and results can live off the project root -- a full Lichess month of
 0012 | # Parquet plus figures does not belong on a drive that is nearly full.
 0013 | #   set SNA_DATA_ROOT=E:\sna_data
-0014 | _DATA_ROOT = Path(os.environ.get("SNA_DATA_ROOT", ROOT))
-     # Keeps this intermediate result under the name `_DATA_ROOT`.
+0014 | _DATA_ROOT = Path(os.environ.get("SNA_DATA_ROOT", ROOT))  # Saves a value named _DATA_ROOT so the next lines can use it.
 0015 |
-0016 | DATA = _DATA_ROOT / "data"
-     # Keeps this intermediate result under the name `DATA`.
-0017 | RAW = DATA / "raw"
-     # Keeps this intermediate result under the name `RAW`.
-0018 | INTERIM = DATA / "interim"
-     # Keeps this intermediate result under the name `INTERIM`.
-0019 | PROCESSED = DATA / "processed"
-     # Keeps this intermediate result under the name `PROCESSED`.
-0020 | RESULTS = _DATA_ROOT / "results"
-     # Keeps this intermediate result under the name `RESULTS`.
-0021 | FIGURES = RESULTS / "figures"
-     # Keeps this intermediate result under the name `FIGURES`.
-0022 | TABLES = RESULTS / "tables"
-     # Keeps this intermediate result under the name `TABLES`.
+0016 | DATA = _DATA_ROOT / "data"  # Saves a value named DATA so the next lines can use it.
+0017 | RAW = DATA / "raw"  # Saves a value named RAW so the next lines can use it.
+0018 | INTERIM = DATA / "interim"  # Saves a value named INTERIM so the next lines can use it.
+0019 | PROCESSED = DATA / "processed"  # Saves a value named PROCESSED so the next lines can use it.
+0020 | RESULTS = _DATA_ROOT / "results"  # Saves a value named RESULTS so the next lines can use it.
+0021 | FIGURES = RESULTS / "figures"  # Saves a value named FIGURES so the next lines can use it.
+0022 | TABLES = RESULTS / "tables"  # Saves a value named TABLES so the next lines can use it.
 0023 |
-0024 | for _p in (RAW, INTERIM, PROCESSED, FIGURES, TABLES):
-     # Processes each item from this collection in turn.
-0025 |     _p.mkdir(parents=True, exist_ok=True)
-     # Continues the current calculation or control flow.
+0024 | for _p in (RAW, INTERIM, PROCESSED, FIGURES, TABLES):  # Repeats the next indented steps once for each item.
+0025 |     _p.mkdir(parents=True, exist_ok=True)  # Creates the folder needed for saved outputs.
 0026 |
 0027 | # ---- sample selection -------------------------------------------------
-0028 | RATING_MIN = 1800
-     # Keeps this intermediate result under the name `RATING_MIN`.
-0029 | RATING_MAX = 2200
-     # Keeps this intermediate result under the name `RATING_MAX`.
+0028 | RATING_MIN = 1800  # Saves a value named RATING_MIN so the next lines can use it.
+0029 | RATING_MAX = 2200  # Saves a value named RATING_MAX so the next lines can use it.
 0030 | # Lichess "Event" header contains the speed. Standard-ish time controls only.
-0031 | ALLOWED_SPEEDS = ("Rapid", "Classical", "Blitz")
-     # Keeps this intermediate result under the name `ALLOWED_SPEEDS`.
+0031 | ALLOWED_SPEEDS = ("Rapid", "Classical", "Blitz")  # Saves a value named ALLOWED_SPEEDS so the next lines can use it.
 0032 | TOP_N_OPENINGS = 40          # keep the most frequent ECO codes only
-     # Keeps this intermediate result under the name `TOP_N_OPENINGS`.
 0033 |
 0034 | # ---- behaviour definition --------------------------------------------
 0035 | # A behaviour is (opening, colour). Playing the Sicilian as Black and
 0036 | # meeting it as White are different behaviours -- colour stays in the key.
 0037 | OPENING_GRANULARITY = "eco"  # "eco" for the main analysis, "ply" for robustness
-     # Keeps this intermediate result under the name `OPENING_GRANULARITY`.
 0038 | PLY_KEY_DEPTH = 8            # first k plies used when granularity == "ply"
-     # Keeps this intermediate result under the name `PLY_KEY_DEPTH`.
 0039 |
 0040 | # ---- contagion measurement -------------------------------------------
 0041 | ADOPTION_WINDOW_DAYS = 14    # fixed window after an exposure
-     # Keeps this intermediate result under the name `ADOPTION_WINDOW_DAYS`.
 0042 | MIN_GAMES_PER_PLAYER = 20    # drop low-activity players: their timing is noise
-     # Keeps this intermediate result under the name `MIN_GAMES_PER_PLAYER`.
 0043 | MAX_EXPOSURE_COUNT = 8       # curve is reported for k = 1..8
-     # Keeps this intermediate result under the name `MAX_EXPOSURE_COUNT`.
 0044 | MAX_DIVERSITY = 6            # d and structural diversity capped for plotting
-     # Keeps this intermediate result under the name `MAX_DIVERSITY`.
 0045 |
 0046 | # ---- identification ---------------------------------------------------
 0047 | N_NULL_REPLICATES = 20       # timestamp-shuffle replicates
-     # Keeps this intermediate result under the name `N_NULL_REPLICATES`.
 0048 | RATING_MATCH_TOLERANCE = 50  # matched controls: +/- rating points
-     # Keeps this intermediate result under the name `RATING_MATCH_TOLERANCE`.
 0049 | ACTIVITY_MATCH_RATIO = 0.25  # matched controls: +/- 25% games played
-     # Keeps this intermediate result under the name `ACTIVITY_MATCH_RATIO`.
 0050 | TRAIN_FRACTION = 0.7         # grouped spell split for the held-out AUC
-     # Keeps this intermediate result under the name `TRAIN_FRACTION`.
 0051 |
-0052 | RANDOM_SEED = 20260916
-     # Keeps this intermediate result under the name `RANDOM_SEED`.
+0052 | RANDOM_SEED = 20260916  # Saves a value named RANDOM_SEED so the next lines can use it.

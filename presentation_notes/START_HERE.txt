@@ -1,7 +1,12 @@
 CODE PRESENTATION QUICK REFERENCE
 
+The runnable Python files in src/, server/ and site/build.py now put a short
+plain-English # explanation beside each executable line. Read the code first,
+then use the comment on that same line if you forget what it does. Existing
+comments and docstrings also explain the larger purpose of each step.
+
 Open code_explained/ alongside the working project. Each .explained.txt file
-repeats the original source line number and puts a plain-English # note after
+repeats the original source line number and puts a plain-English note beside
 each nonblank executable line. The original files are the ones the project
 runs; the explained copies are for speaking and can be searched by line number.
 

@@ -1,59 +1,35 @@
 SOURCE: scripts/build_explorer.py
 SAY FIRST: Reference copy of scripts/build_explorer.py; follow the line numbers while presenting.
-Each numbered source line is followed by a plain-English comment.
+Each numbered code line has a plain-English comment beside it.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Aggregate complete trials for the findings page's opening/colour explorer."""
-0002 | from pathlib import Path
-     # Imports a library or project module needed below.
-0003 | import sys
-     # Imports a library or project module needed below.
-0004 | sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-     # Continues the current calculation or control flow.
-0005 | import numpy as np
-     # Imports a library or project module needed below.
-0006 | import pandas as pd
-     # Imports a library or project module needed below.
-0007 | from src import config
-     # Imports a library or project module needed below.
+0002 | from pathlib import Path  # Loads Path to find and save project files.
+0003 | import sys  # Loads code this file needs for the steps below.
+0004 | sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # Runs this instruction as part of the current step.
+0005 | import numpy as np  # Loads the number library used for fast calculations.
+0006 | import pandas as pd  # Loads the table library used to store games and trials.
+0007 | from src import config  # Loads the named parts of this project so this file can use their functions.
 0008 |
-0009 | trials = pd.read_parquet(config.PROCESSED / "trials.parquet")
-     # Loads a previously prepared game or trial table.
+0009 | trials = pd.read_parquet(config.PROCESSED / "trials.parquet")  # Loads a previously prepared game or trial table.
 0010 | # The findings filters need pre-aggregated opening/colour cells; this script
 0011 | # turns the full trial table into small, downloadable chart-ready groups.
-0012 | trials["d"] = trials["d"].clip(upper=config.MAX_DIVERSITY)
-     # Caps large counts into the final chart bucket, such as six or more opponents.
-0013 | grouped = (trials.groupby(["opening", "colour", "d"], observed=True)
-     # Groups rows sharing these keys before counting or averaging them.
-0014 |            .agg(n=("adopted", "size"), adopted=("adopted", "sum"))
-     # Continues the current calculation or control flow.
-0015 |            .reset_index().sort_values(["opening", "colour", "d"]))
-     # Orders the rows by this field before the next calculation.
-0016 | p = grouped["adopted"] / grouped["n"]
-     # Keeps this intermediate result under the name `p`.
-0017 | n = grouped["n"]
-     # Keeps this intermediate result under the name `n`.
-0018 | z = 1.96
-     # Keeps this intermediate result under the name `z`.
+0012 | trials["d"] = trials["d"].clip(upper=config.MAX_DIVERSITY)  # Caps large counts into the final chart bucket, such as six or more opponents.
+0013 | grouped = (trials.groupby(["opening", "colour", "d"], observed=True)  # Groups rows sharing these keys before counting or averaging them.
+0014 |            .agg(n=("adopted", "size"), adopted=("adopted", "sum"))  # Runs this instruction as part of the current step.
+0015 |            .reset_index().sort_values(["opening", "colour", "d"]))  # Orders the rows by this field before the next calculation.
+0016 | p = grouped["adopted"] / grouped["n"]  # Saves a value named p so the next lines can use it.
+0017 | n = grouped["n"]  # Saves a value named n so the next lines can use it.
+0018 | z = 1.96  # Saves a value named z so the next lines can use it.
 0019 | # Wilson bounds give each selected group an uncertainty interval, especially
 0020 | # useful where a less common opening has few complete trials.
-0021 | den = 1 + z*z/n
-     # Keeps this intermediate result under the name `den`.
-0022 | center = (p + z*z/(2*n)) / den
-     # Keeps this intermediate result under the name `center`.
-0023 | half = z*np.sqrt(p*(1-p)/n + z*z/(4*n*n)) / den
-     # Keeps this intermediate result under the name `half`.
-0024 | grouped["rate"] = p
-     # Continues the current calculation or control flow.
-0025 | grouped["lo"] = center-half
-     # Continues the current calculation or control flow.
-0026 | grouped["hi"] = center+half
-     # Continues the current calculation or control flow.
-0027 | target = config.TABLES / "explorer_by_opening_colour.csv"
-     # Keeps this intermediate result under the name `target`.
-0028 | grouped.to_csv(target, index=False)
-     # Writes a result table that can be inspected or downloaded.
-0029 | assert int(grouped["n"].sum()) == len(trials)
-     # Checks an invariant; the script fails if it is false.
-0030 | print(f"{len(grouped)} groups, {len(trials):,} trials -> {target}")
-     # Prints this reading so a command-line run can be followed.
+0021 | den = 1 + z*z/n  # Saves a value named den so the next lines can use it.
+0022 | center = (p + z*z/(2*n)) / den  # Saves a value named center so the next lines can use it.
+0023 | half = z*np.sqrt(p*(1-p)/n + z*z/(4*n*n)) / den  # Saves a value named half so the next lines can use it.
+0024 | grouped["rate"] = p  # Stores this value under its player, opening, or field key.
+0025 | grouped["lo"] = center-half  # Stores this value under its player, opening, or field key.
+0026 | grouped["hi"] = center+half  # Stores this value under its player, opening, or field key.
+0027 | target = config.TABLES / "explorer_by_opening_colour.csv"  # Saves a value named target so the next lines can use it.
+0028 | grouped.to_csv(target, index=False)  # Writes a result table that can be inspected or downloaded.
+0029 | assert int(grouped["n"].sum()) == len(trials)  # Checks an invariant; the script fails if it is false.
+0030 | print(f"{len(grouped)} groups, {len(trials):,} trials -> {target}")  # Prints this reading so a command-line run can be followed.

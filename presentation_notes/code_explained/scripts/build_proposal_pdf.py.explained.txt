@@ -1,6 +1,6 @@
 SOURCE: scripts/build_proposal_pdf.py
 SAY FIRST: Reference copy of scripts/build_proposal_pdf.py; follow the line numbers while presenting.
-Each numbered source line is followed by a plain-English comment.
+Each numbered code line has a plain-English comment beside it.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Compile the proposal to PDF without altering the submitted source.
@@ -19,149 +19,82 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0014 |
 0015 |     python scripts/build_proposal_pdf.py --tex ../SNA_Proposal/SNA_Proposal.tex
 0016 | """
-0017 | from __future__ import annotations
-     # Imports a library or project module needed below.
+0017 | from __future__ import annotations  # Loads code this file needs for the steps below.
 0018 |
-0019 | import argparse
-     # Imports a library or project module needed below.
-0020 | import shutil
-     # Imports a library or project module needed below.
-0021 | import subprocess
-     # Imports a library or project module needed below.
-0022 | import sys
-     # Imports a library or project module needed below.
-0023 | import tempfile
-     # Imports a library or project module needed below.
-0024 | from pathlib import Path
-     # Imports a library or project module needed below.
+0019 | import argparse  # Loads the tool that reads command-line choices.
+0020 | import shutil  # Loads code this file needs for the steps below.
+0021 | import subprocess  # Loads code this file needs for the steps below.
+0022 | import sys  # Loads code this file needs for the steps below.
+0023 | import tempfile  # Loads code this file needs for the steps below.
+0024 | from pathlib import Path  # Loads Path to find and save project files.
 0025 |
-0026 | SHIM = "\\usepackage[T1]{fontenc}\n"
-     # Keeps this intermediate result under the name `SHIM`.
-0027 | ANCHOR = "\\usepackage{times}"
-     # Keeps this intermediate result under the name `ANCHOR`.
+0026 | SHIM = "\\usepackage[T1]{fontenc}\n"  # Saves a value named SHIM so the next lines can use it.
+0027 | ANCHOR = "\\usepackage{times}"  # Saves a value named ANCHOR so the next lines can use it.
 0028 |
 0029 |
-0030 | def build(tex: Path, engine: Path) -> Path:
-     # Compile a temporary copy so the submitted LaTeX source stays intact.
+0030 | def build(tex: Path, engine: Path) -> Path:  # Compile a temporary copy so the submitted LaTeX source stays intact.
 0031 |     """Compile a temporary copy so the submitted LaTeX source stays intact."""
-0032 |     src = tex.read_text(encoding="utf-8")
-     # Keeps this intermediate result under the name `src`.
-0033 |     if ANCHOR not in src:
-     # Checks this condition before running the next indented block.
-0034 |         sys.exit(f"expected {ANCHOR!r} in {tex}")
-     # Continues the current calculation or control flow.
-0035 |     if "fontenc" in src:
-     # Checks this condition before running the next indented block.
-0036 |         print("note: source already loads fontenc; compiling as-is")
-     # Prints this reading so a command-line run can be followed.
-0037 |         shimmed = src
-     # Keeps this intermediate result under the name `shimmed`.
-0038 |     else:
-     # Handles the alternative when the preceding condition was false.
-0039 |         shimmed = src.replace(ANCHOR, SHIM + ANCHOR, 1)
-     # Keeps this intermediate result under the name `shimmed`.
+0032 |     src = tex.read_text(encoding="utf-8")  # Saves a value named src so the next lines can use it.
+0033 |     if ANCHOR not in src:  # Runs the next indented steps only when this condition is true.
+0034 |         sys.exit(f"expected {ANCHOR!r} in {tex}")  # Runs this instruction as part of the current step.
+0035 |     if "fontenc" in src:  # Runs the next indented steps only when this condition is true.
+0036 |         print("note: source already loads fontenc; compiling as-is")  # Prints this reading so a command-line run can be followed.
+0037 |         shimmed = src  # Saves a value named shimmed so the next lines can use it.
+0038 |     else:  # Handles the alternative when the preceding condition was false.
+0039 |         shimmed = src.replace(ANCHOR, SHIM + ANCHOR, 1)  # Saves a value named shimmed so the next lines can use it.
 0040 |
-0041 |     with tempfile.TemporaryDirectory() as td:
-     # Opens a resource and guarantees cleanup when the block ends.
-0042 |         work = Path(td)
-     # Keeps this intermediate result under the name `work`.
-0043 |         (work / tex.name).write_text(shimmed, encoding="utf-8")
-     # Part of the value, collection, or call spanning several lines.
-0044 |         figs = tex.parent / "figures"
-     # Keeps this intermediate result under the name `figs`.
-0045 |         if figs.is_dir():
-     # Checks this condition before running the next indented block.
-0046 |             shutil.copytree(figs, work / "figures")
-     # Continues the current calculation or control flow.
+0041 |     with tempfile.TemporaryDirectory() as td:  # Opens a resource and guarantees cleanup when the block ends.
+0042 |         work = Path(td)  # Saves a value named work so the next lines can use it.
+0043 |         (work / tex.name).write_text(shimmed, encoding="utf-8")  # Part of the value, collection, or call spanning several lines.
+0044 |         figs = tex.parent / "figures"  # Saves a value named figs so the next lines can use it.
+0045 |         if figs.is_dir():  # Runs the next indented steps only when this condition is true.
+0046 |             shutil.copytree(figs, work / "figures")  # Runs this instruction as part of the current step.
 0047 |
-0048 |         r = subprocess.run(
-     # Keeps this intermediate result under the name `r`.
-0049 |             [str(engine), "-X", "compile", tex.name, "--outdir", "."],
-     # Part of the value, collection, or call spanning several lines.
-0050 |             cwd=work, capture_output=True, text=True)
-     # Keeps this intermediate result under the name `cwd`.
-0051 |         log = (r.stdout or "") + (r.stderr or "")
-     # Keeps this intermediate result under the name `log`.
-0052 |         for line in log.splitlines():
-     # Processes each item from this collection in turn.
-0053 |             if any(w in line.lower() for w in ("overfull", "underfull", "error")):
-     # Checks this condition before running the next indented block.
-0054 |                 print("  " + line.strip())
-     # Prints this reading so a command-line run can be followed.
-0055 |         pdf = work / (tex.stem + ".pdf")
-     # Keeps this intermediate result under the name `pdf`.
-0056 |         if r.returncode != 0 or not pdf.exists():
-     # Checks this condition before running the next indented block.
-0057 |             print(log[-2000:])
-     # Prints this reading so a command-line run can be followed.
-0058 |             sys.exit("compile failed")
-     # Continues the current calculation or control flow.
+0048 |         r = subprocess.run(  # Saves a value named r so the next lines can use it.
+0049 |             [str(engine), "-X", "compile", tex.name, "--outdir", "."],  # Part of the value, collection, or call spanning several lines.
+0050 |             cwd=work, capture_output=True, text=True)  # Saves a value named cwd so the next lines can use it.
+0051 |         log = (r.stdout or "") + (r.stderr or "")  # Saves a value named log so the next lines can use it.
+0052 |         for line in log.splitlines():  # Repeats the next indented steps once for each item.
+0053 |             if any(w in line.lower() for w in ("overfull", "underfull", "error")):  # Runs the next indented steps only when this condition is true.
+0054 |                 print("  " + line.strip())  # Prints this reading so a command-line run can be followed.
+0055 |         pdf = work / (tex.stem + ".pdf")  # Saves a value named pdf so the next lines can use it.
+0056 |         if r.returncode != 0 or not pdf.exists():  # Runs the next indented steps only when this condition is true.
+0057 |             print(log[-2000:])  # Prints this reading so a command-line run can be followed.
+0058 |             sys.exit("compile failed")  # Runs this instruction as part of the current step.
 0059 |
-0060 |         dest = tex.with_suffix(".pdf")
-     # Keeps this intermediate result under the name `dest`.
-0061 |         shutil.copy(pdf, dest)
-     # Continues the current calculation or control flow.
-0062 |         return dest
-     # Hands this result back to the stage that called this function.
+0060 |         dest = tex.with_suffix(".pdf")  # Saves a value named dest so the next lines can use it.
+0061 |         shutil.copy(pdf, dest)  # Runs this instruction as part of the current step.
+0062 |         return dest  # Gives this answer back to the code that called the function.
 0063 |
 0064 |
-0065 | def check_fonts(pdf: Path):
-     # Defines a reusable step; the following indented lines are its body.
-0066 |     try:
-     # Starts an operation that may need error handling.
-0067 |         import pymupdf
-     # Imports a library or project module needed below.
-0068 |     except ImportError:
-     # Handles this specific failure without hiding other errors.
-0069 |         print("(install pymupdf to verify the embedded fonts)")
-     # Prints this reading so a command-line run can be followed.
-0070 |         return
-     # Stops this function here.
-0071 |     doc = pymupdf.open(pdf)
-     # Keeps this intermediate result under the name `doc`.
-0072 |     fonts = sorted({f[3] for p in doc for f in p.get_fonts(full=True)})
-     # Keeps this intermediate result under the name `fonts`.
-0073 |     print(f"\n{pdf.name}: {doc.page_count} pages")
-     # Prints this reading so a command-line run can be followed.
-0074 |     print("embedded fonts:")
-     # Prints this reading so a command-line run can be followed.
-0075 |     for f in fonts:
-     # Processes each item from this collection in turn.
-0076 |         print("  " + f)
-     # Prints this reading so a command-line run can be followed.
-0077 |     has_bold = any("Medi" in f or "Bold" in f for f in fonts)
-     # Keeps this intermediate result under the name `has_bold`.
-0078 |     has_ital = any("Ital" in f for f in fonts)
-     # Keeps this intermediate result under the name `has_ital`.
-0079 |     print(f"\nbold face present   : {has_bold}")
-     # Prints this reading so a command-line run can be followed.
-0080 |     print(f"italic face present : {has_ital}")
-     # Prints this reading so a command-line run can be followed.
-0081 |     if not (has_bold and has_ital):
-     # Checks this condition before running the next indented block.
-0082 |         sys.exit("!! bold/italic missing -- the document would render flat")
-     # Continues the current calculation or control flow.
+0065 | def check_fonts(pdf: Path):  # Defines a reusable step; the following indented lines are its body.
+0066 |     try:  # Starts an operation that may need error handling.
+0067 |         import pymupdf  # Loads code this file needs for the steps below.
+0068 |     except ImportError:  # Handles this specific failure without hiding other errors.
+0069 |         print("(install pymupdf to verify the embedded fonts)")  # Prints this reading so a command-line run can be followed.
+0070 |         return  # Stops this function here.
+0071 |     doc = pymupdf.open(pdf)  # Saves a value named doc so the next lines can use it.
+0072 |     fonts = sorted({f[3] for p in doc for f in p.get_fonts(full=True)})  # Saves a value named fonts so the next lines can use it.
+0073 |     print(f"\n{pdf.name}: {doc.page_count} pages")  # Prints this reading so a command-line run can be followed.
+0074 |     print("embedded fonts:")  # Prints this reading so a command-line run can be followed.
+0075 |     for f in fonts:  # Repeats the next indented steps once for each item.
+0076 |         print("  " + f)  # Prints this reading so a command-line run can be followed.
+0077 |     has_bold = any("Medi" in f or "Bold" in f for f in fonts)  # Saves a value named has_bold so the next lines can use it.
+0078 |     has_ital = any("Ital" in f for f in fonts)  # Saves a value named has_ital so the next lines can use it.
+0079 |     print(f"\nbold face present   : {has_bold}")  # Prints this reading so a command-line run can be followed.
+0080 |     print(f"italic face present : {has_ital}")  # Prints this reading so a command-line run can be followed.
+0081 |     if not (has_bold and has_ital):  # Runs the next indented steps only when this condition is true.
+0082 |         sys.exit("!! bold/italic missing -- the document would render flat")  # Runs this instruction as part of the current step.
 0083 |
 0084 |
-0085 | if __name__ == "__main__":
-     # Runs the command-line entry point only when this file is executed directly.
-0086 |     ap = argparse.ArgumentParser()
-     # Keeps this intermediate result under the name `ap`.
-0087 |     ap.add_argument("--tex", required=True)
-     # Defines a command-line option for this script.
-0088 |     ap.add_argument("--engine", default=None,
-     # Defines a command-line option for this script.
-0089 |                     help="path to the tectonic binary")
-     # Keeps this intermediate result under the name `help`.
-0090 |     a = ap.parse_args()
-     # Keeps this intermediate result under the name `a`.
-0091 |     engine = Path(a.engine) if a.engine else (
-     # Keeps this intermediate result under the name `engine`.
-0092 |         Path(tempfile.gettempdir()) / "tectonic_bin" / "tectonic.exe")
-     # Continues the current calculation or control flow.
-0093 |     if not engine.exists():
-     # Checks this condition before running the next indented block.
-0094 |         sys.exit(f"no LaTeX engine at {engine}")
-     # Continues the current calculation or control flow.
-0095 |     check_fonts(build(Path(a.tex).resolve(), engine))
-     # Continues the current calculation or control flow.
+0085 | if __name__ == "__main__":  # Runs the command-line entry point only when this file is executed directly.
+0086 |     ap = argparse.ArgumentParser()  # Saves a value named ap so the next lines can use it.
+0087 |     ap.add_argument("--tex", required=True)  # Defines a command-line option for this script.
+0088 |     ap.add_argument("--engine", default=None,  # Defines a command-line option for this script.
+0089 |                     help="path to the tectonic binary")  # Saves a value named help so the next lines can use it.
+0090 |     a = ap.parse_args()  # Saves a value named a so the next lines can use it.
+0091 |     engine = Path(a.engine) if a.engine else (  # Saves a value named engine so the next lines can use it.
+0092 |         Path(tempfile.gettempdir()) / "tectonic_bin" / "tectonic.exe")  # Runs this instruction as part of the current step.
+0093 |     if not engine.exists():  # Runs the next indented steps only when this condition is true.
+0094 |         sys.exit(f"no LaTeX engine at {engine}")  # Runs this instruction as part of the current step.
+0095 |     check_fonts(build(Path(a.tex).resolve(), engine))  # Runs this instruction as part of the current step.

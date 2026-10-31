@@ -1,6 +1,6 @@
 SOURCE: src/features.py
 SAY FIRST: This builds earlier-only player, repertoire and network features.
-Each numbered source line is followed by a plain-English comment.
+Each numbered code line has a plain-English comment beside it.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Features for the held-out prediction check, built without leakage.
@@ -13,234 +13,146 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0008 | spells are assigned to one side of the held-out split.
 0009 |
 0010 | **A missing explanation.** The original feature set asked only "who played this
-0011 | opening at you?". De Marzo and Servedio [4] showed that a player's next opening
-0012 | is largely predicted by how close it sits to what they already play -- an
-0013 | "adjacent possible" effect in opening space, with no social component at all.
-0014 | Leaving that out makes the social features look better than they are, because
-0015 | they are the only candidate on offer. `repertoire_density` puts the competing
-0016 | explanation in the model.
+0011 | opening at you?". A player may choose a new opening simply because it is close
+0012 | to openings they already know, without copying an opponent. Leaving that out
+0013 | makes social features look better than they are. `repertoire_density` measures
+0014 | this competing explanation. It is a project control, not a causal proof.
+0015 |
+0016 | Three feature blocks are produced, so the three can be compared directly:
 0017 |
-0018 | Three feature blocks are produced, so the three can be compared directly:
-0019 |
-0020 |     BASELINE    popularity, rating, activity        "popular openings get played"
-0021 |     REPERTOIRE  + density, repertoire size          "you learn what is near what you know"
-0022 |     NETWORK     + k, d, sd, degree, kcore, between  "who played it at you"
-0023 | """
-0024 | from __future__ import annotations
-     # Imports a library or project module needed below.
-0025 |
-0026 | import numpy as np
-     # Imports a library or project module needed below.
-0027 | import pandas as pd
-     # Imports a library or project module needed below.
+0018 |     BASELINE    popularity, rating, activity        "popular openings get played"
+0019 |     REPERTOIRE  + density, repertoire size          "you learn what is near what you know"
+0020 |     NETWORK     + k, d, sd, degree, kcore, between  "who played it at you"
+0021 | """
+0022 | from __future__ import annotations  # Loads code this file needs for the steps below.
+0023 |
+0024 | import numpy as np  # Loads the number library used for fast calculations.
+0025 | import pandas as pd  # Loads the table library used to store games and trials.
+0026 |
+0027 | from . import structure  # Loads the named parts of this project so this file can use their functions.
 0028 |
-0029 | from . import structure
-     # Imports a library or project module needed below.
-0030 |
-0031 | BASELINE = ["popularity", "rating", "activity"]
-     # Keeps this intermediate result under the name `BASELINE`.
-0032 | REPERTOIRE = BASELINE + ["repertoire_density", "repertoire_size"]
-     # Keeps this intermediate result under the name `REPERTOIRE`.
-0033 | NETWORK = REPERTOIRE + ["k", "d", "sd", "degree", "kcore", "betweenness"]
-     # Keeps this intermediate result under the name `NETWORK`.
-0034 |
-0035 |
-0036 | def _repertoires(df: pd.DataFrame) -> dict[str, set]:
-     # Which openings each player actually plays, by colour-agnostic ECO.
-0037 |     """Which openings each player actually plays, by colour-agnostic ECO."""
-0038 |     rep: dict[str, set] = {}
-     # Keeps this intermediate result under the name `rep`.
-0039 |     for col in ("white", "black"):
-     # Processes each item from this collection in turn.
-0040 |         for player, eco in zip(df[col].to_numpy(), df["eco"].to_numpy()):
-     # Processes each item from this collection in turn.
-0041 |             rep.setdefault(player, set()).add(eco)
-     # Continues the current calculation or control flow.
-0042 |     return rep
-     # Hands this result back to the stage that called this function.
-0043 |
-0044 |
-0045 | def relatedness(rep: dict[str, set], openings: list[str]) -> pd.DataFrame:
-     # Opening-to-opening proximity from co-play, following De Marzo & Servedio.
-0046 |     """Opening-to-opening proximity from co-play, following De Marzo & Servedio.
-0047 |
-0048 |     Two openings are related when the same players tend to play both. Using
-0049 |     min() in the denominator keeps a rare opening that is always played
-0050 |     alongside a common one from being scored as unrelated to it.
-0051 |     """
-0052 |     idx = {o: i for i, o in enumerate(openings)}
-     # Keeps this intermediate result under the name `idx`.
-0053 |     n = len(openings)
-     # Keeps this intermediate result under the name `n`.
-0054 |     co = np.zeros((n, n), dtype=float)
-     # Keeps this intermediate result under the name `co`.
-0055 |     count = np.zeros(n, dtype=float)
-     # Keeps this intermediate result under the name `count`.
-0056 |
-0057 |     for played in rep.values():
-     # Processes each item from this collection in turn.
-0058 |         ids = [idx[o] for o in played if o in idx]
-     # Keeps this intermediate result under the name `ids`.
-0059 |         for i in ids:
-     # Processes each item from this collection in turn.
-0060 |             count[i] += 1
-     # Continues the current calculation or control flow.
-0061 |         for a in range(len(ids)):
-     # Processes each item from this collection in turn.
-0062 |             for b in range(a + 1, len(ids)):
-     # Processes each item from this collection in turn.
-0063 |                 co[ids[a], ids[b]] += 1
-     # Continues the current calculation or control flow.
-0064 |                 co[ids[b], ids[a]] += 1
-     # Continues the current calculation or control flow.
-0065 |
-0066 |     denom = np.minimum.outer(count, count)
-     # Keeps this intermediate result under the name `denom`.
-0067 |     with np.errstate(divide="ignore", invalid="ignore"):
-     # Opens a resource and guarantees cleanup when the block ends.
-0068 |         phi = np.where(denom > 0, co / denom, 0.0)
-     # Keeps this intermediate result under the name `phi`.
-0069 |     np.fill_diagonal(phi, 0.0)
-     # Continues the current calculation or control flow.
-0070 |     return pd.DataFrame(phi, index=openings, columns=openings)
-     # Creates a labelled table from the collected rows.
-0071 |
-0072 |
-0073 | def density_matrix(rep: dict[str, set], phi: pd.DataFrame,
-     # Density for every (opening, player) pair at once.
-0074 |                    players: list[str]) -> np.ndarray:
-     # Continues the current calculation or control flow.
-0075 |     """Density for every (opening, player) pair at once.
-0076 |
-0077 |     How close an opening sits to what a player already plays: the share of that
-0078 |     opening's total relatedness pointing at openings already in the repertoire.
-0079 |     1.0 means everything related to it is already known, 0.0 means none of it.
-0080 |
-0081 |     Done as a single matrix product. The obvious per-trial version costs a
-0082 |     pandas label lookup and a fancy-index sum for each of ~224k trials, which
-0083 |     took over ten minutes; this takes a fraction of a second and is the same
-0084 |     arithmetic. phi has a zero diagonal, so an opening never counts itself.
-0085 |     """
-0086 |     openings = list(phi.index)
-     # Keeps this intermediate result under the name `openings`.
-0087 |     o_idx = {o: i for i, o in enumerate(openings)}
-     # Keeps this intermediate result under the name `o_idx`.
-0088 |     mask = np.zeros((len(players), len(openings)), dtype=float)
-     # Keeps this intermediate result under the name `mask`.
-0089 |     for pi, p in enumerate(players):
-     # Processes each item from this collection in turn.
-0090 |         for o in rep.get(p, ()):
-     # Processes each item from this collection in turn.
-0091 |             j = o_idx.get(o)
-     # Keeps this intermediate result under the name `j`.
-0092 |             if j is not None:
-     # Checks this condition before running the next indented block.
-0093 |                 mask[pi, j] = 1.0
-     # Continues the current calculation or control flow.
-0094 |
-0095 |     phi_v = phi.to_numpy()
-     # Keeps this intermediate result under the name `phi_v`.
-0096 |     totals = phi_v.sum(axis=1)                 # per opening
-     # Keeps this intermediate result under the name `totals`.
-0097 |     reach = phi_v @ mask.T                     # openings x players
-     # Keeps this intermediate result under the name `reach`.
-0098 |     with np.errstate(divide="ignore", invalid="ignore"):
-     # Opens a resource and guarantees cleanup when the block ends.
-0099 |         return np.where(totals[:, None] > 0, reach / totals[:, None], 0.0)
-     # Hands this result back to the stage that called this function.
-0100 |
-0101 |
-0102 | def build(games: pd.DataFrame, trials: pd.DataFrame,
-     # Attach features computed ONLY from games before `split_ts`.
-0103 |           split_ts) -> pd.DataFrame:
-     # Continues the current calculation or control flow.
-0104 |     """Attach features computed ONLY from games before `split_ts`.
-0105 |
-0106 |     Explain the three blocks as activity/popularity, closeness to existing
-0107 |     openings, and exposure/network position. Earlier games prevent future
-0108 |     outcomes leaking into the model's predictors.
-0109 |     """
-0110 |     past = games[games["ts"] <= split_ts]
-     # Keeps this intermediate result under the name `past`.
-0111 |     if not len(past):
-     # Checks whether enough records exist for a trustworthy next step.
-0112 |         raise ValueError("no games before the split; cannot build features")
-     # Stops with an explicit error when this requirement is violated.
-0113 |
-0114 |     # --- who plays what, and how openings relate, as of the split ---------
-0115 |     rep = _repertoires(past)
-     # Keeps this intermediate result under the name `rep`.
-0116 |     openings = sorted(past["eco"].unique())
-     # Keeps this intermediate result under the name `openings`.
-0117 |     phi = relatedness(rep, openings)
-     # Keeps this intermediate result under the name `phi`.
-0118 |
-0119 |     # --- player-level attributes from the training window -----------------
-0120 |     activity = pd.concat([past["white"], past["black"]]).value_counts()
-     # Counts how often each player or opening occurs.
-0121 |     rating = pd.concat([
-     # Keeps this intermediate result under the name `rating`.
-0122 |         past[["white", "white_rating"]].rename(
-     # Part of the value, collection, or call spanning several lines.
-0123 |             columns={"white": "p", "white_rating": "r"}),
-     # Keeps this intermediate result under the name `columns`.
-0124 |         past[["black", "black_rating"]].rename(
-     # Part of the value, collection, or call spanning several lines.
-0125 |             columns={"black": "p", "black_rating": "r"}),
-     # Keeps this intermediate result under the name `columns`.
-0126 |     ]).groupby("p")["r"].mean()
-     # Groups rows sharing these keys before counting or averaging them.
-0127 |     popularity = past["eco"].value_counts(normalize=True)
-     # Counts how often each player or opening occurs.
-0128 |
-0129 |     # --- network position as of the split ---------------------------------
-0130 |     g = structure.build_graph(past)
-     # Calculates or stores the player graph for this stage.
-0131 |     feats = structure.node_features(g)[
-     # Calculates or stores the network features for this stage.
-0132 |         ["player", "degree", "kcore", "betweenness"]]
-     # Part of the value, collection, or call spanning several lines.
-0133 |
-0134 |     out = trials.copy()
-     # Calculates or stores the output value for this stage.
-0135 |     out["rating"] = out["player"].map(rating).fillna(rating.mean())
-     # Continues the current calculation or control flow.
-0136 |     out["activity"] = out["player"].map(activity).fillna(0.0)
-     # Continues the current calculation or control flow.
-0137 |     out["popularity"] = out["opening"].map(popularity).fillna(0.0)
-     # Continues the current calculation or control flow.
-0138 |     out["repertoire_size"] = out["player"].map(
-     # Part of the value, collection, or call spanning several lines.
-0139 |         {p: len(s) for p, s in rep.items()}).fillna(0.0)
-     # Part of the value, collection, or call spanning several lines.
-0140 |
-0141 |     players = sorted(rep)
-     # Keeps this intermediate result under the name `players`.
-0142 |     dens = density_matrix(rep, phi, players)
-     # Keeps this intermediate result under the name `dens`.
-0143 |     p_idx = {p: i for i, p in enumerate(players)}
-     # Keeps this intermediate result under the name `p_idx`.
-0144 |     o_idx = {o: i for i, o in enumerate(phi.index)}
-     # Keeps this intermediate result under the name `o_idx`.
-0145 |     rows = out["opening"].map(o_idx).to_numpy()
-     # Calculates or stores the result rows collected for the output table for this stage.
-0146 |     cols = out["player"].map(p_idx).to_numpy()
-     # Keeps this intermediate result under the name `cols`.
-0147 |     known = pd.notna(rows) & pd.notna(cols)
-     # Keeps this intermediate result under the name `known`.
-0148 |     vals = np.zeros(len(out), dtype=float)
-     # Keeps this intermediate result under the name `vals`.
-0149 |     vals[known] = dens[rows[known].astype(int), cols[known].astype(int)]
-     # Continues the current calculation or control flow.
-0150 |     out["repertoire_density"] = vals
-     # Continues the current calculation or control flow.
-0151 |     out = out.drop(columns=["degree", "kcore", "betweenness"], errors="ignore")
-     # Calculates or stores the output value for this stage.
-0152 |     out = out.merge(feats, on="player", how="left")
-     # Joins two tables on shared identifiers so their columns can be compared.
-0153 |     for c in ("degree", "kcore", "betweenness"):
-     # Processes each item from this collection in turn.
-0154 |         out[c] = out[c].fillna(0.0)
-     # Continues the current calculation or control flow.
-0155 |     return out
-     # Hands this result back to the stage that called this function.
+0029 | BASELINE = ["popularity", "rating", "activity"]  # Saves a value named BASELINE so the next lines can use it.
+0030 | REPERTOIRE = BASELINE + ["repertoire_density", "repertoire_size"]  # Saves a value named REPERTOIRE so the next lines can use it.
+0031 | NETWORK = REPERTOIRE + ["k", "d", "sd", "degree", "kcore", "betweenness"]  # Saves a value named NETWORK so the next lines can use it.
+0032 |
+0033 |
+0034 | def _repertoires(df: pd.DataFrame) -> dict[str, set]:  # Which openings each player actually plays, by colour-agnostic ECO.
+0035 |     """Which openings each player actually plays, by colour-agnostic ECO."""
+0036 |     rep: dict[str, set] = {}  # Saves a value named rep so the next lines can use it.
+0037 |     for col in ("white", "black"):  # Repeats the next indented steps once for each item.
+0038 |         for player, eco in zip(df[col].to_numpy(), df["eco"].to_numpy()):  # Repeats the next indented steps once for each item.
+0039 |             rep.setdefault(player, set()).add(eco)  # Adds this item to the collection being built.
+0040 |     return rep  # Gives this answer back to the code that called the function.
+0041 |
+0042 |
+0043 | def relatedness(rep: dict[str, set], openings: list[str]) -> pd.DataFrame:  # Opening-to-opening proximity from co-play, following De Marzo & Servedio.
+0044 |     """Opening-to-opening proximity from co-play, following De Marzo & Servedio.
+0045 |
+0046 |     Two openings are related when the same players tend to play both. Using
+0047 |     min() in the denominator keeps a rare opening that is always played
+0048 |     alongside a common one from being scored as unrelated to it.
+0049 |     """
+0050 |     idx = {o: i for i, o in enumerate(openings)}  # Saves a value named idx so the next lines can use it.
+0051 |     n = len(openings)  # Saves a value named n so the next lines can use it.
+0052 |     co = np.zeros((n, n), dtype=float)  # Saves a value named co so the next lines can use it.
+0053 |     count = np.zeros(n, dtype=float)  # Saves a value named count so the next lines can use it.
+0054 |
+0055 |     for played in rep.values():  # Repeats the next indented steps once for each item.
+0056 |         ids = [idx[o] for o in played if o in idx]  # Saves a value named ids so the next lines can use it.
+0057 |         for i in ids:  # Repeats the next indented steps once for each item.
+0058 |             count[i] += 1  # Adds this amount to the running total.
+0059 |         for a in range(len(ids)):  # Repeats the next indented steps once for each item.
+0060 |             for b in range(a + 1, len(ids)):  # Repeats the next indented steps once for each item.
+0061 |                 co[ids[a], ids[b]] += 1  # Adds this amount to the running total.
+0062 |                 co[ids[b], ids[a]] += 1  # Adds this amount to the running total.
+0063 |
+0064 |     denom = np.minimum.outer(count, count)  # Saves a value named denom so the next lines can use it.
+0065 |     with np.errstate(divide="ignore", invalid="ignore"):  # Opens a resource and guarantees cleanup when the block ends.
+0066 |         phi = np.where(denom > 0, co / denom, 0.0)  # Saves a value named phi so the next lines can use it.
+0067 |     np.fill_diagonal(phi, 0.0)  # Runs this instruction as part of the current step.
+0068 |     return pd.DataFrame(phi, index=openings, columns=openings)  # Creates a labelled table from the collected rows.
+0069 |
+0070 |
+0071 | def density_matrix(rep: dict[str, set], phi: pd.DataFrame,  # Density for every (opening, player) pair at once.
+0072 |                    players: list[str]) -> np.ndarray:  # Runs this instruction as part of the current step.
+0073 |     """Density for every (opening, player) pair at once.
+0074 |
+0075 |     How close an opening sits to what a player already plays: the share of that
+0076 |     opening's total relatedness pointing at openings already in the repertoire.
+0077 |     1.0 means everything related to it is already known, 0.0 means none of it.
+0078 |
+0079 |     Done as a single matrix product. The obvious per-trial version costs a
+0080 |     pandas label lookup and a fancy-index sum for each of ~224k trials, which
+0081 |     took over ten minutes; this takes a fraction of a second and is the same
+0082 |     arithmetic. phi has a zero diagonal, so an opening never counts itself.
+0083 |     """
+0084 |     openings = list(phi.index)  # Saves a value named openings so the next lines can use it.
+0085 |     o_idx = {o: i for i, o in enumerate(openings)}  # Saves a value named o_idx so the next lines can use it.
+0086 |     mask = np.zeros((len(players), len(openings)), dtype=float)  # Saves a value named mask so the next lines can use it.
+0087 |     for pi, p in enumerate(players):  # Repeats the next indented steps once for each item.
+0088 |         for o in rep.get(p, ()):  # Repeats the next indented steps once for each item.
+0089 |             j = o_idx.get(o)  # Saves a value named j so the next lines can use it.
+0090 |             if j is not None:  # Runs the next indented steps only when this condition is true.
+0091 |                 mask[pi, j] = 1.0  # Stores this value under its player, opening, or field key.
+0092 |
+0093 |     phi_v = phi.to_numpy()  # Saves a value named phi_v so the next lines can use it.
+0094 |     totals = phi_v.sum(axis=1)                 # per opening
+0095 |     reach = phi_v @ mask.T                     # openings x players
+0096 |     with np.errstate(divide="ignore", invalid="ignore"):  # Opens a resource and guarantees cleanup when the block ends.
+0097 |         return np.where(totals[:, None] > 0, reach / totals[:, None], 0.0)  # Gives this answer back to the code that called the function.
+0098 |
+0099 |
+0100 | def build(games: pd.DataFrame, trials: pd.DataFrame,  # Attach features computed ONLY from games before split_ts.
+0101 |           split_ts) -> pd.DataFrame:  # Runs this instruction as part of the current step.
+0102 |     """Attach features computed ONLY from games before `split_ts`.
+0103 |
+0104 |     Explain the three blocks as activity/popularity, closeness to existing
+0105 |     openings, and exposure/network position. Earlier games prevent future
+0106 |     outcomes leaking into the model's predictors.
+0107 |     """
+0108 |     past = games[games["ts"] <= split_ts]  # Saves a value named past so the next lines can use it.
+0109 |     if not len(past):  # Checks whether enough records exist for a trustworthy next step.
+0110 |         raise ValueError("no games before the split; cannot build features")  # Stops with an explicit error when this requirement is violated.
+0111 |
+0112 |     # --- who plays what, and how openings relate, as of the split ---------
+0113 |     rep = _repertoires(past)  # Saves a value named rep so the next lines can use it.
+0114 |     openings = sorted(past["eco"].unique())  # Saves a value named openings so the next lines can use it.
+0115 |     phi = relatedness(rep, openings)  # Saves a value named phi so the next lines can use it.
+0116 |
+0117 |     # --- player-level attributes from the training window -----------------
+0118 |     activity = pd.concat([past["white"], past["black"]]).value_counts()  # Counts how often each player or opening occurs.
+0119 |     rating = pd.concat([  # Saves a value named rating so the next lines can use it.
+0120 |         past[["white", "white_rating"]].rename(  # Part of the value, collection, or call spanning several lines.
+0121 |             columns={"white": "p", "white_rating": "r"}),  # Saves a value named columns so the next lines can use it.
+0122 |         past[["black", "black_rating"]].rename(  # Part of the value, collection, or call spanning several lines.
+0123 |             columns={"black": "p", "black_rating": "r"}),  # Saves a value named columns so the next lines can use it.
+0124 |     ]).groupby("p")["r"].mean()  # Groups rows sharing these keys before counting or averaging them.
+0125 |     popularity = past["eco"].value_counts(normalize=True)  # Counts how often each player or opening occurs.
+0126 |
+0127 |     # --- network position as of the split ---------------------------------
+0128 |     g = structure.build_graph(past)  # Connects players who faced each other in the selected games.
+0129 |     feats = structure.node_features(g)[  # Stores the network features for the next step.
+0130 |         ["player", "degree", "kcore", "betweenness"]]  # Part of the value, collection, or call spanning several lines.
+0131 |
+0132 |     out = trials.copy()  # Stores the output value for the next step.
+0133 |     out["rating"] = out["player"].map(rating).fillna(rating.mean())  # Stores this value under its player, opening, or field key.
+0134 |     out["activity"] = out["player"].map(activity).fillna(0.0)  # Stores this value under its player, opening, or field key.
+0135 |     out["popularity"] = out["opening"].map(popularity).fillna(0.0)  # Stores this value under its player, opening, or field key.
+0136 |     out["repertoire_size"] = out["player"].map(  # Part of the value, collection, or call spanning several lines.
+0137 |         {p: len(s) for p, s in rep.items()}).fillna(0.0)  # Part of the value, collection, or call spanning several lines.
+0138 |
+0139 |     players = sorted(rep)  # Saves a value named players so the next lines can use it.
+0140 |     dens = density_matrix(rep, phi, players)  # Saves a value named dens so the next lines can use it.
+0141 |     p_idx = {p: i for i, p in enumerate(players)}  # Saves a value named p_idx so the next lines can use it.
+0142 |     o_idx = {o: i for i, o in enumerate(phi.index)}  # Saves a value named o_idx so the next lines can use it.
+0143 |     rows = out["opening"].map(o_idx).to_numpy()  # Stores the result rows collected for the output table for the next step.
+0144 |     cols = out["player"].map(p_idx).to_numpy()  # Saves a value named cols so the next lines can use it.
+0145 |     known = pd.notna(rows) & pd.notna(cols)  # Saves a value named known so the next lines can use it.
+0146 |     vals = np.zeros(len(out), dtype=float)  # Saves a value named vals so the next lines can use it.
+0147 |     vals[known] = dens[rows[known].astype(int), cols[known].astype(int)]  # Stores this value under its player, opening, or field key.
+0148 |     out["repertoire_density"] = vals  # Stores this value under its player, opening, or field key.
+0149 |     out = out.drop(columns=["degree", "kcore", "betweenness"], errors="ignore")  # Stores the output value for the next step.
+0150 |     out = out.merge(feats, on="player", how="left")  # Joins two tables on shared identifiers so their columns can be compared.
+0151 |     for c in ("degree", "kcore", "betweenness"):  # Repeats the next indented steps once for each item.
+0152 |         out[c] = out[c].fillna(0.0)  # Stores this value under its player, opening, or field key.
+0153 |     return out  # Gives this answer back to the code that called the function.

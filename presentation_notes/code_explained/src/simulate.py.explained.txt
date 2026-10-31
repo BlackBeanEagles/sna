@@ -1,6 +1,6 @@
 SOURCE: src/simulate.py
 SAY FIRST: Reference copy of src/simulate.py; follow the line numbers while presenting.
-Each numbered source line is followed by a plain-English comment.
+Each numbered code line has a plain-English comment beside it.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Synthetic Lichess-format PGN with a KNOWN contagion rule.
@@ -13,288 +13,164 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0008 |
 0009 | Usage:  python -m src.simulate --players 600 --games 40000
 0010 | """
-0011 | from __future__ import annotations
-     # Imports a library or project module needed below.
+0011 | from __future__ import annotations  # Loads code this file needs for the steps below.
 0012 |
-0013 | import argparse
-     # Imports a library or project module needed below.
-0014 | import math
-     # Imports a library or project module needed below.
-0015 | import random
-     # Imports a library or project module needed below.
-0016 | from datetime import datetime, timedelta
-     # Imports a library or project module needed below.
+0013 | import argparse  # Loads the tool that reads command-line choices.
+0014 | import math  # Loads code this file needs for the steps below.
+0015 | import random  # Loads code this file needs for the steps below.
+0016 | from datetime import datetime, timedelta  # Loads code this file needs for the steps below.
 0017 |
-0018 | import chess
-     # Imports a library or project module needed below.
-0019 | import chess.pgn
-     # Imports a library or project module needed below.
+0018 | import chess  # Loads chess rules so the board accepts only legal moves.
+0019 | import chess.pgn  # Loads chess rules so the board accepts only legal moves.
 0020 |
-0021 | from . import config
-     # Imports a library or project module needed below.
+0021 | from . import config  # Loads the named parts of this project so this file can use their functions.
 0022 |
 0023 | # (ECO, name, SAN move list) -- real openings, legal from the start position.
-0024 | OPENINGS = [
-     # Keeps this intermediate result under the name `OPENINGS`.
-0025 |     ("B20", "Sicilian Defense",            ["e4", "c5"]),
-     # Part of the value, collection, or call spanning several lines.
-0026 |     ("C00", "French Defense",              ["e4", "e6"]),
-     # Part of the value, collection, or call spanning several lines.
-0027 |     ("B10", "Caro-Kann Defense",           ["e4", "c6"]),
-     # Part of the value, collection, or call spanning several lines.
-0028 |     ("C20", "King's Pawn Game",            ["e4", "e5"]),
-     # Part of the value, collection, or call spanning several lines.
-0029 |     ("B01", "Scandinavian Defense",        ["e4", "d5"]),
-     # Part of the value, collection, or call spanning several lines.
-0030 |     ("D00", "Queen's Pawn Game",           ["d4", "d5"]),
-     # Part of the value, collection, or call spanning several lines.
-0031 |     ("A45", "Indian Defense",              ["d4", "Nf6"]),
-     # Part of the value, collection, or call spanning several lines.
-0032 |     ("A40", "Modern Defense",              ["d4", "g6"]),
-     # Part of the value, collection, or call spanning several lines.
-0033 |     ("A04", "Zukertort Opening",           ["Nf3", "d5"]),
-     # Part of the value, collection, or call spanning several lines.
-0034 |     ("A10", "English Opening",             ["c4", "e6"]),
-     # Part of the value, collection, or call spanning several lines.
-0035 |     ("A00", "Nimzo-Larsen Attack",         ["b3", "e5"]),
-     # Part of the value, collection, or call spanning several lines.
-0036 |     ("B00", "Nimzowitsch Defense",         ["e4", "Nc6"]),
-     # Part of the value, collection, or call spanning several lines.
-0037 | ]
-     # Closes the data structure or function call started above.
-0038 | ECOS = [o[0] for o in OPENINGS]
-     # Keeps this intermediate result under the name `ECOS`.
-0039 | BY_ECO = {o[0]: o for o in OPENINGS}
-     # Keeps this intermediate result under the name `BY_ECO`.
+0024 | OPENINGS = [  # Saves a value named OPENINGS so the next lines can use it.
+0025 |     ("B20", "Sicilian Defense",            ["e4", "c5"]),  # Part of the value, collection, or call spanning several lines.
+0026 |     ("C00", "French Defense",              ["e4", "e6"]),  # Part of the value, collection, or call spanning several lines.
+0027 |     ("B10", "Caro-Kann Defense",           ["e4", "c6"]),  # Part of the value, collection, or call spanning several lines.
+0028 |     ("C20", "King's Pawn Game",            ["e4", "e5"]),  # Part of the value, collection, or call spanning several lines.
+0029 |     ("B01", "Scandinavian Defense",        ["e4", "d5"]),  # Part of the value, collection, or call spanning several lines.
+0030 |     ("D00", "Queen's Pawn Game",           ["d4", "d5"]),  # Part of the value, collection, or call spanning several lines.
+0031 |     ("A45", "Indian Defense",              ["d4", "Nf6"]),  # Part of the value, collection, or call spanning several lines.
+0032 |     ("A40", "Modern Defense",              ["d4", "g6"]),  # Part of the value, collection, or call spanning several lines.
+0033 |     ("A04", "Zukertort Opening",           ["Nf3", "d5"]),  # Part of the value, collection, or call spanning several lines.
+0034 |     ("A10", "English Opening",             ["c4", "e6"]),  # Part of the value, collection, or call spanning several lines.
+0035 |     ("A00", "Nimzo-Larsen Attack",         ["b3", "e5"]),  # Part of the value, collection, or call spanning several lines.
+0036 |     ("B00", "Nimzowitsch Defense",         ["e4", "Nc6"]),  # Part of the value, collection, or call spanning several lines.
+0037 | ]  # Closes the data structure or function call started above.
+0038 | ECOS = [o[0] for o in OPENINGS]  # Saves a value named ECOS so the next lines can use it.
+0039 | BY_ECO = {o[0]: o for o in OPENINGS}  # Saves a value named BY_ECO so the next lines can use it.
 0040 |
-0041 | SPEEDS = ["Rapid", "Blitz", "Classical"]
-     # Keeps this intermediate result under the name `SPEEDS`.
-0042 | TIME_CONTROLS = {"Rapid": "600+0", "Blitz": "180+2", "Classical": "1800+0"}
-     # Keeps this intermediate result under the name `TIME_CONTROLS`.
+0041 | SPEEDS = ["Rapid", "Blitz", "Classical"]  # Saves a value named SPEEDS so the next lines can use it.
+0042 | TIME_CONTROLS = {"Rapid": "600+0", "Blitz": "180+2", "Classical": "1800+0"}  # Saves a value named TIME_CONTROLS so the next lines can use it.
 0043 |
 0044 |
-0045 | def adoption_hazard(d: int, *, base: float, gain: float, lam: float) -> float:
-     # Complex contagion: probability rises with DISTINCT exposers d.
+0045 | def adoption_hazard(d: int, *, base: float, gain: float, lam: float) -> float:  # Complex contagion: probability rises with DISTINCT exposers d.
 0046 |     """Complex contagion: probability rises with DISTINCT exposers d."""
-0047 |     if d <= 0:
-     # Checks this condition before running the next indented block.
-0048 |         return base
-     # Hands this result back to the stage that called this function.
-0049 |     return min(1.0, base + gain * (1.0 - math.exp(-lam * d)))
-     # Hands this result back to the stage that called this function.
+0047 |     if d <= 0:  # Runs the next indented steps only when this condition is true.
+0048 |         return base  # Gives this answer back to the code that called the function.
+0049 |     return min(1.0, base + gain * (1.0 - math.exp(-lam * d)))  # Gives this answer back to the code that called the function.
 0050 |
 0051 |
-0052 | def build_population(n_players: int, n_communities: int, rng: random.Random):
-     # Defines a reusable step; the following indented lines are its body.
-0053 |     players, community = [], {}
-     # Continues the current calculation or control flow.
-0054 |     for i in range(n_players):
-     # Processes each item from this collection in turn.
-0055 |         name = f"sim_{i:05d}"
-     # Keeps this intermediate result under the name `name`.
-0056 |         players.append(name)
-     # Continues the current calculation or control flow.
-0057 |         community[name] = i % n_communities
-     # Continues the current calculation or control flow.
-0058 |     rating = {p: int(rng.gauss(2000, 110)) for p in players}
-     # Keeps this intermediate result under the name `rating`.
-0059 |     for p in players:
-     # Processes each item from this collection in turn.
-0060 |         rating[p] = max(config.RATING_MIN, min(config.RATING_MAX, rating[p]))
-     # Continues the current calculation or control flow.
+0052 | def build_population(n_players: int, n_communities: int, rng: random.Random):  # Defines a reusable step; the following indented lines are its body.
+0053 |     players, community = [], {}  # Runs this instruction as part of the current step.
+0054 |     for i in range(n_players):  # Repeats the next indented steps once for each item.
+0055 |         name = f"sim_{i:05d}"  # Saves a value named name so the next lines can use it.
+0056 |         players.append(name)  # Adds this item to the list being built.
+0057 |         community[name] = i % n_communities  # Stores this value under its player, opening, or field key.
+0058 |     rating = {p: int(rng.gauss(2000, 110)) for p in players}  # Saves a value named rating so the next lines can use it.
+0059 |     for p in players:  # Repeats the next indented steps once for each item.
+0060 |         rating[p] = max(config.RATING_MIN, min(config.RATING_MAX, rating[p]))  # Stores this value under its player, opening, or field key.
 0061 |     # heavy-tailed activity: a few players play far more than the rest
-0062 |     weight = {p: rng.paretovariate(1.6) for p in players}
-     # Keeps this intermediate result under the name `weight`.
-0063 |     return players, community, rating, weight
-     # Hands this result back to the stage that called this function.
+0062 |     weight = {p: rng.paretovariate(1.6) for p in players}  # Saves a value named weight so the next lines can use it.
+0063 |     return players, community, rating, weight  # Gives this answer back to the code that called the function.
 0064 |
 0065 |
-0066 | def pick_opponent(u, players, community, weight, rng, p_within=0.8):
-     # Defines a reusable step; the following indented lines are its body.
-0067 |     for _ in range(40):
-     # Processes each item from this collection in turn.
-0068 |         v = rng.choices(players, weights=[weight[p] for p in players], k=1)[0]
-     # Keeps this intermediate result under the name `v`.
-0069 |         if v == u:
-     # Checks this condition before running the next indented block.
-0070 |             continue
-     # Skips this item and moves to the next loop iteration.
-0071 |         if community[v] == community[u]:
-     # Checks this condition before running the next indented block.
-0072 |             if rng.random() < p_within:
-     # Checks this condition before running the next indented block.
-0073 |                 return v
-     # Hands this result back to the stage that called this function.
-0074 |         elif rng.random() < (1 - p_within):
-     # Checks this condition before running the next indented block.
-0075 |             return v
-     # Hands this result back to the stage that called this function.
-0076 |     return v
-     # Hands this result back to the stage that called this function.
+0066 | def pick_opponent(u, players, community, weight, rng, p_within=0.8):  # Defines a reusable step; the following indented lines are its body.
+0067 |     for _ in range(40):  # Repeats the next indented steps once for each item.
+0068 |         v = rng.choices(players, weights=[weight[p] for p in players], k=1)[0]  # Saves a value named v so the next lines can use it.
+0069 |         if v == u:  # Runs the next indented steps only when this condition is true.
+0070 |             continue  # Skips this item and moves to the next loop iteration.
+0071 |         if community[v] == community[u]:  # Runs the next indented steps only when this condition is true.
+0072 |             if rng.random() < p_within:  # Runs the next indented steps only when this condition is true.
+0073 |                 return v  # Gives this answer back to the code that called the function.
+0074 |         elif rng.random() < (1 - p_within):  # Runs the next indented steps only when this condition is true.
+0075 |             return v  # Gives this answer back to the code that called the function.
+0076 |     return v  # Gives this answer back to the code that called the function.
 0077 |
 0078 |
-0079 | def play_out(eco: str, rng: random.Random, extra_plies: int = 12) -> str:
-     # SAN movetext: the book line plus random legal continuation.
+0079 | def play_out(eco: str, rng: random.Random, extra_plies: int = 12) -> str:  # SAN movetext: the book line plus random legal continuation.
 0080 |     """SAN movetext: the book line plus random legal continuation."""
-0081 |     board = chess.Board()
-     # Keeps this intermediate result under the name `board`.
-0082 |     sans = []
-     # Keeps this intermediate result under the name `sans`.
-0083 |     for san in BY_ECO[eco][2]:
-     # Processes each item from this collection in turn.
-0084 |         board.push_san(san)
-     # Continues the current calculation or control flow.
-0085 |         sans.append(san)
-     # Continues the current calculation or control flow.
-0086 |     for _ in range(extra_plies):
-     # Processes each item from this collection in turn.
-0087 |         moves = list(board.legal_moves)
-     # Keeps this intermediate result under the name `moves`.
-0088 |         if not moves:
-     # Checks this condition before running the next indented block.
-0089 |             break
-     # Ends the current loop.
-0090 |         mv = rng.choice(moves)
-     # Keeps this intermediate result under the name `mv`.
-0091 |         sans.append(board.san(mv))
-     # Continues the current calculation or control flow.
-0092 |         board.push(mv)
-     # Continues the current calculation or control flow.
-0093 |     return " ".join(sans)
-     # Hands this result back to the stage that called this function.
+0081 |     board = chess.Board()  # Saves a value named board so the next lines can use it.
+0082 |     sans = []  # Stores the moves written in chess notation for the next step.
+0083 |     for san in BY_ECO[eco][2]:  # Repeats the next indented steps once for each item.
+0084 |         board.push_san(san)  # Runs this instruction as part of the current step.
+0085 |         sans.append(san)  # Adds this item to the list being built.
+0086 |     for _ in range(extra_plies):  # Repeats the next indented steps once for each item.
+0087 |         moves = list(board.legal_moves)  # Saves a value named moves so the next lines can use it.
+0088 |         if not moves:  # Runs the next indented steps only when this condition is true.
+0089 |             break  # Ends the current loop.
+0090 |         mv = rng.choice(moves)  # Saves a value named mv so the next lines can use it.
+0091 |         sans.append(board.san(mv))  # Adds this item to the list being built.
+0092 |         board.push(mv)  # Runs this instruction as part of the current step.
+0093 |     return " ".join(sans)  # Gives this answer back to the code that called the function.
 0094 |
 0095 |
-0096 | def simulate(n_players=600, n_games=40000, days=30, n_communities=6,
-     # Write PGN with a planted distinct-opponent adoption rule.
-0097 |              base=0.0015, gain=0.06, lam=0.55, seed=config.RANDOM_SEED,
-     # Keeps this intermediate result under the name `base`.
-0098 |              out_path=None):
-     # Keeps this intermediate result under the name `out_path`.
+0096 | def simulate(n_players=600, n_games=40000, days=30, n_communities=6,  # Write PGN with a planted distinct-opponent adoption rule.
+0097 |              base=0.0015, gain=0.06, lam=0.55, seed=config.RANDOM_SEED,  # Saves a value named base so the next lines can use it.
+0098 |              out_path=None):  # Saves a value named out_path so the next lines can use it.
 0099 |     """Write PGN with a planted distinct-opponent adoption rule.
 0100 |
 0101 |     Use this to check whether the pipeline can detect a rule we know was put
 0102 |     into the data. It is separate from the real January 2016 study.
 0103 |     """
-0104 |     rng = random.Random(seed)
-     # Keeps this intermediate result under the name `rng`.
-0105 |     players, community, rating, weight = build_population(n_players, n_communities, rng)
-     # Continues the current calculation or control flow.
+0104 |     rng = random.Random(seed)  # Saves a value named rng so the next lines can use it.
+0105 |     players, community, rating, weight = build_population(n_players, n_communities, rng)  # Runs this instruction as part of the current step.
 0106 |
 0107 |     # repertoire[(player, colour)] -> set of ECOs the player will actually play
-0108 |     repertoire = {}
-     # Keeps this intermediate result under the name `repertoire`.
-0109 |     for p in players:
-     # Processes each item from this collection in turn.
-0110 |         for c in "WB":
-     # Processes each item from this collection in turn.
-0111 |             repertoire[(p, c)] = set(rng.sample(ECOS, k=rng.choice([1, 1, 2])))
-     # Continues the current calculation or control flow.
+0108 |     repertoire = {}  # Saves a value named repertoire so the next lines can use it.
+0109 |     for p in players:  # Repeats the next indented steps once for each item.
+0110 |         for c in "WB":  # Repeats the next indented steps once for each item.
+0111 |             repertoire[(p, c)] = set(rng.sample(ECOS, k=rng.choice([1, 1, 2])))  # Stores this value under its player, opening, or field key.
 0112 |     # exposers[(player, eco, colour)] -> set of distinct opponents seen playing it
-0113 |     exposers: dict[tuple[str, str, str], set[str]] = {}
-     # Keeps this intermediate result under the name `exposers`.
+0113 |     exposers: dict[tuple[str, str, str], set[str]] = {}  # Saves a value named exposers so the next lines can use it.
 0114 |
-0115 |     start = datetime(2026, 3, 1, 0, 0, 0)
-     # Keeps this intermediate result under the name `start`.
-0116 |     out_path = out_path or (config.RAW / "simulated.pgn")
-     # Keeps this intermediate result under the name `out_path`.
-0117 |     n_written = 0
-     # Keeps this intermediate result under the name `n_written`.
+0115 |     start = datetime(2026, 3, 1, 0, 0, 0)  # Saves a value named start so the next lines can use it.
+0116 |     out_path = out_path or (config.RAW / "simulated.pgn")  # Saves a value named out_path so the next lines can use it.
+0117 |     n_written = 0  # Saves a value named n_written so the next lines can use it.
 0118 |
-0119 |     with open(out_path, "w", encoding="utf-8") as fh:
-     # Opens a resource and guarantees cleanup when the block ends.
-0120 |         for g in range(n_games):
-     # Processes each item from this collection in turn.
-0121 |             ts = start + timedelta(seconds=int(g / n_games * days * 86400)
-     # Keeps this intermediate result under the name `ts`.
-0122 |                                    + rng.randint(0, 60))
-     # Continues the current calculation or control flow.
-0123 |             u = rng.choices(players, weights=[weight[p] for p in players], k=1)[0]
-     # Keeps this intermediate result under the name `u`.
-0124 |             v = pick_opponent(u, players, community, weight, rng)
-     # Keeps this intermediate result under the name `v`.
-0125 |             white, black = (u, v) if rng.random() < 0.5 else (v, u)
-     # Continues the current calculation or control flow.
+0119 |     with open(out_path, "w", encoding="utf-8") as fh:  # Opens a resource and guarantees cleanup when the block ends.
+0120 |         for g in range(n_games):  # Repeats the next indented steps once for each item.
+0121 |             ts = start + timedelta(seconds=int(g / n_games * days * 86400)  # Saves a value named ts so the next lines can use it.
+0122 |                                    + rng.randint(0, 60))  # Runs this instruction as part of the current step.
+0123 |             u = rng.choices(players, weights=[weight[p] for p in players], k=1)[0]  # Saves a value named u so the next lines can use it.
+0124 |             v = pick_opponent(u, players, community, weight, rng)  # Saves a value named v so the next lines can use it.
+0125 |             white, black = (u, v) if rng.random() < 0.5 else (v, u)  # Runs this instruction as part of the current step.
 0126 |
 0127 |             # the ECO of a game is jointly produced: whoever "leads" it here
-0128 |             chooser, chooser_colour = (white, "W") if rng.random() < 0.5 else (black, "B")
-     # Continues the current calculation or control flow.
-0129 |             eco = rng.choice(sorted(repertoire[(chooser, chooser_colour)]))
-     # Keeps this intermediate result under the name `eco`.
+0128 |             chooser, chooser_colour = (white, "W") if rng.random() < 0.5 else (black, "B")  # Runs this instruction as part of the current step.
+0129 |             eco = rng.choice(sorted(repertoire[(chooser, chooser_colour)]))  # Saves a value named eco so the next lines can use it.
 0130 |
 0131 |             # --- exposure + adoption (ground truth) ------------------------
-0132 |             for actor, observer, colour in ((white, black, "W"), (black, white, "B")):
-     # Processes both sides of each game as a performance and an exposure.
-0133 |                 key = (observer, eco, colour)
-     # Keeps this intermediate result under the name `key`.
-0134 |                 seen = exposers.setdefault(key, set())
-     # Calculates or stores the set of opponents already counted for this stage.
-0135 |                 seen.add(actor)
-     # Continues the current calculation or control flow.
-0136 |                 if eco not in repertoire[(observer, colour)]:
-     # Checks this condition before running the next indented block.
-0137 |                     if rng.random() < adoption_hazard(len(seen), base=base,
-     # Checks whether enough records exist for a trustworthy next step.
-0138 |                                                       gain=gain, lam=lam):
-     # Keeps this intermediate result under the name `gain`.
-0139 |                         repertoire[(observer, colour)].add(eco)
-     # Continues the current calculation or control flow.
+0132 |             for actor, observer, colour in ((white, black, "W"), (black, white, "B")):  # Processes both sides of each game as a performance and an exposure.
+0133 |                 key = (observer, eco, colour)  # Saves a value named key so the next lines can use it.
+0134 |                 seen = exposers.setdefault(key, set())  # Stores the set of opponents already counted for the next step.
+0135 |                 seen.add(actor)  # Adds this item to the collection being built.
+0136 |                 if eco not in repertoire[(observer, colour)]:  # Runs the next indented steps only when this condition is true.
+0137 |                     if rng.random() < adoption_hazard(len(seen), base=base,  # Checks whether enough records exist for a trustworthy next step.
+0138 |                                                       gain=gain, lam=lam):  # Saves a value named gain so the next lines can use it.
+0139 |                         repertoire[(observer, colour)].add(eco)  # Adds this item to the collection being built.
 0140 |
-0141 |             speed = rng.choices(SPEEDS, weights=[0.5, 0.35, 0.15], k=1)[0]
-     # Keeps this intermediate result under the name `speed`.
-0142 |             result = rng.choices(["1-0", "0-1", "1/2-1/2"], weights=[.49, .46, .05], k=1)[0]
-     # Keeps this intermediate result under the name `result`.
-0143 |             fh.write(
-     # Part of the value, collection, or call spanning several lines.
-0144 |                 f'[Event "Rated {speed} game"]\n'
-     # Continues the current calculation or control flow.
-0145 |                 f'[Site "https://lichess.org/sim{g:07d}"]\n'
-     # Continues the current calculation or control flow.
-0146 |                 f'[Date "{ts:%Y.%m.%d}"]\n'
-     # Continues the current calculation or control flow.
-0147 |                 f'[White "{white}"]\n[Black "{black}"]\n'
-     # Continues the current calculation or control flow.
-0148 |                 f'[Result "{result}"]\n'
-     # Continues the current calculation or control flow.
-0149 |                 f'[UTCDate "{ts:%Y.%m.%d}"]\n[UTCTime "{ts:%H:%M:%S}"]\n'
-     # Continues the current calculation or control flow.
-0150 |                 f'[WhiteElo "{rating[white]}"]\n[BlackElo "{rating[black]}"]\n'
-     # Continues the current calculation or control flow.
-0151 |                 f'[ECO "{eco}"]\n[Opening "{BY_ECO[eco][1]}"]\n'
-     # Continues the current calculation or control flow.
-0152 |                 f'[TimeControl "{TIME_CONTROLS[speed]}"]\n'
-     # Continues the current calculation or control flow.
-0153 |                 f'[Termination "Normal"]\n\n'
-     # Continues the current calculation or control flow.
-0154 |                 f'{play_out(eco, rng)} {result}\n\n'
-     # Continues the current calculation or control flow.
-0155 |             )
-     # Closes the data structure or function call started above.
-0156 |             n_written += 1
-     # Continues the current calculation or control flow.
+0141 |             speed = rng.choices(SPEEDS, weights=[0.5, 0.35, 0.15], k=1)[0]  # Saves a value named speed so the next lines can use it.
+0142 |             result = rng.choices(["1-0", "0-1", "1/2-1/2"], weights=[.49, .46, .05], k=1)[0]  # Saves a value named result so the next lines can use it.
+0143 |             fh.write(  # Part of the value, collection, or call spanning several lines.
+0144 |                 f'[Event "Rated {speed} game"]\n'  # Runs this instruction as part of the current step.
+0145 |                 f'[Site "https://lichess.org/sim{g:07d}"]\n'  # Runs this instruction as part of the current step.
+0146 |                 f'[Date "{ts:%Y.%m.%d}"]\n'  # Runs this instruction as part of the current step.
+0147 |                 f'[White "{white}"]\n[Black "{black}"]\n'  # Runs this instruction as part of the current step.
+0148 |                 f'[Result "{result}"]\n'  # Runs this instruction as part of the current step.
+0149 |                 f'[UTCDate "{ts:%Y.%m.%d}"]\n[UTCTime "{ts:%H:%M:%S}"]\n'  # Runs this instruction as part of the current step.
+0150 |                 f'[WhiteElo "{rating[white]}"]\n[BlackElo "{rating[black]}"]\n'  # Runs this instruction as part of the current step.
+0151 |                 f'[ECO "{eco}"]\n[Opening "{BY_ECO[eco][1]}"]\n'  # Runs this instruction as part of the current step.
+0152 |                 f'[TimeControl "{TIME_CONTROLS[speed]}"]\n'  # Runs this instruction as part of the current step.
+0153 |                 f'[Termination "Normal"]\n\n'  # Runs this instruction as part of the current step.
+0154 |                 f'{play_out(eco, rng)} {result}\n\n'  # Runs this instruction as part of the current step.
+0155 |             )  # Closes the data structure or function call started above.
+0156 |             n_written += 1  # Adds this amount to the running total.
 0157 |
-0158 |     return {"path": out_path, "games": n_written, "players": n_players,
-     # Hands this result back to the stage that called this function.
-0159 |             "ground_truth": {"base": base, "gain": gain, "lam": lam,
-     # Part of the value, collection, or call spanning several lines.
-0160 |                              "rule": "complex contagion in distinct exposers d"}}
-     # Part of the value, collection, or call spanning several lines.
+0158 |     return {"path": out_path, "games": n_written, "players": n_players,  # Gives this answer back to the code that called the function.
+0159 |             "ground_truth": {"base": base, "gain": gain, "lam": lam,    // Part of the value, collection, or call spanning several lines.
+0160 |                              "rule": "complex contagion in distinct exposers d"}}    // Part of the value, collection, or call spanning several lines.
 0161 |
 0162 |
-0163 | if __name__ == "__main__":
-     # Runs the command-line entry point only when this file is executed directly.
-0164 |     ap = argparse.ArgumentParser()
-     # Keeps this intermediate result under the name `ap`.
-0165 |     ap.add_argument("--players", type=int, default=600)
-     # Defines a command-line option for this script.
-0166 |     ap.add_argument("--games", type=int, default=40000)
-     # Defines a command-line option for this script.
-0167 |     ap.add_argument("--days", type=int, default=30)
-     # Defines a command-line option for this script.
-0168 |     ap.add_argument("--seed", type=int, default=config.RANDOM_SEED)
-     # Defines a command-line option for this script.
-0169 |     a = ap.parse_args()
-     # Keeps this intermediate result under the name `a`.
-0170 |     info = simulate(n_players=a.players, n_games=a.games, days=a.days, seed=a.seed)
-     # Keeps this intermediate result under the name `info`.
-0171 |     print(f"wrote {info['games']} games -> {info['path']}")
-     # Prints this reading so a command-line run can be followed.
+0163 | if __name__ == "__main__":  # Runs the command-line entry point only when this file is executed directly.
+0164 |     ap = argparse.ArgumentParser()  # Saves a value named ap so the next lines can use it.
+0165 |     ap.add_argument("--players", type=int, default=600)  # Defines a command-line option for this script.
+0166 |     ap.add_argument("--games", type=int, default=40000)  # Defines a command-line option for this script.
+0167 |     ap.add_argument("--days", type=int, default=30)  # Defines a command-line option for this script.
+0168 |     ap.add_argument("--seed", type=int, default=config.RANDOM_SEED)  # Defines a command-line option for this script.
+0169 |     a = ap.parse_args()  # Saves a value named a so the next lines can use it.
+0170 |     info = simulate(n_players=a.players, n_games=a.games, days=a.days, seed=a.seed)  # Saves a value named info so the next lines can use it.
+0171 |     print(f"wrote {info['games']} games -> {info['path']}")  # Prints this reading so a command-line run can be followed.

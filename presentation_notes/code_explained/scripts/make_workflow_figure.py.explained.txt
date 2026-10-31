@@ -1,6 +1,6 @@
 SOURCE: scripts/make_workflow_figure.py
 SAY FIRST: Reference copy of scripts/make_workflow_figure.py; follow the line numbers while presenting.
-Each numbered source line is followed by a plain-English comment.
+Each numbered code line has a plain-English comment beside it.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Draw the methodology workflow figure for the proposal.
@@ -11,214 +11,127 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0006 |
 0007 |     python scripts/make_workflow_figure.py
 0008 | """
-0009 | from __future__ import annotations
-     # Imports a library or project module needed below.
+0009 | from __future__ import annotations  # Loads code this file needs for the steps below.
 0010 |
-0011 | import sys
-     # Imports a library or project module needed below.
-0012 | from pathlib import Path
-     # Imports a library or project module needed below.
+0011 | import sys  # Loads code this file needs for the steps below.
+0012 | from pathlib import Path  # Loads Path to find and save project files.
 0013 |
-0014 | import matplotlib
-     # Imports a library or project module needed below.
-0015 | matplotlib.use("Agg")
-     # Continues the current calculation or control flow.
-0016 | import matplotlib.pyplot as plt
-     # Imports a library or project module needed below.
-0017 | from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
-     # Imports a library or project module needed below.
+0014 | import matplotlib  # Loads code this file needs for the steps below.
+0015 | matplotlib.use("Agg")  # Runs this instruction as part of the current step.
+0016 | import matplotlib.pyplot as plt  # Loads code this file needs for the steps below.
+0017 | from matplotlib.patches import FancyArrowPatch, FancyBboxPatch  # Loads code this file needs for the steps below.
 0018 |
-0019 | ROOT = Path(__file__).resolve().parents[1]
-     # Keeps this intermediate result under the name `ROOT`.
-0020 | sys.path.insert(0, str(ROOT))
-     # Continues the current calculation or control flow.
+0019 | ROOT = Path(__file__).resolve().parents[1]  # Saves a value named ROOT so the next lines can use it.
+0020 | sys.path.insert(0, str(ROOT))  # Runs this instruction as part of the current step.
 0021 |
-0022 | INK = "#1a1722"
-     # Keeps this intermediate result under the name `INK`.
-0023 | MUTED = "#5c5670"
-     # Keeps this intermediate result under the name `MUTED`.
-0024 | BOXES = {
-     # Keeps this intermediate result under the name `BOXES`.
+0022 | INK = "#1a1722"  # Saves a value named INK so the next lines can use it.
+0023 | MUTED = "#5c5670"  # Saves a value named MUTED so the next lines can use it.
+0024 | BOXES = {  # Saves a value named BOXES so the next lines can use it.
 0025 |     "data": "#eceaf4",
 0026 |     "build": "#e4eef0",
 0027 |     "test": "#f5e9e7",
 0028 |     "out": "#efeadf",
-0029 | }
-     # Closes the data structure or function call started above.
+0029 | }  # Closes the data structure or function call started above.
 0030 |
 0031 | # Laid out as a serpentine: each row runs in the opposite direction to the one
 0032 | # above it, so every edge joins neighbouring boxes and none has to cut across
 0033 | # the figure -- or through another box -- to reach its target.
-0034 | ROW_A, ROW_B, ROW_C, ROW_D, ROW_E = 0.82, 0.615, 0.41, 0.205, 0.0
-     # Continues the current calculation or control flow.
-0035 | W, H = 0.215, 0.125
-     # Continues the current calculation or control flow.
-0036 | COL = [0.02, 0.27, 0.52, 0.77]
-     # Keeps this intermediate result under the name `COL`.
+0034 | ROW_A, ROW_B, ROW_C, ROW_D, ROW_E = 0.82, 0.615, 0.41, 0.205, 0.0  # Runs this instruction as part of the current step.
+0035 | W, H = 0.215, 0.125  # Runs this instruction as part of the current step.
+0036 | COL = [0.02, 0.27, 0.52, 0.77]  # Saves a value named COL so the next lines can use it.
 0037 |
 0038 | # (x, y, w, h, label, kind)
-0039 | NODES = [
-     # Keeps this intermediate result under the name `NODES`.
+0039 | NODES = [  # Saves a value named NODES so the next lines can use it.
 0040 |     # row A, left to right
-0041 |     (COL[0], ROW_A, W, H, "Lichess monthly\narchive (.pgn.zst)", "data"),
-     # Part of the value, collection, or call spanning several lines.
-0042 |     (COL[1], ROW_A, W, H, "Filter: rating band,\ntime control, top ECO", "data"),
-     # Part of the value, collection, or call spanning several lines.
-0043 |     (COL[2], ROW_A, W, H, "Parse to temporal\nedge list", "data"),
-     # Part of the value, collection, or call spanning several lines.
-0044 |     (COL[3], ROW_A, W, H, "Player interaction\nnetwork G = (V, E, T)", "build"),
-     # Part of the value, collection, or call spanning several lines.
+0041 |     (COL[0], ROW_A, W, H, "Lichess monthly\narchive (.pgn.zst)", "data"),  # Part of the value, collection, or call spanning several lines.
+0042 |     (COL[1], ROW_A, W, H, "Filter: rating band,\ntime control, top ECO", "data"),  # Part of the value, collection, or call spanning several lines.
+0043 |     (COL[2], ROW_A, W, H, "Parse to temporal\nedge list", "data"),  # Part of the value, collection, or call spanning several lines.
+0044 |     (COL[3], ROW_A, W, H, "Player interaction\nnetwork G = (V, E, T)", "build"),  # Part of the value, collection, or call spanning several lines.
 0045 |
 0046 |     # row B, right to left
-0047 |     (COL[3], ROW_B, W, H, "Exposure events\nA plays X against B", "build"),
-     # Part of the value, collection, or call spanning several lines.
-0048 |     (COL[2], ROW_B, W, H, "Adoption events\nB first plays X", "build"),
-     # Part of the value, collection, or call spanning several lines.
-0049 |     (COL[1], ROW_B, W, H, "Exposure neighbourhood\nper (player, opening)", "build"),
-     # Part of the value, collection, or call spanning several lines.
-0050 |     (COL[0], ROW_B, W, H, "Structural diversity\n(components)", "build"),
-     # Part of the value, collection, or call spanning several lines.
+0047 |     (COL[3], ROW_B, W, H, "Exposure events\nA plays X against B", "build"),  # Part of the value, collection, or call spanning several lines.
+0048 |     (COL[2], ROW_B, W, H, "Adoption events\nB first plays X", "build"),  # Part of the value, collection, or call spanning several lines.
+0049 |     (COL[1], ROW_B, W, H, "Exposure neighbourhood\nper (player, opening)", "build"),  # Part of the value, collection, or call spanning several lines.
+0050 |     (COL[0], ROW_B, W, H, "Structural diversity\n(components)", "build"),  # Part of the value, collection, or call spanning several lines.
 0051 |
 0052 |     # row C
-0053 |     (COL[0], ROW_C, W, H, "Adoption-probability\ncurve  P(adopt | k, d)", "build"),
-     # Part of the value, collection, or call spanning several lines.
-0054 |     (COL[3], ROW_C, W, H, "Centrality, communities,\ndiffusion animation", "out"),
-     # Part of the value, collection, or call spanning several lines.
+0053 |     (COL[0], ROW_C, W, H, "Adoption-probability\ncurve  P(adopt | k, d)", "build"),  # Part of the value, collection, or call spanning several lines.
+0054 |     (COL[3], ROW_C, W, H, "Centrality, communities,\ndiffusion animation", "out"),  # Part of the value, collection, or call spanning several lines.
 0055 |
 0056 |     # row D, the three validity checks
-0057 |     (COL[0], ROW_D, W, H, "Shuffled-time\nnull model", "test"),
-     # Part of the value, collection, or call spanning several lines.
-0058 |     (COL[1], ROW_D, W, H, "Rating & activity\nmatched controls", "test"),
-     # Part of the value, collection, or call spanning several lines.
-0059 |     (COL[2], ROW_D, W, H, "Held-out\npredictive AUC", "test"),
-     # Part of the value, collection, or call spanning several lines.
+0057 |     (COL[0], ROW_D, W, H, "Shuffled-time\nnull model", "test"),  # Part of the value, collection, or call spanning several lines.
+0058 |     (COL[1], ROW_D, W, H, "Rating & activity\nmatched controls", "test"),  # Part of the value, collection, or call spanning several lines.
+0059 |     (COL[2], ROW_D, W, H, "Held-out\npredictive AUC", "test"),  # Part of the value, collection, or call spanning several lines.
 0060 |
 0061 |     # row E, the verdict
-0062 |     (COL[1], ROW_E, W, H, "Simple vs complex\ncontagion verdict", "out"),
-     # Part of the value, collection, or call spanning several lines.
-0063 | ]
-     # Closes the data structure or function call started above.
+0062 |     (COL[1], ROW_E, W, H, "Simple vs complex\ncontagion verdict", "out"),  # Part of the value, collection, or call spanning several lines.
+0063 | ]  # Closes the data structure or function call started above.
 0064 |
-0065 | EDGES = [
-     # Keeps this intermediate result under the name `EDGES`.
+0065 | EDGES = [  # Saves a value named EDGES so the next lines can use it.
 0066 |     (0, 1), (1, 2), (2, 3),          # row A
-     # Part of the value, collection, or call spanning several lines.
 0067 |     (3, 4),                          # A -> B, straight down the right edge
-     # Part of the value, collection, or call spanning several lines.
 0068 |     (4, 5), (5, 6), (6, 7),          # row B, leftwards
-     # Part of the value, collection, or call spanning several lines.
 0069 |     (7, 8),                          # B -> C, straight down the left edge
-     # Part of the value, collection, or call spanning several lines.
 0070 |     (8, 10), (8, 11), (8, 12),       # the curve feeds each validity check
-     # Part of the value, collection, or call spanning several lines.
 0071 |     (10, 13), (11, 13), (12, 13),    # the checks converge on the verdict
-     # Part of the value, collection, or call spanning several lines.
-0072 | ]
-     # Closes the data structure or function call started above.
+0072 | ]  # Closes the data structure or function call started above.
 0073 |
 0074 | # The network also drives the structural work, but that box sits two rows down
 0075 | # in the same column, so a straight drop would run through the row between.
 0076 | # This one edge is routed out around the right margin instead.
-0077 | MARGIN_EDGES = [(3, 9)]
-     # Keeps this intermediate result under the name `MARGIN_EDGES`.
+0077 | MARGIN_EDGES = [(3, 9)]  # Saves a value named MARGIN_EDGES so the next lines can use it.
 0078 |
 0079 |
-0080 | def main():
-     # Draw the methodology flow used in the written project material.
+0080 | def main():  # Draw the methodology flow used in the written project material.
 0081 |     """Draw the methodology flow used in the written project material."""
-0082 |     fig, ax = plt.subplots(figsize=(10.5, 6.2))
-     # Continues the current calculation or control flow.
-0083 |     ax.set_xlim(0, 1.06)
-     # Continues the current calculation or control flow.
-0084 |     ax.set_ylim(-0.03, 0.98)
-     # Continues the current calculation or control flow.
-0085 |     ax.axis("off")
-     # Continues the current calculation or control flow.
+0082 |     fig, ax = plt.subplots(figsize=(10.5, 6.2))  # Runs this instruction as part of the current step.
+0083 |     ax.set_xlim(0, 1.06)  # Runs this instruction as part of the current step.
+0084 |     ax.set_ylim(-0.03, 0.98)  # Runs this instruction as part of the current step.
+0085 |     ax.axis("off")  # Runs this instruction as part of the current step.
 0086 |
-0087 |     centres = []
-     # Keeps this intermediate result under the name `centres`.
-0088 |     for x, y, w, h, label, kind in NODES:
-     # Processes each item from this collection in turn.
-0089 |         ax.add_patch(FancyBboxPatch(
-     # Part of the value, collection, or call spanning several lines.
-0090 |             (x, y), w, h, boxstyle="round,pad=0.006,rounding_size=0.012",
-     # Part of the value, collection, or call spanning several lines.
-0091 |             linewidth=0.9, edgecolor="#b9b3c9", facecolor=BOXES[kind]))
-     # Keeps this intermediate result under the name `linewidth`.
-0092 |         ax.text(x + w / 2, y + h / 2, label, ha="center", va="center",
-     # Part of the value, collection, or call spanning several lines.
-0093 |                 fontsize=8.4, color=INK, linespacing=1.45)
-     # Keeps this intermediate result under the name `fontsize`.
-0094 |         centres.append((x + w / 2, y + h / 2, w, h))
-     # Continues the current calculation or control flow.
+0087 |     centres = []  # Saves a value named centres so the next lines can use it.
+0088 |     for x, y, w, h, label, kind in NODES:  # Repeats the next indented steps once for each item.
+0089 |         ax.add_patch(FancyBboxPatch(  # Part of the value, collection, or call spanning several lines.
+0090 |             (x, y), w, h, boxstyle="round,pad=0.006,rounding_size=0.012",  # Part of the value, collection, or call spanning several lines.
+0091 |             linewidth=0.9, edgecolor="#b9b3c9", facecolor=BOXES[kind]))  # Saves a value named linewidth so the next lines can use it.
+0092 |         ax.text(x + w / 2, y + h / 2, label, ha="center", va="center",  # Part of the value, collection, or call spanning several lines.
+0093 |                 fontsize=8.4, color=INK, linespacing=1.45)  # Saves a value named fontsize so the next lines can use it.
+0094 |         centres.append((x + w / 2, y + h / 2, w, h))  # Adds this item to the list being built.
 0095 |
-0096 |     for a, b in EDGES:
-     # Processes each item from this collection in turn.
-0097 |         x0, y0, w0, h0 = centres[a]
-     # Continues the current calculation or control flow.
-0098 |         x1, y1, w1, h1 = centres[b]
-     # Continues the current calculation or control flow.
+0096 |     for a, b in EDGES:  # Repeats the next indented steps once for each item.
+0097 |         x0, y0, w0, h0 = centres[a]  # Runs this instruction as part of the current step.
+0098 |         x1, y1, w1, h1 = centres[b]  # Runs this instruction as part of the current step.
 0099 |         if abs(y0 - y1) < 1e-6:           # neighbours: leave from the facing sides
-     # Checks this condition before running the next indented block.
-0100 |             sx = x0 + (w0 / 2 if x1 > x0 else -w0 / 2)
-     # Keeps this intermediate result under the name `sx`.
-0101 |             ex = x1 - (w1 / 2 if x1 > x0 else -w1 / 2)
-     # Keeps this intermediate result under the name `ex`.
-0102 |             start, end, rad = (sx, y0), (ex, y1), 0.0
-     # Continues the current calculation or control flow.
+0100 |             sx = x0 + (w0 / 2 if x1 > x0 else -w0 / 2)  # Saves a value named sx so the next lines can use it.
+0101 |             ex = x1 - (w1 / 2 if x1 > x0 else -w1 / 2)  # Saves a value named ex so the next lines can use it.
+0102 |             start, end, rad = (sx, y0), (ex, y1), 0.0  # Runs this instruction as part of the current step.
 0103 |         else:                             # drop to the row below
-     # Handles the alternative when the preceding condition was false.
-0104 |             start = (x0, y0 - h0 / 2)
-     # Keeps this intermediate result under the name `start`.
-0105 |             end = (x1, y1 + h1 / 2)
-     # Keeps this intermediate result under the name `end`.
-0106 |             rad = 0.0 if abs(x0 - x1) < 1e-6 else 0.06
-     # Keeps this intermediate result under the name `rad`.
-0107 |         ax.add_patch(FancyArrowPatch(
-     # Part of the value, collection, or call spanning several lines.
-0108 |             start, end, arrowstyle="-|>", mutation_scale=9,
-     # Part of the value, collection, or call spanning several lines.
-0109 |             linewidth=0.9, color=MUTED, shrinkA=1, shrinkB=3,
-     # Keeps this intermediate result under the name `linewidth`.
-0110 |             connectionstyle=f"arc3,rad={rad}"))
-     # Keeps this intermediate result under the name `connectionstyle`.
+0104 |             start = (x0, y0 - h0 / 2)  # Saves a value named start so the next lines can use it.
+0105 |             end = (x1, y1 + h1 / 2)  # Saves a value named end so the next lines can use it.
+0106 |             rad = 0.0 if abs(x0 - x1) < 1e-6 else 0.06  # Saves a value named rad so the next lines can use it.
+0107 |         ax.add_patch(FancyArrowPatch(  # Part of the value, collection, or call spanning several lines.
+0108 |             start, end, arrowstyle="-|>", mutation_scale=9,  # Part of the value, collection, or call spanning several lines.
+0109 |             linewidth=0.9, color=MUTED, shrinkA=1, shrinkB=3,  # Saves a value named linewidth so the next lines can use it.
+0110 |             connectionstyle=f"arc3,rad={rad}"))  # Saves a value named connectionstyle so the next lines can use it.
 0111 |
-0112 |     for a, b in MARGIN_EDGES:
-     # Processes each item from this collection in turn.
-0113 |         x0, y0, w0, h0 = centres[a]
-     # Continues the current calculation or control flow.
-0114 |         x1, y1, w1, h1 = centres[b]
-     # Continues the current calculation or control flow.
-0115 |         lane = max(x0 + w0 / 2, x1 + w1 / 2) + 0.035
-     # Keeps this intermediate result under the name `lane`.
-0116 |         ax.plot([x0 + w0 / 2, lane, lane, x1 + w1 / 2],
-     # Part of the value, collection, or call spanning several lines.
-0117 |                 [y0, y0, y1, y1], color=MUTED, linewidth=0.9,
-     # Part of the value, collection, or call spanning several lines.
-0118 |                 solid_joinstyle="round", zorder=1)
-     # Keeps this intermediate result under the name `solid_joinstyle`.
-0119 |         ax.add_patch(FancyArrowPatch(
-     # Part of the value, collection, or call spanning several lines.
-0120 |             (lane, y1), (x1 + w1 / 2, y1), arrowstyle="-|>",
-     # Part of the value, collection, or call spanning several lines.
-0121 |             mutation_scale=9, linewidth=0.9, color=MUTED, shrinkA=0, shrinkB=3))
-     # Keeps this intermediate result under the name `mutation_scale`.
+0112 |     for a, b in MARGIN_EDGES:  # Repeats the next indented steps once for each item.
+0113 |         x0, y0, w0, h0 = centres[a]  # Runs this instruction as part of the current step.
+0114 |         x1, y1, w1, h1 = centres[b]  # Runs this instruction as part of the current step.
+0115 |         lane = max(x0 + w0 / 2, x1 + w1 / 2) + 0.035  # Saves a value named lane so the next lines can use it.
+0116 |         ax.plot([x0 + w0 / 2, lane, lane, x1 + w1 / 2],  # Part of the value, collection, or call spanning several lines.
+0117 |                 [y0, y0, y1, y1], color=MUTED, linewidth=0.9,  # Part of the value, collection, or call spanning several lines.
+0118 |                 solid_joinstyle="round", zorder=1)  # Saves a value named solid_joinstyle so the next lines can use it.
+0119 |         ax.add_patch(FancyArrowPatch(  # Part of the value, collection, or call spanning several lines.
+0120 |             (lane, y1), (x1 + w1 / 2, y1), arrowstyle="-|>",  # Part of the value, collection, or call spanning several lines.
+0121 |             mutation_scale=9, linewidth=0.9, color=MUTED, shrinkA=0, shrinkB=3))  # Saves a value named mutation_scale so the next lines can use it.
 0122 |
-0123 |     out = ROOT / "docs" / "figures"
-     # Calculates or stores the output value for this stage.
-0124 |     out.mkdir(parents=True, exist_ok=True)
-     # Continues the current calculation or control flow.
-0125 |     path = out / "methodology.png"
-     # Keeps this intermediate result under the name `path`.
-0126 |     fig.savefig(path, dpi=220, bbox_inches="tight", facecolor="white")
-     # Continues the current calculation or control flow.
-0127 |     plt.close(fig)
-     # Continues the current calculation or control flow.
-0128 |     print(f"wrote {path}")
-     # Prints this reading so a command-line run can be followed.
+0123 |     out = ROOT / "docs" / "figures"  # Stores the output value for the next step.
+0124 |     out.mkdir(parents=True, exist_ok=True)  # Creates the folder needed for saved outputs.
+0125 |     path = out / "methodology.png"  # Saves a value named path so the next lines can use it.
+0126 |     fig.savefig(path, dpi=220, bbox_inches="tight", facecolor="white")  # Runs this instruction as part of the current step.
+0127 |     plt.close(fig)  # Runs this instruction as part of the current step.
+0128 |     print(f"wrote {path}")  # Prints this reading so a command-line run can be followed.
 0129 |
 0130 |
-0131 | if __name__ == "__main__":
-     # Runs the command-line entry point only when this file is executed directly.
-0132 |     main()
-     # Continues the current calculation or control flow.
+0131 | if __name__ == "__main__":  # Runs the command-line entry point only when this file is executed directly.
+0132 |     main()  # Runs this instruction as part of the current step.

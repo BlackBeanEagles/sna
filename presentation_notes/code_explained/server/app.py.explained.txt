@@ -1,6 +1,6 @@
 SOURCE: server/app.py
 SAY FIRST: The browser sends requests here. This file routes them to the runner and streams progress back.
-Each numbered source line is followed by a plain-English comment.
+Each numbered code line has a plain-English comment beside it.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Live pipeline console — stdlib HTTP server with Server-Sent Events.
@@ -16,393 +16,217 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0011 |     GET  /api/stream?run=<id>  SSE event stream for that run
 0012 |     POST /api/cancel?run=<id>  stop a run
 0013 | """
-0014 | from __future__ import annotations
-     # Imports a library or project module needed below.
+0014 | from __future__ import annotations  # Loads code this file needs for the steps below.
 0015 |
-0016 | import argparse
-     # Imports a library or project module needed below.
-0017 | import json
-     # Imports a library or project module needed below.
-0018 | import time
-     # Imports a library or project module needed below.
-0019 | import sys
-     # Imports a library or project module needed below.
-0020 | from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
-     # Imports a library or project module needed below.
-0021 | from pathlib import Path
-     # Imports a library or project module needed below.
-0022 | from urllib.parse import urlparse, parse_qs
-     # Imports a library or project module needed below.
+0016 | import argparse  # Loads the tool that reads command-line choices.
+0017 | import json  # Loads JSON tools for saved results and browser messages.
+0018 | import time  # Loads code this file needs for the steps below.
+0019 | import sys  # Loads code this file needs for the steps below.
+0020 | from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler  # Loads code this file needs for the steps below.
+0021 | from pathlib import Path  # Loads Path to find and save project files.
+0022 | from urllib.parse import urlparse, parse_qs  # Loads code this file needs for the steps below.
 0023 |
-0024 | ROOT = Path(__file__).resolve().parents[1]
-     # Keeps this intermediate result under the name `ROOT`.
-0025 | sys.path.insert(0, str(ROOT))
-     # Continues the current calculation or control flow.
+0024 | ROOT = Path(__file__).resolve().parents[1]  # Saves a value named ROOT so the next lines can use it.
+0025 | sys.path.insert(0, str(ROOT))  # Runs this instruction as part of the current step.
 0026 |
 0027 | from server import runner  # noqa: E402
-     # Imports a library or project module needed below.
 0028 |
-0029 | STATIC = Path(__file__).resolve().parent / "static"
-     # Keeps this intermediate result under the name `STATIC`.
+0029 | STATIC = Path(__file__).resolve().parent / "static"  # Saves a value named STATIC so the next lines can use it.
 0030 |
 0031 |
-0032 | class Handler(BaseHTTPRequestHandler):
-     # Thin HTTP layer: validate requests, then delegate analysis to runner.py.
+0032 | class Handler(BaseHTTPRequestHandler):  # Thin HTTP layer: validate requests, then delegate analysis to runner.py.
 0033 |     """Thin HTTP layer: validate requests, then delegate analysis to runner.py.
 0034 |
 0035 |     For a presentation, point here for browser-to-Python communication. The
 0036 |     server returns HTML, JSON endpoints, and a live event stream; it does not
 0037 |     calculate the statistical result itself.
 0038 |     """
-0039 |     protocol_version = "HTTP/1.1"
-     # Keeps this intermediate result under the name `protocol_version`.
+0039 |     protocol_version = "HTTP/1.1"  # Saves a value named protocol_version so the next lines can use it.
 0040 |
 0041 |     def log_message(self, fmt, *args):             # keep the console readable
-     # Defines a reusable step; the following indented lines are its body.
-0042 |         if "/api/stream" not in self.path:
-     # Checks this condition before running the next indented block.
-0043 |             sys.stderr.write("  %s %s\n" % (self.command, self.path))
-     # Continues the current calculation or control flow.
+0042 |         if "/api/stream" not in self.path:  # Runs the next indented steps only when this condition is true.
+0043 |             sys.stderr.write("  %s %s\n" % (self.command, self.path))  # Runs this instruction as part of the current step.
 0044 |
 0045 |     # ---------------- helpers ----------------
-0046 |     def _send(self, code, body: bytes, ctype="application/json"):
-     # Defines a reusable step; the following indented lines are its body.
-0047 |         self.send_response(code)
-     # Continues the current calculation or control flow.
-0048 |         self.send_header("Content-Type", ctype)
-     # Continues the current calculation or control flow.
-0049 |         self.send_header("Content-Length", str(len(body)))
-     # Continues the current calculation or control flow.
-0050 |         self.send_header("Cache-Control", "no-store")
-     # Continues the current calculation or control flow.
-0051 |         self.end_headers()
-     # Continues the current calculation or control flow.
-0052 |         self.wfile.write(body)
-     # Continues the current calculation or control flow.
+0046 |     def _send(self, code, body: bytes, ctype="application/json"):  # Defines a reusable step; the following indented lines are its body.
+0047 |         self.send_response(code)  # Runs this instruction as part of the current step.
+0048 |         self.send_header("Content-Type", ctype)  # Runs this instruction as part of the current step.
+0049 |         self.send_header("Content-Length", str(len(body)))  # Runs this instruction as part of the current step.
+0050 |         self.send_header("Cache-Control", "no-store")  # Runs this instruction as part of the current step.
+0051 |         self.end_headers()  # Runs this instruction as part of the current step.
+0052 |         self.wfile.write(body)  # Runs this instruction as part of the current step.
 0053 |
-0054 |     def _json(self, obj, code=200):
-     # Defines a reusable step; the following indented lines are its body.
-0055 |         self._send(code, json.dumps(obj).encode("utf-8"))
-     # Encodes Python values as JSON for saving or sending to the browser.
+0054 |     def _json(self, obj, code=200):  # Defines a reusable step; the following indented lines are its body.
+0055 |         self._send(code, json.dumps(obj).encode("utf-8"))  # Encodes Python values as JSON for saving or sending to the browser.
 0056 |
-0057 |     def _query(self):
-     # Defines a reusable step; the following indented lines are its body.
-0058 |         return parse_qs(urlparse(self.path).query)
-     # Hands this result back to the stage that called this function.
+0057 |     def _query(self):  # Defines a reusable step; the following indented lines are its body.
+0058 |         return parse_qs(urlparse(self.path).query)  # Gives this answer back to the code that called the function.
 0059 |
 0060 |     # ---------------- routes ----------------
-0061 |     def do_GET(self):
-     # Defines a reusable step; the following indented lines are its body.
+0061 |     def do_GET(self):  # Defines a reusable step; the following indented lines are its body.
 0062 |         # The console is live; /findings serves the saved full-study report.
 0063 |         # Keeping both routes on one local server makes the demo easy to open.
-0064 |         path = urlparse(self.path).path
-     # Keeps this intermediate result under the name `path`.
-0065 |         if path in ("/", "/index.html", "/board-demo"):
-     # Checks this condition before running the next indented block.
-0066 |             html = (STATIC / "index.html").read_bytes()
-     # Keeps this intermediate result under the name `html`.
-0067 |             return self._send(200, html, "text/html; charset=utf-8")
-     # Hands this result back to the stage that called this function.
-0068 |         if path == "/findings":
-     # Checks this condition before running the next indented block.
-0069 |             html = (ROOT / "site" / "index.html").read_bytes()
-     # Keeps this intermediate result under the name `html`.
-0070 |             return self._send(200, html, "text/html; charset=utf-8")
-     # Hands this result back to the stage that called this function.
-0071 |         if path == "/assets/favicon.svg":
-     # Checks this condition before running the next indented block.
-0072 |             icon = (ROOT / "site" / "assets" / "favicon.svg").read_bytes()
-     # Keeps this intermediate result under the name `icon`.
-0073 |             return self._send(200, icon, "image/svg+xml")
-     # Hands this result back to the stage that called this function.
-0074 |         if path in ("/assets/chess-network-hero.png",
-     # Checks this condition before running the next indented block.
-0075 |                     "/assets/chess-diffusion-landscape.png",
-     # Part of the value, collection, or call spanning several lines.
-0076 |                     "/assets/chess-diffusion-walnut.png"):
-     # Part of the value, collection, or call spanning several lines.
-0077 |             image = (ROOT / "site" / "assets" / path.rsplit("/", 1)[1]).read_bytes()
-     # Keeps this intermediate result under the name `image`.
-0078 |             return self._send(200, image, "image/png")
-     # Hands this result back to the stage that called this function.
-0079 |         if path == "/api/runs":
-     # Checks this condition before running the next indented block.
-0080 |             return self._json({"runs": runner.list_runs()})
-     # Hands this result back to the stage that called this function.
-0081 |         if path == "/api/board-demo":
-     # Checks this condition before running the next indented block.
-0082 |             return self._json(runner.board_demo_payload())
-     # Hands this result back to the stage that called this function.
-0083 |         if path == "/api/months":
-     # Checks this condition before running the next indented block.
-0084 |             return self._json({"months": runner.MONTHS, "stages":
-     # Hands this result back to the stage that called this function.
-0085 |                                [{"key": k, "label": l} for k, l in runner.STAGES]})
-     # Part of the value, collection, or call spanning several lines.
-0086 |         if path == "/api/stream":
-     # Checks this condition before running the next indented block.
-0087 |             return self._stream()
-     # Hands this result back to the stage that called this function.
-0088 |         return self._send(404, b"not found", "text/plain")
-     # Hands this result back to the stage that called this function.
+0064 |         path = urlparse(self.path).path  # Saves a value named path so the next lines can use it.
+0065 |         if path in ("/", "/index.html", "/board-demo"):  # Runs the next indented steps only when this condition is true.
+0066 |             html = (STATIC / "index.html").read_bytes()  # Saves a value named html so the next lines can use it.
+0067 |             return self._send(200, html, "text/html; charset=utf-8")  # Gives this answer back to the code that called the function.
+0068 |         if path == "/findings":  # Runs the next indented steps only when this condition is true.
+0069 |             html = (ROOT / "site" / "index.html").read_bytes()  # Saves a value named html so the next lines can use it.
+0070 |             return self._send(200, html, "text/html; charset=utf-8")  # Gives this answer back to the code that called the function.
+0071 |         if path == "/assets/favicon.svg":  # Runs the next indented steps only when this condition is true.
+0072 |             icon = (ROOT / "site" / "assets" / "favicon.svg").read_bytes()  # Saves a value named icon so the next lines can use it.
+0073 |             return self._send(200, icon, "image/svg+xml")  # Gives this answer back to the code that called the function.
+0074 |         if path in ("/assets/chess-network-hero.png",  # Runs the next indented steps only when this condition is true.
+0075 |                     "/assets/chess-diffusion-landscape.png",    // Part of the value, collection, or call spanning several lines.
+0076 |                     "/assets/chess-diffusion-walnut.png"):    // Part of the value, collection, or call spanning several lines.
+0077 |             image = (ROOT / "site" / "assets" / path.rsplit("/", 1)[1]).read_bytes()  # Saves a value named image so the next lines can use it.
+0078 |             return self._send(200, image, "image/png")  # Gives this answer back to the code that called the function.
+0079 |         if path == "/api/runs":  # Runs the next indented steps only when this condition is true.
+0080 |             return self._json({"runs": runner.list_runs()})  # Gives this answer back to the code that called the function.
+0081 |         if path == "/api/board-demo":  # Runs the next indented steps only when this condition is true.
+0082 |             return self._json(runner.board_demo_payload())  # Loads saved real games for the board without starting a new analysis.
+0083 |         if path == "/api/months":  # Runs the next indented steps only when this condition is true.
+0084 |             return self._json({"months": runner.MONTHS, "stages":  # Gives this answer back to the code that called the function.
+0085 |                                [{"key": k, "label": l} for k, l in runner.STAGES]})  # Part of the value, collection, or call spanning several lines.
+0086 |         if path == "/api/stream":  # Runs the next indented steps only when this condition is true.
+0087 |             return self._stream()  # Gives this answer back to the code that called the function.
+0088 |         return self._send(404, b"not found", "text/plain")  # Gives this answer back to the code that called the function.
 0089 |
-0090 |     def do_POST(self):
-     # Defines a reusable step; the following indented lines are its body.
+0090 |     def do_POST(self):  # Defines a reusable step; the following indented lines are its body.
 0091 |         # The Run button reaches /api/run, then the browser subscribes to
 0092 |         # /api/stream. Board moves go to /api/board for legal-move validation.
-0093 |         path = urlparse(self.path).path
-     # Keeps this intermediate result under the name `path`.
-0094 |         if path == "/api/run":
-     # Checks this condition before running the next indented block.
-0095 |             n = int(self.headers.get("Content-Length") or 0)
-     # Keeps this intermediate result under the name `n`.
-0096 |             cfg = json.loads(self.rfile.read(n) or b"{}")
-     # Decodes saved JSON text into Python data.
-0097 |             months = {m["id"] for m in runner.MONTHS}
-     # Keeps this intermediate result under the name `months`.
-0098 |             month = cfg.get("month")
-     # Keeps this intermediate result under the name `month`.
-0099 |             if month not in months:
-     # Checks this condition before running the next indented block.
-0100 |                 return self._json({"error": "unknown month"}, 400)
-     # Hands this result back to the stage that called this function.
-0101 |             cap = cfg.get("max_games")
-     # Keeps this intermediate result under the name `cap`.
-0102 |             cap = int(cap) if cap else None
-     # Keeps this intermediate result under the name `cap`.
-0103 |             if month in runner.DEMO_SIZES:
-     # Checks this condition before running the next indented block.
-0104 |                 cap = None
-     # Keeps this intermediate result under the name `cap`.
-0105 |                 cfg["refresh"] = False
-     # Continues the current calculation or control flow.
-0106 |             run = runner.start(month, cap,
-     # Calculates or stores the current analysis run for this stage.
-0107 |                                int(cfg.get("null_reps", 20)),
-     # Part of the value, collection, or call spanning several lines.
-0108 |                                int(cfg.get("window_days", 14)),
-     # Part of the value, collection, or call spanning several lines.
-0109 |                                bool(cfg.get("refresh", False)),
-     # Part of the value, collection, or call spanning several lines.
-0110 |                                bool(cfg.get("predict", False)))
-     # Continues the current calculation or control flow.
-0111 |             return self._json({"run_id": run.id})
-     # Hands this result back to the stage that called this function.
-0112 |         if path == "/api/resume":
-     # Checks this condition before running the next indented block.
-0113 |             rid = (self._query().get("run") or [""])[0]
-     # Keeps this intermediate result under the name `rid`.
-0114 |             run = runner.resume(rid)
-     # Calculates or stores the current analysis run for this stage.
-0115 |             return self._json({"run_id": run.id} if run else
-     # Hands this result back to the stage that called this function.
-0116 |                               {"error": "run cannot be resumed"}, 200 if run else 409)
-     # Part of the value, collection, or call spanning several lines.
-0117 |         if path == "/api/board":
-     # Checks this condition before running the next indented block.
-0118 |             n = int(self.headers.get("Content-Length") or 0)
-     # Keeps this intermediate result under the name `n`.
-0119 |             body = json.loads(self.rfile.read(n) or b"{}")
-     # Decodes saved JSON text into Python data.
-0120 |             sans = body.get("sans") or []
-     # Keeps this intermediate result under the name `sans`.
-0121 |             if not isinstance(sans, list) or len(sans) > 200:
-     # Checks this condition before running the next indented block.
-0122 |                 return self._json({"error": "bad move list"}, 400)
-     # Hands this result back to the stage that called this function.
-0123 |             selected_run = str(body.get("run_id") or "")
-     # Keeps this intermediate result under the name `selected_run`.
-0124 |             has_data = runner.load_board_data(selected_run) if selected_run else False
-     # Keeps this intermediate result under the name `has_data`.
-0125 |             state = runner.board_state([str(s) for s in sans], body.get("uci"))
-     # Keeps this intermediate result under the name `state`.
-0126 |             if not has_data:
-     # Checks this condition before running the next indented block.
+0093 |         path = urlparse(self.path).path  # Saves a value named path so the next lines can use it.
+0094 |         if path == "/api/run":  # Runs the next indented steps only when this condition is true.
+0095 |             n = int(self.headers.get("Content-Length") or 0)  # Saves a value named n so the next lines can use it.
+0096 |             cfg = json.loads(self.rfile.read(n) or b"{}")  # Decodes saved JSON text into Python data.
+0097 |             months = {m["id"] for m in runner.MONTHS}  # Saves a value named months so the next lines can use it.
+0098 |             month = cfg.get("month")  # Saves a value named month so the next lines can use it.
+0099 |             if month not in months:  # Runs the next indented steps only when this condition is true.
+0100 |                 return self._json({"error": "unknown month"}, 400)  # Gives this answer back to the code that called the function.
+0101 |             cap = cfg.get("max_games")  # Saves a value named cap so the next lines can use it.
+0102 |             cap = int(cap) if cap else None  # Saves a value named cap so the next lines can use it.
+0103 |             if month in runner.DEMO_SIZES:  # Runs the next indented steps only when this condition is true.
+0104 |                 cap = None  # Saves a value named cap so the next lines can use it.
+0105 |                 cfg["refresh"] = False  # Stores this value under its player, opening, or field key.
+0106 |             run = runner.start(month, cap,  # Stores the current analysis run for the next step.
+0107 |                                int(cfg.get("null_reps", 20)),  # Part of the value, collection, or call spanning several lines.
+0108 |                                int(cfg.get("window_days", 14)),  # Part of the value, collection, or call spanning several lines.
+0109 |                                bool(cfg.get("refresh", False)),  # Part of the value, collection, or call spanning several lines.
+0110 |                                bool(cfg.get("predict", False)))  # Runs this instruction as part of the current step.
+0111 |             return self._json({"run_id": run.id})  # Gives this answer back to the code that called the function.
+0112 |         if path == "/api/resume":  # Runs the next indented steps only when this condition is true.
+0113 |             rid = (self._query().get("run") or [""])[0]  # Saves a value named rid so the next lines can use it.
+0114 |             run = runner.resume(rid)  # Stores the current analysis run for the next step.
+0115 |             return self._json({"run_id": run.id} if run else  # Gives this answer back to the code that called the function.
+0116 |                               {"error": "run cannot be resumed"}, 200 if run else 409)  # Part of the value, collection, or call spanning several lines.
+0117 |         if path == "/api/board":  # Runs the next indented steps only when this condition is true.
+0118 |             n = int(self.headers.get("Content-Length") or 0)  # Saves a value named n so the next lines can use it.
+0119 |             body = json.loads(self.rfile.read(n) or b"{}")  # Decodes saved JSON text into Python data.
+0120 |             sans = body.get("sans") or []  # Stores the moves written in chess notation for the next step.
+0121 |             if not isinstance(sans, list) or len(sans) > 200:  # Runs the next indented steps only when this condition is true.
+0122 |                 return self._json({"error": "bad move list"}, 400)  # Gives this answer back to the code that called the function.
+0123 |             selected_run = str(body.get("run_id") or "")  # Saves a value named selected_run so the next lines can use it.
+0124 |             has_data = runner.load_board_data(selected_run) if selected_run else False  # Saves a value named has_data so the next lines can use it.
+0125 |             state = runner.board_state([str(s) for s in sans], body.get("uci"))  # Saves a value named state so the next lines can use it.
+0126 |             if not has_data:  # Runs the next indented steps only when this condition is true.
 0127 |                 state["opening"] = None  # moves still work before a run is selected
-     # Continues the current calculation or control flow.
-0128 |             state["has_data"] = has_data
-     # Continues the current calculation or control flow.
-0129 |             state["month"] = runner.LAST.get("month") if has_data else None
-     # Continues the current calculation or control flow.
-0130 |             return self._json(state)
-     # Hands this result back to the stage that called this function.
-0131 |         if path == "/api/cancel":
-     # Checks this condition before running the next indented block.
-0132 |             rid = (self._query().get("run") or [""])[0]
-     # Keeps this intermediate result under the name `rid`.
-0133 |             run = runner.get(rid)
-     # Calculates or stores the current analysis run for this stage.
-0134 |             if run:
-     # Checks this condition before running the next indented block.
-0135 |                 run.cancel()
-     # Continues the current calculation or control flow.
-0136 |             return self._json({"ok": bool(run)})
-     # Hands this result back to the stage that called this function.
-0137 |         return self._send(404, b"not found", "text/plain")
-     # Hands this result back to the stage that called this function.
+0128 |             state["has_data"] = has_data  # Stores this value under its player, opening, or field key.
+0129 |             state["month"] = runner.LAST.get("month") if has_data else None  # Stores this value under its player, opening, or field key.
+0130 |             return self._json(state)  # Gives this answer back to the code that called the function.
+0131 |         if path == "/api/cancel":  # Runs the next indented steps only when this condition is true.
+0132 |             rid = (self._query().get("run") or [""])[0]  # Saves a value named rid so the next lines can use it.
+0133 |             run = runner.get(rid)  # Stores the current analysis run for the next step.
+0134 |             if run:  # Runs the next indented steps only when this condition is true.
+0135 |                 run.cancel()  # Runs this instruction as part of the current step.
+0136 |             return self._json({"ok": bool(run)})  # Gives this answer back to the code that called the function.
+0137 |         return self._send(404, b"not found", "text/plain")  # Gives this answer back to the code that called the function.
 0138 |
 0139 |     # ---------------- SSE ----------------
-0140 |     def _stream(self):
-     # Replay saved JSON events and stream new progress to the browser.
+0140 |     def _stream(self):  # Replay saved JSON events and stream new progress to the browser.
 0141 |         """Replay saved JSON events and stream new progress to the browser.
 0142 |
 0143 |         Event IDs let the browser reconnect without losing a running analysis.
 0144 |         The worker owns the calculation; this request only reads its log.
 0145 |         """
-0146 |         rid = (self._query().get("run") or [""])[0]
-     # Keeps this intermediate result under the name `rid`.
-0147 |         run = runner.get(rid)
-     # Calculates or stores the current analysis run for this stage.
-0148 |         if not run:
-     # Checks this condition before running the next indented block.
-0149 |             return self._json({"error": "unknown run"}, 404)
-     # Hands this result back to the stage that called this function.
-0150 |         try:
-     # Starts an operation that may need error handling.
-0151 |             after = max(0, int(self.headers.get("Last-Event-ID") or
-     # Keeps this intermediate result under the name `after`.
-0152 |                                (self._query().get("after") or ["0"])[0]))
-     # Part of the value, collection, or call spanning several lines.
-0153 |         except ValueError:
-     # Handles this specific failure without hiding other errors.
-0154 |             after = 0
-     # Keeps this intermediate result under the name `after`.
+0146 |         rid = (self._query().get("run") or [""])[0]  # Saves a value named rid so the next lines can use it.
+0147 |         run = runner.get(rid)  # Stores the current analysis run for the next step.
+0148 |         if not run:  # Runs the next indented steps only when this condition is true.
+0149 |             return self._json({"error": "unknown run"}, 404)  # Gives this answer back to the code that called the function.
+0150 |         try:  # Starts an operation that may need error handling.
+0151 |             after = max(0, int(self.headers.get("Last-Event-ID") or  # Saves a value named after so the next lines can use it.
+0152 |                                (self._query().get("after") or ["0"])[0]))  # Part of the value, collection, or call spanning several lines.
+0153 |         except ValueError:  # Handles this specific failure without hiding other errors.
+0154 |             after = 0  # Saves a value named after so the next lines can use it.
 0155 |
-0156 |         self.send_response(200)
-     # Continues the current calculation or control flow.
-0157 |         self.send_header("Content-Type", "text/event-stream")
-     # Continues the current calculation or control flow.
-0158 |         self.send_header("Cache-Control", "no-cache")
-     # Continues the current calculation or control flow.
-0159 |         self.send_header("Connection", "keep-alive")
-     # Continues the current calculation or control flow.
-0160 |         self.send_header("X-Accel-Buffering", "no")
-     # Continues the current calculation or control flow.
-0161 |         self.end_headers()
-     # Continues the current calculation or control flow.
+0156 |         self.send_response(200)  # Runs this instruction as part of the current step.
+0157 |         self.send_header("Content-Type", "text/event-stream")  # Runs this instruction as part of the current step.
+0158 |         self.send_header("Cache-Control", "no-cache")  # Runs this instruction as part of the current step.
+0159 |         self.send_header("Connection", "keep-alive")  # Runs this instruction as part of the current step.
+0160 |         self.send_header("X-Accel-Buffering", "no")  # Runs this instruction as part of the current step.
+0161 |         self.end_headers()  # Runs this instruction as part of the current step.
 0162 |
-0163 |         try:
-     # Starts an operation that may need error handling.
-0164 |             position = 0
-     # Keeps this intermediate result under the name `position`.
-0165 |             stream = None
-     # Keeps this intermediate result under the name `stream`.
-0166 |             last_ping = time.monotonic()
-     # Keeps this intermediate result under the name `last_ping`.
-0167 |             while True:
-     # Repeats the indented block until this condition stops holding.
-0168 |                 if stream is None and run.events_path.is_file():
-     # Checks this condition before running the next indented block.
-0169 |                     stream = run.events_path.open("r", encoding="utf-8")
-     # Keeps this intermediate result under the name `stream`.
-0170 |                 mark = stream.tell() if stream is not None else 0
-     # Keeps this intermediate result under the name `mark`.
-0171 |                 line = stream.readline() if stream is not None else ""
-     # Keeps this intermediate result under the name `line`.
-0172 |                 if line and not line.endswith("\n"):
-     # Checks this condition before running the next indented block.
-0173 |                     stream.seek(mark)
-     # Continues the current calculation or control flow.
-0174 |                     line = ""
-     # Keeps this intermediate result under the name `line`.
-0175 |                 if line:
-     # Checks this condition before running the next indented block.
-0176 |                     position += 1
-     # Continues the current calculation or control flow.
-0177 |                     if position <= after:
-     # Checks this condition before running the next indented block.
-0178 |                         continue
-     # Skips this item and moves to the next loop iteration.
-0179 |                     payload = json.loads(line)
-     # Decodes saved JSON text into Python data.
-0180 |                     self.wfile.write(f"id: {position}\n".encode("ascii"))
-     # Continues the current calculation or control flow.
-0181 |                     self.wfile.write(b"data: " + line.encode("utf-8") + b"\n")
-     # Continues the current calculation or control flow.
-0182 |                     self.wfile.flush()
-     # Continues the current calculation or control flow.
-0183 |                     if payload.get("kind") == "done":
-     # Checks this condition before running the next indented block.
-0184 |                         self.wfile.write(b"event: end\ndata: {}\n\n")
-     # Continues the current calculation or control flow.
-0185 |                         self.wfile.flush()
-     # Continues the current calculation or control flow.
-0186 |                         return
-     # Stops this function here.
-0187 |                     continue
-     # Skips this item and moves to the next loop iteration.
-0188 |                 if run.manifest_path.is_file():
-     # Checks this condition before running the next indented block.
-0189 |                     status = runner.current_status(json.loads(run.manifest_path.read_text(encoding="utf-8")))
-     # Decodes saved JSON text into Python data.
-0190 |                     if status != "running" and position >= after:
-     # Checks this condition before running the next indented block.
-0191 |                         if stream is None:
-     # Checks this condition before running the next indented block.
-0192 |                             self.wfile.write(b'data: {"kind":"log","msg":"No saved progress for this run. Choose Retry in Recent runs.","level":"warn"}\n\n')
-     # Continues the current calculation or control flow.
-0193 |                             self.wfile.write(b'data: {"kind":"done","ok":false}\n\n')
-     # Continues the current calculation or control flow.
-0194 |                         elif status == "interrupted":
-     # Checks this condition before running the next indented block.
-0195 |                             self.wfile.write(b'data: {"kind":"done","ok":false,"interrupted":true}\n\n')
-     # Continues the current calculation or control flow.
-0196 |                         self.wfile.write(b"event: end\ndata: {}\n\n")
-     # Continues the current calculation or control flow.
-0197 |                         self.wfile.flush()
-     # Continues the current calculation or control flow.
-0198 |                         return
-     # Stops this function here.
-0199 |                 if time.monotonic() - last_ping >= 10:
-     # Checks this condition before running the next indented block.
-0200 |                     self.wfile.write(b": keepalive\n\n")
-     # Continues the current calculation or control flow.
-0201 |                     self.wfile.flush()
-     # Continues the current calculation or control flow.
-0202 |                     last_ping = time.monotonic()
-     # Keeps this intermediate result under the name `last_ping`.
-0203 |                 time.sleep(0.35)
-     # Continues the current calculation or control flow.
-0204 |         except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
-     # Handles this specific failure without hiding other errors.
-0205 |             return
-     # Stops this function here.
-0206 |         finally:
-     # Runs cleanup whether the operation succeeds or fails.
-0207 |             if stream is not None:
-     # Checks this condition before running the next indented block.
-0208 |                 stream.close()
-     # Continues the current calculation or control flow.
+0163 |         try:  # Starts an operation that may need error handling.
+0164 |             position = 0  # Saves a value named position so the next lines can use it.
+0165 |             stream = None  # Saves a value named stream so the next lines can use it.
+0166 |             last_ping = time.monotonic()  # Saves a value named last_ping so the next lines can use it.
+0167 |             while True:  # Repeats the indented block until this condition stops holding.
+0168 |                 if stream is None and run.events_path.is_file():  # Runs the next indented steps only when this condition is true.
+0169 |                     stream = run.events_path.open("r", encoding="utf-8")  # Saves a value named stream so the next lines can use it.
+0170 |                 mark = stream.tell() if stream is not None else 0  # Saves a value named mark so the next lines can use it.
+0171 |                 line = stream.readline() if stream is not None else ""  # Saves a value named line so the next lines can use it.
+0172 |                 if line and not line.endswith("\n"):  # Runs the next indented steps only when this condition is true.
+0173 |                     stream.seek(mark)  # Runs this instruction as part of the current step.
+0174 |                     line = ""  # Saves a value named line so the next lines can use it.
+0175 |                 if line:  # Runs the next indented steps only when this condition is true.
+0176 |                     position += 1  # Adds this amount to the running total.
+0177 |                     if position <= after:  # Runs the next indented steps only when this condition is true.
+0178 |                         continue  # Skips this item and moves to the next loop iteration.
+0179 |                     payload = json.loads(line)  # Decodes saved JSON text into Python data.
+0180 |                     self.wfile.write(f"id: {position}\n".encode("ascii"))  # Runs this instruction as part of the current step.
+0181 |                     self.wfile.write(b"data: " + line.encode("utf-8") + b"\n")  # Runs this instruction as part of the current step.
+0182 |                     self.wfile.flush()  # Runs this instruction as part of the current step.
+0183 |                     if payload.get("kind") == "done":  # Runs the next indented steps only when this condition is true.
+0184 |                         self.wfile.write(b"event: end\ndata: {}\n\n")  # Runs this instruction as part of the current step.
+0185 |                         self.wfile.flush()  # Runs this instruction as part of the current step.
+0186 |                         return  # Stops this function here.
+0187 |                     continue  # Skips this item and moves to the next loop iteration.
+0188 |                 if run.manifest_path.is_file():  # Runs the next indented steps only when this condition is true.
+0189 |                     status = runner.current_status(json.loads(run.manifest_path.read_text(encoding="utf-8")))  # Decodes saved JSON text into Python data.
+0190 |                     if status != "running" and position >= after:  # Runs the next indented steps only when this condition is true.
+0191 |                         if stream is None:  # Runs the next indented steps only when this condition is true.
+0192 |                             self.wfile.write(b'data: {"kind":"log","msg":"No saved progress for this run. Choose Retry in Recent runs.","level":"warn"}\n\n')  # Runs this instruction as part of the current step.
+0193 |                             self.wfile.write(b'data: {"kind":"done","ok":false}\n\n')  # Runs this instruction as part of the current step.
+0194 |                         elif status == "interrupted":  # Runs the next indented steps only when this condition is true.
+0195 |                             self.wfile.write(b'data: {"kind":"done","ok":false,"interrupted":true}\n\n')  # Runs this instruction as part of the current step.
+0196 |                         self.wfile.write(b"event: end\ndata: {}\n\n")  # Runs this instruction as part of the current step.
+0197 |                         self.wfile.flush()  # Runs this instruction as part of the current step.
+0198 |                         return  # Stops this function here.
+0199 |                 if time.monotonic() - last_ping >= 10:  # Runs the next indented steps only when this condition is true.
+0200 |                     self.wfile.write(b": keepalive\n\n")  # Runs this instruction as part of the current step.
+0201 |                     self.wfile.flush()  # Runs this instruction as part of the current step.
+0202 |                     last_ping = time.monotonic()  # Saves a value named last_ping so the next lines can use it.
+0203 |                 time.sleep(0.35)  # Runs this instruction as part of the current step.
+0204 |         except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):  # Handles this specific failure without hiding other errors.
+0205 |             return  # Stops this function here.
+0206 |         finally:  # Runs cleanup whether the operation succeeds or fails.
+0207 |             if stream is not None:  # Runs the next indented steps only when this condition is true.
+0208 |                 stream.close()  # Runs this instruction as part of the current step.
 0209 |
 0210 |
-0211 | def main():
-     # Defines a reusable step; the following indented lines are its body.
-0212 |     ap = argparse.ArgumentParser()
-     # Keeps this intermediate result under the name `ap`.
-0213 |     ap.add_argument("--port", type=int, default=8124)
-     # Defines a command-line option for this script.
-0214 |     ap.add_argument("--host", default="127.0.0.1")
-     # Defines a command-line option for this script.
-0215 |     a = ap.parse_args()
-     # Keeps this intermediate result under the name `a`.
-0216 |     srv = ThreadingHTTPServer((a.host, a.port), Handler)
-     # Keeps this intermediate result under the name `srv`.
+0211 | def main():  # Defines a reusable step; the following indented lines are its body.
+0212 |     ap = argparse.ArgumentParser()  # Saves a value named ap so the next lines can use it.
+0213 |     ap.add_argument("--port", type=int, default=8124)  # Defines a command-line option for this script.
+0214 |     ap.add_argument("--host", default="127.0.0.1")  # Defines a command-line option for this script.
+0215 |     a = ap.parse_args()  # Saves a value named a so the next lines can use it.
+0216 |     srv = ThreadingHTTPServer((a.host, a.port), Handler)  # Saves a value named srv so the next lines can use it.
 0217 |     # ASCII only: the Windows console is cp1252 and raises on arrows/dashes
-0218 |     print(f"Live pipeline console -> http://localhost:{a.port}")
-     # Prints this reading so a command-line run can be followed.
-0219 |     print("Press Ctrl+C to stop.")
-     # Prints this reading so a command-line run can be followed.
-0220 |     try:
-     # Starts an operation that may need error handling.
-0221 |         srv.serve_forever()
-     # Continues the current calculation or control flow.
-0222 |     except KeyboardInterrupt:
-     # Handles this specific failure without hiding other errors.
-0223 |         print("\nstopped")
-     # Prints this reading so a command-line run can be followed.
+0218 |     print(f"Live pipeline console -> http://localhost:{a.port}")  # Prints this reading so a command-line run can be followed.
+0219 |     print("Press Ctrl+C to stop.")  # Prints this reading so a command-line run can be followed.
+0220 |     try:  # Starts an operation that may need error handling.
+0221 |         srv.serve_forever()  # Runs this instruction as part of the current step.
+0222 |     except KeyboardInterrupt:  # Handles this specific failure without hiding other errors.
+0223 |         print("\nstopped")  # Prints this reading so a command-line run can be followed.
 0224 |
 0225 |
-0226 | if __name__ == "__main__":
-     # Runs the command-line entry point only when this file is executed directly.
-0227 |     main()
-     # Continues the current calculation or control flow.
+0226 | if __name__ == "__main__":  # Runs the command-line entry point only when this file is executed directly.
+0227 |     main()  # Runs this instruction as part of the current step.

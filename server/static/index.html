@@ -765,7 +765,7 @@ body.board-mode .findings-link.board-demo-link{display:none}
    handle paints each stage, and board moves post to /api/board. The analysis
    lives in Python; this file renders the live results and interactions. */
 var NS="http://www.w3.org/2000/svg";
-var BOARD_MODE=location.pathname==="/board-demo";
+var BOARD_MODE=location.pathname==="/board-demo"; // This page is the quick chessboard view when the URL ends in /board-demo.
 var es=null, runId=null, started=0, streamWarned=false, runMonth=null;
 var $=function(id){return document.getElementById(id);};
 var fmt=function(n){return (n==null?"—":Number(n).toLocaleString("en-US"));};
@@ -1235,9 +1235,9 @@ function showLiveOpening(o,hasData){
 }
 
 function sendMove(uci){
-  GAME.busy=true;
+  GAME.busy=true; // Pause new clicks until Python checks this move.
   fetch("/api/board",{method:"POST",headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({sans:GAME.sans,uci:uci||null,run_id:runId})})
+    body:JSON.stringify({sans:GAME.sans,uci:uci||null,run_id:runId})}) // Send the played moves and selected game sample.
     .then(function(r){return r.json();})
     .then(function(st){ GAME.busy=false; if(st.fen) applyState(st); })
     .catch(function(){ GAME.busy=false;
@@ -1310,12 +1310,12 @@ resetBoard();
 if(BOARD_MODE) initBoardDemo();
 
 function initBoardDemo(){
-  document.body.classList.add("has-run","board-mode");
+  document.body.classList.add("has-run","board-mode"); // Show the board-focused layout.
   $("boardIntro").hidden=false;
   document.querySelector("header .eyebrow").textContent="Opening explorer · board demonstration";
   document.querySelector("header h1").textContent="Play an opening, see the evidence";
   document.querySelector("header .sub").textContent="Move real chess pieces and see how the line appears in a fixed sample of Lichess games.";
-  runId="board-demo";
+  runId="board-demo"; // Use saved real games; no new pipeline run starts here.
   fetch("/api/board-demo").then(function(r){if(!r.ok)throw Error("board data unavailable");return r.json();})
     .then(function(d){
       showOpenings(d.openings);
@@ -1740,7 +1740,7 @@ function attachRun(id){
   /* Replaying a saved run uses the same stream as a fresh run. This is why a
      browser refresh does not erase the readings collected in the demo. */
   if(es)es.close();
-  runId=id; streamWarned=false;
+  runId=id; streamWarned=false; // The following live events belong to this run.
   var savedButton=document.querySelector('#runHistory button[data-run-id="'+id+'"]');
   if(savedButton){
     $("month").value=savedButton.dataset.month;
@@ -1760,7 +1760,7 @@ function attachRun(id){
   localStorage.setItem("sna:lastRun",id);
   reset();
   $("run").disabled=true; $("stop").disabled=false;
-  es=new EventSource("/api/stream?run="+encodeURIComponent(id));
+  es=new EventSource("/api/stream?run="+encodeURIComponent(id)); // Listen for progress sent by Python.
   es.onmessage=function(m){
     try{handle(JSON.parse(m.data));}
     catch(err){logLine(null,"Could not display part of this run. Try reopening it.","error");}
@@ -1780,7 +1780,7 @@ $("refreshHistory").addEventListener("click",function(){refreshHistory(false);})
 
 /* ---------- run control ---------- */
 $("run").addEventListener("click",function(){
-  $("run").disabled=true; $("stop").disabled=false;
+  $("run").disabled=true; $("stop").disabled=false; // Prevent two runs from one double-click.
   $("runMessage").hidden=true;
   started=Date.now();
   fetch("/api/run",{method:"POST",headers:{"Content-Type":"application/json"},
@@ -1788,7 +1788,7 @@ $("run").addEventListener("click",function(){
       month:$("month").value,
       max_games:$("month").value.startsWith("demo-")||Number(capEl.value)>=Number(capEl.max)?null:Number(capEl.value),
       null_reps:Number($("reps").value),
-      predict:$("predictModel").checked,
+      predict:$("predictModel").checked, // This slower extra check is optional for a classroom run.
       window_days:14,
       refresh:$("refresh").checked
     })}).then(function(r){return r.json();}).then(function(d){

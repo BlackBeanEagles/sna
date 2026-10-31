@@ -1,6 +1,6 @@
 SOURCE: src/curve.py
 SAY FIRST: This calculates adoption rates by exposure and applies the verdict rules.
-Each numbered source line is followed by a plain-English comment.
+Each numbered code line has a plain-English comment beside it.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Step 5 -- the adoption-probability curve. This is the whole project.
@@ -10,255 +10,149 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0005 |                      exposers d (or with structural diversity sd) even when
 0006 |                      the total exposure count k is held FIXED.
 0007 | """
-0008 | from __future__ import annotations
-     # Imports a library or project module needed below.
+0008 | from __future__ import annotations  # Loads code this file needs for the steps below.
 0009 |
-0010 | import argparse
-     # Imports a library or project module needed below.
-0011 | import math
-     # Imports a library or project module needed below.
-0012 | from pathlib import Path
-     # Imports a library or project module needed below.
+0010 | import argparse  # Loads the tool that reads command-line choices.
+0011 | import math  # Loads code this file needs for the steps below.
+0012 | from pathlib import Path  # Loads Path to find and save project files.
 0013 |
-0014 | import pandas as pd
-     # Imports a library or project module needed below.
+0014 | import pandas as pd  # Loads the table library used to store games and trials.
 0015 |
-0016 | from . import config
-     # Imports a library or project module needed below.
+0016 | from . import config  # Loads the named parts of this project so this file can use their functions.
 0017 |
 0018 |
-0019 | def wilson(successes: int, n: int, z: float = 1.96):
-     # Wilson score interval -- behaves at the small cell counts in the tail.
+0019 | def wilson(successes: int, n: int, z: float = 1.96):  # Wilson score interval -- behaves at the small cell counts in the tail.
 0020 |     """Wilson score interval -- behaves at the small cell counts in the tail."""
-0021 |     if n == 0:
-     # Checks this condition before running the next indented block.
-0022 |         return (float("nan"),) * 3
-     # Hands this result back to the stage that called this function.
-0023 |     p = successes / n
-     # Keeps this intermediate result under the name `p`.
-0024 |     den = 1 + z * z / n
-     # Keeps this intermediate result under the name `den`.
-0025 |     centre = (p + z * z / (2 * n)) / den
-     # Keeps this intermediate result under the name `centre`.
-0026 |     half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / den
-     # Keeps this intermediate result under the name `half`.
-0027 |     return p, max(0.0, centre - half), min(1.0, centre + half)
-     # Hands this result back to the stage that called this function.
+0021 |     if n == 0:  # Runs the next indented steps only when this condition is true.
+0022 |         return (float("nan"),) * 3  # Gives this answer back to the code that called the function.
+0023 |     p = successes / n  # Saves a value named p so the next lines can use it.
+0024 |     den = 1 + z * z / n  # Saves a value named den so the next lines can use it.
+0025 |     centre = (p + z * z / (2 * n)) / den  # Saves a value named centre so the next lines can use it.
+0026 |     half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / den  # Saves a value named half so the next lines can use it.
+0027 |     return p, max(0.0, centre - half), min(1.0, centre + half)  # Gives this answer back to the code that called the function.
 0028 |
 0029 |
-0030 | def rate_table(trials: pd.DataFrame, by: str) -> pd.DataFrame:
-     # Group trials by exposure count/diversity and estimate adoption rates.
+0030 | def rate_table(trials: pd.DataFrame, by: str) -> pd.DataFrame:  # Group trials by exposure count/diversity and estimate adoption rates.
 0031 |     """Group trials by exposure count/diversity and estimate adoption rates.
 0032 |
 0033 |     The error bounds are Wilson intervals, which remain sensible for the
 0034 |     smaller groups at the right-hand end of the chart.
 0035 |     """
-0036 |     g = trials.groupby(by)["adopted"].agg(["sum", "count"])
-     # Groups rows sharing these keys before counting or averaging them.
-0037 |     out = []
-     # Calculates or stores the output value for this stage.
-0038 |     for val, row in g.iterrows():
-     # Processes each item from this collection in turn.
-0039 |         p, lo, hi = wilson(int(row["sum"]), int(row["count"]))
-     # Continues the current calculation or control flow.
-0040 |         out.append((val, int(row["count"]), int(row["sum"]), p, lo, hi))
-     # Continues the current calculation or control flow.
-0041 |     return pd.DataFrame(out, columns=[by, "n", "adopted", "rate", "lo", "hi"])
-     # Creates a labelled table from the collected rows.
+0036 |     g = trials.groupby(by)["adopted"].agg(["sum", "count"])  # Groups rows sharing these keys before counting or averaging them.
+0037 |     out = []  # Stores the output value for the next step.
+0038 |     for val, row in g.iterrows():  # Repeats the next indented steps once for each item.
+0039 |         p, lo, hi = wilson(int(row["sum"]), int(row["count"]))  # Runs this instruction as part of the current step.
+0040 |         out.append((val, int(row["count"]), int(row["sum"]), p, lo, hi))  # Adds this item to the list being built.
+0041 |     return pd.DataFrame(out, columns=[by, "n", "adopted", "rate", "lo", "hi"])  # Creates a labelled table from the collected rows.
 0042 |
 0043 |
-0044 | def held_k_table(trials: pd.DataFrame, k_values=(2, 3, 4), by: str = "d"
-     # The decisive comparison: k fixed, d varying.
-0045 |                  ) -> pd.DataFrame:
-     # Continues the current calculation or control flow.
+0044 | def held_k_table(trials: pd.DataFrame, k_values=(2, 3, 4), by: str = "d"  # The decisive comparison: k fixed, d varying.
+0045 |                  ) -> pd.DataFrame:  # Runs this instruction as part of the current step.
 0046 |     """The decisive comparison: k fixed, d varying."""
-0047 |     out = []
-     # Calculates or stores the output value for this stage.
-0048 |     for k in k_values:
-     # Processes each item from this collection in turn.
-0049 |         sub = trials[trials["k"] == k]
-     # Keeps this intermediate result under the name `sub`.
-0050 |         if not len(sub):
-     # Checks whether enough records exist for a trustworthy next step.
-0051 |             continue
-     # Skips this item and moves to the next loop iteration.
-0052 |         t = rate_table(sub, by)
-     # Calculates or stores the current game or exposure time for this stage.
-0053 |         t.insert(0, "k", k)
-     # Continues the current calculation or control flow.
-0054 |         out.append(t)
-     # Continues the current calculation or control flow.
-0055 |     return (pd.concat(out, ignore_index=True) if out
-     # Hands this result back to the stage that called this function.
-0056 |             else pd.DataFrame(columns=["k", by, "n", "adopted", "rate", "lo", "hi"]))
-     # Creates a labelled table from the collected rows.
+0047 |     out = []  # Stores the output value for the next step.
+0048 |     for k in k_values:  # Repeats the next indented steps once for each item.
+0049 |         sub = trials[trials["k"] == k]  # Saves a value named sub so the next lines can use it.
+0050 |         if not len(sub):  # Checks whether enough records exist for a trustworthy next step.
+0051 |             continue  # Skips this item and moves to the next loop iteration.
+0052 |         t = rate_table(sub, by)  # Saves a temporary value used by the next calculation.
+0053 |         t.insert(0, "k", k)  # Runs this instruction as part of the current step.
+0054 |         out.append(t)  # Adds this item to the list being built.
+0055 |     return (pd.concat(out, ignore_index=True) if out  # Gives this answer back to the code that called the function.
+0056 |             else pd.DataFrame(columns=["k", by, "n", "adopted", "rate", "lo", "hi"]))  # Creates a labelled table from the collected rows.
 0057 |
 0058 |
-0059 | def _clip(trials: pd.DataFrame) -> pd.DataFrame:
-     # Defines a reusable step; the following indented lines are its body.
-0060 |     t = trials.copy()
-     # Calculates or stores the current game or exposure time for this stage.
-0061 |     t["k"] = t["k"].clip(upper=config.MAX_EXPOSURE_COUNT)
-     # Caps large counts into the final chart bucket, such as six or more opponents.
-0062 |     t["d"] = t["d"].clip(upper=config.MAX_DIVERSITY)
-     # Caps large counts into the final chart bucket, such as six or more opponents.
-0063 |     t["sd"] = t["sd"].clip(upper=config.MAX_DIVERSITY)
-     # Caps large counts into the final chart bucket, such as six or more opponents.
-0064 |     return t
-     # Hands this result back to the stage that called this function.
+0059 | def _clip(trials: pd.DataFrame) -> pd.DataFrame:  # Defines a reusable step; the following indented lines are its body.
+0060 |     t = trials.copy()  # Saves a temporary value used by the next calculation.
+0061 |     t["k"] = t["k"].clip(upper=config.MAX_EXPOSURE_COUNT)  # Caps large counts into the final chart bucket, such as six or more opponents.
+0062 |     t["d"] = t["d"].clip(upper=config.MAX_DIVERSITY)  # Caps large counts into the final chart bucket, such as six or more opponents.
+0063 |     t["sd"] = t["sd"].clip(upper=config.MAX_DIVERSITY)  # Caps large counts into the final chart bucket, such as six or more opponents.
+0064 |     return t  # Gives this answer back to the code that called the function.
 0065 |
 0066 |
-0067 | def analyse(trials: pd.DataFrame) -> dict[str, pd.DataFrame]:
-     # Build the raw curves and fixed-k checks used by charts and verdicts.
+0067 | def analyse(trials: pd.DataFrame) -> dict[str, pd.DataFrame]:  # Build the raw curves and fixed-k checks used by charts and verdicts.
 0068 |     """Build the raw curves and fixed-k checks used by charts and verdicts."""
-0069 |     t = _clip(trials)
-     # Calculates or stores the current game or exposure time for this stage.
-0070 |     return {
-     # Hands this result back to the stage that called this function.
-0071 |         "by_k": rate_table(t, "k"),
-     # Part of the value, collection, or call spanning several lines.
-0072 |         "by_d": rate_table(t, "d"),
-     # Part of the value, collection, or call spanning several lines.
-0073 |         "by_sd": rate_table(t, "sd"),
-     # Part of the value, collection, or call spanning several lines.
-0074 |         "held_k_by_d": held_k_table(t, by="d"),
-     # Part of the value, collection, or call spanning several lines.
-0075 |         "held_k_by_sd": held_k_table(t, by="sd"),
-     # Part of the value, collection, or call spanning several lines.
-0076 |     }
-     # Closes the data structure or function call started above.
+0069 |     t = _clip(trials)  # Saves a temporary value used by the next calculation.
+0070 |     return {  # Gives this answer back to the code that called the function.
+0071 |         "by_k": rate_table(t, "k"),    // Part of the value, collection, or call spanning several lines.
+0072 |         "by_d": rate_table(t, "d"),    // Part of the value, collection, or call spanning several lines.
+0073 |         "by_sd": rate_table(t, "sd"),    // Part of the value, collection, or call spanning several lines.
+0074 |         "held_k_by_d": held_k_table(t, by="d"),    // Part of the value, collection, or call spanning several lines.
+0075 |         "held_k_by_sd": held_k_table(t, by="sd"),    // Part of the value, collection, or call spanning several lines.
+0076 |     }  # Closes the data structure or function call started above.
 0077 |
 0078 |
-0079 | def _yerr(tb: pd.DataFrame):
-     # Wilson's centre is shifted from the point estimate, so rate-lo and hi-rate can go slightly negative at extreme p.
+0079 | def _yerr(tb: pd.DataFrame):  # Wilson's centre is shifted from the point estimate, so rate-lo and hi-rate can go slightly negative at extreme p.
 0080 |     """Wilson's centre is shifted from the point estimate, so rate-lo and
 0081 |     hi-rate can go slightly negative at extreme p. Matplotlib rejects that."""
-0082 |     return [(tb["rate"] - tb["lo"]).clip(lower=0).to_numpy(),
-     # Caps large counts into the final chart bucket, such as six or more opponents.
-0083 |             (tb["hi"] - tb["rate"]).clip(lower=0).to_numpy()]
-     # Caps large counts into the final chart bucket, such as six or more opponents.
+0082 |     return [(tb["rate"] - tb["lo"]).clip(lower=0).to_numpy(),  # Caps large counts into the final chart bucket, such as six or more opponents.
+0083 |             (tb["hi"] - tb["rate"]).clip(lower=0).to_numpy()]  # Caps large counts into the final chart bucket, such as six or more opponents.
 0084 |
 0085 |
-0086 | def plot(tables: dict[str, pd.DataFrame], out: Path,
-     # Defines a reusable step; the following indented lines are its body.
-0087 |          null_cmp: pd.DataFrame = None):
-     # Keeps this intermediate result under the name `null_cmp`.
+0086 | def plot(tables: dict[str, pd.DataFrame], out: Path,  # Defines a reusable step; the following indented lines are its body.
+0087 |          null_cmp: pd.DataFrame = None):  # Saves a value named null_cmp so the next lines can use it.
 0088 |     # The live console only needs numeric tables, not a PNG. Import plotting
 0089 |     # when a CLI/report run actually asks for a figure.
-0090 |     import matplotlib
-     # Imports a library or project module needed below.
-0091 |     matplotlib.use("Agg")
-     # Continues the current calculation or control flow.
-0092 |     import matplotlib.pyplot as plt
-     # Imports a library or project module needed below.
-0093 |     n_panels = 3 if (null_cmp is not None and len(null_cmp)) else 2
-     # Keeps this intermediate result under the name `n_panels`.
-0094 |     fig, axes = plt.subplots(1, n_panels, figsize=(6 * n_panels, 4.6))
-     # Continues the current calculation or control flow.
+0090 |     import matplotlib  # Loads code this file needs for the steps below.
+0091 |     matplotlib.use("Agg")  # Runs this instruction as part of the current step.
+0092 |     import matplotlib.pyplot as plt  # Loads code this file needs for the steps below.
+0093 |     n_panels = 3 if (null_cmp is not None and len(null_cmp)) else 2  # Saves a value named n_panels so the next lines can use it.
+0094 |     fig, axes = plt.subplots(1, n_panels, figsize=(6 * n_panels, 4.6))  # Runs this instruction as part of the current step.
 0095 |
-0096 |     ax = axes[0]
-     # Keeps this intermediate result under the name `ax`.
-0097 |     for name, lbl, mk in (("by_k", "k  (total exposures)", "o"),
-     # Processes each item from this collection in turn.
-0098 |                           ("by_d", "d  (distinct exposers)", "s"),
-     # Part of the value, collection, or call spanning several lines.
-0099 |                           ("by_sd", "sd (structural diversity)", "^")):
-     # Part of the value, collection, or call spanning several lines.
-0100 |         tb = tables[name]
-     # Keeps this intermediate result under the name `tb`.
-0101 |         tb = tb[tb["n"] >= 5]
-     # Keeps this intermediate result under the name `tb`.
-0102 |         if not len(tb):
-     # Checks whether enough records exist for a trustworthy next step.
-0103 |             continue
-     # Skips this item and moves to the next loop iteration.
-0104 |         x = tb.iloc[:, 0]
-     # Keeps this intermediate result under the name `x`.
-0105 |         ax.errorbar(x, tb["rate"], yerr=_yerr(tb),
-     # Part of the value, collection, or call spanning several lines.
-0106 |                     marker=mk, capsize=3, label=lbl)
-     # Keeps this intermediate result under the name `marker`.
+0096 |     ax = axes[0]  # Saves a value named ax so the next lines can use it.
+0097 |     for name, lbl, mk in (("by_k", "k  (total exposures)", "o"),  # Repeats the next indented steps once for each item.
+0098 |                           ("by_d", "d  (distinct exposers)", "s"),  # Part of the value, collection, or call spanning several lines.
+0099 |                           ("by_sd", "sd (structural diversity)", "^")):  # Part of the value, collection, or call spanning several lines.
+0100 |         tb = tables[name]  # Saves a value named tb so the next lines can use it.
+0101 |         tb = tb[tb["n"] >= 5]  # Saves a value named tb so the next lines can use it.
+0102 |         if not len(tb):  # Checks whether enough records exist for a trustworthy next step.
+0103 |             continue  # Skips this item and moves to the next loop iteration.
+0104 |         x = tb.iloc[:, 0]  # Saves a value named x so the next lines can use it.
+0105 |         ax.errorbar(x, tb["rate"], yerr=_yerr(tb),  # Part of the value, collection, or call spanning several lines.
+0106 |                     marker=mk, capsize=3, label=lbl)  # Saves a value named marker so the next lines can use it.
 0107 |     # The null belongs ON this panel. Without it the rising curve reads as
 0108 |     # complex contagion, which is exactly the misreading it refutes.
-0109 |     if null_cmp is not None and len(null_cmp):
-     # Checks this condition before running the next indented block.
-0110 |         ax.plot(null_cmp["d"], null_cmp["rate_null"], "k--", marker="x",
-     # Part of the value, collection, or call spanning several lines.
-0111 |                 linewidth=1.3, label="shuffled-time null (by d)")
-     # Keeps this intermediate result under the name `linewidth`.
-0112 |     ax.set_xlabel("exposure measure")
-     # Continues the current calculation or control flow.
-0113 |     ax.set_ylabel(f"P(adopt within {config.ADOPTION_WINDOW_DAYS}d)")
-     # Continues the current calculation or control flow.
-0114 |     ax.set_title("Adoption probability curve")
-     # Continues the current calculation or control flow.
-0115 |     ax.legend(fontsize=8)
-     # Continues the current calculation or control flow.
-0116 |     ax.grid(alpha=.3)
-     # Continues the current calculation or control flow.
+0109 |     if null_cmp is not None and len(null_cmp):  # Runs the next indented steps only when this condition is true.
+0110 |         ax.plot(null_cmp["d"], null_cmp["rate_null"], "k--", marker="x",  # Part of the value, collection, or call spanning several lines.
+0111 |                 linewidth=1.3, label="shuffled-time null (by d)")  # Saves a value named linewidth so the next lines can use it.
+0112 |     ax.set_xlabel("exposure measure")  # Runs this instruction as part of the current step.
+0113 |     ax.set_ylabel(f"P(adopt within {config.ADOPTION_WINDOW_DAYS}d)")  # Runs this instruction as part of the current step.
+0114 |     ax.set_title("Adoption probability curve")  # Runs this instruction as part of the current step.
+0115 |     ax.legend(fontsize=8)  # Runs this instruction as part of the current step.
+0116 |     ax.grid(alpha=.3)  # Runs this instruction as part of the current step.
 0117 |
-0118 |     ax = axes[1]
-     # Keeps this intermediate result under the name `ax`.
-0119 |     hk = tables["held_k_by_d"]
-     # Keeps this intermediate result under the name `hk`.
-0120 |     for k, sub in hk.groupby("k"):
-     # Groups rows sharing these keys before counting or averaging them.
-0121 |         sub = sub[sub["n"] >= 5]
-     # Keeps this intermediate result under the name `sub`.
-0122 |         if len(sub) < 2:
-     # Checks whether enough records exist for a trustworthy next step.
-0123 |             continue
-     # Skips this item and moves to the next loop iteration.
-0124 |         ax.errorbar(sub["d"], sub["rate"], yerr=_yerr(sub),
-     # Part of the value, collection, or call spanning several lines.
-0125 |                     marker="o", capsize=3, label=f"k = {k}")
-     # Keeps this intermediate result under the name `marker`.
-0126 |     ax.set_xlabel("d  (distinct exposers), total exposures k held fixed")
-     # Continues the current calculation or control flow.
-0127 |     ax.set_ylabel("P(adopt)")
-     # Continues the current calculation or control flow.
-0128 |     ax.set_title("Decisive comparison: k fixed, d varying")
-     # Continues the current calculation or control flow.
-0129 |     ax.legend(fontsize=8)
-     # Continues the current calculation or control flow.
-0130 |     ax.grid(alpha=.3)
-     # Continues the current calculation or control flow.
+0118 |     ax = axes[1]  # Saves a value named ax so the next lines can use it.
+0119 |     hk = tables["held_k_by_d"]  # Saves a value named hk so the next lines can use it.
+0120 |     for k, sub in hk.groupby("k"):  # Groups rows sharing these keys before counting or averaging them.
+0121 |         sub = sub[sub["n"] >= 5]  # Saves a value named sub so the next lines can use it.
+0122 |         if len(sub) < 2:  # Checks whether enough records exist for a trustworthy next step.
+0123 |             continue  # Skips this item and moves to the next loop iteration.
+0124 |         ax.errorbar(sub["d"], sub["rate"], yerr=_yerr(sub),  # Part of the value, collection, or call spanning several lines.
+0125 |                     marker="o", capsize=3, label=f"k = {k}")  # Saves a value named marker so the next lines can use it.
+0126 |     ax.set_xlabel("d  (distinct exposers), total exposures k held fixed")  # Runs this instruction as part of the current step.
+0127 |     ax.set_ylabel("P(adopt)")  # Runs this instruction as part of the current step.
+0128 |     ax.set_title("Decisive comparison: k fixed, d varying")  # Runs this instruction as part of the current step.
+0129 |     ax.legend(fontsize=8)  # Runs this instruction as part of the current step.
+0130 |     ax.grid(alpha=.3)  # Runs this instruction as part of the current step.
 0131 |
-0132 |     if n_panels == 3:
-     # Checks this condition before running the next indented block.
-0133 |         ax = axes[2]
-     # Keeps this intermediate result under the name `ax`.
-0134 |         ax.axhline(1.0, color="k", linewidth=1, linestyle=":")
-     # Continues the current calculation or control flow.
-0135 |         ax.plot(null_cmp["d"], null_cmp["lift_over_null"], marker="D",
-     # Compares the observed adoption rate with the shuffled-time reference rate.
-0136 |                 color="#c2185b")
-     # Keeps this intermediate result under the name `color`.
-0137 |         ax.set_xlabel("d  (distinct exposers)")
-     # Continues the current calculation or control flow.
-0138 |         ax.set_ylabel("real rate / null rate")
-     # Continues the current calculation or control flow.
-0139 |         ax.set_title("Excess over the null"
-     # Continues the current calculation or control flow.
-0140 |                      + chr(10) + "(complex contagion needs this to RISE)")
-     # Continues the current calculation or control flow.
-0141 |         ax.grid(alpha=.3)
-     # Continues the current calculation or control flow.
+0132 |     if n_panels == 3:  # Runs the next indented steps only when this condition is true.
+0133 |         ax = axes[2]  # Saves a value named ax so the next lines can use it.
+0134 |         ax.axhline(1.0, color="k", linewidth=1, linestyle=":")  # Runs this instruction as part of the current step.
+0135 |         ax.plot(null_cmp["d"], null_cmp["lift_over_null"], marker="D",  # Compares the observed adoption rate with the shuffled-time reference rate.
+0136 |                 color="#c2185b")  # Saves a value named color so the next lines can use it.
+0137 |         ax.set_xlabel("d  (distinct exposers)")  # Runs this instruction as part of the current step.
+0138 |         ax.set_ylabel("real rate / null rate")  # Runs this instruction as part of the current step.
+0139 |         ax.set_title("Excess over the null"  # Runs this instruction as part of the current step.
+0140 |                      + chr(10) + "(complex contagion needs this to RISE)")  # Runs this instruction as part of the current step.
+0141 |         ax.grid(alpha=.3)  # Runs this instruction as part of the current step.
 0142 |
-0143 |     fig.tight_layout()
-     # Continues the current calculation or control flow.
-0144 |     fig.savefig(out, dpi=150)
-     # Continues the current calculation or control flow.
-0145 |     plt.close(fig)
-     # Continues the current calculation or control flow.
-0146 |     return out
-     # Hands this result back to the stage that called this function.
+0143 |     fig.tight_layout()  # Runs this instruction as part of the current step.
+0144 |     fig.savefig(out, dpi=150)  # Runs this instruction as part of the current step.
+0145 |     plt.close(fig)  # Runs this instruction as part of the current step.
+0146 |     return out  # Gives this answer back to the code that called the function.
 0147 |
 0148 |
-0149 | def verdict(tables: dict[str, pd.DataFrame], null_cmp: pd.DataFrame = None,
-     # Simple vs complex, read off the curve AND the null.
-0150 |             min_n: int = 20) -> dict:
-     # Keeps this intermediate result under the name `min_n`.
+0149 | def verdict(tables: dict[str, pd.DataFrame], null_cmp: pd.DataFrame = None,  # Simple vs complex, read off the curve AND the null.
+0150 |             min_n: int = 20) -> dict:  # Saves a value named min_n so the next lines can use it.
 0151 |     """Simple vs complex, read off the curve AND the null.
 0152 |
 0153 |     A rising raw d-curve is NOT sufficient. High-d players are high-activity
@@ -267,129 +161,71 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0156 |     the null to grow with d, and requires the rise to survive with the total
 0157 |     exposure count k held fixed.
 0158 |     """
-0159 |     d = tables["by_d"]
-     # Calculates or stores the distinct-opponent count for this stage.
-0160 |     d = d[d["n"] >= min_n]
-     # Calculates or stores the distinct-opponent count for this stage.
-0161 |     if len(d) < 2:
-     # Checks whether enough records exist for a trustworthy next step.
-0162 |         return {"verdict": "insufficient data"}
-     # Hands this result back to the stage that called this function.
-0163 |     first, last = d.iloc[0], d.iloc[-1]
-     # Continues the current calculation or control flow.
-0164 |     out = {
-     # Calculates or stores the output value for this stage.
-0165 |         "raw_lift_d_last_over_first": round(float(last["rate"] / first["rate"]), 3)
-     # Part of the value, collection, or call spanning several lines.
-0166 |         if first["rate"] else None,
-     # Checks this condition before running the next indented block.
-0167 |         "rate_d_min": round(float(first["rate"]), 4),
-     # Part of the value, collection, or call spanning several lines.
-0168 |         "rate_d_max": round(float(last["rate"]), 4),
-     # Part of the value, collection, or call spanning several lines.
-0169 |         "raw_curve_rises": bool(last["lo"] > first["hi"]),
-     # Part of the value, collection, or call spanning several lines.
-0170 |     }
-     # Closes the data structure or function call started above.
+0159 |     d = tables["by_d"]  # Stores the distinct-opponent count for the next step.
+0160 |     d = d[d["n"] >= min_n]  # Stores the distinct-opponent count for the next step.
+0161 |     if len(d) < 2:  # Checks whether enough records exist for a trustworthy next step.
+0162 |         return {"verdict": "insufficient data"}  # Gives this answer back to the code that called the function.
+0163 |     first, last = d.iloc[0], d.iloc[-1]  # Runs this instruction as part of the current step.
+0164 |     out = {  # Stores the output value for the next step.
+0165 |         "raw_lift_d_last_over_first": round(float(last["rate"] / first["rate"]), 3)    // Part of the value, collection, or call spanning several lines.
+0166 |         if first["rate"] else None,  # Runs the next indented steps only when this condition is true.
+0167 |         "rate_d_min": round(float(first["rate"]), 4),    // Part of the value, collection, or call spanning several lines.
+0168 |         "rate_d_max": round(float(last["rate"]), 4),    // Part of the value, collection, or call spanning several lines.
+0169 |         "raw_curve_rises": bool(last["lo"] > first["hi"]),    // Part of the value, collection, or call spanning several lines.
+0170 |     }  # Closes the data structure or function call started above.
 0171 |
 0172 |     # (a) does the rise survive with k held fixed?
-0173 |     hk = tables["held_k_by_d"]
-     # Keeps this intermediate result under the name `hk`.
-0174 |     hk = hk[hk["n"] >= min_n]
-     # Keeps this intermediate result under the name `hk`.
-0175 |     held = False
-     # Keeps this intermediate result under the name `held`.
-0176 |     for _, sub in hk.groupby("k"):
-     # Groups rows sharing these keys before counting or averaging them.
-0177 |         if len(sub) >= 2 and sub.iloc[-1]["lo"] > sub.iloc[0]["hi"]:
-     # Checks this condition before running the next indented block.
-0178 |             held = True
-     # Keeps this intermediate result under the name `held`.
-0179 |             break
-     # Ends the current loop.
-0180 |     out["separated_at_fixed_k"] = held
-     # Continues the current calculation or control flow.
+0173 |     hk = tables["held_k_by_d"]  # Saves a value named hk so the next lines can use it.
+0174 |     hk = hk[hk["n"] >= min_n]  # Saves a value named hk so the next lines can use it.
+0175 |     held = False  # Saves a value named held so the next lines can use it.
+0176 |     for _, sub in hk.groupby("k"):  # Groups rows sharing these keys before counting or averaging them.
+0177 |         if len(sub) >= 2 and sub.iloc[-1]["lo"] > sub.iloc[0]["hi"]:  # Runs the next indented steps only when this condition is true.
+0178 |             held = True  # Saves a value named held so the next lines can use it.
+0179 |             break  # Ends the current loop.
+0180 |     out["separated_at_fixed_k"] = held  # Stores this value under its player, opening, or field key.
 0181 |
 0182 |     # (b) does the EXCESS over the shuffled null grow with d?
-0183 |     excess_grows = None
-     # Keeps this intermediate result under the name `excess_grows`.
-0184 |     if null_cmp is not None and len(null_cmp) >= 2:
-     # Checks this condition before running the next indented block.
-0185 |         nc = null_cmp.dropna(subset=["lift_over_null"])
-     # Compares the observed adoption rate with the shuffled-time reference rate.
-0186 |         if len(nc) >= 2:
-     # Checks this condition before running the next indented block.
-0187 |             lo_d, hi_d = nc.iloc[0], nc.iloc[-1]
-     # Continues the current calculation or control flow.
-0188 |             out["lift_over_null_at_min_d"] = round(float(lo_d["lift_over_null"]), 3)
-     # Compares the observed adoption rate with the shuffled-time reference rate.
-0189 |             out["lift_over_null_at_max_d"] = round(float(hi_d["lift_over_null"]), 3)
-     # Compares the observed adoption rate with the shuffled-time reference rate.
-0190 |             excess_grows = bool(hi_d["lift_over_null"] > lo_d["lift_over_null"])
-     # Compares the observed adoption rate with the shuffled-time reference rate.
-0191 |             out["excess_over_null_grows_with_d"] = excess_grows
-     # Continues the current calculation or control flow.
+0183 |     excess_grows = None  # Saves a value named excess_grows so the next lines can use it.
+0184 |     if null_cmp is not None and len(null_cmp) >= 2:  # Runs the next indented steps only when this condition is true.
+0185 |         nc = null_cmp.dropna(subset=["lift_over_null"])  # Compares the observed adoption rate with the shuffled-time reference rate.
+0186 |         if len(nc) >= 2:  # Runs the next indented steps only when this condition is true.
+0187 |             lo_d, hi_d = nc.iloc[0], nc.iloc[-1]  # Runs this instruction as part of the current step.
+0188 |             out["lift_over_null_at_min_d"] = round(float(lo_d["lift_over_null"]), 3)  # Compares the observed adoption rate with the shuffled-time reference rate.
+0189 |             out["lift_over_null_at_max_d"] = round(float(hi_d["lift_over_null"]), 3)  # Compares the observed adoption rate with the shuffled-time reference rate.
+0190 |             excess_grows = bool(hi_d["lift_over_null"] > lo_d["lift_over_null"])  # Compares the observed adoption rate with the shuffled-time reference rate.
+0191 |             out["excess_over_null_grows_with_d"] = excess_grows  # Stores this value under its player, opening, or field key.
 0192 |             # any influence at all? the null must be beaten somewhere
-0193 |             out["beats_null_anywhere"] = bool((nc["z_vs_null"] > 3).any())
-     # Continues the current calculation or control flow.
+0193 |             out["beats_null_anywhere"] = bool((nc["z_vs_null"] > 3).any())  # Stores this value under its player, opening, or field key.
 0194 |
-0195 |     if excess_grows is None:
-     # Checks this condition before running the next indented block.
-0196 |         out["verdict"] = ("raw curve rises, but no null model supplied -- "
-     # Continues the current calculation or control flow.
-0197 |                           "verdict withheld")
-     # Part of the value, collection, or call spanning several lines.
-0198 |     elif out["raw_curve_rises"] and held and excess_grows:
-     # Checks this condition before running the next indented block.
-0199 |         out["verdict"] = "complex contagion"
-     # Continues the current calculation or control flow.
-0200 |     elif out.get("beats_null_anywhere"):
-     # Checks this condition before running the next indented block.
-0201 |         out["verdict"] = ("simple contagion pattern: first-exposure association "
-     # Continues the current calculation or control flow.
-0202 |                           "exceeds the shuffled null; no clear evidence that "
-     # Part of the value, collection, or call spanning several lines.
-0203 |                           "distinct exposers reinforce adoption")
-     # Part of the value, collection, or call spanning several lines.
-0204 |     else:
-     # Handles the alternative when the preceding condition was false.
-0205 |         out["verdict"] = "no detectable contagion above the null"
-     # Continues the current calculation or control flow.
-0206 |     return out
-     # Hands this result back to the stage that called this function.
+0195 |     if excess_grows is None:  # Runs the next indented steps only when this condition is true.
+0196 |         out["verdict"] = ("raw curve rises, but no null model supplied -- "  # Stores this value under its player, opening, or field key.
+0197 |                           "verdict withheld")    // Part of the value, collection, or call spanning several lines.
+0198 |     elif out["raw_curve_rises"] and held and excess_grows:  # Runs the next indented steps only when this condition is true.
+0199 |         out["verdict"] = "complex contagion"  # Stores this value under its player, opening, or field key.
+0200 |     elif out.get("beats_null_anywhere"):  # Runs the next indented steps only when this condition is true.
+0201 |         out["verdict"] = ("simple contagion pattern: first-exposure association "  # Stores this value under its player, opening, or field key.
+0202 |                           "exceeds the shuffled null; no clear evidence that "    // Part of the value, collection, or call spanning several lines.
+0203 |                           "distinct exposers reinforce adoption")    // Part of the value, collection, or call spanning several lines.
+0204 |     else:  # Handles the alternative when the preceding condition was false.
+0205 |         out["verdict"] = "no detectable contagion above the null"  # Stores this value under its player, opening, or field key.
+0206 |     return out  # Gives this answer back to the code that called the function.
 0207 |
 0208 |
-0209 | def run(trials_path: Path, null_cmp: pd.DataFrame = None):
-     # Defines a reusable step; the following indented lines are its body.
-0210 |     trials = pd.read_parquet(trials_path)
-     # Loads a previously prepared game or trial table.
-0211 |     tables = analyse(trials)
-     # Keeps this intermediate result under the name `tables`.
-0212 |     for name, tb in tables.items():
-     # Processes each item from this collection in turn.
-0213 |         tb.to_csv(config.TABLES / f"curve_{name}.csv", index=False)
-     # Writes a result table that can be inspected or downloaded.
-0214 |     fig = plot(tables, config.FIGURES / "adoption_curve.png",
-     # Keeps this intermediate result under the name `fig`.
-0215 |                null_cmp=null_cmp)
-     # Keeps this intermediate result under the name `null_cmp`.
-0216 |     return tables, verdict(tables, null_cmp), fig
-     # Hands this result back to the stage that called this function.
+0209 | def run(trials_path: Path, null_cmp: pd.DataFrame = None):  # Defines a reusable step; the following indented lines are its body.
+0210 |     trials = pd.read_parquet(trials_path)  # Loads a previously prepared game or trial table.
+0211 |     tables = analyse(trials)  # Stores the adoption-rate tables for the charts for the next step.
+0212 |     for name, tb in tables.items():  # Repeats the next indented steps once for each item.
+0213 |         tb.to_csv(config.TABLES / f"curve_{name}.csv", index=False)  # Writes a result table that can be inspected or downloaded.
+0214 |     fig = plot(tables, config.FIGURES / "adoption_curve.png",  # Saves a value named fig so the next lines can use it.
+0215 |                null_cmp=null_cmp)  # Saves a value named null_cmp so the next lines can use it.
+0216 |     return tables, verdict(tables, null_cmp), fig  # Gives this answer back to the code that called the function.
 0217 |
 0218 |
-0219 | if __name__ == "__main__":
-     # Runs the command-line entry point only when this file is executed directly.
-0220 |     ap = argparse.ArgumentParser()
-     # Keeps this intermediate result under the name `ap`.
-0221 |     ap.add_argument("--trials", default=str(config.PROCESSED / "trials.parquet"))
-     # Defines a command-line option for this script.
-0222 |     a = ap.parse_args()
-     # Keeps this intermediate result under the name `a`.
-0223 |     tables, v, fig = run(Path(a.trials))
-     # Continues the current calculation or control flow.
-0224 |     print(tables["by_d"].to_string(index=False))
-     # Prints this reading so a command-line run can be followed.
-0225 |     print("\nVERDICT:", v)
-     # Prints this reading so a command-line run can be followed.
-0226 |     print("figure ->", fig)
-     # Prints this reading so a command-line run can be followed.
+0219 | if __name__ == "__main__":  # Runs the command-line entry point only when this file is executed directly.
+0220 |     ap = argparse.ArgumentParser()  # Saves a value named ap so the next lines can use it.
+0221 |     ap.add_argument("--trials", default=str(config.PROCESSED / "trials.parquet"))  # Defines a command-line option for this script.
+0222 |     a = ap.parse_args()  # Saves a value named a so the next lines can use it.
+0223 |     tables, v, fig = run(Path(a.trials))  # Runs this instruction as part of the current step.
+0224 |     print(tables["by_d"].to_string(index=False))  # Prints this reading so a command-line run can be followed.
+0225 |     print("\nVERDICT:", v)  # Prints this reading so a command-line run can be followed.
+0226 |     print("figure ->", fig)  # Prints this reading so a command-line run can be followed.

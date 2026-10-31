@@ -1,6 +1,6 @@
 SOURCE: src/events.py
 SAY FIRST: This turns encounters into exposure trials and first-use outcomes.
-Each numbered source line is followed by a plain-English comment.
+Each numbered code line has a plain-English comment beside it.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Steps 3-4 -- exposure/adoption logs and the trial table.
@@ -25,240 +25,148 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0020 |
 0021 | Holding k fixed and varying d (or sd) is the decisive comparison.
 0022 | """
-0023 | from __future__ import annotations
-     # Imports a library or project module needed below.
+0023 | from __future__ import annotations  # Loads code this file needs for the steps below.
 0024 |
-0025 | import argparse
-     # Imports a library or project module needed below.
-0026 | from collections import defaultdict
-     # Imports a library or project module needed below.
-0027 | from pathlib import Path
-     # Imports a library or project module needed below.
+0025 | import argparse  # Loads the tool that reads command-line choices.
+0026 | from collections import defaultdict  # Loads containers for counting or collecting game records.
+0027 | from pathlib import Path  # Loads Path to find and save project files.
 0028 |
-0029 | import pandas as pd
-     # Imports a library or project module needed below.
+0029 | import pandas as pd  # Loads the table library used to store games and trials.
 0030 |
-0031 | from . import config, parse
-     # Imports a library or project module needed below.
+0031 | from . import config, parse  # Loads the named parts of this project so this file can use their functions.
 0032 |
 0033 |
-0034 | def behaviour_key(row, granularity: str) -> str:
-     # Defines a reusable step; the following indented lines are its body.
-0035 |     return row.eco if granularity == "eco" else f"{row.eco}|{row.ply_key}"
-     # Hands this result back to the stage that called this function.
+0034 | def behaviour_key(row, granularity: str) -> str:  # Defines a reusable step; the following indented lines are its body.
+0035 |     return row.eco if granularity == "eco" else f"{row.eco}|{row.ply_key}"  # Gives this answer back to the code that called the function.
 0036 |
 0037 |
-0038 | def sweep(df: pd.DataFrame, granularity: str = None):
-     # Single time-ordered pass.
+0038 | def sweep(df: pd.DataFrame, granularity: str = None):  # Single time-ordered pass.
 0039 |     """Single time-ordered pass. Returns (exposures, first_performance, edge_first_t).
 0040 |
-0041 |     exposures[(player, behaviour)] -> list of (timestamp, exposer)
-0042 |     first_perf[(player, behaviour)] -> timestamp of first performance
-0043 |     edge_first_t[frozenset{u,v}]    -> first time the pair ever met
-0044 |     """
-0045 |     granularity = granularity or config.OPENING_GRANULARITY
-     # Keeps this intermediate result under the name `granularity`.
-0046 |     df = df.sort_values("ts")
-     # Orders the rows by this field before the next calculation.
-0047 |     key_col = df["eco"] if granularity == "eco" else df["eco"] + "|" + df["ply_key"]
-     # Keeps this intermediate result under the name `key_col`.
-0048 |
-0049 |     exposures: dict[tuple, list] = defaultdict(list)
-     # Calculates or stores the encounter log keyed by player and behaviour for this stage.
-0050 |     first_perf: dict[tuple, object] = {}
-     # Calculates or stores the first-use time for each player and behaviour for this stage.
-0051 |     edge_first_t: dict[frozenset, object] = {}
-     # Calculates or stores the first meeting time for each opponent pair for this stage.
-0052 |
-0053 |     for (ts, w, b), x in zip(
-     # Processes each item from this collection in turn.
-0054 |         zip(df["ts"].to_numpy(), df["white"].to_numpy(), df["black"].to_numpy()),
-     # Part of the value, collection, or call spanning several lines.
-0055 |         key_col.to_numpy(),
-     # Part of the value, collection, or call spanning several lines.
-0056 |     ):
-     # Continues the current calculation or control flow.
-0057 |         e = frozenset((w, b))
-     # Makes an unordered opponent pair, so White–Black order cannot create two links.
-0058 |         if e not in edge_first_t:
-     # Adds only the first meeting time for this opponent pair.
-0059 |             edge_first_t[e] = ts
-     # Remembers when these two players first met, so later structure uses only past links.
-0060 |         for actor, observer, colour in ((w, b, "W"), (b, w, "B")):
-     # Processes both sides of each game as a performance and an exposure.
-0061 |             beh = (x, colour)
-     # Calculates or stores the opening-and-colour behaviour for this stage.
-0062 |             first_perf.setdefault((actor, beh), ts)      # performance
-     # Records first use without overwriting it on later games.
-0063 |             exposures[(observer, beh)].append((ts, actor))  # exposure
-     # Adds an exposure event for the player who watched the opponent play this behaviour.
-0064 |     return exposures, first_perf, edge_first_t
-     # Hands this result back to the stage that called this function.
-0065 |
-0066 |
-0067 | def _components(nodes: list[str], edge_first_t: dict, t_now) -> int:
-     # Connected components of the subgraph induced on `nodes`, counting only edges that already existed at t_now.
-0068 |     """Connected components of the subgraph induced on `nodes`, counting only
-0069 |     edges that already existed at t_now. O(d^2) -- d is small by construction."""
-0070 |     n = len(nodes)
-     # Keeps this intermediate result under the name `n`.
-0071 |     if n <= 1:
-     # Checks this condition before running the next indented block.
-0072 |         return n
-     # Hands this result back to the stage that called this function.
-0073 |     parent = list(range(n))
-     # Calculates or stores the union-find parent list for grouping connected exposers for this stage.
-0074 |
-0075 |     def find(i):
-     # Defines a reusable step; the following indented lines are its body.
-0076 |         while parent[i] != i:
-     # Repeats the indented block until this condition stops holding.
-0077 |             parent[i] = parent[parent[i]]
-     # Shortens the search path while finding a connected exposer group.
-0078 |             i = parent[i]
-     # Keeps this intermediate result under the name `i`.
-0079 |         return i
-     # Hands this result back to the stage that called this function.
-0080 |
-0081 |     for i in range(n):
-     # Processes each item from this collection in turn.
-0082 |         for j in range(i + 1, n):
-     # Processes each item from this collection in turn.
-0083 |             t = edge_first_t.get(frozenset((nodes[i], nodes[j])))
-     # Calculates or stores the current game or exposure time for this stage.
-0084 |             if t is not None and t <= t_now:
-     # Checks this condition before running the next indented block.
-0085 |                 ri, rj = find(i), find(j)
-     # Continues the current calculation or control flow.
-0086 |                 if ri != rj:
-     # Checks this condition before running the next indented block.
-0087 |                     parent[ri] = rj
-     # Joins two exposer groups after finding a link between them.
-0088 |     return len({find(i) for i in range(n)})
-     # Counts how many separate social sources the exposing opponents form.
-0089 |
-0090 |
-0091 | def build_trials(df: pd.DataFrame, granularity: str = None,
-     # Turn encounters into the rows used by every later statistical check.
-0092 |                  window_days: int = None, with_diversity: bool = True
-     # Keeps this intermediate result under the name `window_days`.
-0093 |                  ) -> pd.DataFrame:
-     # Continues the current calculation or control flow.
-0094 |     """Turn encounters into the rows used by every later statistical check.
-0095 |
-0096 |     Explain this in a demo as: k counts all encounters, d counts different
-0097 |     opponents, sd counts disconnected groups among those opponents, and
-0098 |     adopted records first use of the same opening/colour within the window.
-0099 |     """
-0100 |     window_days = window_days or config.ADOPTION_WINDOW_DAYS
-     # Keeps this intermediate result under the name `window_days`.
-0101 |     window = pd.Timedelta(days=window_days)
-     # Keeps this intermediate result under the name `window`.
-0102 |     exposures, first_perf, edge_first_t = sweep(df, granularity)
-     # Continues the current calculation or control flow.
-0103 |
-0104 |     t_end = df["ts"].max()
-     # Calculates or stores the last observed game time for this stage.
-0105 |     games = pd.concat([df["white"], df["black"]]).value_counts()
-     # Counts how often each player or opening occurs.
-0106 |     rating = pd.concat([
-     # Keeps this intermediate result under the name `rating`.
-0107 |         df[["white", "white_rating"]].rename(
-     # Part of the value, collection, or call spanning several lines.
-0108 |             columns={"white": "p", "white_rating": "r"}),
-     # Keeps this intermediate result under the name `columns`.
-0109 |         df[["black", "black_rating"]].rename(
-     # Part of the value, collection, or call spanning several lines.
-0110 |             columns={"black": "p", "black_rating": "r"}),
-     # Keeps this intermediate result under the name `columns`.
-0111 |     ]).groupby("p")["r"].mean()
-     # Groups rows sharing these keys before counting or averaging them.
-0112 |     popularity = (pd.concat([df["eco"], df["eco"]]).value_counts(normalize=True)
-     # Counts how often each player or opening occurs.
-0113 |                   if granularity == "eco" else None)
-     # Checks this condition before running the next indented block.
-0114 |
-0115 |     rows = []
-     # Calculates or stores the result rows collected for the output table for this stage.
-0116 |     for (player, beh), evs in exposures.items():
-     # Processes each item from this collection in turn.
-0117 |         adopt_t = first_perf.get((player, beh))
-     # Keeps this intermediate result under the name `adopt_t`.
-0118 |         seen, distinct = set(), []
-     # Continues the current calculation or control flow.
-0119 |         for k, (t, exposer) in enumerate(evs, start=1):
-     # Processes each item from this collection in turn.
-0120 |             if adopt_t is not None and adopt_t <= t:
-     # Stops creating trials after the player has already performed this behaviour.
-0121 |                 break                       # already performing it; no longer at risk
-     # Continues the current calculation or control flow.
-0122 |             if exposer not in seen:
-     # Counts a repeat opponent once for d, even if they played many games.
-0123 |                 seen.add(exposer)
-     # Marks this opponent as already included in the distinct count.
-0124 |                 distinct.append(exposer)
-     # Keeps this new opponent for the structural-diversity calculation.
-0125 |             # Every included trial needs the same observable follow-up. Keeping
-0126 |             # late positive trials while dropping late negative trials makes
-0127 |             # adoption rates (and the temporal test set) outcome-dependent.
-0128 |             if t + window > t_end:
-     # Excludes late encounters that cannot receive a complete follow-up window.
-0129 |                 continue
-     # Skips this item and moves to the next loop iteration.
-0130 |             adopted = int(adopt_t is not None and t < adopt_t <= t + window)
-     # Marks adoption only when first use occurs after exposure and within the follow-up window.
-0131 |             sd = _components(distinct, edge_first_t, t) if with_diversity else 0
-     # Counts independent groups among the distinct exposing opponents.
-0132 |             rows.append((player, beh[0], beh[1], t, k, len(distinct), sd, adopted))
-     # Continues the current calculation or control flow.
-0133 |
-0134 |     trials = pd.DataFrame(rows, columns=[
-     # Creates a labelled table from the collected rows.
-0135 |         "player", "opening", "colour", "t", "k", "d", "sd", "adopted"])
-     # Part of the value, collection, or call spanning several lines.
-0136 |     if len(trials):
-     # Checks this condition before running the next indented block.
-0137 |         trials["rating"] = trials["player"].map(rating)
-     # Continues the current calculation or control flow.
-0138 |         trials["activity"] = trials["player"].map(games)
-     # Continues the current calculation or control flow.
-0139 |         trials["popularity"] = (trials["opening"].map(popularity)
-     # Continues the current calculation or control flow.
-0140 |                                 if popularity is not None else 0.0)
-     # Checks this condition before running the next indented block.
-0141 |     return trials
-     # Hands this result back to the stage that called this function.
-0142 |
-0143 |
-0144 | def run(games_path: Path, out: Path, granularity=None) -> pd.DataFrame:
-     # Defines a reusable step; the following indented lines are its body.
-0145 |     df = parse.load_games(games_path)
-     # Calculates or stores the game table for this stage.
-0146 |     trials = build_trials(df, granularity)
-     # Calculates or stores the exposure-trial table for this stage.
-0147 |     trials.to_parquet(out, index=False)
-     # Saves a compact table for later analysis stages.
-0148 |     return trials
-     # Hands this result back to the stage that called this function.
+0041 |     Say to the teacher: we read games in date order. For each game, we record
+0042 |     what opening each player used and what opening their opponent saw.
+0043 |
+0044 |     exposures[(player, behaviour)] -> list of (timestamp, exposer)
+0045 |     first_perf[(player, behaviour)] -> timestamp of first performance
+0046 |     edge_first_t[frozenset{u,v}]    -> first time the pair ever met
+0047 |     """
+0048 |     granularity = granularity or config.OPENING_GRANULARITY  # Saves a value named granularity so the next lines can use it.
+0049 |     df = df.sort_values("ts")  # Puts games in time order so earlier encounters cannot use future information.
+0050 |     key_col = df["eco"] if granularity == "eco" else df["eco"] + "|" + df["ply_key"]  # Chooses whether the behaviour is an ECO opening or a more specific opening line.
+0051 |
+0052 |     exposures: dict[tuple, list] = defaultdict(list)  # Stores the encounter log keyed by player and behaviour for the next step.
+0053 |     first_perf: dict[tuple, object] = {}  # Stores the first-use time for each player and behaviour for the next step.
+0054 |     edge_first_t: dict[frozenset, object] = {}  # Stores the first meeting time for each opponent pair for the next step.
+0055 |
+0056 |     for (ts, w, b), x in zip(  # Repeats the next indented steps once for each item.
+0057 |         zip(df["ts"].to_numpy(), df["white"].to_numpy(), df["black"].to_numpy()),  # Part of the value, collection, or call spanning several lines.
+0058 |         key_col.to_numpy(),  # Part of the value, collection, or call spanning several lines.
+0059 |     ):  # Runs this instruction as part of the current step.
+0060 |         e = frozenset((w, b))  # Makes an unordered opponent pair, so White–Black order cannot create two links.
+0061 |         if e not in edge_first_t:  # Adds only the first meeting time for this opponent pair.
+0062 |             edge_first_t[e] = ts  # Remembers when these two players first met, so later structure uses only past links.
+0063 |         for actor, observer, colour in ((w, b, "W"), (b, w, "B")):  # Processes both sides of each game as a performance and an exposure.
+0064 |             beh = (x, colour)  # Stores the opening-and-colour behaviour for the next step.
+0065 |             first_perf.setdefault((actor, beh), ts)      # performance
+0066 |             exposures[(observer, beh)].append((ts, actor))  # exposure
+0067 |     return exposures, first_perf, edge_first_t  # Gives this answer back to the code that called the function.
+0068 |
+0069 |
+0070 | def _components(nodes: list[str], edge_first_t: dict, t_now) -> int:  # Connected components of the subgraph induced on nodes, counting only edges that already existed at t_now.
+0071 |     """Connected components of the subgraph induced on `nodes`, counting only
+0072 |     edges that already existed at t_now. O(d^2) -- d is small by construction."""
+0073 |     n = len(nodes)  # Saves a value named n so the next lines can use it.
+0074 |     if n <= 1:  # Runs the next indented steps only when this condition is true.
+0075 |         return n  # Gives this answer back to the code that called the function.
+0076 |     parent = list(range(n))  # Stores the union-find parent list for grouping connected exposers for the next step.
+0077 |
+0078 |     def find(i):  # Defines a reusable step; the following indented lines are its body.
+0079 |         while parent[i] != i:  # Repeats the indented block until this condition stops holding.
+0080 |             parent[i] = parent[parent[i]]  # Shortens the search path while finding a connected exposer group.
+0081 |             i = parent[i]  # Saves a value named i so the next lines can use it.
+0082 |         return i  # Gives this answer back to the code that called the function.
+0083 |
+0084 |     for i in range(n):  # Repeats the next indented steps once for each item.
+0085 |         for j in range(i + 1, n):  # Repeats the next indented steps once for each item.
+0086 |             t = edge_first_t.get(frozenset((nodes[i], nodes[j])))  # Saves a temporary value used by the next calculation.
+0087 |             if t is not None and t <= t_now:  # Runs the next indented steps only when this condition is true.
+0088 |                 ri, rj = find(i), find(j)  # Runs this instruction as part of the current step.
+0089 |                 if ri != rj:  # Runs the next indented steps only when this condition is true.
+0090 |                     parent[ri] = rj  # Joins two exposer groups after finding a link between them.
+0091 |     return len({find(i) for i in range(n)})  # Counts how many separate social sources the exposing opponents form.
+0092 |
+0093 |
+0094 | def build_trials(df: pd.DataFrame, granularity: str = None,  # Turn encounters into the rows used by every later statistical check.
+0095 |                  window_days: int = None, with_diversity: bool = True  # Saves a value named window_days so the next lines can use it.
+0096 |                  ) -> pd.DataFrame:  # Runs this instruction as part of the current step.
+0097 |     """Turn encounters into the rows used by every later statistical check.
+0098 |
+0099 |     Explain this in a demo as: k counts all encounters, d counts different
+0100 |     opponents, sd counts separate groups among those opponents, and adopted
+0101 |     means the player first used that opening/colour within the next 14 days.
+0102 |     """
+0103 |     window_days = window_days or config.ADOPTION_WINDOW_DAYS  # Saves a value named window_days so the next lines can use it.
+0104 |     window = pd.Timedelta(days=window_days)  # Stores the time allowed for a later first use for the next step.
+0105 |     exposures, first_perf, edge_first_t = sweep(df, granularity)  # Runs this instruction as part of the current step.
+0106 |
+0107 |     t_end = df["ts"].max()  # Finds the last game date; a trial needs enough time after it to observe the outcome.
+0108 |     games = pd.concat([df["white"], df["black"]]).value_counts()  # Counts how often each player or opening occurs.
+0109 |     rating = pd.concat([  # Saves a value named rating so the next lines can use it.
+0110 |         df[["white", "white_rating"]].rename(  # Part of the value, collection, or call spanning several lines.
+0111 |             columns={"white": "p", "white_rating": "r"}),  # Saves a value named columns so the next lines can use it.
+0112 |         df[["black", "black_rating"]].rename(  # Part of the value, collection, or call spanning several lines.
+0113 |             columns={"black": "p", "black_rating": "r"}),  # Saves a value named columns so the next lines can use it.
+0114 |     ]).groupby("p")["r"].mean()  # Groups rows sharing these keys before counting or averaging them.
+0115 |     popularity = (pd.concat([df["eco"], df["eco"]]).value_counts(normalize=True)  # Counts how often each player or opening occurs.
+0116 |                   if granularity == "eco" else None)  # Runs the next indented steps only when this condition is true.
+0117 |
+0118 |     rows = []  # Stores the result rows collected for the output table for the next step.
+0119 |     for (player, beh), evs in exposures.items():  # Repeats the next indented steps once for each item.
+0120 |         # A player/opening pair is one story: first seeing it, then possibly
+0121 |         # playing it. We stop counting exposures once that player has used it.
+0122 |         adopt_t = first_perf.get((player, beh))  # Saves a value named adopt_t so the next lines can use it.
+0123 |         seen, distinct = set(), []  # Runs this instruction as part of the current step.
+0124 |         for k, (t, exposer) in enumerate(evs, start=1):  # Repeats the next indented steps once for each item.
+0125 |             if adopt_t is not None and adopt_t <= t:  # Stops creating trials after the player has already performed this behaviour.
+0126 |                 break                       # already performing it; no longer at risk
+0127 |             if exposer not in seen:  # Counts a repeat opponent once for d, even if they played many games.
+0128 |                 seen.add(exposer)  # Marks this opponent as already included in the distinct count.
+0129 |                 distinct.append(exposer)  # Keeps this new opponent for the structural-diversity calculation.
+0130 |             # Every included trial needs the same observable follow-up. Keeping
+0131 |             # late positive trials while dropping late negative trials makes
+0132 |             # adoption rates (and the temporal test set) outcome-dependent.
+0133 |             if t + window > t_end:  # Skips late encounters because we cannot observe a full follow-up period for them.
+0134 |                 continue  # Skips this item and moves to the next loop iteration.
+0135 |             # The outcome is 1 only for first use after this encounter and
+0136 |             # before the chosen follow-up period ends; otherwise it is 0.
+0137 |             adopted = int(adopt_t is not None and t < adopt_t <= t + window)  # Marks adoption only when first use occurs after exposure and within the follow-up window.
+0138 |             sd = _components(distinct, edge_first_t, t) if with_diversity else 0  # Counts independent groups among the distinct exposing opponents.
+0139 |             rows.append((player, beh[0], beh[1], t, k, len(distinct), sd, adopted))  # Adds this item to the list being built.
+0140 |
+0141 |     trials = pd.DataFrame(rows, columns=[  # Turns the collected encounters into the table used by later tests.
+0142 |         "player", "opening", "colour", "t", "k", "d", "sd", "adopted"])    // Part of the value, collection, or call spanning several lines.
+0143 |     if len(trials):  # Runs the next indented steps only when this condition is true.
+0144 |         trials["rating"] = trials["player"].map(rating)  # Stores this value under its player, opening, or field key.
+0145 |         trials["activity"] = trials["player"].map(games)  # Stores this value under its player, opening, or field key.
+0146 |         trials["popularity"] = (trials["opening"].map(popularity)  # Stores this value under its player, opening, or field key.
+0147 |                                 if popularity is not None else 0.0)  # Runs the next indented steps only when this condition is true.
+0148 |     return trials  # Gives this answer back to the code that called the function.
 0149 |
 0150 |
-0151 | if __name__ == "__main__":
-     # Runs the command-line entry point only when this file is executed directly.
-0152 |     ap = argparse.ArgumentParser()
-     # Keeps this intermediate result under the name `ap`.
-0153 |     ap.add_argument("--games", default=str(config.INTERIM / "games.parquet"))
-     # Defines a command-line option for this script.
-0154 |     ap.add_argument("--out", default=str(config.PROCESSED / "trials.parquet"))
-     # Defines a command-line option for this script.
-0155 |     ap.add_argument("--granularity", default=config.OPENING_GRANULARITY)
-     # Defines a command-line option for this script.
-0156 |     a = ap.parse_args()
-     # Keeps this intermediate result under the name `a`.
-0157 |     t = run(Path(a.games), Path(a.out), a.granularity)
-     # Calculates or stores the current game or exposure time for this stage.
-0158 |     print(f"{len(t)} trials, {t.adopted.sum()} adoptions "
-     # Prints this reading so a command-line run can be followed.
-0159 |           f"({t.adopted.mean():.3%}) -> {a.out}")
-     # Continues the current calculation or control flow.
-0160 |     print(t.groupby("d")["adopted"].agg(["count", "mean"]).head(8))
-     # Groups rows sharing these keys before counting or averaging them.
+0151 | def run(games_path: Path, out: Path, granularity=None) -> pd.DataFrame:  # Defines a reusable step; the following indented lines are its body.
+0152 |     df = parse.load_games(games_path)  # Stores the game table for the next step.
+0153 |     trials = build_trials(df, granularity)  # Stores the exposure-trial table for the next step.
+0154 |     trials.to_parquet(out, index=False)  # Saves a compact table for later analysis stages.
+0155 |     return trials  # Gives this answer back to the code that called the function.
+0156 |
+0157 |
+0158 | if __name__ == "__main__":  # Runs the command-line entry point only when this file is executed directly.
+0159 |     ap = argparse.ArgumentParser()  # Saves a value named ap so the next lines can use it.
+0160 |     ap.add_argument("--games", default=str(config.INTERIM / "games.parquet"))  # Defines a command-line option for this script.
+0161 |     ap.add_argument("--out", default=str(config.PROCESSED / "trials.parquet"))  # Defines a command-line option for this script.
+0162 |     ap.add_argument("--granularity", default=config.OPENING_GRANULARITY)  # Defines a command-line option for this script.
+0163 |     a = ap.parse_args()  # Saves a value named a so the next lines can use it.
+0164 |     t = run(Path(a.games), Path(a.out), a.granularity)  # Saves a temporary value used by the next calculation.
+0165 |     print(f"{len(t)} trials, {t.adopted.sum()} adoptions "  # Prints this reading so a command-line run can be followed.
+0166 |           f"({t.adopted.mean():.3%}) -> {a.out}")  # Runs this instruction as part of the current step.
+0167 |     print(t.groupby("d")["adopted"].agg(["count", "mean"]).head(8))  # Groups rows sharing these keys before counting or averaging them.

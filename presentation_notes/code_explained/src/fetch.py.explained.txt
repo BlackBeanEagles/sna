@@ -1,6 +1,6 @@
 SOURCE: src/fetch.py
 SAY FIRST: Reference copy of src/fetch.py; follow the line numbers while presenting.
-Each numbered source line is followed by a plain-English comment.
+Each numbered code line has a plain-English comment beside it.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Where the Lichess archives live.
@@ -15,32 +15,21 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0010 |
 0011 | Source: https://database.lichess.org  (CC0).
 0012 | """
-0013 | from __future__ import annotations
-     # Imports a library or project module needed below.
+0013 | from __future__ import annotations  # Loads code this file needs for the steps below.
 0014 |
-0015 | BASE = "https://database.lichess.org/standard/lichess_db_standard_rated_{month}.pgn.zst"
-     # Keeps this intermediate result under the name `BASE`.
+0015 | BASE = "https://database.lichess.org/standard/lichess_db_standard_rated_{month}.pgn.zst"  # Saves a value named BASE so the next lines can use it.
 0016 |
 0017 |
-0018 | def url(month: str) -> str:
-     # `month` is 'YYYY-MM', e.g.
+0018 | def url(month: str) -> str:  # month is 'YYYY-MM', e.g.
 0019 |     """`month` is 'YYYY-MM', e.g. '2016-01'."""
-0020 |     return BASE.format(month=month)
-     # Hands this result back to the stage that called this function.
+0020 |     return BASE.format(month=month)  # Gives this answer back to the code that called the function.
 0021 |
 0022 |
-0023 | if __name__ == "__main__":
-     # Runs the command-line entry point only when this file is executed directly.
-0024 |     import argparse
-     # Imports a library or project module needed below.
+0023 | if __name__ == "__main__":  # Runs the command-line entry point only when this file is executed directly.
+0024 |     import argparse  # Loads the tool that reads command-line choices.
 0025 |
-0026 |     ap = argparse.ArgumentParser(description=__doc__)
-     # Keeps this intermediate result under the name `ap`.
-0027 |     ap.add_argument("--month", default="2016-01", help="YYYY-MM")
-     # Defines a command-line option for this script.
-0028 |     a = ap.parse_args()
-     # Keeps this intermediate result under the name `a`.
-0029 |     print(url(a.month))
-     # Prints this reading so a command-line run can be followed.
-0030 |     print("\nTo analyse it:  python -m src.run_pipeline --month " + a.month)
-     # Prints this reading so a command-line run can be followed.
+0026 |     ap = argparse.ArgumentParser(description=__doc__)  # Saves a value named ap so the next lines can use it.
+0027 |     ap.add_argument("--month", default="2016-01", help="YYYY-MM")  # Defines a command-line option for this script.
+0028 |     a = ap.parse_args()  # Saves a value named a so the next lines can use it.
+0029 |     print(url(a.month))  # Prints this reading so a command-line run can be followed.
+0030 |     print("\nTo analyse it:  python -m src.run_pipeline --month " + a.month)  # Prints this reading so a command-line run can be followed.

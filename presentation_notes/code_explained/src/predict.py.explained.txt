@@ -1,6 +1,6 @@
 SOURCE: src/predict.py
 SAY FIRST: This tests whether those features improve prediction on held-out player-opening spells.
-Each numbered source line is followed by a plain-English comment.
+Each numbered code line has a plain-English comment beside it.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Step 7b -- the held-out predictive check.
@@ -26,84 +26,54 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0021 | alongside as a simpler comparison. The held-out model gaps are descriptive:
 0022 | they do not establish that an opponent caused adoption.
 0023 | """
-0024 | from __future__ import annotations
-     # Imports a library or project module needed below.
+0024 | from __future__ import annotations  # Loads code this file needs for the steps below.
 0025 |
-0026 | import argparse
-     # Imports a library or project module needed below.
-0027 | from pathlib import Path
-     # Imports a library or project module needed below.
+0026 | import argparse  # Loads the tool that reads command-line choices.
+0027 | from pathlib import Path  # Loads Path to find and save project files.
 0028 |
-0029 | import pandas as pd
-     # Imports a library or project module needed below.
-0030 | from sklearn.ensemble import HistGradientBoostingClassifier
-     # Imports a library or project module needed below.
-0031 | from sklearn.linear_model import LogisticRegression
-     # Imports a library or project module needed below.
-0032 | from sklearn.metrics import roc_auc_score
-     # Measures how well the model ranks adopters above non-adopters on held-out data.
-0033 | from sklearn.model_selection import GroupShuffleSplit
-     # Keeps whole player-opening-colour spells together in train or test data.
-0034 | from sklearn.pipeline import make_pipeline
-     # Imports a library or project module needed below.
-0035 | from sklearn.preprocessing import StandardScaler
-     # Imports a library or project module needed below.
+0029 | import pandas as pd  # Loads the table library used to store games and trials.
+0030 | from sklearn.ensemble import HistGradientBoostingClassifier  # Loads code this file needs for the steps below.
+0031 | from sklearn.linear_model import LogisticRegression  # Loads code this file needs for the steps below.
+0032 | from sklearn.metrics import roc_auc_score  # Measures how well the model ranks adopters above non-adopters on held-out data.
+0033 | from sklearn.model_selection import GroupShuffleSplit  # Keeps whole player-opening-colour spells together in train or test data.
+0034 | from sklearn.pipeline import make_pipeline  # Loads code this file needs for the steps below.
+0035 | from sklearn.preprocessing import StandardScaler  # Loads code this file needs for the steps below.
 0036 |
-0037 | from . import config, features, parse
-     # Imports a library or project module needed below.
+0037 | from . import config, features, parse  # Loads the named parts of this project so this file can use their functions.
 0038 |
-0039 | NESTED = {
-     # Keeps this intermediate result under the name `NESTED`.
+0039 | NESTED = {  # Saves a value named NESTED so the next lines can use it.
 0040 |     "baseline": features.BASELINE,
 0041 |     "repertoire": features.REPERTOIRE,
 0042 |     "network": features.NETWORK,
-0043 | }
-     # Closes the data structure or function call started above.
+0043 | }  # Closes the data structure or function call started above.
 0044 |
 0045 | # what each part of the network block is worth on its own
-0046 | DECOMPOSE = {
-     # Keeps this intermediate result under the name `DECOMPOSE`.
+0046 | DECOMPOSE = {  # Saves a value named DECOMPOSE so the next lines can use it.
 0047 |     "plus_k_only": features.REPERTOIRE + ["k"],
 0048 |     "plus_diversity_only": features.REPERTOIRE + ["d", "sd"],
 0049 |     "plus_centrality_only": features.REPERTOIRE + ["degree", "kcore", "betweenness"],
-0050 | }
-     # Closes the data structure or function call started above.
+0050 | }  # Closes the data structure or function call started above.
 0051 |
 0052 |
-0053 | def _gbm(train, test, cols):
-     # Defines a reusable step; the following indented lines are its body.
-0054 |     m = HistGradientBoostingClassifier(max_iter=300, learning_rate=0.06,
-     # Keeps this intermediate result under the name `m`.
-0055 |                                        random_state=config.RANDOM_SEED)
-     # Keeps this intermediate result under the name `random_state`.
-0056 |     m.fit(train[cols], train["adopted"])
-     # Continues the current calculation or control flow.
-0057 |     return (roc_auc_score(test["adopted"], m.predict_proba(test[cols])[:, 1]),
-     # Measures how well the model ranks adopters above non-adopters on held-out data.
-0058 |             roc_auc_score(train["adopted"], m.predict_proba(train[cols])[:, 1]))
-     # Measures how well the model ranks adopters above non-adopters on held-out data.
+0053 | def _gbm(train, test, cols):  # Defines a reusable step; the following indented lines are its body.
+0054 |     m = HistGradientBoostingClassifier(max_iter=300, learning_rate=0.06,  # Saves a value named m so the next lines can use it.
+0055 |                                        random_state=config.RANDOM_SEED)  # Saves a value named random_state so the next lines can use it.
+0056 |     m.fit(train[cols], train["adopted"])  # Runs this instruction as part of the current step.
+0057 |     return (roc_auc_score(test["adopted"], m.predict_proba(test[cols])[:, 1]),  # Measures how well the model ranks adopters above non-adopters on held-out data.
+0058 |             roc_auc_score(train["adopted"], m.predict_proba(train[cols])[:, 1]))  # Measures how well the model ranks adopters above non-adopters on held-out data.
 0059 |
 0060 |
-0061 | def _logistic(train, test, cols):
-     # Defines a reusable step; the following indented lines are its body.
-0062 |     m = make_pipeline(StandardScaler(),
-     # Keeps this intermediate result under the name `m`.
-0063 |                       LogisticRegression(max_iter=2000,
-     # Part of the value, collection, or call spanning several lines.
-0064 |                                          random_state=config.RANDOM_SEED))
-     # Keeps this intermediate result under the name `random_state`.
-0065 |     m.fit(train[cols].fillna(0.0), train["adopted"])
-     # Continues the current calculation or control flow.
-0066 |     return roc_auc_score(test["adopted"],
-     # Measures how well the model ranks adopters above non-adopters on held-out data.
-0067 |                          m.predict_proba(test[cols].fillna(0.0))[:, 1])
-     # Gets each trial's predicted probability of later adoption.
+0061 | def _logistic(train, test, cols):  # Defines a reusable step; the following indented lines are its body.
+0062 |     m = make_pipeline(StandardScaler(),  # Saves a value named m so the next lines can use it.
+0063 |                       LogisticRegression(max_iter=2000,  # Part of the value, collection, or call spanning several lines.
+0064 |                                          random_state=config.RANDOM_SEED))  # Saves a value named random_state so the next lines can use it.
+0065 |     m.fit(train[cols].fillna(0.0), train["adopted"])  # Runs this instruction as part of the current step.
+0066 |     return roc_auc_score(test["adopted"],  # Measures how well the model ranks adopters above non-adopters on held-out data.
+0067 |                          m.predict_proba(test[cols].fillna(0.0))[:, 1])  # Gets each trial's predicted probability of later adoption.
 0068 |
 0069 |
-0070 | def evaluate(games: pd.DataFrame, trials: pd.DataFrame,
-     # The whole check, on data already in memory.
-0071 |              full: bool = True) -> dict:
-     # Keeps this intermediate result under the name `full`.
+0070 | def evaluate(games: pd.DataFrame, trials: pd.DataFrame,  # The whole check, on data already in memory.
+0071 |              full: bool = True) -> dict:  # Saves a value named full so the next lines can use it.
 0072 |     """The whole check, on data already in memory.
 0073 |
 0074 |     `run()` is the file-based entry point; the live console holds the frames
@@ -121,128 +91,70 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0086 |     """
 0087 |     # The initial 20% supplies background features. Every evaluated trial
 0088 |     # occurs later, so even training rows cannot see their own outcomes.
-0089 |     feature_cutoff = trials["t"].quantile(0.20)
-     # Keeps this intermediate result under the name `feature_cutoff`.
-0090 |     eligible = trials.loc[trials["t"] > feature_cutoff].copy()
-     # Keeps this intermediate result under the name `eligible`.
-0091 |     if len(eligible) < 100:
-     # Checks whether enough records exist for a trustworthy next step.
-0092 |         return {"error": "not enough trials after the feature cutoff"}
-     # Hands this result back to the stage that called this function.
-0093 |     data = features.build(games, eligible, feature_cutoff)
-     # Keeps this intermediate result under the name `data`.
-0094 |     groups = pd.MultiIndex.from_frame(
-     # Keeps this intermediate result under the name `groups`.
-0095 |         data[["player", "opening", "colour"]]).factorize()[0]
-     # Continues the current calculation or control flow.
-0096 |     splitter = GroupShuffleSplit(n_splits=1,
-     # Keeps whole player-opening-colour spells together in train or test data.
-0097 |                                  test_size=1 - config.TRAIN_FRACTION,
-     # Keeps this intermediate result under the name `test_size`.
-0098 |                                  random_state=config.RANDOM_SEED)
-     # Keeps this intermediate result under the name `random_state`.
-0099 |     train_idx, test_idx = next(splitter.split(data, data["adopted"], groups))
-     # Continues the current calculation or control flow.
-0100 |     train, test = data.iloc[train_idx], data.iloc[test_idx]
-     # Continues the current calculation or control flow.
-0101 |     if train["adopted"].nunique() < 2 or test["adopted"].nunique() < 2:
-     # Checks this condition before running the next indented block.
-0102 |         return {"error": "not enough class variation in one of the splits"}
-     # Hands this result back to the stage that called this function.
+0089 |     feature_cutoff = trials["t"].quantile(0.20)  # Saves a value named feature_cutoff so the next lines can use it.
+0090 |     eligible = trials.loc[trials["t"] > feature_cutoff].copy()  # Saves a value named eligible so the next lines can use it.
+0091 |     if len(eligible) < 100:  # Checks whether enough records exist for a trustworthy next step.
+0092 |         return {"error": "not enough trials after the feature cutoff"}  # Gives this answer back to the code that called the function.
+0093 |     data = features.build(games, eligible, feature_cutoff)  # Saves a value named data so the next lines can use it.
+0094 |     groups = pd.MultiIndex.from_frame(  # Saves a value named groups so the next lines can use it.
+0095 |         data[["player", "opening", "colour"]]).factorize()[0]  # Runs this instruction as part of the current step.
+0096 |     splitter = GroupShuffleSplit(n_splits=1,  # Keeps whole player-opening-colour spells together in train or test data.
+0097 |                                  test_size=1 - config.TRAIN_FRACTION,  # Saves a value named test_size so the next lines can use it.
+0098 |                                  random_state=config.RANDOM_SEED)  # Saves a value named random_state so the next lines can use it.
+0099 |     train_idx, test_idx = next(splitter.split(data, data["adopted"], groups))  # Runs this instruction as part of the current step.
+0100 |     train, test = data.iloc[train_idx], data.iloc[test_idx]  # Runs this instruction as part of the current step.
+0101 |     if train["adopted"].nunique() < 2 or test["adopted"].nunique() < 2:  # Runs the next indented steps only when this condition is true.
+0102 |         return {"error": "not enough class variation in one of the splits"}  # Gives this answer back to the code that called the function.
 0103 |
-0104 |     out = {
-     # Calculates or stores the output value for this stage.
-0105 |         "n_train": int(len(train)), "n_test": int(len(test)),
-     # Part of the value, collection, or call spanning several lines.
-0106 |         "split_method": "held-out player-opening-colour spells",
-     # Part of the value, collection, or call spanning several lines.
-0107 |         "feature_cutoff": str(feature_cutoff), "leakage_free": True,
-     # Part of the value, collection, or call spanning several lines.
-0108 |         "base_rate_train": round(float(train["adopted"].mean()), 4),
-     # Part of the value, collection, or call spanning several lines.
-0109 |         "base_rate_test": round(float(test["adopted"].mean()), 4),
-     # Part of the value, collection, or call spanning several lines.
-0110 |     }
-     # Closes the data structure or function call started above.
+0104 |     out = {  # Stores the output value for the next step.
+0105 |         "n_train": int(len(train)), "n_test": int(len(test)),    // Part of the value, collection, or call spanning several lines.
+0106 |         "split_method": "held-out player-opening-colour spells",    // Part of the value, collection, or call spanning several lines.
+0107 |         "feature_cutoff": str(feature_cutoff), "leakage_free": True,    // Part of the value, collection, or call spanning several lines.
+0108 |         "base_rate_train": round(float(train["adopted"].mean()), 4),    // Part of the value, collection, or call spanning several lines.
+0109 |         "base_rate_test": round(float(test["adopted"].mean()), 4),    // Part of the value, collection, or call spanning several lines.
+0110 |     }  # Closes the data structure or function call started above.
 0111 |
-0112 |     auc = {}
-     # Keeps this intermediate result under the name `auc`.
-0113 |     for name, cols in NESTED.items():
-     # Processes each item from this collection in turn.
-0114 |         te, tr = _gbm(train, test, cols)
-     # Continues the current calculation or control flow.
-0115 |         auc[name] = te
-     # Continues the current calculation or control flow.
-0116 |         out[f"auc_{name}"] = round(float(te), 4)
-     # Continues the current calculation or control flow.
-0117 |         out[f"train_auc_{name}"] = round(float(tr), 4)
-     # Continues the current calculation or control flow.
-0118 |         if full:
-     # Checks this condition before running the next indented block.
-0119 |             out[f"logistic_{name}"] = round(float(_logistic(train, test, cols)), 4)
-     # Continues the current calculation or control flow.
+0112 |     auc = {}  # Saves a value named auc so the next lines can use it.
+0113 |     for name, cols in NESTED.items():  # Repeats the next indented steps once for each item.
+0114 |         te, tr = _gbm(train, test, cols)  # Runs this instruction as part of the current step.
+0115 |         auc[name] = te  # Stores this value under its player, opening, or field key.
+0116 |         out[f"auc_{name}"] = round(float(te), 4)  # Stores this value under its player, opening, or field key.
+0117 |         out[f"train_auc_{name}"] = round(float(tr), 4)  # Stores this value under its player, opening, or field key.
+0118 |         if full:  # Runs the next indented steps only when this condition is true.
+0119 |             out[f"logistic_{name}"] = round(float(_logistic(train, test, cols)), 4)  # Stores this value under its player, opening, or field key.
 0120 |
-0121 |     out["gain_repertoire_over_baseline"] = round(auc["repertoire"] - auc["baseline"], 4)
-     # Continues the current calculation or control flow.
-0122 |     out["gain_network_over_repertoire"] = round(auc["network"] - auc["repertoire"], 4)
-     # Continues the current calculation or control flow.
+0121 |     out["gain_repertoire_over_baseline"] = round(auc["repertoire"] - auc["baseline"], 4)  # Stores this value under its player, opening, or field key.
+0122 |     out["gain_network_over_repertoire"] = round(auc["network"] - auc["repertoire"], 4)  # Stores this value under its player, opening, or field key.
 0123 |
-0124 |     if full:
-     # Checks this condition before running the next indented block.
-0125 |         for name, cols in DECOMPOSE.items():
-     # Processes each item from this collection in turn.
-0126 |             te, _ = _gbm(train, test, cols)
-     # Continues the current calculation or control flow.
-0127 |             out[f"auc_{name}"] = round(float(te), 4)
-     # Continues the current calculation or control flow.
-0128 |             out[f"gain_{name}"] = round(float(te - auc["repertoire"]), 4)
-     # Continues the current calculation or control flow.
-0129 |         exposure_gain = max(out["gain_plus_k_only"], out["gain_plus_diversity_only"])
-     # Keeps this intermediate result under the name `exposure_gain`.
-0130 |         out["reading"] = (
-     # Part of the value, collection, or call spanning several lines.
-0131 |             f"repertoire proximity is worth {out['gain_repertoire_over_baseline']:+.4f} "
-     # Continues the current calculation or control flow.
-0132 |             f"AUC over the baseline; knowing who played the opening at the player adds "
-     # Continues the current calculation or control flow.
-0133 |             f"at most {exposure_gain:+.4f} on top of it")
-     # Continues the current calculation or control flow.
-0134 |     else:
-     # Handles the alternative when the preceding condition was false.
-0135 |         out["reading"] = (
-     # Part of the value, collection, or call spanning several lines.
-0136 |             f"repertoire proximity is worth {out['gain_repertoire_over_baseline']:+.4f} "
-     # Continues the current calculation or control flow.
-0137 |             f"AUC over the baseline; social exposure and centrality together add "
-     # Continues the current calculation or control flow.
-0138 |             f"{out['gain_network_over_repertoire']:+.4f} on top of it")
-     # Continues the current calculation or control flow.
+0124 |     if full:  # Runs the next indented steps only when this condition is true.
+0125 |         for name, cols in DECOMPOSE.items():  # Repeats the next indented steps once for each item.
+0126 |             te, _ = _gbm(train, test, cols)  # Runs this instruction as part of the current step.
+0127 |             out[f"auc_{name}"] = round(float(te), 4)  # Stores this value under its player, opening, or field key.
+0128 |             out[f"gain_{name}"] = round(float(te - auc["repertoire"]), 4)  # Stores this value under its player, opening, or field key.
+0129 |         exposure_gain = max(out["gain_plus_k_only"], out["gain_plus_diversity_only"])  # Saves a value named exposure_gain so the next lines can use it.
+0130 |         out["reading"] = (  # Part of the value, collection, or call spanning several lines.
+0131 |             f"repertoire proximity is worth {out['gain_repertoire_over_baseline']:+.4f} "  # Runs this instruction as part of the current step.
+0132 |             f"AUC over the baseline; knowing who played the opening at the player adds "  # Runs this instruction as part of the current step.
+0133 |             f"at most {exposure_gain:+.4f} on top of it")  # Runs this instruction as part of the current step.
+0134 |     else:  # Handles the alternative when the preceding condition was false.
+0135 |         out["reading"] = (  # Part of the value, collection, or call spanning several lines.
+0136 |             f"repertoire proximity is worth {out['gain_repertoire_over_baseline']:+.4f} "  # Runs this instruction as part of the current step.
+0137 |             f"AUC over the baseline; social exposure and centrality together add "  # Runs this instruction as part of the current step.
+0138 |             f"{out['gain_network_over_repertoire']:+.4f} on top of it")  # Runs this instruction as part of the current step.
 0139 |
-0140 |     return out
-     # Hands this result back to the stage that called this function.
+0140 |     return out  # Gives this answer back to the code that called the function.
 0141 |
 0142 |
-0143 | def run(trials_path: Path, games_path: Path) -> dict:
-     # Defines a reusable step; the following indented lines are its body.
-0144 |     out = evaluate(parse.load_games(games_path), pd.read_parquet(trials_path))
-     # Loads a previously prepared game or trial table.
-0145 |     pd.DataFrame([out]).to_csv(config.TABLES / "predictive_auc.csv", index=False)
-     # Creates a labelled table from the collected rows.
-0146 |     return out
-     # Hands this result back to the stage that called this function.
+0143 | def run(trials_path: Path, games_path: Path) -> dict:  # Defines a reusable step; the following indented lines are its body.
+0144 |     out = evaluate(parse.load_games(games_path), pd.read_parquet(trials_path))  # Loads a previously prepared game or trial table.
+0145 |     pd.DataFrame([out]).to_csv(config.TABLES / "predictive_auc.csv", index=False)  # Creates a labelled table from the collected rows.
+0146 |     return out  # Gives this answer back to the code that called the function.
 0147 |
 0148 |
-0149 | if __name__ == "__main__":
-     # Runs the command-line entry point only when this file is executed directly.
-0150 |     ap = argparse.ArgumentParser()
-     # Keeps this intermediate result under the name `ap`.
-0151 |     ap.add_argument("--trials", default=str(config.PROCESSED / "trials.parquet"))
-     # Defines a command-line option for this script.
-0152 |     ap.add_argument("--games", default=str(config.INTERIM / "games.parquet"))
-     # Defines a command-line option for this script.
-0153 |     a = ap.parse_args()
-     # Keeps this intermediate result under the name `a`.
-0154 |     for k, v in run(Path(a.trials), Path(a.games)).items():
-     # Processes each item from this collection in turn.
-0155 |         print(f"{k}: {v}")
-     # Prints this reading so a command-line run can be followed.
+0149 | if __name__ == "__main__":  # Runs the command-line entry point only when this file is executed directly.
+0150 |     ap = argparse.ArgumentParser()  # Saves a value named ap so the next lines can use it.
+0151 |     ap.add_argument("--trials", default=str(config.PROCESSED / "trials.parquet"))  # Defines a command-line option for this script.
+0152 |     ap.add_argument("--games", default=str(config.INTERIM / "games.parquet"))  # Defines a command-line option for this script.
+0153 |     a = ap.parse_args()  # Saves a value named a so the next lines can use it.
+0154 |     for k, v in run(Path(a.trials), Path(a.games)).items():  # Repeats the next indented steps once for each item.
+0155 |         print(f"{k}: {v}")  # Prints this reading so a command-line run can be followed.
