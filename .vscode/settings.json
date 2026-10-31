@@ -1,0 +1,25 @@
+{
+  "files.exclude": {
+    "**/.git": true,
+    "**/.venv": true,
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/*.pyc": true,
+    "notebooks": true,
+    "data": true,
+    "results": true,
+    "scripts": true,
+    "tests": true,
+    "src/animate.py": true,
+    "src/simulate.py": true,
+    "src/features.py": true,
+    "src/predict.py": true,
+    "site/assets": true,
+    "site/build.py": true,
+    "site/index.html": true,
+    "docs/RESULTS_PRE_*.md": true,
+    "docs/SNA_Proposal*": true,
+    "docs/figures": true,
+    "docs/player_network_preview.png": true
+  }
+}
