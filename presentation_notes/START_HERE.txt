@@ -7,6 +7,11 @@ runs; the explained copies are for speaking and can be searched by line number.
 
 If the teacher asks for the full workflow, follow this order:
 
+For a quick interactive example, open http://127.0.0.1:8124/board-demo first.
+Click Try e4 c5, then reset and move a piece yourself. This board lookup uses
+the bundled 60,000 real games; the statistical pipeline is the separate Run
+analysis control on the main page.
+
 1. server/app.py — The browser sends Run to /api/run. The server starts a run.
 2. server/runner.py — A worker loads real games, builds trials, calculates
    the network and curve, then runs the shuffled, matched and prediction checks.
@@ -35,6 +40,10 @@ Useful answers to remember:
   time to see whether the excess grows with different opponents.
 - Matching and held-out prediction are checks on the pattern. They do not
   turn the observational study into proof of causation.
+- If asked about January 2016: it is a fixed historical case study with a
+  complete filtered slice, timestamps, and enough games for the 14-day study.
+  The method works on other months; the result is not a claim about today's
+  chess players.
 
 After changing source files, regenerate these copies with:
   .venv\Scripts\python.exe scripts\build_annotated_code.py

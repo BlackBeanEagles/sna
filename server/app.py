@@ -62,7 +62,7 @@ class Handler(BaseHTTPRequestHandler):
         # The console is live; /findings serves the saved full-study report.
         # Keeping both routes on one local server makes the demo easy to open.
         path = urlparse(self.path).path
-        if path in ("/", "/index.html"):
+        if path in ("/", "/index.html", "/board-demo"):
             html = (STATIC / "index.html").read_bytes()
             return self._send(200, html, "text/html; charset=utf-8")
         if path == "/findings":
@@ -78,6 +78,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, image, "image/png")
         if path == "/api/runs":
             return self._json({"runs": runner.list_runs()})
+        if path == "/api/board-demo":
+            return self._json(runner.board_demo_payload())
         if path == "/api/months":
             return self._json({"months": runner.MONTHS, "stages":
                                [{"key": k, "label": l} for k, l in runner.STAGES]})
@@ -104,7 +106,8 @@ class Handler(BaseHTTPRequestHandler):
             run = runner.start(month, cap,
                                int(cfg.get("null_reps", 20)),
                                int(cfg.get("window_days", 14)),
-                               bool(cfg.get("refresh", False)))
+                               bool(cfg.get("refresh", False)),
+                               bool(cfg.get("predict", False)))
             return self._json({"run_id": run.id})
         if path == "/api/resume":
             rid = (self._query().get("run") or [""])[0]

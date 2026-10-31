@@ -11,9 +11,6 @@ import argparse
 import math
 from pathlib import Path
 
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
 import pandas as pd
 
 from . import config
@@ -88,6 +85,11 @@ def _yerr(tb: pd.DataFrame):
 
 def plot(tables: dict[str, pd.DataFrame], out: Path,
          null_cmp: pd.DataFrame = None):
+    # The live console only needs numeric tables, not a PNG. Import plotting
+    # when a CLI/report run actually asks for a figure.
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
     n_panels = 3 if (null_cmp is not None and len(null_cmp)) else 2
     fig, axes = plt.subplots(1, n_panels, figsize=(6 * n_panels, 4.6))
 

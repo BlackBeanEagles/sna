@@ -29,8 +29,10 @@ RUNS_DIR.mkdir(parents=True, exist_ok=True)
 # streamed and decompressed on the fly, never written to disk.
 DEMO_MONTH = "demo-2016-01"
 DEMO_FAST_MONTH = "demo-fast-2016-01"
+BOARD_DEMO_ID = "board-demo"
 DEMO_SLICE = config.ROOT / "data" / "demo" / "january_2016_classroom_sample.parquet"
 DEMO_SIZES = {DEMO_FAST_MONTH: 20_000, DEMO_MONTH: 60_000}
+_BOARD_DEMO_CACHE: dict = {}
 
 MONTHS = [
     {"id": DEMO_FAST_MONTH, "label": "January 2016 · fast presentation run", "mb": 2.4,
@@ -50,7 +52,7 @@ STAGES = [
     ("curve",   "Adoption-probability curve"),
     ("null",    "Timestamp-shuffled null"),
     ("matched", "Matched controls"),
-    ("predict", "Group-held-out prediction"),
+    ("predict", "Group-held-out prediction (optional)"),
     ("verdict", "Verdict"),
 ]
 
@@ -200,6 +202,7 @@ class Run:
     """
     def __init__(self, month: str, max_games: int | None, null_reps: int,
                  window_days: int, refresh: bool = False,
+                 predict: bool = True,
                  run_id: str | None = None):
         self.id = run_id or uuid.uuid4().hex[:12]
         self.month = month
@@ -207,6 +210,7 @@ class Run:
         self.null_reps = max(1, min(20, null_reps))
         self.window_days = window_days
         self.refresh = refresh
+        self.predict = predict
         self.dir = RUNS_DIR / self.id
         self.dir.mkdir(parents=True, exist_ok=True)
         self.events_path = self.dir / "events.jsonl"
@@ -218,7 +222,8 @@ class Run:
             self._save_manifest({
                 "id": self.id, "month": month, "max_games": self.max_games,
                 "null_reps": self.null_reps, "window_days": window_days,
-                "refresh": refresh, "started": self.started,
+                "refresh": refresh, "predict": predict,
+                "started": self.started,
                 "status": "running",
             })
         else:
@@ -240,7 +245,8 @@ class Run:
             return None
         m = json.loads(path.read_text(encoding="utf-8"))
         return cls(m["month"], m["max_games"], m["null_reps"],
-                   m["window_days"], m["refresh"], run_id=run_id)
+                   m["window_days"], m["refresh"],
+                   predict=m.get("predict", True), run_id=run_id)
 
     def emit(self, kind: str, **payload):
         payload["kind"] = kind
@@ -313,8 +319,9 @@ def _launch(run: Run):
 
 
 def start(month: str, max_games: int | None, null_reps: int,
-          window_days: int, refresh: bool = False) -> Run:
-    run = Run(month, max_games, null_reps, window_days, refresh)
+          window_days: int, refresh: bool = False,
+          predict: bool = True) -> Run:
+    run = Run(month, max_games, null_reps, window_days, refresh, predict)
     _launch(run)
     return run
 
@@ -344,6 +351,9 @@ def resume(run_id: str) -> Run | None:
 def load_board_data(run_id: str) -> bool:
     import pandas as pd
 
+    if run_id == BOARD_DEMO_ID:
+        board_demo_payload()
+        return True
     run = get(run_id)
     if run is None:
         return False
@@ -363,6 +373,32 @@ def load_board_data(run_id: str) -> bool:
     LAST["graph_players"] = (json.loads(graph_path.read_text(encoding="utf-8"))
                              if graph_path.is_file() else None)
     return True
+
+
+def board_demo_payload() -> dict:
+    """Load real January games for board interaction without a pipeline run.
+
+    First-use trials are calculated once for the opening counts. Structural
+    diversity is omitted here because the board does not display it; the
+    full analysis still computes it in the ordinary pipeline.
+    """
+    import pandas as pd
+    from src import events
+
+    if not _BOARD_DEMO_CACHE:
+        games = pd.read_parquet(DEMO_SLICE)
+        trials = events.build_trials(games, with_diversity=False)
+        _BOARD_DEMO_CACHE.update(
+            df=games, trials=trials,
+            openings=_openings_payload(games, trials),
+            players=len(set(games["white"]) | set(games["black"])),
+        )
+    LAST.update(df=_BOARD_DEMO_CACHE["df"], trials=_BOARD_DEMO_CACHE["trials"],
+                month="January 2016 board demo", run_id=BOARD_DEMO_ID,
+                comm=None, graph_players=None)
+    return {"games": len(_BOARD_DEMO_CACHE["df"]),
+            "players": _BOARD_DEMO_CACHE["players"],
+            "openings": _BOARD_DEMO_CACHE["openings"]["openings"]}
 
 
 
@@ -478,7 +514,9 @@ def _analyse(run: "Run", df):
     reference -> matched controls -> held-out prediction -> verdict.
     """
     import pandas as pd
-    from src import curve, events as ev, matching, nulls, predict, structure
+    # Keep the first visible readings responsive on a cold classroom laptop.
+    # The predictive model imports scikit-learn only when that final stage starts.
+    from src import curve, events as ev, matching, nulls, structure
 
     span_days = (df["ts"].max() - df["ts"].min()).total_seconds() / 86400
     players = len(set(df["white"]) | set(df["black"]))
@@ -573,18 +611,21 @@ def _analyse(run: "Run", df):
     if run.stopped(): return _cancel(run)
 
     # ---------------- 7. prediction ----------------
-    run.stage("predict", "running")
-    # same code path as the CLI: features rebuilt from the training window
-    # only, three nested models, and the network block taken apart
-    pred = predict.evaluate(df, trials, full=False)
-    run.emit("predict", **pred)
-    if "error" in pred:
-        run.stage("predict", "skipped", "insufficient variation")
+    if run.predict:
+        run.stage("predict", "running")
+        from src import predict
+        # same code path as the CLI: features rebuilt from the training window
+        pred = predict.evaluate(df, trials, full=False)
+        run.emit("predict", **pred)
+        if "error" in pred:
+            run.stage("predict", "skipped", "insufficient variation")
+        else:
+            run.log(pred["reading"], "hl")
+            run.stage("predict", "done",
+                      f"repertoire {pred['gain_repertoire_over_baseline']:+.3f} "
+                      f"vs network {pred['gain_network_over_repertoire']:+.3f}")
     else:
-        run.log(pred["reading"], "hl")
-        run.stage("predict", "done",
-                  f"repertoire {pred['gain_repertoire_over_baseline']:+.3f} "
-                  f"vs network {pred['gain_network_over_repertoire']:+.3f}")
+        run.stage("predict", "skipped", "optional model not selected")
 
     # ---------------- 8. verdict ----------------
     run.stage("verdict", "running")

@@ -50,1171 +50,1243 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `DEMO_MONTH`.
 0031 | DEMO_FAST_MONTH = "demo-fast-2016-01"
      # Keeps this intermediate result under the name `DEMO_FAST_MONTH`.
-0032 | DEMO_SLICE = config.ROOT / "data" / "demo" / "january_2016_classroom_sample.parquet"
+0032 | BOARD_DEMO_ID = "board-demo"
+     # Keeps this intermediate result under the name `BOARD_DEMO_ID`.
+0033 | DEMO_SLICE = config.ROOT / "data" / "demo" / "january_2016_classroom_sample.parquet"
      # Keeps this intermediate result under the name `DEMO_SLICE`.
-0033 | DEMO_SIZES = {DEMO_FAST_MONTH: 20_000, DEMO_MONTH: 60_000}
+0034 | DEMO_SIZES = {DEMO_FAST_MONTH: 20_000, DEMO_MONTH: 60_000}
      # Keeps this intermediate result under the name `DEMO_SIZES`.
-0034 |
-0035 | MONTHS = [
+0035 | _BOARD_DEMO_CACHE: dict = {}
+     # Keeps this intermediate result under the name `_BOARD_DEMO_CACHE`.
+0036 |
+0037 | MONTHS = [
      # Keeps this intermediate result under the name `MONTHS`.
-0036 |     {"id": DEMO_FAST_MONTH, "label": "January 2016 · fast presentation run", "mb": 2.4,
+0038 |     {"id": DEMO_FAST_MONTH, "label": "January 2016 · fast presentation run", "mb": 2.4,
      # Part of the value, collection, or call spanning several lines.
-0037 |      "games": "20,000 sampled real"},
+0039 |      "games": "20,000 sampled real"},
      # Part of the value, collection, or call spanning several lines.
-0038 |     {"id": DEMO_MONTH, "label": "January 2016 · quick live demo", "mb": 2.4,
+0040 |     {"id": DEMO_MONTH, "label": "January 2016 · quick live demo", "mb": 2.4,
      # Part of the value, collection, or call spanning several lines.
-0039 |      "games": "60,000 sampled real"},
+0041 |      "games": "60,000 sampled real"},
      # Part of the value, collection, or call spanning several lines.
-0040 |     {"id": "2014-07", "label": "July 2014",    "mb": 200,  "games": "~1.0M"},
+0042 |     {"id": "2014-07", "label": "July 2014",    "mb": 200,  "games": "~1.0M"},
      # Part of the value, collection, or call spanning several lines.
-0041 |     {"id": "2015-01", "label": "January 2015", "mb": 285,  "games": "~1.5M"},
+0043 |     {"id": "2015-01", "label": "January 2015", "mb": 285,  "games": "~1.5M"},
      # Part of the value, collection, or call spanning several lines.
-0042 |     {"id": "2015-07", "label": "July 2015",    "mb": 482,  "games": "~2.4M"},
+0044 |     {"id": "2015-07", "label": "July 2015",    "mb": 482,  "games": "~2.4M"},
      # Part of the value, collection, or call spanning several lines.
-0043 |     {"id": "2016-01", "label": "January 2016", "mb": 871,  "games": "~5.0M"},
+0045 |     {"id": "2016-01", "label": "January 2016", "mb": 871,  "games": "~5.0M"},
      # Part of the value, collection, or call spanning several lines.
-0044 | ]
+0046 | ]
      # Closes the data structure or function call started above.
-0045 |
-0046 | STAGES = [
+0047 |
+0048 | STAGES = [
      # Keeps this intermediate result under the name `STAGES`.
-0047 |     ("stream",  "Stream & filter the archive"),
+0049 |     ("stream",  "Stream & filter the archive"),
      # Part of the value, collection, or call spanning several lines.
-0048 |     ("trials",  "Build exposure / adoption trials"),
+0050 |     ("trials",  "Build exposure / adoption trials"),
      # Part of the value, collection, or call spanning several lines.
-0049 |     ("network", "Network structure"),
+0051 |     ("network", "Network structure"),
      # Part of the value, collection, or call spanning several lines.
-0050 |     ("curve",   "Adoption-probability curve"),
+0052 |     ("curve",   "Adoption-probability curve"),
      # Part of the value, collection, or call spanning several lines.
-0051 |     ("null",    "Timestamp-shuffled null"),
+0053 |     ("null",    "Timestamp-shuffled null"),
      # Part of the value, collection, or call spanning several lines.
-0052 |     ("matched", "Matched controls"),
+0054 |     ("matched", "Matched controls"),
      # Part of the value, collection, or call spanning several lines.
-0053 |     ("predict", "Group-held-out prediction"),
+0055 |     ("predict", "Group-held-out prediction (optional)"),
      # Part of the value, collection, or call spanning several lines.
-0054 |     ("verdict", "Verdict"),
+0056 |     ("verdict", "Verdict"),
      # Part of the value, collection, or call spanning several lines.
-0055 | ]
+0057 | ]
      # Closes the data structure or function call started above.
-0056 |
-0057 | _RUNS: dict[str, "Run"] = {}
-     # Keeps this intermediate result under the name `_RUNS`.
 0058 |
-0059 | # The most recent successful run's data, kept so the interactive board can ask
-0060 | # "what happened to THIS opening?" without re-streaming the archive.
-0061 | LAST: dict = {"df": None, "trials": None, "month": None, "comm": None,
+0059 | _RUNS: dict[str, "Run"] = {}
+     # Keeps this intermediate result under the name `_RUNS`.
+0060 |
+0061 | # The most recent successful run's data, kept so the interactive board can ask
+0062 | # "what happened to THIS opening?" without re-streaming the archive.
+0063 | LAST: dict = {"df": None, "trials": None, "month": None, "comm": None,
      # Keeps this intermediate result under the name `LAST`.
-0062 |               "graph_players": None}
+0064 |               "graph_players": None}
      # Part of the value, collection, or call spanning several lines.
-0063 |
-0064 |
-0065 | def board_state(sans: list[str], uci: str | None = None) -> dict:
+0065 |
+0066 |
+0067 | def board_state(sans: list[str], uci: str | None = None) -> dict:
      # Replay a SAN list from the start position, optionally appending one move.
-0066 |     """Replay a SAN list from the start position, optionally appending one move.
-0067 |
-0068 |     Stateless by design: the client sends the whole (short) move list each time,
-0069 |     so two people can share the board without the server tracking sessions.
-0070 |     """
-0071 |     import chess
+0068 |     """Replay a SAN list from the start position, optionally appending one move.
+0069 |
+0070 |     Stateless by design: the client sends the whole (short) move list each time,
+0071 |     so two people can share the board without the server tracking sessions.
+0072 |     """
+0073 |     import chess
      # Imports a library or project module needed below.
-0072 |
-0073 |     board = chess.Board()
+0074 |
+0075 |     board = chess.Board()
      # Keeps this intermediate result under the name `board`.
-0074 |     played: list[str] = []
+0076 |     played: list[str] = []
      # Keeps this intermediate result under the name `played`.
-0075 |     for san in sans:
+0077 |     for san in sans:
      # Processes each item from this collection in turn.
-0076 |         try:
+0078 |         try:
      # Starts an operation that may need error handling.
-0077 |             board.push_san(san)
+0079 |             board.push_san(san)
      # Continues the current calculation or control flow.
-0078 |             played.append(san)
+0080 |             played.append(san)
      # Continues the current calculation or control flow.
-0079 |         except Exception:
+0081 |         except Exception:
      # Handles this specific failure without hiding other errors.
-0080 |             break                                  # ignore a corrupt tail
+0082 |             break                                  # ignore a corrupt tail
      # Continues the current calculation or control flow.
-0081 |
-0082 |     error = None
+0083 |
+0084 |     error = None
      # Keeps this intermediate result under the name `error`.
-0083 |     if uci:
+0085 |     if uci:
      # Checks this condition before running the next indented block.
-0084 |         try:
+0086 |         try:
      # Starts an operation that may need error handling.
-0085 |             mv = chess.Move.from_uci(uci)
+0087 |             mv = chess.Move.from_uci(uci)
      # Keeps this intermediate result under the name `mv`.
-0086 |             if mv in board.legal_moves:
+0088 |             if mv in board.legal_moves:
      # Checks this condition before running the next indented block.
-0087 |                 played.append(board.san(mv))
+0089 |                 played.append(board.san(mv))
      # Continues the current calculation or control flow.
-0088 |                 board.push(mv)
+0090 |                 board.push(mv)
      # Continues the current calculation or control flow.
-0089 |             else:
+0091 |             else:
      # Handles the alternative when the preceding condition was false.
-0090 |                 error = "illegal move"
+0092 |                 error = "illegal move"
      # Keeps this intermediate result under the name `error`.
-0091 |         except Exception:
+0093 |         except Exception:
      # Handles this specific failure without hiding other errors.
-0092 |             error = "could not read that move"
+0094 |             error = "could not read that move"
      # Keeps this intermediate result under the name `error`.
-0093 |
-0094 |     legal: dict[str, list[str]] = {}
+0095 |
+0096 |     legal: dict[str, list[str]] = {}
      # Keeps this intermediate result under the name `legal`.
-0095 |     for mv in board.legal_moves:
+0097 |     for mv in board.legal_moves:
      # Processes each item from this collection in turn.
-0096 |         legal.setdefault(chess.square_name(mv.from_square), []).append(
+0098 |         legal.setdefault(chess.square_name(mv.from_square), []).append(
      # Part of the value, collection, or call spanning several lines.
-0097 |             chess.square_name(mv.to_square))
+0099 |             chess.square_name(mv.to_square))
      # Continues the current calculation or control flow.
-0098 |
-0099 |     status = None
+0100 |
+0101 |     status = None
      # Keeps this intermediate result under the name `status`.
-0100 |     if board.is_checkmate():
+0102 |     if board.is_checkmate():
      # Checks this condition before running the next indented block.
-0101 |         status = "checkmate"
+0103 |         status = "checkmate"
      # Keeps this intermediate result under the name `status`.
-0102 |     elif board.is_stalemate():
+0104 |     elif board.is_stalemate():
      # Checks this condition before running the next indented block.
-0103 |         status = "stalemate"
+0105 |         status = "stalemate"
      # Keeps this intermediate result under the name `status`.
-0104 |     elif board.is_check():
+0106 |     elif board.is_check():
      # Checks this condition before running the next indented block.
-0105 |         status = "check"
+0107 |         status = "check"
      # Keeps this intermediate result under the name `status`.
-0106 |
-0107 |     return {
+0108 |
+0109 |     return {
      # Hands this result back to the stage that called this function.
-0108 |         "fen": board.fen(),
+0110 |         "fen": board.fen(),
      # Part of the value, collection, or call spanning several lines.
-0109 |         "turn": "white" if board.turn else "black",
+0111 |         "turn": "white" if board.turn else "black",
      # Part of the value, collection, or call spanning several lines.
-0110 |         "sans": played,
+0112 |         "sans": played,
      # Part of the value, collection, or call spanning several lines.
-0111 |         "legal": legal,
+0113 |         "legal": legal,
      # Part of the value, collection, or call spanning several lines.
-0112 |         "status": status,
+0114 |         "status": status,
      # Part of the value, collection, or call spanning several lines.
-0113 |         "error": error,
+0115 |         "error": error,
      # Part of the value, collection, or call spanning several lines.
-0114 |         "opening": lookup_opening(played),
+0116 |         "opening": lookup_opening(played),
      # Part of the value, collection, or call spanning several lines.
-0115 |     }
+0117 |     }
      # Closes the data structure or function call started above.
-0116 |
-0117 |
-0118 | def lookup_opening(sans: list[str]) -> dict | None:
+0118 |
+0119 |
+0120 | def lookup_opening(sans: list[str]) -> dict | None:
      # Find what the loaded archive slice knows about the line being played.
-0119 |     """Find what the loaded archive slice knows about the line being played.
-0120 |
-0121 |     Matches on the SAN prefix, so the answer sharpens move by move: after 1.e4
-0122 |     it reports every e4 game, after 1.e4 c5 only the Sicilians.
-0123 |     """
-0124 |     import pandas as pd
+0121 |     """Find what the loaded archive slice knows about the line being played.
+0122 |
+0123 |     Matches on the SAN prefix, so the answer sharpens move by move: after 1.e4
+0124 |     it reports every e4 game, after 1.e4 c5 only the Sicilians.
+0125 |     """
+0126 |     import pandas as pd
      # Imports a library or project module needed below.
-0125 |
-0126 |     df = LAST.get("df")
+0127 |
+0128 |     df = LAST.get("df")
      # Calculates or stores the game table for this stage.
-0127 |     if df is None or not len(sans):
+0129 |     if df is None or not len(sans):
      # Checks whether enough records exist for a trustworthy next step.
-0128 |         return None
+0130 |         return None
      # Hands this result back to the stage that called this function.
-0129 |
-0130 |     prefix = " ".join(sans)
+0131 |
+0132 |     prefix = " ".join(sans)
      # Keeps this intermediate result under the name `prefix`.
-0131 |     hit = df[df["ply_key"].str.startswith(prefix, na=False)]
+0133 |     hit = df[df["ply_key"].str.startswith(prefix, na=False)]
      # Keeps this intermediate result under the name `hit`.
-0132 |     if not len(hit):
+0134 |     if not len(hit):
      # Checks whether enough records exist for a trustworthy next step.
-0133 |         return {"matched": 0, "prefix": prefix, "ply": len(sans)}
+0135 |         return {"matched": 0, "prefix": prefix, "ply": len(sans)}
      # Hands this result back to the stage that called this function.
-0134 |
-0135 |     top = hit.groupby(["eco", "opening"]).size().sort_values(ascending=False)
+0136 |
+0137 |     top = hit.groupby(["eco", "opening"]).size().sort_values(ascending=False)
      # Groups rows sharing these keys before counting or averaging them.
-0136 |     (eco, name), n = top.index[0], int(top.iloc[0])
+0138 |     (eco, name), n = top.index[0], int(top.iloc[0])
      # Part of the value, collection, or call spanning several lines.
-0137 |     # After a short prefix the leading ECO is only the commonest continuation,
-0138 |     # not the name of the position: 1.e4 is not "the French Defense" just
-0139 |     # because French games are the largest single group beneath it.
-0140 |     top_share = n / len(hit)
+0139 |     # After a short prefix the leading ECO is only the commonest continuation,
+0140 |     # not the name of the position: 1.e4 is not "the French Defense" just
+0141 |     # because French games are the largest single group beneath it.
+0142 |     top_share = n / len(hit)
      # Keeps this intermediate result under the name `top_share`.
-0141 |
-0142 |     trials = LAST.get("trials")
+0143 |
+0144 |     trials = LAST.get("trials")
      # Calculates or stores the exposure-trial table for this stage.
-0143 |     adoptions = exposures = 0
+0145 |     adoptions = exposures = 0
      # Keeps this intermediate result under the name `adoptions`.
-0144 |     rate = None
+0146 |     rate = None
      # Keeps this intermediate result under the name `rate`.
-0145 |     if trials is not None and len(trials):
+0147 |     if trials is not None and len(trials):
      # Checks this condition before running the next indented block.
-0146 |         sub = trials[trials["opening"] == eco]
+0148 |         sub = trials[trials["opening"] == eco]
      # Keeps this intermediate result under the name `sub`.
-0147 |         exposures = int(len(sub))
+0149 |         exposures = int(len(sub))
      # Calculates or stores the encounter log keyed by player and behaviour for this stage.
-0148 |         adoptions = int(sub["adopted"].sum())
+0150 |         adoptions = int(sub["adopted"].sum())
      # Keeps this intermediate result under the name `adoptions`.
-0149 |         rate = round(float(sub["adopted"].mean()), 4) if len(sub) else None
+0151 |         rate = round(float(sub["adopted"].mean()), 4) if len(sub) else None
      # Keeps this intermediate result under the name `rate`.
-0150 |
-0151 |     white = float((hit["result"] == "1-0").mean())
+0152 |
+0153 |     white = float((hit["result"] == "1-0").mean())
      # Keeps this intermediate result under the name `white`.
-0152 |     black = float((hit["result"] == "0-1").mean())
+0154 |     black = float((hit["result"] == "0-1").mean())
      # Keeps this intermediate result under the name `black`.
-0153 |
-0154 |     # Which drawn players relate to this line, as node indices the canvas can
-0155 |     # light directly. Two different sets, and the distinction matters:
-0156 |     #   played   - ever reached this position. High-degree players have played
-0157 |     #              nearly everything, so 1.e4 lights up the whole graph.
-0158 |     #   adopters - took the opening up for the first time AFTER being exposed
-0159 |     #              to it. That is the contagion event, and it is the set worth
-0160 |     #              looking at for clustering.
-0161 |     graph_hits: list[int] = []
+0155 |
+0156 |     # Which drawn players relate to this line, as node indices the canvas can
+0157 |     # light directly. Two different sets, and the distinction matters:
+0158 |     #   played   - ever reached this position. High-degree players have played
+0159 |     #              nearly everything, so 1.e4 lights up the whole graph.
+0160 |     #   adopters - took the opening up for the first time AFTER being exposed
+0161 |     #              to it. That is the contagion event, and it is the set worth
+0162 |     #              looking at for clustering.
+0163 |     graph_hits: list[int] = []
      # Keeps this intermediate result under the name `graph_hits`.
-0162 |     graph_adopters: list[int] = []
+0164 |     graph_adopters: list[int] = []
      # Keeps this intermediate result under the name `graph_adopters`.
-0163 |     drawn = LAST.get("graph_players")
+0165 |     drawn = LAST.get("graph_players")
      # Keeps this intermediate result under the name `drawn`.
-0164 |     if drawn:
+0166 |     if drawn:
      # Checks this condition before running the next indented block.
-0165 |         played_by = set(pd.unique(pd.concat([hit["white"], hit["black"]])))
+0167 |         played_by = set(pd.unique(pd.concat([hit["white"], hit["black"]])))
      # Keeps this intermediate result under the name `played_by`.
-0166 |         graph_hits = [i for i, p in enumerate(drawn) if p in played_by]
+0168 |         graph_hits = [i for i, p in enumerate(drawn) if p in played_by]
      # Keeps this intermediate result under the name `graph_hits`.
-0167 |         if trials is not None and len(trials):
+0169 |         if trials is not None and len(trials):
      # Checks this condition before running the next indented block.
-0168 |             adopted_by = set(trials.loc[(trials["opening"] == eco)
+0170 |             adopted_by = set(trials.loc[(trials["opening"] == eco)
      # Keeps this intermediate result under the name `adopted_by`.
-0169 |                                         & (trials["adopted"] == 1), "player"])
+0171 |                                         & (trials["adopted"] == 1), "player"])
      # Continues the current calculation or control flow.
-0170 |             graph_adopters = [i for i, p in enumerate(drawn) if p in adopted_by]
+0172 |             graph_adopters = [i for i, p in enumerate(drawn) if p in adopted_by]
      # Keeps this intermediate result under the name `graph_adopters`.
-0171 |     return {
+0173 |     return {
      # Hands this result back to the stage that called this function.
-0172 |         "matched": int(len(hit)),
+0174 |         "matched": int(len(hit)),
      # Part of the value, collection, or call spanning several lines.
-0173 |         "prefix": prefix,
+0175 |         "prefix": prefix,
      # Part of the value, collection, or call spanning several lines.
-0174 |         "ply": len(sans),
+0176 |         "ply": len(sans),
      # Part of the value, collection, or call spanning several lines.
-0175 |         "eco": eco,
+0177 |         "eco": eco,
      # Part of the value, collection, or call spanning several lines.
-0176 |         "name": name or eco,
+0178 |         "name": name or eco,
      # Part of the value, collection, or call spanning several lines.
-0177 |         "games": n,
+0179 |         "games": n,
      # Part of the value, collection, or call spanning several lines.
-0178 |         "top_share": round(top_share, 4),
+0180 |         "top_share": round(top_share, 4),
      # Part of the value, collection, or call spanning several lines.
-0179 |         "settled": bool(top_share >= 0.5),
+0181 |         "settled": bool(top_share >= 0.5),
      # Part of the value, collection, or call spanning several lines.
-0180 |         "share": round(len(hit) / len(df), 5),
+0182 |         "share": round(len(hit) / len(df), 5),
      # Part of the value, collection, or call spanning several lines.
-0181 |         "white_win": round(white, 3),
+0183 |         "white_win": round(white, 3),
      # Part of the value, collection, or call spanning several lines.
-0182 |         "black_win": round(black, 3),
+0184 |         "black_win": round(black, 3),
      # Part of the value, collection, or call spanning several lines.
-0183 |         "mean_elo": int(((hit["white_rating"] + hit["black_rating"]) / 2).mean()),
+0185 |         "mean_elo": int(((hit["white_rating"] + hit["black_rating"]) / 2).mean()),
      # Part of the value, collection, or call spanning several lines.
-0184 |         "trials": exposures,
+0186 |         "trials": exposures,
      # Part of the value, collection, or call spanning several lines.
-0185 |         "adoptions": adoptions,
+0187 |         "adoptions": adoptions,
      # Part of the value, collection, or call spanning several lines.
-0186 |         "adoption_rate": rate,
+0188 |         "adoption_rate": rate,
      # Part of the value, collection, or call spanning several lines.
-0187 |         "variations": [{"eco": e, "name": nm or e, "games": int(c)}
+0189 |         "variations": [{"eco": e, "name": nm or e, "games": int(c)}
      # Part of the value, collection, or call spanning several lines.
-0188 |                        for (e, nm), c in top.head(5).items()],
+0190 |                        for (e, nm), c in top.head(5).items()],
      # Processes each item from this collection in turn.
-0189 |         "graph_hits": graph_hits,
+0191 |         "graph_hits": graph_hits,
      # Part of the value, collection, or call spanning several lines.
-0190 |         "graph_adopters": graph_adopters,
+0192 |         "graph_adopters": graph_adopters,
      # Part of the value, collection, or call spanning several lines.
-0191 |         "graph_total": len(drawn) if drawn else 0,
+0193 |         "graph_total": len(drawn) if drawn else 0,
      # Part of the value, collection, or call spanning several lines.
-0192 |     }
+0194 |     }
      # Closes the data structure or function call started above.
-0193 |
-0194 |
-0195 | class Run:
+0195 |
+0196 |
+0197 | class Run:
      # One analysis attempt, with a manifest and append-only progress events.
-0196 |     """One analysis attempt, with a manifest and append-only progress events.
-0197 |
-0198 |     The manifest gives Recent runs its status. The JSONL event file lets a
-0199 |     browser reopen a run and replay every stage after a refresh or disconnect.
-0200 |     """
-0201 |     def __init__(self, month: str, max_games: int | None, null_reps: int,
+0198 |     """One analysis attempt, with a manifest and append-only progress events.
+0199 |
+0200 |     The manifest gives Recent runs its status. The JSONL event file lets a
+0201 |     browser reopen a run and replay every stage after a refresh or disconnect.
+0202 |     """
+0203 |     def __init__(self, month: str, max_games: int | None, null_reps: int,
      # Defines a reusable step; the following indented lines are its body.
-0202 |                  window_days: int, refresh: bool = False,
+0204 |                  window_days: int, refresh: bool = False,
      # Keeps this intermediate result under the name `window_days`.
-0203 |                  run_id: str | None = None):
+0205 |                  predict: bool = True,
+     # Keeps this intermediate result under the name `predict`.
+0206 |                  run_id: str | None = None):
      # Keeps this intermediate result under the name `run_id`.
-0204 |         self.id = run_id or uuid.uuid4().hex[:12]
+0207 |         self.id = run_id or uuid.uuid4().hex[:12]
      # Keeps this intermediate result under the name `id`.
-0205 |         self.month = month
+0208 |         self.month = month
      # Keeps this intermediate result under the name `month`.
-0206 |         self.max_games = max_games or None
+0209 |         self.max_games = max_games or None
      # Keeps this intermediate result under the name `max_games`.
-0207 |         self.null_reps = max(1, min(20, null_reps))
+0210 |         self.null_reps = max(1, min(20, null_reps))
      # Keeps this intermediate result under the name `null_reps`.
-0208 |         self.window_days = window_days
+0211 |         self.window_days = window_days
      # Keeps this intermediate result under the name `window_days`.
-0209 |         self.refresh = refresh
+0212 |         self.refresh = refresh
      # Keeps this intermediate result under the name `refresh`.
-0210 |         self.dir = RUNS_DIR / self.id
+0213 |         self.predict = predict
+     # Keeps this intermediate result under the name `predict`.
+0214 |         self.dir = RUNS_DIR / self.id
      # Keeps this intermediate result under the name `dir`.
-0211 |         self.dir.mkdir(parents=True, exist_ok=True)
+0215 |         self.dir.mkdir(parents=True, exist_ok=True)
      # Continues the current calculation or control flow.
-0212 |         self.events_path = self.dir / "events.jsonl"
+0216 |         self.events_path = self.dir / "events.jsonl"
      # Keeps this intermediate result under the name `events_path`.
-0213 |         self.cancel_path = self.dir / "cancel"
+0217 |         self.cancel_path = self.dir / "cancel"
      # Keeps this intermediate result under the name `cancel_path`.
-0214 |         self.heartbeat_path = self.dir / "heartbeat"
+0218 |         self.heartbeat_path = self.dir / "heartbeat"
      # Keeps this intermediate result under the name `heartbeat_path`.
-0215 |         self.manifest_path = self.dir / "run.json"
+0219 |         self.manifest_path = self.dir / "run.json"
      # Keeps this intermediate result under the name `manifest_path`.
-0216 |         self.started = time.time()
+0220 |         self.started = time.time()
      # Keeps this intermediate result under the name `started`.
-0217 |         if run_id is None:
+0221 |         if run_id is None:
      # Checks this condition before running the next indented block.
-0218 |             self._save_manifest({
+0222 |             self._save_manifest({
      # Part of the value, collection, or call spanning several lines.
-0219 |                 "id": self.id, "month": month, "max_games": self.max_games,
+0223 |                 "id": self.id, "month": month, "max_games": self.max_games,
      # Part of the value, collection, or call spanning several lines.
-0220 |                 "null_reps": self.null_reps, "window_days": window_days,
+0224 |                 "null_reps": self.null_reps, "window_days": window_days,
      # Part of the value, collection, or call spanning several lines.
-0221 |                 "refresh": refresh, "started": self.started,
+0225 |                 "refresh": refresh, "predict": predict,
      # Part of the value, collection, or call spanning several lines.
-0222 |                 "status": "running",
+0226 |                 "started": self.started,
      # Part of the value, collection, or call spanning several lines.
-0223 |             })
+0227 |                 "status": "running",
+     # Part of the value, collection, or call spanning several lines.
+0228 |             })
      # Continues the current calculation or control flow.
-0224 |         else:
+0229 |         else:
      # Handles the alternative when the preceding condition was false.
-0225 |             self.started = json.loads(self.manifest_path.read_text(
+0230 |             self.started = json.loads(self.manifest_path.read_text(
      # Decodes saved JSON text into Python data.
-0226 |                 encoding="utf-8"))["started"]
+0231 |                 encoding="utf-8"))["started"]
      # Keeps this intermediate result under the name `encoding`.
-0227 |         _RUNS[self.id] = self
-     # Continues the current calculation or control flow.
-0228 |
-0229 |     def _save_manifest(self, manifest: dict):
-     # Defines a reusable step; the following indented lines are its body.
-0230 |         tmp = self.manifest_path.with_suffix(".tmp")
-     # Keeps this intermediate result under the name `tmp`.
-0231 |         tmp.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
-     # Encodes Python values as JSON for saving or sending to the browser.
-0232 |         tmp.replace(self.manifest_path)
+0232 |         _RUNS[self.id] = self
      # Continues the current calculation or control flow.
 0233 |
-0234 |     @classmethod
-     # Configures the function or class immediately below it.
-0235 |     def from_id(cls, run_id: str) -> "Run | None":
+0234 |     def _save_manifest(self, manifest: dict):
      # Defines a reusable step; the following indented lines are its body.
-0236 |         if len(run_id) != 12 or any(c not in "0123456789abcdef" for c in run_id):
-     # Checks this condition before running the next indented block.
-0237 |             return None
-     # Hands this result back to the stage that called this function.
-0238 |         path = RUNS_DIR / run_id / "run.json"
-     # Keeps this intermediate result under the name `path`.
-0239 |         if not path.is_file():
-     # Checks this condition before running the next indented block.
-0240 |             return None
-     # Hands this result back to the stage that called this function.
-0241 |         m = json.loads(path.read_text(encoding="utf-8"))
-     # Decodes saved JSON text into Python data.
-0242 |         return cls(m["month"], m["max_games"], m["null_reps"],
-     # Hands this result back to the stage that called this function.
-0243 |                    m["window_days"], m["refresh"], run_id=run_id)
-     # Continues the current calculation or control flow.
-0244 |
-0245 |     def emit(self, kind: str, **payload):
-     # Defines a reusable step; the following indented lines are its body.
-0246 |         payload["kind"] = kind
-     # Continues the current calculation or control flow.
-0247 |         payload["t"] = round(time.time() - self.started, 1)
-     # Continues the current calculation or control flow.
-0248 |         with self.events_path.open("a", encoding="utf-8") as stream:
-     # Opens a resource and guarantees cleanup when the block ends.
-0249 |             stream.write(json.dumps(payload, default=str) + "\n")
+0235 |         tmp = self.manifest_path.with_suffix(".tmp")
+     # Keeps this intermediate result under the name `tmp`.
+0236 |         tmp.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
      # Encodes Python values as JSON for saving or sending to the browser.
-0250 |         if kind in ("stage", "done"):
+0237 |         tmp.replace(self.manifest_path)
+     # Continues the current calculation or control flow.
+0238 |
+0239 |     @classmethod
+     # Configures the function or class immediately below it.
+0240 |     def from_id(cls, run_id: str) -> "Run | None":
+     # Defines a reusable step; the following indented lines are its body.
+0241 |         if len(run_id) != 12 or any(c not in "0123456789abcdef" for c in run_id):
      # Checks this condition before running the next indented block.
-0251 |             m = json.loads(self.manifest_path.read_text(encoding="utf-8"))
+0242 |             return None
+     # Hands this result back to the stage that called this function.
+0243 |         path = RUNS_DIR / run_id / "run.json"
+     # Keeps this intermediate result under the name `path`.
+0244 |         if not path.is_file():
+     # Checks this condition before running the next indented block.
+0245 |             return None
+     # Hands this result back to the stage that called this function.
+0246 |         m = json.loads(path.read_text(encoding="utf-8"))
      # Decodes saved JSON text into Python data.
-0252 |             if kind == "stage":
-     # Checks this condition before running the next indented block.
-0253 |                 m["stage"] = payload["key"]
-     # Continues the current calculation or control flow.
-0254 |                 m["stage_state"] = payload["state"]
-     # Continues the current calculation or control flow.
-0255 |             else:
-     # Handles the alternative when the preceding condition was false.
-0256 |                 m["status"] = ("completed" if payload.get("ok") else
-     # Continues the current calculation or control flow.
-0257 |                                "cancelled" if payload.get("cancelled") else "failed")
+0247 |         return cls(m["month"], m["max_games"], m["null_reps"],
+     # Hands this result back to the stage that called this function.
+0248 |                    m["window_days"], m["refresh"],
      # Part of the value, collection, or call spanning several lines.
-0258 |                 m["finished"] = time.time()
-     # Continues the current calculation or control flow.
-0259 |             self._save_manifest(m)
-     # Continues the current calculation or control flow.
-0260 |
-0261 |     def log(self, msg: str, level: str = "info"):
+0249 |                    predict=m.get("predict", True), run_id=run_id)
+     # Keeps this intermediate result under the name `predict`.
+0250 |
+0251 |     def emit(self, kind: str, **payload):
      # Defines a reusable step; the following indented lines are its body.
-0262 |         self.emit("log", msg=msg, level=level)
+0252 |         payload["kind"] = kind
      # Continues the current calculation or control flow.
-0263 |
-0264 |     def stage(self, key: str, state: str, detail: str = ""):
-     # Defines a reusable step; the following indented lines are its body.
-0265 |         self.emit("stage", key=key, state=state, detail=detail)
+0253 |         payload["t"] = round(time.time() - self.started, 1)
+     # Continues the current calculation or control flow.
+0254 |         with self.events_path.open("a", encoding="utf-8") as stream:
+     # Opens a resource and guarantees cleanup when the block ends.
+0255 |             stream.write(json.dumps(payload, default=str) + "\n")
+     # Encodes Python values as JSON for saving or sending to the browser.
+0256 |         if kind in ("stage", "done"):
+     # Checks this condition before running the next indented block.
+0257 |             m = json.loads(self.manifest_path.read_text(encoding="utf-8"))
+     # Decodes saved JSON text into Python data.
+0258 |             if kind == "stage":
+     # Checks this condition before running the next indented block.
+0259 |                 m["stage"] = payload["key"]
+     # Continues the current calculation or control flow.
+0260 |                 m["stage_state"] = payload["state"]
+     # Continues the current calculation or control flow.
+0261 |             else:
+     # Handles the alternative when the preceding condition was false.
+0262 |                 m["status"] = ("completed" if payload.get("ok") else
+     # Continues the current calculation or control flow.
+0263 |                                "cancelled" if payload.get("cancelled") else "failed")
+     # Part of the value, collection, or call spanning several lines.
+0264 |                 m["finished"] = time.time()
+     # Continues the current calculation or control flow.
+0265 |             self._save_manifest(m)
      # Continues the current calculation or control flow.
 0266 |
-0267 |     def cancel(self):
+0267 |     def log(self, msg: str, level: str = "info"):
      # Defines a reusable step; the following indented lines are its body.
-0268 |         self.cancel_path.touch()
+0268 |         self.emit("log", msg=msg, level=level)
      # Continues the current calculation or control flow.
 0269 |
-0270 |     def stopped(self) -> bool:
+0270 |     def stage(self, key: str, state: str, detail: str = ""):
      # Defines a reusable step; the following indented lines are its body.
-0271 |         return self.cancel_path.exists()
-     # Hands this result back to the stage that called this function.
+0271 |         self.emit("stage", key=key, state=state, detail=detail)
+     # Continues the current calculation or control flow.
 0272 |
-0273 |
-0274 | def get(run_id: str) -> Run | None:
+0273 |     def cancel(self):
      # Defines a reusable step; the following indented lines are its body.
-0275 |     return _RUNS.get(run_id) or Run.from_id(run_id)
+0274 |         self.cancel_path.touch()
+     # Continues the current calculation or control flow.
+0275 |
+0276 |     def stopped(self) -> bool:
+     # Defines a reusable step; the following indented lines are its body.
+0277 |         return self.cancel_path.exists()
      # Hands this result back to the stage that called this function.
-0276 |
-0277 |
-0278 | def current_status(manifest: dict) -> str:
+0278 |
+0279 |
+0280 | def get(run_id: str) -> Run | None:
      # Defines a reusable step; the following indented lines are its body.
-0279 |     status = manifest.get("status", "unknown")
+0281 |     return _RUNS.get(run_id) or Run.from_id(run_id)
+     # Hands this result back to the stage that called this function.
+0282 |
+0283 |
+0284 | def current_status(manifest: dict) -> str:
+     # Defines a reusable step; the following indented lines are its body.
+0285 |     status = manifest.get("status", "unknown")
      # Keeps this intermediate result under the name `status`.
-0280 |     if status != "running":
+0286 |     if status != "running":
      # Checks this condition before running the next indented block.
-0281 |         return status
+0287 |         return status
      # Hands this result back to the stage that called this function.
-0282 |     heartbeat = RUNS_DIR / manifest["id"] / "heartbeat"
+0288 |     heartbeat = RUNS_DIR / manifest["id"] / "heartbeat"
      # Keeps this intermediate result under the name `heartbeat`.
-0283 |     if time.time() - manifest["started"] > 12:
+0289 |     if time.time() - manifest["started"] > 12:
      # Checks this condition before running the next indented block.
-0284 |         if not heartbeat.is_file() or time.time() - heartbeat.stat().st_mtime > 12:
+0290 |         if not heartbeat.is_file() or time.time() - heartbeat.stat().st_mtime > 12:
      # Checks this condition before running the next indented block.
-0285 |             return "interrupted"
+0291 |             return "interrupted"
      # Hands this result back to the stage that called this function.
-0286 |     return status
+0292 |     return status
      # Hands this result back to the stage that called this function.
-0287 |
-0288 | def list_runs(limit: int = 20) -> list[dict]:
+0293 |
+0294 | def list_runs(limit: int = 20) -> list[dict]:
      # Defines a reusable step; the following indented lines are its body.
-0289 |     manifests = sorted(RUNS_DIR.glob("*/run.json"),
+0295 |     manifests = sorted(RUNS_DIR.glob("*/run.json"),
      # Keeps this intermediate result under the name `manifests`.
-0290 |                        key=lambda p: p.stat().st_mtime, reverse=True)
+0296 |                        key=lambda p: p.stat().st_mtime, reverse=True)
      # Keeps this intermediate result under the name `key`.
-0291 |     out = []
+0297 |     out = []
      # Calculates or stores the output value for this stage.
-0292 |     for path in manifests[:limit]:
+0298 |     for path in manifests[:limit]:
      # Processes each item from this collection in turn.
-0293 |         m = json.loads(path.read_text(encoding="utf-8"))
+0299 |         m = json.loads(path.read_text(encoding="utf-8"))
      # Decodes saved JSON text into Python data.
-0294 |         m["status"] = current_status(m)
+0300 |         m["status"] = current_status(m)
      # Continues the current calculation or control flow.
-0295 |         out.append(m)
+0301 |         out.append(m)
      # Continues the current calculation or control flow.
-0296 |     return out
+0302 |     return out
      # Hands this result back to the stage that called this function.
-0297 |
-0298 |
-0299 | def _launch(run: Run):
+0303 |
+0304 |
+0305 | def _launch(run: Run):
      # Start the computation in a separate process from the web server.
-0300 |     """Start the computation in a separate process from the web server."""
-0301 |     flags = 0
+0306 |     """Start the computation in a separate process from the web server."""
+0307 |     flags = 0
      # Keeps this intermediate result under the name `flags`.
-0302 |     if os.name == "nt":
+0308 |     if os.name == "nt":
      # Checks this condition before running the next indented block.
-0303 |         flags = (subprocess.CREATE_NO_WINDOW | subprocess.DETACHED_PROCESS
+0309 |         flags = (subprocess.CREATE_NO_WINDOW | subprocess.DETACHED_PROCESS
      # Keeps this intermediate result under the name `flags`.
-0304 |                  | subprocess.CREATE_NEW_PROCESS_GROUP)
+0310 |                  | subprocess.CREATE_NEW_PROCESS_GROUP)
      # Continues the current calculation or control flow.
-0305 |     with (run.dir / "worker.log").open("ab") as log:
+0311 |     with (run.dir / "worker.log").open("ab") as log:
      # Opens a resource and guarantees cleanup when the block ends.
-0306 |         proc = subprocess.Popen(
+0312 |         proc = subprocess.Popen(
      # Keeps this intermediate result under the name `proc`.
-0307 |             [sys.executable, "-m", "server.runner", "--worker", run.id],
+0313 |             [sys.executable, "-m", "server.runner", "--worker", run.id],
      # Part of the value, collection, or call spanning several lines.
-0308 |             cwd=str(config.ROOT), stdout=log, stderr=subprocess.STDOUT,
+0314 |             cwd=str(config.ROOT), stdout=log, stderr=subprocess.STDOUT,
      # Keeps this intermediate result under the name `cwd`.
-0309 |             creationflags=flags, close_fds=True)
+0315 |             creationflags=flags, close_fds=True)
      # Keeps this intermediate result under the name `creationflags`.
-0310 |     m = json.loads(run.manifest_path.read_text(encoding="utf-8"))
+0316 |     m = json.loads(run.manifest_path.read_text(encoding="utf-8"))
      # Decodes saved JSON text into Python data.
-0311 |     m["pid"] = proc.pid
+0317 |     m["pid"] = proc.pid
      # Continues the current calculation or control flow.
-0312 |     run._save_manifest(m)
+0318 |     run._save_manifest(m)
      # Continues the current calculation or control flow.
-0313 |
-0314 |
-0315 | def start(month: str, max_games: int | None, null_reps: int,
-     # Defines a reusable step; the following indented lines are its body.
-0316 |           window_days: int, refresh: bool = False) -> Run:
-     # Keeps this intermediate result under the name `window_days`.
-0317 |     run = Run(month, max_games, null_reps, window_days, refresh)
-     # Calculates or stores the current analysis run for this stage.
-0318 |     _launch(run)
-     # Continues the current calculation or control flow.
-0319 |     return run
-     # Hands this result back to the stage that called this function.
+0319 |
 0320 |
-0321 |
-0322 | def resume(run_id: str) -> Run | None:
+0321 | def start(month: str, max_games: int | None, null_reps: int,
      # Defines a reusable step; the following indented lines are its body.
-0323 |     run = get(run_id)
-     # Calculates or stores the current analysis run for this stage.
-0324 |     if run is None:
-     # Checks this condition before running the next indented block.
-0325 |         return None
-     # Hands this result back to the stage that called this function.
-0326 |     m = json.loads(run.manifest_path.read_text(encoding="utf-8"))
-     # Decodes saved JSON text into Python data.
-0327 |     if current_status(m) not in ("interrupted", "failed"):
-     # Checks this condition before running the next indented block.
-0328 |         return None
-     # Hands this result back to the stage that called this function.
-0329 |     if run.events_path.exists():
-     # Checks this condition before running the next indented block.
-0330 |         attempt = int(m.get("attempt", 1))
-     # Keeps this intermediate result under the name `attempt`.
-0331 |         run.events_path.rename(run.dir / f"events_attempt_{attempt}.jsonl")
-     # Continues the current calculation or control flow.
-0332 |         m["attempt"] = attempt + 1
-     # Continues the current calculation or control flow.
-0333 |     run.cancel_path.unlink(missing_ok=True)
-     # Continues the current calculation or control flow.
-0334 |     run.heartbeat_path.unlink(missing_ok=True)
-     # Continues the current calculation or control flow.
-0335 |     run.started = time.time()
-     # Keeps this intermediate result under the name `started`.
-0336 |     m.update(started=run.started, status="running")
-     # Continues the current calculation or control flow.
-0337 |     m.pop("finished", None)
-     # Continues the current calculation or control flow.
-0338 |     m.pop("stage", None)
-     # Continues the current calculation or control flow.
-0339 |     m.pop("stage_state", None)
-     # Continues the current calculation or control flow.
-0340 |     run._save_manifest(m)
-     # Continues the current calculation or control flow.
-0341 |     _launch(run)
-     # Continues the current calculation or control flow.
-0342 |     return run
-     # Hands this result back to the stage that called this function.
-0343 |
-0344 | def load_board_data(run_id: str) -> bool:
-     # Defines a reusable step; the following indented lines are its body.
-0345 |     import pandas as pd
-     # Imports a library or project module needed below.
-0346 |
-0347 |     run = get(run_id)
-     # Calculates or stores the current analysis run for this stage.
-0348 |     if run is None:
-     # Checks this condition before running the next indented block.
-0349 |         return False
-     # Hands this result back to the stage that called this function.
-0350 |     if LAST.get("run_id") == run_id and LAST.get("df") is not None:
-     # Checks this condition before running the next indented block.
-0351 |         return True
-     # Hands this result back to the stage that called this function.
-0352 |     cache = (DEMO_SLICE if run.month in DEMO_SIZES else
-     # Keeps this intermediate result under the name `cache`.
-0353 |              config.INTERIM / f"slice_{run.month}_{run.max_games or 'full'}.parquet")
-     # Continues the current calculation or control flow.
-0354 |     trials_path = run.dir / "trials.parquet"
-     # Keeps this intermediate result under the name `trials_path`.
-0355 |     if not cache.is_file() or not trials_path.is_file():
-     # Checks this condition before running the next indented block.
-0356 |         return False
-     # Hands this result back to the stage that called this function.
-0357 |     games = pd.read_parquet(cache)
-     # Loads a previously prepared game or trial table.
-0358 |     if run.month == DEMO_FAST_MONTH:
-     # Checks this condition before running the next indented block.
-0359 |         games = games.sample(n=DEMO_SIZES[run.month], random_state=config.RANDOM_SEED).sort_values("ts").reset_index(drop=True)
-     # Orders the rows by this field before the next calculation.
-0360 |     LAST.update(df=games, trials=pd.read_parquet(trials_path),
-     # Loads a previously prepared game or trial table.
-0361 |                 month=run.month, run_id=run_id, comm=None)
-     # Keeps this intermediate result under the name `month`.
-0362 |     graph_path = run.dir / "graph_players.json"
-     # Keeps this intermediate result under the name `graph_path`.
-0363 |     LAST["graph_players"] = (json.loads(graph_path.read_text(encoding="utf-8"))
-     # Decodes saved JSON text into Python data.
-0364 |                              if graph_path.is_file() else None)
-     # Checks this condition before running the next indented block.
-0365 |     return True
-     # Hands this result back to the stage that called this function.
-0366 |
-0367 |
-0368 |
-0369 | # ------------------------------------------------------------------ pipeline
-0370 | def _execute(run: Run):
-     # Defines a reusable step; the following indented lines are its body.
-0371 |     finished = threading.Event()
-     # Keeps this intermediate result under the name `finished`.
-0372 |
-0373 |     def heartbeat():
-     # Defines a reusable step; the following indented lines are its body.
-0374 |         while not finished.is_set():
-     # Repeats the indented block until this condition stops holding.
-0375 |             run.heartbeat_path.write_text(str(time.time()), encoding="ascii")
-     # Continues the current calculation or control flow.
-0376 |             finished.wait(2)
-     # Continues the current calculation or control flow.
-0377 |
-0378 |     beat = threading.Thread(target=heartbeat, daemon=True)
-     # Keeps this intermediate result under the name `beat`.
-0379 |     beat.start()
-     # Continues the current calculation or control flow.
-0380 |     try:
-     # Starts an operation that may need error handling.
-0381 |         _pipeline(run)
-     # Continues the current calculation or control flow.
-0382 |     except Exception as exc:
-     # Handles this specific failure without hiding other errors.
-0383 |         # Keep diagnostics in the run folder; only a useful, safe summary reaches the page.
-0384 |         (run.dir / "error.txt").write_text(traceback.format_exc(), encoding="utf-8")
-     # Part of the value, collection, or call spanning several lines.
-0385 |         if "CERTIFICATE_VERIFY_FAILED" in str(exc) or "UNTRUSTED_ROOT" in str(exc):
-     # Checks this condition before running the next indented block.
-0386 |             run.log("The archive connection could not be verified. Try a trusted connection or a saved data slice.", "error")
-     # Adds a short explanation to the live progress log.
-0387 |         else:
-     # Handles the alternative when the preceding condition was false.
-0388 |             run.log("This analysis stopped unexpectedly. Open Recent runs and choose Retry.", "error")
-     # Adds a short explanation to the live progress log.
-0389 |         run.emit("done", ok=False)
-     # Appends a structured progress event that the browser can replay.
-0390 |     finally:
-     # Runs cleanup whether the operation succeeds or fails.
-0391 |         finished.set()
-     # Continues the current calculation or control flow.
-0392 |         beat.join(timeout=3)
-     # Continues the current calculation or control flow.
-0393 |
-0394 | def _pipeline(run: Run):
-     # Load a real game slice, using the bundled sample for classroom demos.
-0395 |     """Load a real game slice, using the bundled sample for classroom demos.
-0396 |
-0397 |     The demo sample still runs the analysis; it only skips network downloading
-0398 |     and avoids depending on a classroom internet connection.
-0399 |     """
-0400 |     import pandas as pd
-     # Imports a library or project module needed below.
-0401 |     from src import parse
-     # Imports a library or project module needed below.
-0402 |
-0403 |     url = "bundled real January 2016 sample" if run.month in DEMO_SIZES else BASE.format(month=run.month)
-     # Keeps this intermediate result under the name `url`.
-0404 |     run.emit("init", stages=[{"key": k, "label": l} for k, l in STAGES],
-     # Appends a structured progress event that the browser can replay.
-0405 |              month=run.month, url=url, max_games=run.max_games)
-     # Keeps this intermediate result under the name `month`.
-0406 |
-0407 |     # ---------------- 1. stream & filter ----------------
-0408 |     run.stage("stream", "running")
-     # Sets the status shown in the live stage list.
-0409 |     if run.month in DEMO_SIZES:
-     # Checks this condition before running the next indented block.
-0410 |         df = pd.read_parquet(DEMO_SLICE)
-     # Loads a previously prepared game or trial table.
-0411 |         if run.month == DEMO_FAST_MONTH:
-     # Checks this condition before running the next indented block.
-0412 |             # A reproducible subset keeps the full month of dates while making
-0413 |             # the in-class run shorter; the detailed option still uses 60,000.
-0414 |             df = df.sample(n=DEMO_SIZES[run.month], random_state=config.RANDOM_SEED).sort_values("ts").reset_index(drop=True)
-     # Orders the rows by this field before the next calculation.
-0415 |         df.attrs["skipped"] = {}
-     # Continues the current calculation or control flow.
-0416 |         run.log(f"Loaded {len(df):,} real January 2016 games from the bundled classroom sample.", "ok")
-     # Adds a short explanation to the live progress log.
-0417 |         run.emit("scan", scanned=len(df), kept=len(df), rate=0, game=None)
-     # Appends a structured progress event that the browser can replay.
-0418 |         return _analyse(run, df)
-     # Hands this result back to the stage that called this function.
-0419 |
-0420 |     # A parsed slice is cached so a second demo of the same month is instant.
-0421 |     # Lichess throttles repeated downloads, and a stalled stream in front of an
-0422 |     # audience is the one failure worth engineering away.
-0423 |     cache = config.INTERIM / f"slice_{run.month}_{run.max_games or 'full'}.parquet"
-     # Keeps this intermediate result under the name `cache`.
-0424 |     if cache.exists() and not run.refresh:
-     # Checks this condition before running the next indented block.
-0425 |         df = pd.read_parquet(cache)
-     # Loads a previously prepared game or trial table.
-0426 |         df.attrs["skipped"] = {}       # filters already applied when it was cached
-     # Continues the current calculation or control flow.
-0427 |         run.log(f"Loaded saved games from {run.month} "
-     # Adds a short explanation to the live progress log.
-0428 |                 f"({len(df):,} games).", "ok")
-     # Continues the current calculation or control flow.
-0429 |         run.emit("scan", scanned=len(df), kept=len(df), rate=0, game=None)
-     # Appends a structured progress event that the browser can replay.
-0430 |         return _analyse(run, df)
-     # Hands this result back to the stage that called this function.
-0431 |
-0432 |     run.log("Opening the selected Lichess archive…")
-     # Adds a short explanation to the live progress log.
-0433 |     run.log("Reading games from the archive…")
-     # Adds a short explanation to the live progress log.
-0434 |
-0435 |     last = {"t": 0.0}
-     # Keeps this intermediate result under the name `last`.
-0436 |
-0437 |     def on_progress(scanned, kept, row=None):
-     # Defines a reusable step; the following indented lines are its body.
-0438 |         now = time.time()
-     # Keeps this intermediate result under the name `now`.
-0439 |         if now - last["t"] < 0.4:                  # don't flood the socket
-     # Checks this condition before running the next indented block.
-0440 |             return
-     # Stops this function here.
-0441 |         last["t"] = now
-     # Continues the current calculation or control flow.
-0442 |         rate = scanned / max(1e-6, now - run.started)
-     # Keeps this intermediate result under the name `rate`.
-0443 |         game = None
-     # Keeps this intermediate result under the name `game`.
-0444 |         if row is not None:
-     # Checks this condition before running the next indented block.
-0445 |             # row order matches parse.parse's tuple
-0446 |             game = {"white_elo": row[4], "black_elo": row[5], "eco": row[6],
-     # Keeps this intermediate result under the name `game`.
-0447 |                     "opening": row[7], "moves": " ".join(str(row[8]).split()[:6]),
-     # Part of the value, collection, or call spanning several lines.
-0448 |                     "speed": row[9], "result": row[10]}
-     # Part of the value, collection, or call spanning several lines.
-0449 |         run.emit("scan", scanned=scanned, kept=kept, rate=round(rate), game=game)
-     # Appends a structured progress event that the browser can replay.
-0450 |
-0451 |     df = parse.parse(url, limit=run.max_games, progress=20000,
-     # Calculates or stores the game table for this stage.
-0452 |                      on_progress=on_progress, should_stop=run.stopped)
-     # Keeps this intermediate result under the name `on_progress`.
-0453 |
-0454 |     if run.stopped():
-     # Stops the analysis when the user has cancelled the live run.
-0455 |         run.log("Cancelled.", "warn")
-     # Adds a short explanation to the live progress log.
-0456 |         run.emit("done", ok=False, cancelled=True)
-     # Appends a structured progress event that the browser can replay.
-0457 |         return
-     # Stops this function here.
-0458 |     if len(df) < 200:
-     # Checks whether enough records exist for a trustworthy next step.
-0459 |         run.stage("stream", "failed")
-     # Sets the status shown in the live stage list.
-0460 |         run.log(f"Only {len(df)} games survived the filters — "
-     # Adds a short explanation to the live progress log.
-0461 |                 "not enough to analyse. Try a larger cap or another month.", "error")
-     # Part of the value, collection, or call spanning several lines.
-0462 |         run.emit("done", ok=False)
-     # Appends a structured progress event that the browser can replay.
-0463 |         return
-     # Stops this function here.
-0464 |
-0465 |     try:
-     # Starts an operation that may need error handling.
-0466 |         df.to_parquet(cache, index=False)
-     # Saves a compact table for later analysis stages.
-0467 |         run.log("Saved these games for a faster repeat analysis.")
-     # Adds a short explanation to the live progress log.
-0468 |     except Exception:
-     # Handles this specific failure without hiding other errors.
-0469 |         pass                                   # a cache failure must not kill the run
-     # Leaves this branch intentionally without extra work.
-0470 |
-0471 |     return _analyse(run, df)
-     # Hands this result back to the stage that called this function.
-0472 |
-0473 |
-0474 | def _analyse(run: "Run", df):
-     # Execute the same research stages as the CLI and emit UI events.
-0475 |     """Execute the same research stages as the CLI and emit UI events.
-0476 |
-0477 |     Follow this method during a demo: trials -> graph -> curve -> shuffled
-0478 |     reference -> matched controls -> held-out prediction -> verdict.
-0479 |     """
-0480 |     import pandas as pd
-     # Imports a library or project module needed below.
-0481 |     from src import curve, events as ev, matching, nulls, predict, structure
-     # Imports a library or project module needed below.
-0482 |
-0483 |     span_days = (df["ts"].max() - df["ts"].min()).total_seconds() / 86400
-     # Keeps this intermediate result under the name `span_days`.
-0484 |     players = len(set(df["white"]) | set(df["black"]))
-     # Keeps this intermediate result under the name `players`.
-0485 |     skipped = df.attrs.get("skipped", {})
-     # Keeps this intermediate result under the name `skipped`.
-0486 |     run.emit("sample", games=len(df), players=players,
-     # Appends a structured progress event that the browser can replay.
-0487 |              openings=int(df["eco"].nunique()), span_days=round(span_days, 2),
-     # Keeps this intermediate result under the name `openings`.
-0488 |              t0=str(df["ts"].min()), t1=str(df["ts"].max()), skipped=skipped)
-     # Calculates or stores the exposure time for this stage.
-0489 |     run.stage("stream", "done", f"{len(df):,} games · {players:,} players")
-     # Sets the status shown in the live stage list.
-0490 |
-0491 |     # The adoption window has to fit inside the observed span, or every trial
-0492 |     # is censored. A capped slice covers only the first hours of the month.
-0493 |     window = run.window_days
-     # Keeps this intermediate result under the name `window`.
-0494 |     if span_days < window * 2.2:
-     # Checks this condition before running the next indented block.
-0495 |         window = max(1, int(span_days / 2.2))
-     # Keeps this intermediate result under the name `window`.
-0496 |         run.log(f"Slice spans {span_days:.1f} days, so the adoption window is "
-     # Adds a short explanation to the live progress log.
-0497 |                 f"reduced from {run.window_days} to {window} day(s) — "
-     # Continues the current calculation or control flow.
-0498 |                 "otherwise every trial would be censored.", "warn")
-     # Part of the value, collection, or call spanning several lines.
-0499 |         run.emit("window", days=window, auto=True)
-     # Appends a structured progress event that the browser can replay.
-0500 |     else:
-     # Handles the alternative when the preceding condition was false.
-0501 |         run.emit("window", days=window, auto=False)
-     # Appends a structured progress event that the browser can replay.
-0502 |
-0503 |     # ---------------- 2. trials ----------------
-0504 |     run.stage("trials", "running")
-     # Sets the status shown in the live stage list.
-0505 |     trials = ev.build_trials(df, window_days=window)
-     # Calculates or stores the exposure-trial table for this stage.
-0506 |     trials.to_parquet(run.dir / "trials.parquet", index=False)
-     # Saves a compact table for later analysis stages.
-0507 |     if not len(trials) or trials["adopted"].sum() < 30:
-     # Checks whether enough records exist for a trustworthy next step.
-0508 |         run.stage("trials", "failed")
-     # Sets the status shown in the live stage list.
-0509 |         run.log(f"Only {len(trials)} trials / "
-     # Adds a short explanation to the live progress log.
-0510 |                 f"{int(trials['adopted'].sum()) if len(trials) else 0} adoptions. "
-     # Continues the current calculation or control flow.
-0511 |                 "Widen the sample.", "error")
-     # Part of the value, collection, or call spanning several lines.
-0512 |         run.emit("done", ok=False)
-     # Appends a structured progress event that the browser can replay.
-0513 |         return
-     # Stops this function here.
-0514 |     run.emit("trials", n=int(len(trials)), adoptions=int(trials["adopted"].sum()),
-     # Appends a structured progress event that the browser can replay.
-0515 |              rate=round(float(trials["adopted"].mean()), 4))
-     # Keeps this intermediate result under the name `rate`.
-0516 |     # make this slice queryable by the interactive board
-0517 |     LAST["df"], LAST["trials"], LAST["month"] = df, trials, run.month
-     # Continues the current calculation or control flow.
-0518 |     run.emit("board_ready", month=run.month, games=int(len(df)))
-     # Appends a structured progress event that the browser can replay.
-0519 |     run.emit("openings", **_openings_payload(df, trials))
-     # Appends a structured progress event that the browser can replay.
-0520 |     run.stage("trials", "done", f"{len(trials):,} trials")
-     # Sets the status shown in the live stage list.
-0521 |     if run.stopped(): return _cancel(run)
-     # Stops the analysis when the user has cancelled the live run.
-0522 |
-0523 |     # ---------------- 3. network ----------------
-0524 |     run.stage("network", "running")
-     # Sets the status shown in the live stage list.
-0525 |     g = structure.build_graph(df)
-     # Calculates or stores the player graph for this stage.
-0526 |     feats = structure.node_features(g, betweenness_k=40 if run.month == DEMO_FAST_MONTH else 200)
-     # Calculates or stores the network features for this stage.
-0527 |     early = structure.early_adopters(df).merge(feats, on="player", how="left")
-     # Joins two tables on shared identifiers so their columns can be compared.
-0528 |     by_early = early.groupby("is_early")[["degree", "kcore", "betweenness"]].mean()
-     # Groups rows sharing these keys before counting or averaging them.
-0529 |     run.emit("network",
-     # Appends a structured progress event that the browser can replay.
-0530 |              nodes=g.number_of_nodes(), edges=g.number_of_edges(),
-     # Keeps this intermediate result under the name `nodes`.
-0531 |              communities=int(feats.attrs["n_communities"]),
-     # Keeps this intermediate result under the name `communities`.
-0532 |              modularity=round(float(feats.attrs["modularity"]), 4),
-     # Keeps this intermediate result under the name `modularity`.
-0533 |              early=_early_payload(by_early))
-     # Keeps this intermediate result under the name `early`.
-0534 |     run.emit("graph", **_graph_payload(g, feats, early))
-     # Appends a structured progress event that the browser can replay.
-0535 |     (run.dir / "graph_players.json").write_text(
-     # Part of the value, collection, or call spanning several lines.
-0536 |         json.dumps(LAST["graph_players"]), encoding="utf-8")
-     # Encodes Python values as JSON for saving or sending to the browser.
-0537 |     run.stage("network", "done",
-     # Sets the status shown in the live stage list.
-0538 |               f"{g.number_of_nodes():,} nodes · Q={feats.attrs['modularity']:.3f}")
-     # Continues the current calculation or control flow.
-0539 |     if run.stopped(): return _cancel(run)
-     # Stops the analysis when the user has cancelled the live run.
-0540 |
-0541 |     # ---------------- 4. curve ----------------
-0542 |     run.stage("curve", "running")
-     # Sets the status shown in the live stage list.
-0543 |     tables = curve.analyse(trials)
-     # Keeps this intermediate result under the name `tables`.
-0544 |     run.emit("curve", by_d=_rows(tables["by_d"]), held_k=_rows(tables["held_k_by_d"]))
-     # Appends a structured progress event that the browser can replay.
-0545 |     top = tables["by_d"]
-     # Keeps this intermediate result under the name `top`.
-0546 |     if len(top) >= 2:
-     # Checks this condition before running the next indented block.
-0547 |         lift = top.iloc[-1]["rate"] / top.iloc[0]["rate"] if top.iloc[0]["rate"] else 0
-     # Keeps this intermediate result under the name `lift`.
-0548 |         run.log(f"Raw curve rises {top.iloc[0]['rate']:.3f} → "
-     # Adds a short explanation to the live progress log.
-0549 |                 f"{top.iloc[-1]['rate']:.3f} (×{lift:.2f}). "
-     # Continues the current calculation or control flow.
-0550 |                 "Compare the shuffled null before interpreting it.", "hl")
-     # Part of the value, collection, or call spanning several lines.
-0551 |     run.stage("curve", "done")
-     # Sets the status shown in the live stage list.
-0552 |     if run.stopped(): return _cancel(run)
-     # Stops the analysis when the user has cancelled the live run.
-0553 |
-0554 |     # ---------------- 5. null ----------------
-0555 |     run.stage("null", "running", f"{run.null_reps} replicate(s)")
-     # Sets the status shown in the live stage list.
-0556 |     run.log("Shuffling timestamps: keeps degree, ratings and popularity, "
-     # Adds a short explanation to the live progress log.
-0557 |             "destroys causal order.")
-     # Part of the value, collection, or call spanning several lines.
-0558 |     null_by_d = nulls.run_null(df, n_reps=run.null_reps, kind="shuffle",
-     # Keeps this intermediate result under the name `null_by_d`.
-0559 |                                window_days=window, should_stop=run.stopped,
+0322 |           window_days: int, refresh: bool = False,
      # Keeps this intermediate result under the name `window_days`.
-0560 |                                on_progress=lambda done, total: run.emit("null_progress", done=done, total=total))
-     # Appends a structured progress event that the browser can replay.
-0561 |     cmp = nulls.compare(tables["by_d"], null_by_d) if len(null_by_d) else pd.DataFrame()
-     # Creates a labelled table from the collected rows.
-0562 |     run.emit("null", rows=_rows(cmp))
-     # Appends a structured progress event that the browser can replay.
-0563 |     run.stage("null", "done")
-     # Sets the status shown in the live stage list.
-0564 |     if run.stopped(): return _cancel(run)
-     # Stops the analysis when the user has cancelled the live run.
-0565 |
-0566 |     # ---------------- 6. matched controls ----------------
-0567 |     run.stage("matched", "running")
-     # Sets the status shown in the live stage list.
-0568 |     pairs = matching.build_matched(df, max_trials=15000 if run.month == DEMO_FAST_MONTH else 60000, window_days=window)
-     # Keeps this intermediate result under the name `pairs`.
-0569 |     msum = matching.summarise(pairs)
-     # Keeps this intermediate result under the name `msum`.
-0570 |     run.emit("matched", **msum)
-     # Appends a structured progress event that the browser can replay.
-0571 |     run.stage("matched", "done",
-     # Sets the status shown in the live stage list.
-0572 |               (f"+{msum['difference']*100:.2f} pp" if msum.get("n_pairs") else "no pairs"))
-     # Part of the value, collection, or call spanning several lines.
-0573 |     if run.stopped(): return _cancel(run)
-     # Stops the analysis when the user has cancelled the live run.
-0574 |
-0575 |     # ---------------- 7. prediction ----------------
-0576 |     run.stage("predict", "running")
-     # Sets the status shown in the live stage list.
-0577 |     # same code path as the CLI: features rebuilt from the training window
-0578 |     # only, three nested models, and the network block taken apart
-0579 |     pred = predict.evaluate(df, trials, full=False)
-     # Keeps this intermediate result under the name `pred`.
-0580 |     run.emit("predict", **pred)
-     # Appends a structured progress event that the browser can replay.
-0581 |     if "error" in pred:
-     # Checks this condition before running the next indented block.
-0582 |         run.stage("predict", "skipped", "insufficient variation")
-     # Sets the status shown in the live stage list.
-0583 |     else:
-     # Handles the alternative when the preceding condition was false.
-0584 |         run.log(pred["reading"], "hl")
-     # Adds a short explanation to the live progress log.
-0585 |         run.stage("predict", "done",
-     # Sets the status shown in the live stage list.
-0586 |                   f"repertoire {pred['gain_repertoire_over_baseline']:+.3f} "
+0323 |           predict: bool = True) -> Run:
+     # Keeps this intermediate result under the name `predict`.
+0324 |     run = Run(month, max_games, null_reps, window_days, refresh, predict)
+     # Calculates or stores the current analysis run for this stage.
+0325 |     _launch(run)
      # Continues the current calculation or control flow.
-0587 |                   f"vs network {pred['gain_network_over_repertoire']:+.3f}")
-     # Continues the current calculation or control flow.
-0588 |
-0589 |     # ---------------- 8. verdict ----------------
-0590 |     run.stage("verdict", "running")
-     # Sets the status shown in the live stage list.
-0591 |     v = curve.verdict(tables, cmp if len(cmp) else None)
-     # Keeps this intermediate result under the name `v`.
-0592 |     run.emit("verdict", **v)
-     # Appends a structured progress event that the browser can replay.
-0593 |     run.stage("verdict", "done")
-     # Sets the status shown in the live stage list.
-0594 |     run.log("Run complete.", "ok")
-     # Adds a short explanation to the live progress log.
-0595 |     run.emit("done", ok=True, seconds=round(time.time() - run.started, 1))
-     # Appends a structured progress event that the browser can replay.
-0596 |
-0597 |
-0598 | def _cancel(run: Run):
+0326 |     return run
+     # Hands this result back to the stage that called this function.
+0327 |
+0328 |
+0329 | def resume(run_id: str) -> Run | None:
      # Defines a reusable step; the following indented lines are its body.
-0599 |     run.log("Cancelled.", "warn")
-     # Adds a short explanation to the live progress log.
-0600 |     run.emit("done", ok=False, cancelled=True)
-     # Appends a structured progress event that the browser can replay.
-0601 |
-0602 |
-0603 | def _openings_payload(df: pd.DataFrame, trials: pd.DataFrame | None = None,
-     # The openings actually present in this slice, each with the real board positions of its opening line.
-0604 |                       top: int = 10) -> dict:
-     # Keeps this intermediate result under the name `top`.
-0605 |     """The openings actually present in this slice, each with the real board
-0606 |     positions of its opening line.
-0607 |
-0608 |     The SAN is replayed through python-chess here rather than in the browser:
-0609 |     the page then only has to draw a FEN, and the positions are guaranteed
-0610 |     legal rather than reconstructed by hand.
-0611 |     """
-0612 |     import chess
+0330 |     run = get(run_id)
+     # Calculates or stores the current analysis run for this stage.
+0331 |     if run is None:
+     # Checks this condition before running the next indented block.
+0332 |         return None
+     # Hands this result back to the stage that called this function.
+0333 |     m = json.loads(run.manifest_path.read_text(encoding="utf-8"))
+     # Decodes saved JSON text into Python data.
+0334 |     if current_status(m) not in ("interrupted", "failed"):
+     # Checks this condition before running the next indented block.
+0335 |         return None
+     # Hands this result back to the stage that called this function.
+0336 |     if run.events_path.exists():
+     # Checks this condition before running the next indented block.
+0337 |         attempt = int(m.get("attempt", 1))
+     # Keeps this intermediate result under the name `attempt`.
+0338 |         run.events_path.rename(run.dir / f"events_attempt_{attempt}.jsonl")
+     # Continues the current calculation or control flow.
+0339 |         m["attempt"] = attempt + 1
+     # Continues the current calculation or control flow.
+0340 |     run.cancel_path.unlink(missing_ok=True)
+     # Continues the current calculation or control flow.
+0341 |     run.heartbeat_path.unlink(missing_ok=True)
+     # Continues the current calculation or control flow.
+0342 |     run.started = time.time()
+     # Keeps this intermediate result under the name `started`.
+0343 |     m.update(started=run.started, status="running")
+     # Continues the current calculation or control flow.
+0344 |     m.pop("finished", None)
+     # Continues the current calculation or control flow.
+0345 |     m.pop("stage", None)
+     # Continues the current calculation or control flow.
+0346 |     m.pop("stage_state", None)
+     # Continues the current calculation or control flow.
+0347 |     run._save_manifest(m)
+     # Continues the current calculation or control flow.
+0348 |     _launch(run)
+     # Continues the current calculation or control flow.
+0349 |     return run
+     # Hands this result back to the stage that called this function.
+0350 |
+0351 | def load_board_data(run_id: str) -> bool:
+     # Defines a reusable step; the following indented lines are its body.
+0352 |     import pandas as pd
      # Imports a library or project module needed below.
-0613 |
-0614 |     counts = df.groupby(["eco", "opening"]).size().sort_values(ascending=False)
-     # Groups rows sharing these keys before counting or averaging them.
-0615 |     adopt = {}
-     # Keeps this intermediate result under the name `adopt`.
-0616 |     if trials is not None and len(trials):
+0353 |
+0354 |     if run_id == BOARD_DEMO_ID:
      # Checks this condition before running the next indented block.
-0617 |         a = trials[trials["adopted"] == 1].groupby("opening").size()
-     # Groups rows sharing these keys before counting or averaging them.
-0618 |         adopt = a.to_dict()
-     # Converts table values into JSON-friendly records for a report or UI event.
-0619 |
-0620 |     out = []
-     # Calculates or stores the output value for this stage.
-0621 |     for (eco, name), n in counts.head(top).items():
-     # Processes each item from this collection in turn.
-0622 |         line = df.loc[(df["eco"] == eco) & (df["opening"] == name), "ply_key"]
-     # Keeps this intermediate result under the name `line`.
-0623 |         sans = str(line.mode().iloc[0]).split() if len(line) else []
-     # Keeps this intermediate result under the name `sans`.
-0624 |         board, fens, played = chess.Board(), [chess.Board().fen()], []
+0355 |         board_demo_payload()
      # Continues the current calculation or control flow.
-0625 |         for san in sans[:8]:
-     # Processes each item from this collection in turn.
-0626 |             try:
-     # Starts an operation that may need error handling.
-0627 |                 board.push_san(san)
-     # Continues the current calculation or control flow.
-0628 |             except Exception:
-     # Handles this specific failure without hiding other errors.
-0629 |                 break                       # truncated or ambiguous SAN: stop here
-     # Continues the current calculation or control flow.
-0630 |             played.append(san)
-     # Continues the current calculation or control flow.
-0631 |             fens.append(board.fen())
-     # Continues the current calculation or control flow.
-0632 |         out.append({"eco": eco, "name": name or eco, "games": int(n),
-     # Part of the value, collection, or call spanning several lines.
-0633 |                     "adoptions": int(adopt.get(eco, 0)),
-     # Part of the value, collection, or call spanning several lines.
-0634 |                     "sans": played, "fens": fens})
-     # Part of the value, collection, or call spanning several lines.
-0635 |     return {"openings": out}
+0356 |         return True
      # Hands this result back to the stage that called this function.
-0636 |
-0637 |
-0638 | def _graph_payload(g, feats, early, max_nodes: int = 240,
-     # A drawable subsample of the interaction network: the highest-degree nodes plus the heaviest edges among them.
-0639 |                    max_edges: int = 1400) -> dict:
-     # Keeps this intermediate result under the name `max_edges`.
-0640 |     """A drawable subsample of the interaction network: the highest-degree
-0641 |     nodes plus the heaviest edges among them. The full graph has tens of
-0642 |     thousands of edges -- far past what a browser force layout can move."""
-0643 |     deg = dict(g.degree())
-     # Keeps this intermediate result under the name `deg`.
-0644 |     keep = [n for n, _ in sorted(deg.items(), key=lambda kv: -kv[1])[:max_nodes]]
-     # Keeps this intermediate result under the name `keep`.
-0645 |     idx = {n: i for i, n in enumerate(keep)}
-     # Keeps this intermediate result under the name `idx`.
-0646 |     # remember the draw order so the board can map players -> node indices
-0647 |     LAST["graph_players"] = keep
+0357 |     run = get(run_id)
+     # Calculates or stores the current analysis run for this stage.
+0358 |     if run is None:
+     # Checks this condition before running the next indented block.
+0359 |         return False
+     # Hands this result back to the stage that called this function.
+0360 |     if LAST.get("run_id") == run_id and LAST.get("df") is not None:
+     # Checks this condition before running the next indented block.
+0361 |         return True
+     # Hands this result back to the stage that called this function.
+0362 |     cache = (DEMO_SLICE if run.month in DEMO_SIZES else
+     # Keeps this intermediate result under the name `cache`.
+0363 |              config.INTERIM / f"slice_{run.month}_{run.max_games or 'full'}.parquet")
      # Continues the current calculation or control flow.
-0648 |
-0649 |     comm = dict(zip(feats["player"], feats["community"]))
+0364 |     trials_path = run.dir / "trials.parquet"
+     # Keeps this intermediate result under the name `trials_path`.
+0365 |     if not cache.is_file() or not trials_path.is_file():
+     # Checks this condition before running the next indented block.
+0366 |         return False
+     # Hands this result back to the stage that called this function.
+0367 |     games = pd.read_parquet(cache)
+     # Loads a previously prepared game or trial table.
+0368 |     if run.month == DEMO_FAST_MONTH:
+     # Checks this condition before running the next indented block.
+0369 |         games = games.sample(n=DEMO_SIZES[run.month], random_state=config.RANDOM_SEED).sort_values("ts").reset_index(drop=True)
+     # Orders the rows by this field before the next calculation.
+0370 |     LAST.update(df=games, trials=pd.read_parquet(trials_path),
+     # Loads a previously prepared game or trial table.
+0371 |                 month=run.month, run_id=run_id, comm=None)
+     # Keeps this intermediate result under the name `month`.
+0372 |     graph_path = run.dir / "graph_players.json"
+     # Keeps this intermediate result under the name `graph_path`.
+0373 |     LAST["graph_players"] = (json.loads(graph_path.read_text(encoding="utf-8"))
+     # Decodes saved JSON text into Python data.
+0374 |                              if graph_path.is_file() else None)
+     # Checks this condition before running the next indented block.
+0375 |     return True
+     # Hands this result back to the stage that called this function.
+0376 |
+0377 |
+0378 | def board_demo_payload() -> dict:
+     # Load real January games for board interaction without a pipeline run.
+0379 |     """Load real January games for board interaction without a pipeline run.
+0380 |
+0381 |     First-use trials are calculated once for the opening counts. Structural
+0382 |     diversity is omitted here because the board does not display it; the
+0383 |     full analysis still computes it in the ordinary pipeline.
+0384 |     """
+0385 |     import pandas as pd
+     # Imports a library or project module needed below.
+0386 |     from src import events
+     # Imports a library or project module needed below.
+0387 |
+0388 |     if not _BOARD_DEMO_CACHE:
+     # Checks this condition before running the next indented block.
+0389 |         games = pd.read_parquet(DEMO_SLICE)
+     # Loads a previously prepared game or trial table.
+0390 |         trials = events.build_trials(games, with_diversity=False)
+     # Calculates or stores the exposure-trial table for this stage.
+0391 |         _BOARD_DEMO_CACHE.update(
+     # Part of the value, collection, or call spanning several lines.
+0392 |             df=games, trials=trials,
+     # Calculates or stores the game table for this stage.
+0393 |             openings=_openings_payload(games, trials),
+     # Keeps this intermediate result under the name `openings`.
+0394 |             players=len(set(games["white"]) | set(games["black"])),
+     # Keeps this intermediate result under the name `players`.
+0395 |         )
+     # Closes the data structure or function call started above.
+0396 |     LAST.update(df=_BOARD_DEMO_CACHE["df"], trials=_BOARD_DEMO_CACHE["trials"],
+     # Part of the value, collection, or call spanning several lines.
+0397 |                 month="January 2016 board demo", run_id=BOARD_DEMO_ID,
+     # Keeps this intermediate result under the name `month`.
+0398 |                 comm=None, graph_players=None)
      # Keeps this intermediate result under the name `comm`.
-0650 |     early_set = set(early.loc[early["is_early"] == 1, "player"]) if len(early) else set()
-     # Keeps this intermediate result under the name `early_set`.
-0651 |
-0652 |     edges = []
-     # Keeps this intermediate result under the name `edges`.
-0653 |     for u, v, data in g.subgraph(keep).edges(data=True):
-     # Processes each item from this collection in turn.
-0654 |         edges.append((idx[u], idx[v], int(data.get("games", 1))))
-     # Continues the current calculation or control flow.
-0655 |     edges.sort(key=lambda e: -e[2])
-     # Continues the current calculation or control flow.
-0656 |     edges = edges[:max_edges]
-     # Keeps this intermediate result under the name `edges`.
-0657 |
-0658 |     return {
+0399 |     return {"games": len(_BOARD_DEMO_CACHE["df"]),
      # Hands this result back to the stage that called this function.
-0659 |         "nodes": [{"d": int(deg[n]), "c": int(comm.get(n, 0)),
+0400 |             "players": _BOARD_DEMO_CACHE["players"],
      # Part of the value, collection, or call spanning several lines.
-0660 |                    "e": 1 if n in early_set else 0} for n in keep],
+0401 |             "openings": _BOARD_DEMO_CACHE["openings"]["openings"]}
      # Part of the value, collection, or call spanning several lines.
-0661 |         "edges": [[e[0], e[1]] for e in edges],
-     # Part of the value, collection, or call spanning several lines.
-0662 |         "total_nodes": g.number_of_nodes(),
-     # Part of the value, collection, or call spanning several lines.
-0663 |         "total_edges": g.number_of_edges(),
-     # Part of the value, collection, or call spanning several lines.
-0664 |     }
-     # Closes the data structure or function call started above.
-0665 |
-0666 |
-0667 | def _early_payload(by_early) -> dict:
+0402 |
+0403 |
+0404 |
+0405 | # ------------------------------------------------------------------ pipeline
+0406 | def _execute(run: Run):
      # Defines a reusable step; the following indented lines are its body.
-0668 |     out = {}
-     # Calculates or stores the output value for this stage.
-0669 |     for flag in (0, 1):
-     # Processes each item from this collection in turn.
-0670 |         if flag in by_early.index:
+0407 |     finished = threading.Event()
+     # Keeps this intermediate result under the name `finished`.
+0408 |
+0409 |     def heartbeat():
+     # Defines a reusable step; the following indented lines are its body.
+0410 |         while not finished.is_set():
+     # Repeats the indented block until this condition stops holding.
+0411 |             run.heartbeat_path.write_text(str(time.time()), encoding="ascii")
+     # Continues the current calculation or control flow.
+0412 |             finished.wait(2)
+     # Continues the current calculation or control flow.
+0413 |
+0414 |     beat = threading.Thread(target=heartbeat, daemon=True)
+     # Keeps this intermediate result under the name `beat`.
+0415 |     beat.start()
+     # Continues the current calculation or control flow.
+0416 |     try:
+     # Starts an operation that may need error handling.
+0417 |         _pipeline(run)
+     # Continues the current calculation or control flow.
+0418 |     except Exception as exc:
+     # Handles this specific failure without hiding other errors.
+0419 |         # Keep diagnostics in the run folder; only a useful, safe summary reaches the page.
+0420 |         (run.dir / "error.txt").write_text(traceback.format_exc(), encoding="utf-8")
+     # Part of the value, collection, or call spanning several lines.
+0421 |         if "CERTIFICATE_VERIFY_FAILED" in str(exc) or "UNTRUSTED_ROOT" in str(exc):
      # Checks this condition before running the next indented block.
-0671 |             r = by_early.loc[flag]
-     # Keeps this intermediate result under the name `r`.
-0672 |             out["early" if flag else "rest"] = {
-     # Part of the value, collection, or call spanning several lines.
-0673 |                 "degree": round(float(r["degree"]), 2),
-     # Part of the value, collection, or call spanning several lines.
-0674 |                 "kcore": round(float(r["kcore"]), 2),
-     # Part of the value, collection, or call spanning several lines.
-0675 |                 "betweenness": round(float(r["betweenness"]), 6),
-     # Part of the value, collection, or call spanning several lines.
-0676 |             }
-     # Closes the data structure or function call started above.
-0677 |     return out
+0422 |             run.log("The archive connection could not be verified. Try a trusted connection or a saved data slice.", "error")
+     # Adds a short explanation to the live progress log.
+0423 |         else:
+     # Handles the alternative when the preceding condition was false.
+0424 |             run.log("This analysis stopped unexpectedly. Open Recent runs and choose Retry.", "error")
+     # Adds a short explanation to the live progress log.
+0425 |         run.emit("done", ok=False)
+     # Appends a structured progress event that the browser can replay.
+0426 |     finally:
+     # Runs cleanup whether the operation succeeds or fails.
+0427 |         finished.set()
+     # Continues the current calculation or control flow.
+0428 |         beat.join(timeout=3)
+     # Continues the current calculation or control flow.
+0429 |
+0430 | def _pipeline(run: Run):
+     # Load a real game slice, using the bundled sample for classroom demos.
+0431 |     """Load a real game slice, using the bundled sample for classroom demos.
+0432 |
+0433 |     The demo sample still runs the analysis; it only skips network downloading
+0434 |     and avoids depending on a classroom internet connection.
+0435 |     """
+0436 |     import pandas as pd
+     # Imports a library or project module needed below.
+0437 |     from src import parse
+     # Imports a library or project module needed below.
+0438 |
+0439 |     url = "bundled real January 2016 sample" if run.month in DEMO_SIZES else BASE.format(month=run.month)
+     # Keeps this intermediate result under the name `url`.
+0440 |     run.emit("init", stages=[{"key": k, "label": l} for k, l in STAGES],
+     # Appends a structured progress event that the browser can replay.
+0441 |              month=run.month, url=url, max_games=run.max_games)
+     # Keeps this intermediate result under the name `month`.
+0442 |
+0443 |     # ---------------- 1. stream & filter ----------------
+0444 |     run.stage("stream", "running")
+     # Sets the status shown in the live stage list.
+0445 |     if run.month in DEMO_SIZES:
+     # Checks this condition before running the next indented block.
+0446 |         df = pd.read_parquet(DEMO_SLICE)
+     # Loads a previously prepared game or trial table.
+0447 |         if run.month == DEMO_FAST_MONTH:
+     # Checks this condition before running the next indented block.
+0448 |             # A reproducible subset keeps the full month of dates while making
+0449 |             # the in-class run shorter; the detailed option still uses 60,000.
+0450 |             df = df.sample(n=DEMO_SIZES[run.month], random_state=config.RANDOM_SEED).sort_values("ts").reset_index(drop=True)
+     # Orders the rows by this field before the next calculation.
+0451 |         df.attrs["skipped"] = {}
+     # Continues the current calculation or control flow.
+0452 |         run.log(f"Loaded {len(df):,} real January 2016 games from the bundled classroom sample.", "ok")
+     # Adds a short explanation to the live progress log.
+0453 |         run.emit("scan", scanned=len(df), kept=len(df), rate=0, game=None)
+     # Appends a structured progress event that the browser can replay.
+0454 |         return _analyse(run, df)
      # Hands this result back to the stage that called this function.
-0678 |
-0679 |
-0680 | def _rows(df: pd.DataFrame) -> list[dict]:
+0455 |
+0456 |     # A parsed slice is cached so a second demo of the same month is instant.
+0457 |     # Lichess throttles repeated downloads, and a stalled stream in front of an
+0458 |     # audience is the one failure worth engineering away.
+0459 |     cache = config.INTERIM / f"slice_{run.month}_{run.max_games or 'full'}.parquet"
+     # Keeps this intermediate result under the name `cache`.
+0460 |     if cache.exists() and not run.refresh:
+     # Checks this condition before running the next indented block.
+0461 |         df = pd.read_parquet(cache)
+     # Loads a previously prepared game or trial table.
+0462 |         df.attrs["skipped"] = {}       # filters already applied when it was cached
+     # Continues the current calculation or control flow.
+0463 |         run.log(f"Loaded saved games from {run.month} "
+     # Adds a short explanation to the live progress log.
+0464 |                 f"({len(df):,} games).", "ok")
+     # Continues the current calculation or control flow.
+0465 |         run.emit("scan", scanned=len(df), kept=len(df), rate=0, game=None)
+     # Appends a structured progress event that the browser can replay.
+0466 |         return _analyse(run, df)
+     # Hands this result back to the stage that called this function.
+0467 |
+0468 |     run.log("Opening the selected Lichess archive…")
+     # Adds a short explanation to the live progress log.
+0469 |     run.log("Reading games from the archive…")
+     # Adds a short explanation to the live progress log.
+0470 |
+0471 |     last = {"t": 0.0}
+     # Keeps this intermediate result under the name `last`.
+0472 |
+0473 |     def on_progress(scanned, kept, row=None):
      # Defines a reusable step; the following indented lines are its body.
-0681 |     if df is None or not len(df):
+0474 |         now = time.time()
+     # Keeps this intermediate result under the name `now`.
+0475 |         if now - last["t"] < 0.4:                  # don't flood the socket
+     # Checks this condition before running the next indented block.
+0476 |             return
+     # Stops this function here.
+0477 |         last["t"] = now
+     # Continues the current calculation or control flow.
+0478 |         rate = scanned / max(1e-6, now - run.started)
+     # Keeps this intermediate result under the name `rate`.
+0479 |         game = None
+     # Keeps this intermediate result under the name `game`.
+0480 |         if row is not None:
+     # Checks this condition before running the next indented block.
+0481 |             # row order matches parse.parse's tuple
+0482 |             game = {"white_elo": row[4], "black_elo": row[5], "eco": row[6],
+     # Keeps this intermediate result under the name `game`.
+0483 |                     "opening": row[7], "moves": " ".join(str(row[8]).split()[:6]),
+     # Part of the value, collection, or call spanning several lines.
+0484 |                     "speed": row[9], "result": row[10]}
+     # Part of the value, collection, or call spanning several lines.
+0485 |         run.emit("scan", scanned=scanned, kept=kept, rate=round(rate), game=game)
+     # Appends a structured progress event that the browser can replay.
+0486 |
+0487 |     df = parse.parse(url, limit=run.max_games, progress=20000,
+     # Calculates or stores the game table for this stage.
+0488 |                      on_progress=on_progress, should_stop=run.stopped)
+     # Keeps this intermediate result under the name `on_progress`.
+0489 |
+0490 |     if run.stopped():
+     # Stops the analysis when the user has cancelled the live run.
+0491 |         run.log("Cancelled.", "warn")
+     # Adds a short explanation to the live progress log.
+0492 |         run.emit("done", ok=False, cancelled=True)
+     # Appends a structured progress event that the browser can replay.
+0493 |         return
+     # Stops this function here.
+0494 |     if len(df) < 200:
      # Checks whether enough records exist for a trustworthy next step.
-0682 |         return []
+0495 |         run.stage("stream", "failed")
+     # Sets the status shown in the live stage list.
+0496 |         run.log(f"Only {len(df)} games survived the filters — "
+     # Adds a short explanation to the live progress log.
+0497 |                 "not enough to analyse. Try a larger cap or another month.", "error")
+     # Part of the value, collection, or call spanning several lines.
+0498 |         run.emit("done", ok=False)
+     # Appends a structured progress event that the browser can replay.
+0499 |         return
+     # Stops this function here.
+0500 |
+0501 |     try:
+     # Starts an operation that may need error handling.
+0502 |         df.to_parquet(cache, index=False)
+     # Saves a compact table for later analysis stages.
+0503 |         run.log("Saved these games for a faster repeat analysis.")
+     # Adds a short explanation to the live progress log.
+0504 |     except Exception:
+     # Handles this specific failure without hiding other errors.
+0505 |         pass                                   # a cache failure must not kill the run
+     # Leaves this branch intentionally without extra work.
+0506 |
+0507 |     return _analyse(run, df)
      # Hands this result back to the stage that called this function.
-0683 |     clean = df.replace({float("nan"): None})
-     # Keeps this intermediate result under the name `clean`.
-0684 |     return clean.to_dict(orient="records")
+0508 |
+0509 |
+0510 | def _analyse(run: "Run", df):
+     # Execute the same research stages as the CLI and emit UI events.
+0511 |     """Execute the same research stages as the CLI and emit UI events.
+0512 |
+0513 |     Follow this method during a demo: trials -> graph -> curve -> shuffled
+0514 |     reference -> matched controls -> held-out prediction -> verdict.
+0515 |     """
+0516 |     import pandas as pd
+     # Imports a library or project module needed below.
+0517 |     # Keep the first visible readings responsive on a cold classroom laptop.
+0518 |     # The predictive model imports scikit-learn only when that final stage starts.
+0519 |     from src import curve, events as ev, matching, nulls, structure
+     # Imports a library or project module needed below.
+0520 |
+0521 |     span_days = (df["ts"].max() - df["ts"].min()).total_seconds() / 86400
+     # Keeps this intermediate result under the name `span_days`.
+0522 |     players = len(set(df["white"]) | set(df["black"]))
+     # Keeps this intermediate result under the name `players`.
+0523 |     skipped = df.attrs.get("skipped", {})
+     # Keeps this intermediate result under the name `skipped`.
+0524 |     run.emit("sample", games=len(df), players=players,
+     # Appends a structured progress event that the browser can replay.
+0525 |              openings=int(df["eco"].nunique()), span_days=round(span_days, 2),
+     # Keeps this intermediate result under the name `openings`.
+0526 |              t0=str(df["ts"].min()), t1=str(df["ts"].max()), skipped=skipped)
+     # Calculates or stores the exposure time for this stage.
+0527 |     run.stage("stream", "done", f"{len(df):,} games · {players:,} players")
+     # Sets the status shown in the live stage list.
+0528 |
+0529 |     # The adoption window has to fit inside the observed span, or every trial
+0530 |     # is censored. A capped slice covers only the first hours of the month.
+0531 |     window = run.window_days
+     # Keeps this intermediate result under the name `window`.
+0532 |     if span_days < window * 2.2:
+     # Checks this condition before running the next indented block.
+0533 |         window = max(1, int(span_days / 2.2))
+     # Keeps this intermediate result under the name `window`.
+0534 |         run.log(f"Slice spans {span_days:.1f} days, so the adoption window is "
+     # Adds a short explanation to the live progress log.
+0535 |                 f"reduced from {run.window_days} to {window} day(s) — "
+     # Continues the current calculation or control flow.
+0536 |                 "otherwise every trial would be censored.", "warn")
+     # Part of the value, collection, or call spanning several lines.
+0537 |         run.emit("window", days=window, auto=True)
+     # Appends a structured progress event that the browser can replay.
+0538 |     else:
+     # Handles the alternative when the preceding condition was false.
+0539 |         run.emit("window", days=window, auto=False)
+     # Appends a structured progress event that the browser can replay.
+0540 |
+0541 |     # ---------------- 2. trials ----------------
+0542 |     run.stage("trials", "running")
+     # Sets the status shown in the live stage list.
+0543 |     trials = ev.build_trials(df, window_days=window)
+     # Calculates or stores the exposure-trial table for this stage.
+0544 |     trials.to_parquet(run.dir / "trials.parquet", index=False)
+     # Saves a compact table for later analysis stages.
+0545 |     if not len(trials) or trials["adopted"].sum() < 30:
+     # Checks whether enough records exist for a trustworthy next step.
+0546 |         run.stage("trials", "failed")
+     # Sets the status shown in the live stage list.
+0547 |         run.log(f"Only {len(trials)} trials / "
+     # Adds a short explanation to the live progress log.
+0548 |                 f"{int(trials['adopted'].sum()) if len(trials) else 0} adoptions. "
+     # Continues the current calculation or control flow.
+0549 |                 "Widen the sample.", "error")
+     # Part of the value, collection, or call spanning several lines.
+0550 |         run.emit("done", ok=False)
+     # Appends a structured progress event that the browser can replay.
+0551 |         return
+     # Stops this function here.
+0552 |     run.emit("trials", n=int(len(trials)), adoptions=int(trials["adopted"].sum()),
+     # Appends a structured progress event that the browser can replay.
+0553 |              rate=round(float(trials["adopted"].mean()), 4))
+     # Keeps this intermediate result under the name `rate`.
+0554 |     # make this slice queryable by the interactive board
+0555 |     LAST["df"], LAST["trials"], LAST["month"] = df, trials, run.month
+     # Continues the current calculation or control flow.
+0556 |     run.emit("board_ready", month=run.month, games=int(len(df)))
+     # Appends a structured progress event that the browser can replay.
+0557 |     run.emit("openings", **_openings_payload(df, trials))
+     # Appends a structured progress event that the browser can replay.
+0558 |     run.stage("trials", "done", f"{len(trials):,} trials")
+     # Sets the status shown in the live stage list.
+0559 |     if run.stopped(): return _cancel(run)
+     # Stops the analysis when the user has cancelled the live run.
+0560 |
+0561 |     # ---------------- 3. network ----------------
+0562 |     run.stage("network", "running")
+     # Sets the status shown in the live stage list.
+0563 |     g = structure.build_graph(df)
+     # Calculates or stores the player graph for this stage.
+0564 |     feats = structure.node_features(g, betweenness_k=40 if run.month == DEMO_FAST_MONTH else 200)
+     # Calculates or stores the network features for this stage.
+0565 |     early = structure.early_adopters(df).merge(feats, on="player", how="left")
+     # Joins two tables on shared identifiers so their columns can be compared.
+0566 |     by_early = early.groupby("is_early")[["degree", "kcore", "betweenness"]].mean()
+     # Groups rows sharing these keys before counting or averaging them.
+0567 |     run.emit("network",
+     # Appends a structured progress event that the browser can replay.
+0568 |              nodes=g.number_of_nodes(), edges=g.number_of_edges(),
+     # Keeps this intermediate result under the name `nodes`.
+0569 |              communities=int(feats.attrs["n_communities"]),
+     # Keeps this intermediate result under the name `communities`.
+0570 |              modularity=round(float(feats.attrs["modularity"]), 4),
+     # Keeps this intermediate result under the name `modularity`.
+0571 |              early=_early_payload(by_early))
+     # Keeps this intermediate result under the name `early`.
+0572 |     run.emit("graph", **_graph_payload(g, feats, early))
+     # Appends a structured progress event that the browser can replay.
+0573 |     (run.dir / "graph_players.json").write_text(
+     # Part of the value, collection, or call spanning several lines.
+0574 |         json.dumps(LAST["graph_players"]), encoding="utf-8")
+     # Encodes Python values as JSON for saving or sending to the browser.
+0575 |     run.stage("network", "done",
+     # Sets the status shown in the live stage list.
+0576 |               f"{g.number_of_nodes():,} nodes · Q={feats.attrs['modularity']:.3f}")
+     # Continues the current calculation or control flow.
+0577 |     if run.stopped(): return _cancel(run)
+     # Stops the analysis when the user has cancelled the live run.
+0578 |
+0579 |     # ---------------- 4. curve ----------------
+0580 |     run.stage("curve", "running")
+     # Sets the status shown in the live stage list.
+0581 |     tables = curve.analyse(trials)
+     # Keeps this intermediate result under the name `tables`.
+0582 |     run.emit("curve", by_d=_rows(tables["by_d"]), held_k=_rows(tables["held_k_by_d"]))
+     # Appends a structured progress event that the browser can replay.
+0583 |     top = tables["by_d"]
+     # Keeps this intermediate result under the name `top`.
+0584 |     if len(top) >= 2:
+     # Checks this condition before running the next indented block.
+0585 |         lift = top.iloc[-1]["rate"] / top.iloc[0]["rate"] if top.iloc[0]["rate"] else 0
+     # Keeps this intermediate result under the name `lift`.
+0586 |         run.log(f"Raw curve rises {top.iloc[0]['rate']:.3f} → "
+     # Adds a short explanation to the live progress log.
+0587 |                 f"{top.iloc[-1]['rate']:.3f} (×{lift:.2f}). "
+     # Continues the current calculation or control flow.
+0588 |                 "Compare the shuffled null before interpreting it.", "hl")
+     # Part of the value, collection, or call spanning several lines.
+0589 |     run.stage("curve", "done")
+     # Sets the status shown in the live stage list.
+0590 |     if run.stopped(): return _cancel(run)
+     # Stops the analysis when the user has cancelled the live run.
+0591 |
+0592 |     # ---------------- 5. null ----------------
+0593 |     run.stage("null", "running", f"{run.null_reps} replicate(s)")
+     # Sets the status shown in the live stage list.
+0594 |     run.log("Shuffling timestamps: keeps degree, ratings and popularity, "
+     # Adds a short explanation to the live progress log.
+0595 |             "destroys causal order.")
+     # Part of the value, collection, or call spanning several lines.
+0596 |     null_by_d = nulls.run_null(df, n_reps=run.null_reps, kind="shuffle",
+     # Keeps this intermediate result under the name `null_by_d`.
+0597 |                                window_days=window, should_stop=run.stopped,
+     # Keeps this intermediate result under the name `window_days`.
+0598 |                                on_progress=lambda done, total: run.emit("null_progress", done=done, total=total))
+     # Appends a structured progress event that the browser can replay.
+0599 |     cmp = nulls.compare(tables["by_d"], null_by_d) if len(null_by_d) else pd.DataFrame()
+     # Creates a labelled table from the collected rows.
+0600 |     run.emit("null", rows=_rows(cmp))
+     # Appends a structured progress event that the browser can replay.
+0601 |     run.stage("null", "done")
+     # Sets the status shown in the live stage list.
+0602 |     if run.stopped(): return _cancel(run)
+     # Stops the analysis when the user has cancelled the live run.
+0603 |
+0604 |     # ---------------- 6. matched controls ----------------
+0605 |     run.stage("matched", "running")
+     # Sets the status shown in the live stage list.
+0606 |     pairs = matching.build_matched(df, max_trials=15000 if run.month == DEMO_FAST_MONTH else 60000, window_days=window)
+     # Keeps this intermediate result under the name `pairs`.
+0607 |     msum = matching.summarise(pairs)
+     # Keeps this intermediate result under the name `msum`.
+0608 |     run.emit("matched", **msum)
+     # Appends a structured progress event that the browser can replay.
+0609 |     run.stage("matched", "done",
+     # Sets the status shown in the live stage list.
+0610 |               (f"+{msum['difference']*100:.2f} pp" if msum.get("n_pairs") else "no pairs"))
+     # Part of the value, collection, or call spanning several lines.
+0611 |     if run.stopped(): return _cancel(run)
+     # Stops the analysis when the user has cancelled the live run.
+0612 |
+0613 |     # ---------------- 7. prediction ----------------
+0614 |     if run.predict:
+     # Checks this condition before running the next indented block.
+0615 |         run.stage("predict", "running")
+     # Sets the status shown in the live stage list.
+0616 |         from src import predict
+     # Imports a library or project module needed below.
+0617 |         # same code path as the CLI: features rebuilt from the training window
+0618 |         pred = predict.evaluate(df, trials, full=False)
+     # Keeps this intermediate result under the name `pred`.
+0619 |         run.emit("predict", **pred)
+     # Appends a structured progress event that the browser can replay.
+0620 |         if "error" in pred:
+     # Checks this condition before running the next indented block.
+0621 |             run.stage("predict", "skipped", "insufficient variation")
+     # Sets the status shown in the live stage list.
+0622 |         else:
+     # Handles the alternative when the preceding condition was false.
+0623 |             run.log(pred["reading"], "hl")
+     # Adds a short explanation to the live progress log.
+0624 |             run.stage("predict", "done",
+     # Sets the status shown in the live stage list.
+0625 |                       f"repertoire {pred['gain_repertoire_over_baseline']:+.3f} "
+     # Continues the current calculation or control flow.
+0626 |                       f"vs network {pred['gain_network_over_repertoire']:+.3f}")
+     # Continues the current calculation or control flow.
+0627 |     else:
+     # Handles the alternative when the preceding condition was false.
+0628 |         run.stage("predict", "skipped", "optional model not selected")
+     # Sets the status shown in the live stage list.
+0629 |
+0630 |     # ---------------- 8. verdict ----------------
+0631 |     run.stage("verdict", "running")
+     # Sets the status shown in the live stage list.
+0632 |     v = curve.verdict(tables, cmp if len(cmp) else None)
+     # Keeps this intermediate result under the name `v`.
+0633 |     run.emit("verdict", **v)
+     # Appends a structured progress event that the browser can replay.
+0634 |     run.stage("verdict", "done")
+     # Sets the status shown in the live stage list.
+0635 |     run.log("Run complete.", "ok")
+     # Adds a short explanation to the live progress log.
+0636 |     run.emit("done", ok=True, seconds=round(time.time() - run.started, 1))
+     # Appends a structured progress event that the browser can replay.
+0637 |
+0638 |
+0639 | def _cancel(run: Run):
+     # Defines a reusable step; the following indented lines are its body.
+0640 |     run.log("Cancelled.", "warn")
+     # Adds a short explanation to the live progress log.
+0641 |     run.emit("done", ok=False, cancelled=True)
+     # Appends a structured progress event that the browser can replay.
+0642 |
+0643 |
+0644 | def _openings_payload(df: pd.DataFrame, trials: pd.DataFrame | None = None,
+     # The openings actually present in this slice, each with the real board positions of its opening line.
+0645 |                       top: int = 10) -> dict:
+     # Keeps this intermediate result under the name `top`.
+0646 |     """The openings actually present in this slice, each with the real board
+0647 |     positions of its opening line.
+0648 |
+0649 |     The SAN is replayed through python-chess here rather than in the browser:
+0650 |     the page then only has to draw a FEN, and the positions are guaranteed
+0651 |     legal rather than reconstructed by hand.
+0652 |     """
+0653 |     import chess
+     # Imports a library or project module needed below.
+0654 |
+0655 |     counts = df.groupby(["eco", "opening"]).size().sort_values(ascending=False)
+     # Groups rows sharing these keys before counting or averaging them.
+0656 |     adopt = {}
+     # Keeps this intermediate result under the name `adopt`.
+0657 |     if trials is not None and len(trials):
+     # Checks this condition before running the next indented block.
+0658 |         a = trials[trials["adopted"] == 1].groupby("opening").size()
+     # Groups rows sharing these keys before counting or averaging them.
+0659 |         adopt = a.to_dict()
      # Converts table values into JSON-friendly records for a report or UI event.
-0685 |
-0686 |
-0687 |
-0688 | if __name__ == "__main__":
+0660 |
+0661 |     out = []
+     # Calculates or stores the output value for this stage.
+0662 |     for (eco, name), n in counts.head(top).items():
+     # Processes each item from this collection in turn.
+0663 |         line = df.loc[(df["eco"] == eco) & (df["opening"] == name), "ply_key"]
+     # Keeps this intermediate result under the name `line`.
+0664 |         sans = str(line.mode().iloc[0]).split() if len(line) else []
+     # Keeps this intermediate result under the name `sans`.
+0665 |         board, fens, played = chess.Board(), [chess.Board().fen()], []
+     # Continues the current calculation or control flow.
+0666 |         for san in sans[:8]:
+     # Processes each item from this collection in turn.
+0667 |             try:
+     # Starts an operation that may need error handling.
+0668 |                 board.push_san(san)
+     # Continues the current calculation or control flow.
+0669 |             except Exception:
+     # Handles this specific failure without hiding other errors.
+0670 |                 break                       # truncated or ambiguous SAN: stop here
+     # Continues the current calculation or control flow.
+0671 |             played.append(san)
+     # Continues the current calculation or control flow.
+0672 |             fens.append(board.fen())
+     # Continues the current calculation or control flow.
+0673 |         out.append({"eco": eco, "name": name or eco, "games": int(n),
+     # Part of the value, collection, or call spanning several lines.
+0674 |                     "adoptions": int(adopt.get(eco, 0)),
+     # Part of the value, collection, or call spanning several lines.
+0675 |                     "sans": played, "fens": fens})
+     # Part of the value, collection, or call spanning several lines.
+0676 |     return {"openings": out}
+     # Hands this result back to the stage that called this function.
+0677 |
+0678 |
+0679 | def _graph_payload(g, feats, early, max_nodes: int = 240,
+     # A drawable subsample of the interaction network: the highest-degree nodes plus the heaviest edges among them.
+0680 |                    max_edges: int = 1400) -> dict:
+     # Keeps this intermediate result under the name `max_edges`.
+0681 |     """A drawable subsample of the interaction network: the highest-degree
+0682 |     nodes plus the heaviest edges among them. The full graph has tens of
+0683 |     thousands of edges -- far past what a browser force layout can move."""
+0684 |     deg = dict(g.degree())
+     # Keeps this intermediate result under the name `deg`.
+0685 |     keep = [n for n, _ in sorted(deg.items(), key=lambda kv: -kv[1])[:max_nodes]]
+     # Keeps this intermediate result under the name `keep`.
+0686 |     idx = {n: i for i, n in enumerate(keep)}
+     # Keeps this intermediate result under the name `idx`.
+0687 |     # remember the draw order so the board can map players -> node indices
+0688 |     LAST["graph_players"] = keep
+     # Continues the current calculation or control flow.
+0689 |
+0690 |     comm = dict(zip(feats["player"], feats["community"]))
+     # Keeps this intermediate result under the name `comm`.
+0691 |     early_set = set(early.loc[early["is_early"] == 1, "player"]) if len(early) else set()
+     # Keeps this intermediate result under the name `early_set`.
+0692 |
+0693 |     edges = []
+     # Keeps this intermediate result under the name `edges`.
+0694 |     for u, v, data in g.subgraph(keep).edges(data=True):
+     # Processes each item from this collection in turn.
+0695 |         edges.append((idx[u], idx[v], int(data.get("games", 1))))
+     # Continues the current calculation or control flow.
+0696 |     edges.sort(key=lambda e: -e[2])
+     # Continues the current calculation or control flow.
+0697 |     edges = edges[:max_edges]
+     # Keeps this intermediate result under the name `edges`.
+0698 |
+0699 |     return {
+     # Hands this result back to the stage that called this function.
+0700 |         "nodes": [{"d": int(deg[n]), "c": int(comm.get(n, 0)),
+     # Part of the value, collection, or call spanning several lines.
+0701 |                    "e": 1 if n in early_set else 0} for n in keep],
+     # Part of the value, collection, or call spanning several lines.
+0702 |         "edges": [[e[0], e[1]] for e in edges],
+     # Part of the value, collection, or call spanning several lines.
+0703 |         "total_nodes": g.number_of_nodes(),
+     # Part of the value, collection, or call spanning several lines.
+0704 |         "total_edges": g.number_of_edges(),
+     # Part of the value, collection, or call spanning several lines.
+0705 |     }
+     # Closes the data structure or function call started above.
+0706 |
+0707 |
+0708 | def _early_payload(by_early) -> dict:
+     # Defines a reusable step; the following indented lines are its body.
+0709 |     out = {}
+     # Calculates or stores the output value for this stage.
+0710 |     for flag in (0, 1):
+     # Processes each item from this collection in turn.
+0711 |         if flag in by_early.index:
+     # Checks this condition before running the next indented block.
+0712 |             r = by_early.loc[flag]
+     # Keeps this intermediate result under the name `r`.
+0713 |             out["early" if flag else "rest"] = {
+     # Part of the value, collection, or call spanning several lines.
+0714 |                 "degree": round(float(r["degree"]), 2),
+     # Part of the value, collection, or call spanning several lines.
+0715 |                 "kcore": round(float(r["kcore"]), 2),
+     # Part of the value, collection, or call spanning several lines.
+0716 |                 "betweenness": round(float(r["betweenness"]), 6),
+     # Part of the value, collection, or call spanning several lines.
+0717 |             }
+     # Closes the data structure or function call started above.
+0718 |     return out
+     # Hands this result back to the stage that called this function.
+0719 |
+0720 |
+0721 | def _rows(df: pd.DataFrame) -> list[dict]:
+     # Defines a reusable step; the following indented lines are its body.
+0722 |     if df is None or not len(df):
+     # Checks whether enough records exist for a trustworthy next step.
+0723 |         return []
+     # Hands this result back to the stage that called this function.
+0724 |     clean = df.replace({float("nan"): None})
+     # Keeps this intermediate result under the name `clean`.
+0725 |     return clean.to_dict(orient="records")
+     # Converts table values into JSON-friendly records for a report or UI event.
+0726 |
+0727 |
+0728 |
+0729 | if __name__ == "__main__":
      # Runs the command-line entry point only when this file is executed directly.
-0689 |     if len(sys.argv) == 3 and sys.argv[1] == "--worker":
+0730 |     if len(sys.argv) == 3 and sys.argv[1] == "--worker":
      # Checks this condition before running the next indented block.
-0690 |         worker_run = Run.from_id(sys.argv[2])
+0731 |         worker_run = Run.from_id(sys.argv[2])
      # Keeps this intermediate result under the name `worker_run`.
-0691 |         if worker_run is None:
+0732 |         if worker_run is None:
      # Checks this condition before running the next indented block.
-0692 |             raise SystemExit("unknown run")
+0733 |             raise SystemExit("unknown run")
      # Stops with an explicit error when this requirement is violated.
-0693 |         _execute(worker_run)
+0734 |         _execute(worker_run)
      # Continues the current calculation or control flow.

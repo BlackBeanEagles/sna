@@ -23,6 +23,7 @@ The template-based Word report, with methodology diagrams and corrected result g
 | | what it is | how |
 |---|---|---|
 | **Live console** | Press a button and watch the whole pipeline execute on a real Lichess month — streaming, stage by stage, with a playable board. | `python server/app.py` → <http://localhost:8124> |
+| **Board demo** | Move pieces immediately and compare a line with the bundled 60,000 real January games; no analysis run or archive download is needed. | `python server/app.py` → <http://localhost:8124/board-demo> |
 | **Findings page** | The static write-up of the result, with the charts. | `python -m http.server 8123 --directory site` → <http://localhost:8123> |
 | **CLI** | Run the complete pipeline on a chosen archive. | `python -m src.run_pipeline --month 2016-01` |
 
@@ -56,16 +57,35 @@ The console's `d`-curve, null overlay and verdict come from the same
 replays saved settings and progress after a page reload; **Retry** restarts an
 interrupted run from its cached slice.
 
-For a classroom presentation, leave **January 2016 · fast presentation run**
-selected and click **Run analysis**. It recomputes every analysis stage on a
-reproducible 20,000-game subset of the bundled real January sample, with no
-archive download. On this machine the run completed in about 30 seconds;
-classroom hardware may differ. Click **Try e4 c5** on the board, or click a
-piece and then a highlighted destination square. The opening details update
-from the selected games. Open **Findings** for the full-study result. The
-fast run uses one timing shuffle and is exploratory. The 60,000-game detailed
-demo remains available; the published findings use all 249,505 filtered games
-and 20 shuffles.
+For a direct classroom demonstration, open **/board-demo**. It loads the
+bundled 60,000 real January games and prepares opening counts in a few
+seconds. Click **Try e4 c5**, or click a piece and then a
+highlighted destination square. The board validates the move and updates the
+opening evidence. This is an interactive lookup, not a new pipeline run.
+
+For a fresh calculation, the ordinary console defaults to the 60,000-game
+**January 2016 · quick live demo** shown in the slides. A separate 20,000-game
+fast presentation run completed in 6.8 seconds on this machine with the
+prediction option off; the 60,000-game run took 19.8 seconds. Both
+bundled runs need no archive download and use one timing shuffle, so their
+verdicts are exploratory. The published findings use all 249,505 filtered
+games and 20 shuffles. For other archive months, the UI starts with three
+shuffles for a quicker first check; choose 20 to match the report procedure.
+The held-out prediction model is optional in Advanced options. Leave it off
+for a faster live run; the core curve, shuffled reference, matched comparison,
+and verdict still run. Turn it on when reproducing that additional check.
+Repeated scans of the same month and cap load the saved filtered slice, but a
+first archive download still depends on the size of the file and connection.
+
+### Why January 2016?
+
+January 2016 is a fixed historical case study for which the project already
+has a complete filtered slice and saved results. Its timestamps let us put
+encounters before later opening use and require a full 14-day follow-up. The
+date itself is not part of the method: the same pipeline accepts other monthly
+archives. These results describe that selected month and player group, not
+current opening trends or all chess players. A second-month replication is
+still future work while the archive connection fails certificate verification.
 
 The deck, with 12 content slides plus a cover and speaker notes, is in
 [`docs/Chess_Opening_Contagion_Presentation.pptx`](docs/Chess_Opening_Contagion_Presentation.pptx).
