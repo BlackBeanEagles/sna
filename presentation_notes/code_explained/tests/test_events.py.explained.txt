@@ -4,39 +4,39 @@ Each numbered source line is followed by a plain-English comment.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Tests for the exposure/adoption core.
-0002 | 
+0002 |
 0003 | `events.build_trials` is where the science lives: if it miscounts exposures,
 0004 | mis-dates adoption or mis-measures structural diversity, every number
 0005 | downstream is wrong and still looks plausible. These build tiny games tables
 0006 | by hand where the right answer is known by inspection.
-0007 | 
+0007 |
 0008 |     python -m pytest tests -q
 0009 | """
 0010 | from __future__ import annotations
      # Imports a library or project module needed below.
-0011 | 
+0011 |
 0012 | import sys
      # Imports a library or project module needed below.
 0013 | from datetime import datetime, timedelta
      # Imports a library or project module needed below.
 0014 | from pathlib import Path
      # Imports a library or project module needed below.
-0015 | 
+0015 |
 0016 | import pandas as pd
      # Imports a library or project module needed below.
 0017 | import pytest
      # Imports a library or project module needed below.
-0018 | 
+0018 |
 0019 | sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
      # Continues the current calculation or control flow.
-0020 | 
+0020 |
 0021 | from src import curve, events, nulls  # noqa: E402
      # Imports a library or project module needed below.
-0022 | 
+0022 |
 0023 | T0 = datetime(2016, 1, 1)
      # Keeps this intermediate result under the name `T0`.
-0024 | 
-0025 | 
+0024 |
+0025 |
 0026 | def game(white, black, day, eco="B20", ply="e4 c5", wr=2000, br=2000):
      # Make a tiny known game; tests vary just the detail under inspection.
 0027 |     """Make a tiny known game; tests vary just the detail under inspection."""
@@ -48,14 +48,14 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Part of the value, collection, or call spanning several lines.
 0031 |             "ply_key": ply, "speed": "Blitz", "result": "1-0"}
      # Part of the value, collection, or call spanning several lines.
-0032 | 
-0033 | 
+0032 |
+0033 |
 0034 | def frame(rows):
      # Defines a reusable step; the following indented lines are its body.
 0035 |     return pd.DataFrame(rows).sort_values("ts").reset_index(drop=True)
      # Orders the rows by this field before the next calculation.
-0036 | 
-0037 | 
+0036 |
+0037 |
 0038 | # ---------------------------------------------------------------- sweep
 0039 | def test_one_game_makes_two_performances_and_two_exposures():
      # u plays (X,W) and exposes v to it; v plays (X,B) and exposes u.
@@ -64,7 +64,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Calculates or stores the game table for this stage.
 0042 |     exposures, first_perf, _ = events.sweep(df)
      # Continues the current calculation or control flow.
-0043 | 
+0043 |
 0044 |     assert ("u", ("B20", "W")) in first_perf      # white performed it as White
      # Checks an invariant; the script fails if it is false.
 0045 |     assert ("v", ("B20", "B")) in first_perf      # black performed it as Black
@@ -73,8 +73,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Checks an invariant; the script fails if it is false.
 0047 |     assert exposures[("u", ("B20", "B"))] == [(df.ts[0], "v")]
      # Checks an invariant; the script fails if it is false.
-0048 | 
-0049 | 
+0048 |
+0049 |
 0050 | def test_colour_is_part_of_the_behaviour():
      # Meeting the Sicilian as White is not the same behaviour as playing it as Black -- if colour dropped out of the key, adoption becomes meaningless.
 0051 |     """Meeting the Sicilian as White is not the same behaviour as playing it
@@ -87,8 +87,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Checks an invariant; the script fails if it is false.
 0056 |     assert ("v", ("B20", "W")) not in first_perf
      # Checks an invariant; the script fails if it is false.
-0057 | 
-0058 | 
+0057 |
+0058 |
 0059 | def test_first_performance_wins():
      # Defines a reusable step; the following indented lines are its body.
 0060 |     df = frame([game("u", "v", 0), game("u", "w", 5)])
@@ -97,8 +97,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0062 |     assert first_perf[("u", ("B20", "W"))] == T0        # not day 5
      # Checks an invariant; the script fails if it is false.
-0063 | 
-0064 | 
+0063 |
+0064 |
 0065 | # ---------------------------------------------------------------- trials
 0066 | def test_adoption_inside_window_counts():
      # Defines a reusable step; the following indented lines are its body.
@@ -113,8 +113,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Checks an invariant; the script fails if it is false.
 0072 |     assert row.iloc[0]["adopted"] == 1
      # Checks an invariant; the script fails if it is false.
-0073 | 
-0074 | 
+0073 |
+0074 |
 0075 | def test_adoption_outside_window_does_not_count():
      # Defines a reusable step; the following indented lines are its body.
 0076 |     # exposure day 0, first play day 20, window 14 -> not an adoption
@@ -128,8 +128,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Checks an invariant; the script fails if it is false.
 0081 |     assert row.iloc[0]["adopted"] == 0
      # Checks an invariant; the script fails if it is false.
-0082 | 
-0083 | 
+0082 |
+0083 |
 0084 | def test_trials_censored_when_window_runs_past_the_data():
      # A window that does not fit inside the observation period is dropped, not silently scored as a non-adoption.
 0085 |     """A window that does not fit inside the observation period is dropped,
@@ -140,8 +140,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Calculates or stores the exposure-trial table for this stage.
 0089 |     assert len(trials) == 0
      # Checks an invariant; the script fails if it is false.
-0090 | 
-0091 | 
+0090 |
+0091 |
 0092 | def test_late_adoption_is_censored_alongside_late_nonadoption():
      # Defines a reusable step; the following indented lines are its body.
 0093 |     # A positive result is not complete follow-up when the 14-day window
@@ -154,8 +154,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Calculates or stores the exposure-trial table for this stage.
 0098 |     assert trials.empty
      # Checks an invariant; the script fails if it is false.
-0099 | 
-0100 | 
+0099 |
+0100 |
 0101 | def test_prediction_holds_out_whole_spells_and_uses_earlier_features(monkeypatch):
      # Defines a reusable step; the following indented lines are its body.
 0102 |     from src import predict
@@ -176,7 +176,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Creates a labelled table from the collected rows.
 0110 |     checked = []
      # Keeps this intermediate result under the name `checked`.
-0111 | 
+0111 |
 0112 |     def fake_features(games, data, cutoff):
      # Defines a reusable step; the following indented lines are its body.
 0113 |         assert (data.t > cutoff).all()
@@ -185,7 +185,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0115 |         return data.copy()
      # Hands this result back to the stage that called this function.
-0116 | 
+0116 |
 0117 |     def fake_gbm(train, test, columns):
      # Defines a reusable step; the following indented lines are its body.
 0118 |         train_spells = set(train.player)
@@ -196,7 +196,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Checks an invariant; the script fails if it is false.
 0121 |         return 0.6, 0.6
      # Hands this result back to the stage that called this function.
-0122 | 
+0122 |
 0123 |     monkeypatch.setattr(predict.features, "build", fake_features)
      # Continues the current calculation or control flow.
 0124 |     monkeypatch.setattr(predict, "_gbm", fake_gbm)
@@ -207,8 +207,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Checks an invariant; the script fails if it is false.
 0127 |     assert out["n_train"] + out["n_test"] < len(trials)  # burn-in removed
      # Checks an invariant; the script fails if it is false.
-0128 | 
-0129 | 
+0128 |
+0129 |
 0130 | def test_matching_uses_risk_set_at_exposure_time():
      # Defines a reusable step; the following indented lines are its body.
 0131 |     from src import matching
@@ -255,8 +255,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Checks an invariant; the script fails if it is false.
 0152 |     assert row.iloc[0].control_pre_rating == 2000
      # Checks an invariant; the script fails if it is false.
-0153 | 
-0154 | 
+0153 |
+0154 |
 0155 | def test_player_already_playing_it_is_not_at_risk():
      # Defines a reusable step; the following indented lines are its body.
 0156 |     # b plays it on day 0 as White, is exposed to (X,W) later -> no trial
@@ -266,8 +266,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Calculates or stores the exposure-trial table for this stage.
 0159 |     assert trials[(trials.player == "b") & (trials.colour == "W")].empty
      # Checks an invariant; the script fails if it is false.
-0160 | 
-0161 | 
+0160 |
+0161 |
 0162 | def test_distinct_exposers_counted_not_repeat_exposures():
      # Three games from the same opponent is d=1 with k=3.
 0163 |     """Three games from the same opponent is d=1 with k=3."""
@@ -283,8 +283,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Checks an invariant; the script fails if it is false.
 0169 |     assert row["k"].max() == 3
      # Checks an invariant; the script fails if it is false.
-0170 | 
-0171 | 
+0170 |
+0171 |
 0172 | def test_three_different_exposers_give_d_three():
      # Defines a reusable step; the following indented lines are its body.
 0173 |     df = frame([game("a", "b", 0), game("c", "b", 1), game("e", "b", 2),
@@ -297,8 +297,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `row`.
 0177 |     assert row["d"].max() == 3
      # Checks an invariant; the script fails if it is false.
-0178 | 
-0179 | 
+0178 |
+0179 |
 0180 | # ------------------------------------------------- structural diversity
 0181 | def test_structural_diversity_separate_exposers_are_separate_components():
      # Two exposers who have never met are two components -> sd = 2.
@@ -311,8 +311,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `row`.
 0186 |     assert row["sd"].max() == 2
      # Checks an invariant; the script fails if it is false.
-0187 | 
-0188 | 
+0187 |
+0188 |
 0189 | def test_structural_diversity_connected_exposers_collapse_to_one():
      # If the two exposers have played each other, they are one social source.
 0190 |     """If the two exposers have played each other, they are one social source."""
@@ -328,8 +328,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Checks an invariant; the script fails if it is false.
 0196 |     assert row["sd"].max() == 1         # but only one component
      # Checks an invariant; the script fails if it is false.
-0197 | 
-0198 | 
+0197 |
+0198 |
 0199 | def test_structural_diversity_ignores_edges_formed_later():
      # The exposure subgraph may only use edges that existed at the time.
 0200 |     """The exposure subgraph may only use edges that existed at the time."""
@@ -345,8 +345,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `row`.
 0206 |     assert row["sd"].max() == 2
      # Checks an invariant; the script fails if it is false.
-0207 | 
-0208 | 
+0207 |
+0208 |
 0209 | # ---------------------------------------------------------------- nulls
 0210 | def test_shuffling_timestamps_preserves_the_games_themselves():
      # Defines a reusable step; the following indented lines are its body.
@@ -360,8 +360,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Checks an invariant; the script fails if it is false.
 0215 |     assert len(out) == len(df)
      # Checks an invariant; the script fails if it is false.
-0216 | 
-0217 | 
+0216 |
+0217 |
 0218 | def test_aborted_game_does_not_leak_its_tags_into_the_next():
      # Lichess contains games with headers but no movetext.
 0219 |     """Lichess contains games with headers but no movetext. If the scanner only
@@ -371,7 +371,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Imports a library or project module needed below.
 0223 |     from src import parse
      # Imports a library or project module needed below.
-0224 | 
+0224 |
 0225 |     pgn = (
      # Keeps this intermediate result under the name `pgn`.
 0226 |         '[Event "Rated Blitz game"]\n[White "ghost"]\n[ECO "Z99"]\n'
@@ -390,7 +390,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `f`.
 0233 |     f.write_text(pgn, encoding="utf-8")
      # Continues the current calculation or control flow.
-0234 | 
+0234 |
 0235 |     games = list(parse.iter_games(f))
      # Keeps this intermediate result under the name `games`.
 0236 |     assert len(games) == 1                       # the aborted game is dropped
@@ -403,8 +403,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Checks an invariant; the script fails if it is false.
 0240 |     assert "WhiteElo" not in tags
      # Checks an invariant; the script fails if it is false.
-0241 | 
-0242 | 
+0241 |
+0242 |
 0243 | def test_matching_pool_reaches_the_bottom_of_the_activity_tolerance():
      # The activity index is log-spaced at the tolerance ratio, so the lowest acceptable activity can floor two buckets down.
 0244 |     """The activity index is log-spaced at the tolerance ratio, so the lowest
@@ -414,7 +414,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Imports a library or project module needed below.
 0248 |     from src import matching
      # Imports a library or project module needed below.
-0249 | 
+0249 |
 0250 |     src = inspect.getsource(matching.build_matched)
      # Keeps this intermediate result under the name `src`.
 0251 |     assert "for da in (-2, -1, 0, 1, 2)" in src, (
@@ -423,8 +423,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Part of the value, collection, or call spanning several lines.
 0253 |         "can be missed")
      # Part of the value, collection, or call spanning several lines.
-0254 | 
-0255 | 
+0254 |
+0255 |
 0256 | def test_rewire_preserves_degree_and_makes_no_self_loops():
      # The proposal's second null: degree-preserving edge rewiring.
 0257 |     """The proposal's second null: degree-preserving edge rewiring. It has to
@@ -433,7 +433,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Imports a library or project module needed below.
 0260 |     from collections import Counter
      # Imports a library or project module needed below.
-0261 | 
+0261 |
 0262 |     df = pd.DataFrame({
      # Creates a labelled table from the collected rows.
 0263 |         "white": [f"w{i % 7}" for i in range(60)],
@@ -446,7 +446,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0267 |     out = nulls.rewire_preserving_degree(df, np.random.default_rng(0))
      # Calculates or stores the output value for this stage.
-0268 | 
+0268 |
 0269 |     def degrees(d):
      # Defines a reusable step; the following indented lines are its body.
 0270 |         c = Counter()
@@ -459,19 +459,19 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0274 |         return c
      # Hands this result back to the stage that called this function.
-0275 | 
+0275 |
 0276 |     assert degrees(df) == degrees(out)
      # Checks an invariant; the script fails if it is false.
 0277 |     assert (out.white != out.black).all()          # no self-loops
      # Checks an invariant; the script fails if it is false.
 0278 |     assert set(zip(df.white, df.black)) != set(zip(out.white, out.black))
      # Checks an invariant; the script fails if it is false.
-0279 | 
-0280 | 
+0279 |
+0280 |
 0281 | def test_null_honours_granularity():
      # The null must build trials the same way the real analysis does.
 0282 |     """The null must build trials the same way the real analysis does.
-0283 | 
+0283 |
 0284 |     Leaving granularity at the default while the real trials are keyed by ply
 0285 |     compares a sparse ply world against a dense ECO world and manufactures a
 0286 |     spurious 'complex contagion' verdict. Same class of bug as the adoption
@@ -485,7 +485,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Processes each item from this collection in turn.
 0292 |     df = frame(rows)
      # Calculates or stores the game table for this stage.
-0293 | 
+0293 |
 0294 |     # ply granularity must actually split the single ECO into two behaviours
 0295 |     eco_keys = {events.behaviour_key(r, "eco") for r in df.itertuples()}
      # Keeps this intermediate result under the name `eco_keys`.
@@ -493,21 +493,21 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `ply_keys`.
 0297 |     assert len(eco_keys) == 1 and len(ply_keys) == 2
      # Checks an invariant; the script fails if it is false.
-0298 | 
+0298 |
 0299 |     # and run_null must forward that choice to build_trials, not silently
 0300 |     # fall back to the configured default
 0301 |     seen = []
      # Calculates or stores the set of opponents already counted for this stage.
 0302 |     real_build = events.build_trials
      # Keeps this intermediate result under the name `real_build`.
-0303 | 
+0303 |
 0304 |     def spy(frame_, *args, **kwargs):
      # Defines a reusable step; the following indented lines are its body.
 0305 |         seen.append(kwargs.get("granularity"))
      # Continues the current calculation or control flow.
 0306 |         return real_build(frame_, *args, **kwargs)
      # Hands this result back to the stage that called this function.
-0307 | 
+0307 |
 0308 |     events.build_trials = spy
      # Keeps this intermediate result under the name `build_trials`.
 0309 |     try:
@@ -518,13 +518,13 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Runs cleanup whether the operation succeeds or fails.
 0312 |         events.build_trials = real_build
      # Keeps this intermediate result under the name `build_trials`.
-0313 | 
+0313 |
 0314 |     assert seen and all(g == "ply" for g in seen), (
      # Checks an invariant; the script fails if it is false.
 0315 |         f"run_null passed granularity={seen} to build_trials, expected 'ply'")
      # Continues the current calculation or control flow.
-0316 | 
-0317 | 
+0316 |
+0317 |
 0318 | def test_compare_falls_back_to_binomial_se_with_one_replicate():
      # A single replicate has no across-replicate spread.
 0319 |     """A single replicate has no across-replicate spread. Without a fallback
@@ -543,8 +543,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `z`.
 0327 |     assert z.notna().all()
      # Checks an invariant; the script fails if it is false.
-0328 | 
-0329 | 
+0328 |
+0329 |
 0330 | # --------------------------------------------------------------- verdict
 0331 | def test_verdict_needs_the_null_before_it_will_call_complex_contagion():
      # The bug this guards: a rising raw curve alone was enough to print 'complex contagion', even though the null reproduced the whole rise.
@@ -568,8 +568,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Checks an invariant; the script fails if it is false.
 0342 |     assert "withheld" in v["verdict"] or "no null" in v["verdict"]
      # Checks an invariant; the script fails if it is false.
-0343 | 
-0344 | 
+0343 |
+0344 |
 0345 | def test_verdict_reports_simple_when_null_matches_the_rise():
      # Defines a reusable step; the following indented lines are its body.
 0346 |     rising = pd.DataFrame({"d": [1, 2, 3], "n": [1000] * 3,
@@ -600,14 +600,14 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Checks an invariant; the script fails if it is false.
 0359 |     assert v["verdict"].startswith("simple contagion")
      # Checks an invariant; the script fails if it is false.
-0360 | 
-0361 | 
+0360 |
+0361 |
 0362 | if __name__ == "__main__":
      # Runs the command-line entry point only when this file is executed directly.
 0363 |     raise SystemExit(pytest.main([__file__, "-q"]))
      # Stops with an explicit error when this requirement is violated.
-0364 | 
-0365 | 
+0364 |
+0365 |
 0366 | def test_saved_run_reopens_and_retries_without_losing_history(monkeypatch):
      # Defines a reusable step; the following indented lines are its body.
 0367 |     from server import runner
@@ -616,7 +616,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Imports a library or project module needed below.
 0369 |     import tempfile
      # Imports a library or project module needed below.
-0370 | 
+0370 |
 0371 |     with tempfile.TemporaryDirectory(dir=config.RESULTS) as folder:
      # Opens a resource and guarantees cleanup when the block ends.
 0372 |         monkeypatch.setattr(runner, "RUNS_DIR", Path(folder))
@@ -631,7 +631,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Appends a structured progress event that the browser can replay.
 0377 |         assert runner.list_runs()[0]["status"] == "failed"
      # Checks an invariant; the script fails if it is false.
-0378 | 
+0378 |
 0379 |         runner._RUNS.pop(run.id)
      # Continues the current calculation or control flow.
 0380 |         reopened = runner.get(run.id)
@@ -640,7 +640,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Checks an invariant; the script fails if it is false.
 0382 |         assert reopened.events_path.read_text(encoding="utf-8").count("\n") == 3
      # Checks an invariant; the script fails if it is false.
-0383 | 
+0383 |
 0384 |         launched = []
      # Keeps this intermediate result under the name `launched`.
 0385 |         monkeypatch.setattr(runner, "_launch", lambda r: launched.append(r.id))
@@ -655,12 +655,12 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Checks an invariant; the script fails if it is false.
 0390 |         runner._RUNS.pop(run.id, None)
      # Continues the current calculation or control flow.
-0391 | 
+0391 |
 0392 | def test_cluster_bootstrap_reports_repeated_players():
      # Defines a reusable step; the following indented lines are its body.
 0393 |     from src import matching
      # Imports a library or project module needed below.
-0394 | 
+0394 |
 0395 |     pairs = pd.DataFrame({
      # Creates a labelled table from the collected rows.
 0396 |         "exposed": ["a", "a", "b", "c", "c", "d"],
@@ -695,8 +695,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Checks an invariant; the script fails if it is false.
 0411 |     assert first["pre_match_balance"]["control_games_mean"] == 9
      # Checks an invariant; the script fails if it is false.
-0412 | 
-0413 | 
+0412 |
+0413 |
 0414 | def test_null_run_can_stop_between_replicates():
      # Defines a reusable step; the following indented lines are its body.
 0415 |     from src import nulls

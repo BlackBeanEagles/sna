@@ -264,7 +264,7 @@ svg.chart text{font-family:var(--mono);fill:var(--ink-2)}
 .lo-sub{margin:10px 0 0;font-size:10.5px;color:var(--muted);line-height:1.7}
 .openlist-row{display:flex;flex-wrap:wrap;gap:6px;max-height:none;overflow:visible}
 .openlist-row li{border:1px solid var(--rule);padding:5px 10px;font-size:11.5px;font-family:var(--mono)}
-.boardctl{display:flex;align-items:center;gap:8px;margin-top:10px}
+.boardctl{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
 .movetext{font-size:12px;color:var(--ink);flex:1;min-width:0;letter-spacing:.01em;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 button.mini{background:var(--surface-2);color:var(--ink-2);
@@ -588,7 +588,7 @@ header {
   <button id="run">Run analysis</button>
   <button id="stop" class="ghost" disabled>Cancel</button>
 </div>
-<p class="demo-note" id="demoNote">Quick demo: 60,000 sampled real January games are bundled with the project. This run recomputes the analysis; use Findings for the full-study result.</p>
+<p class="demo-note" id="demoNote">Fast presentation run: 20,000 real January games. It recomputes the analysis; use Findings for the full-study result.</p>
 <details class="advanced-options">
   <summary>Advanced options</summary>
   <label class="toggle" for="refresh">
@@ -650,8 +650,7 @@ header {
     <div class="panel" id="openPanel">
       <div class="phead">
         <div><h2>Play it out — the board is live</h2>
-          <p class="hint" id="openHint">Two players alternate moves. Every move is matched
-            against the archive and the numbers below update.</p></div>
+          <p class="hint" id="openHint">Click a piece, then a highlighted square. Try White's e2 pawn to e4, then Black's c7 pawn to c5. The opening details update after each move.</p></div>
         <span class="turnchip" id="turnChip">White to move</span>
       </div>
       <div class="bd boardrow">
@@ -662,6 +661,7 @@ header {
             <button class="mini" id="bUndo">Undo</button>
             <button class="mini" id="bReset">Reset</button>
             <button class="mini" id="bPlay">Replay line</button>
+            <button class="mini" id="bTry">Try e4 c5</button>
           </div>
           <p class="movetext mono" id="moveText">Start position — White to move.</p>
         </div>
@@ -753,7 +753,7 @@ addEventListener("error",function(){
 /* ---------- controls ---------- */
 var capEl=$("cap"), capVal=$("capVal");
 capEl.addEventListener("input",function(){
-  if($("month").value==="demo-2016-01")return;
+  if($("month").value.startsWith("demo-"))return;
   capVal.textContent=Number(capEl.value).toLocaleString("en-US")+
     (capEl.value>=capEl.max?" (full month)":"");
 });
@@ -764,20 +764,23 @@ fetch("/api/months").then(function(r){return r.json();}).then(function(d){
   d.months.forEach(function(m,i){
     var o=document.createElement("option");
     o.value=m.id; o.textContent=m.label;
-    if(m.id==="demo-2016-01") o.selected=true;
+    if(m.id==="demo-fast-2016-01") o.selected=true;
     sel.appendChild(o);
   });
   function updateMonthMeta(){
     var m=d.months.find(function(x){return x.id===sel.value;});
     $("monthMeta").textContent=m?m.mb+" MB · "+m.games+" games":"";
-    var demo=sel.value==="demo-2016-01";
+    var demo=sel.value.startsWith("demo-");
     capEl.disabled=demo;
-    capVal.textContent=demo?"60,000 sampled real games":
+    capVal.textContent=demo?m.games+" games":
       Number(capEl.value).toLocaleString("en-US")+
       (Number(capEl.value)>=Number(capEl.max)?" (full month)":"");
     $("refresh").disabled=demo;
     if(demo){$("refresh").checked=false;$("reps").value="1";}
     $("demoNote").hidden=!demo;
+    if(demo) $("demoNote").textContent=sel.value==="demo-fast-2016-01"
+      ? "Fast presentation run: 20,000 real January games. It recomputes the analysis; use Findings for the full-study result."
+      : "Detailed demo: 60,000 real January games. It recomputes the analysis; use Findings for the full-study result.";
   }
   sel.addEventListener("change",updateMonthMeta);
   updateMonthMeta();
@@ -1256,13 +1259,13 @@ function showOpenings(list){
     });
     ol.appendChild(li);
   });
-  $("openHint").textContent="Two players alternate moves on the board. Every move is "+
-    "matched against the "+fmt(GAME.openings.length)+" most common lines in this slice.";
+  $("openHint").textContent="Click a piece, then a highlighted square. Try e2 to e4, then c7 to c5; or click an opening below to replay it. Moves are compared with the selected games.";
 }
 
 $("bReset").addEventListener("click",resetBoard);
 $("bUndo").addEventListener("click",undoMove);
 $("bPlay").addEventListener("click",function(){ replayLine(GAME.lineSans||[]); });
+$("bTry").addEventListener("click",function(){ GAME.lineSans=["e4","c5"]; replayLine(GAME.lineSans); });
 
 // Track the previous position so the "last move" highlight works on human moves.
 (function(){
@@ -1523,7 +1526,7 @@ function handle(e){
     case "init":
       runMonth=e.month;
       buildRail(e.stages);
-      logLine(e.t,"Run started · "+(e.month==="demo-2016-01"?"classroom sample":"month "+e.month)+
+      logLine(e.t,"Run started · "+(e.month.startsWith("demo-")?"classroom sample":"month "+e.month)+
         (e.max_games?(" · cap "+fmt(e.max_games)+" games"):" · full month"),"hl");
       break;
     case "log": if(e.level!=="trace")logLine(e.t,e.msg,e.level); break;
@@ -1632,7 +1635,7 @@ function showVerdict(v){
   if(v.separated_at_fixed_k!=null) bits.push(["fixed-k separation",v.separated_at_fixed_k?"yes":"no"]);
   var m=window.__matched;
   if(m&&m.n_pairs) bits.push(["matched diff",(m.difference*100).toFixed(2)+" pp"]);
-  if(runMonth==="demo-2016-01")bits.push(["sample","60,000 real games / exploratory"]);
+  if(runMonth&&runMonth.startsWith("demo-"))bits.push(["sample",(runMonth==="demo-fast-2016-01"?"20,000":"60,000")+" real games / exploratory"]);
   bits.forEach(function(b){
     var s=document.createElement("span");
     s.innerHTML=b[0]+" <b>"+b[1]+"</b>"; ev.appendChild(s);
@@ -1658,7 +1661,7 @@ function refreshHistory(restore){
         b.textContent=monthLabel+" · "+r.status;
         var sm=document.createElement("small");
         sm.textContent=new Date(r.started*1000).toLocaleString()+" · "+
-          (r.month==="demo-2016-01"?"60,000-game sample":
+          (r.month.startsWith("demo-")?(r.month==="demo-fast-2016-01"?"20,000":"60,000")+"-game sample":
             (r.max_games?fmt(r.max_games)+" scanned cap":"full month"))+
           " · "+r.null_reps+" shuffles";
         b.appendChild(sm);
@@ -1735,7 +1738,7 @@ $("run").addEventListener("click",function(){
   fetch("/api/run",{method:"POST",headers:{"Content-Type":"application/json"},
     body:JSON.stringify({
       month:$("month").value,
-      max_games:$("month").value==="demo-2016-01"||Number(capEl.value)>=Number(capEl.max)?null:Number(capEl.value),
+      max_games:$("month").value.startsWith("demo-")||Number(capEl.value)>=Number(capEl.max)?null:Number(capEl.value),
       null_reps:Number($("reps").value),
       window_days:14,
       refresh:$("refresh").checked

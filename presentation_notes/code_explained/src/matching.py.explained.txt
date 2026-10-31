@@ -4,7 +4,7 @@ Each numbered source line is followed by a plain-English comment.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Step 7a -- rating-and-activity matched controls.
-0002 | 
+0002 |
 0003 | Each exposed (player, behaviour) spell is matched to a comparable player
 0004 | who had not yet performed or been exposed to that behaviour at the matching
 0005 | time. Rating and activity use only earlier games. Later exposure is recorded
@@ -12,23 +12,23 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0007 | """
 0008 | from __future__ import annotations
      # Imports a library or project module needed below.
-0009 | 
+0009 |
 0010 | import argparse
      # Imports a library or project module needed below.
 0011 | from collections import defaultdict
      # Imports a library or project module needed below.
 0012 | from pathlib import Path
      # Imports a library or project module needed below.
-0013 | 
+0013 |
 0014 | import numpy as np
      # Imports a library or project module needed below.
 0015 | import pandas as pd
      # Imports a library or project module needed below.
-0016 | 
+0016 |
 0017 | from . import config, events, parse
      # Imports a library or project module needed below.
-0018 | 
-0019 | 
+0018 |
+0019 |
 0020 | def _match_index(rating: pd.Series, games: pd.Series):
      # Bucket players by (rating band, log-activity band) so finding a control is a dict lookup instead of a scan over every player.
 0021 |     """Bucket players by (rating band, log-activity band) so finding a control
@@ -57,8 +57,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0035 |     return idx, meta
      # Hands this result back to the stage that called this function.
-0036 | 
-0037 | 
+0036 |
+0037 |
 0038 | def build_matched(df: pd.DataFrame, n_per_trial: int = 1,
      # Compare an exposed player to a similar player still at risk at t0.
 0039 |                   max_trials: int | None = 100_000,
@@ -68,7 +68,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0041 |                   window_days: int = None) -> pd.DataFrame:
      # Keeps this intermediate result under the name `window_days`.
 0042 |     """Compare an exposed player to a similar player still at risk at t0.
-0043 | 
+0043 |
 0044 |     Rating and game activity are taken only from games before t0. A control
 0045 |     cannot already have seen or played this opening/colour. This reduces some
 0046 |     differences between players, but it is still observational matching.
@@ -89,7 +89,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `keys`.
 0055 |     keys.sort(key=lambda key: exposures[key][0][0])
      # Continues the current calculation or control flow.
-0056 | 
+0056 |
 0057 |     players = pd.Index(pd.unique(pd.concat([df["white"], df["black"]])))
      # Keeps this intermediate result under the name `players`.
 0058 |     player_idx = {p: i for i, p in enumerate(players)}
@@ -110,7 +110,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Processes each item from this collection in turn.
 0066 |         first_perf_ns[beh][player_idx[p]] = pd.Timestamp(t).value
      # Tracks first performance time to exclude people who already adopted before matching.
-0067 | 
+0067 |
 0068 |     # Advance a game-time sweep to strictly before each exposed player's t0.
 0069 |     # The bucket index changes as players accumulate games. No full-month
 0070 |     # covariate contributes to a control decision.
@@ -138,7 +138,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `a_ratio`.
 0082 |     log_ratio = np.log(a_ratio)
      # Keeps this intermediate result under the name `log_ratio`.
-0083 | 
+0083 |
 0084 |     def update_player(p: str, r: float):
      # Defines a reusable step; the following indented lines are its body.
 0085 |         i = player_idx[p]
@@ -167,7 +167,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0097 |             bucket_of[i] = new
      # Continues the current calculation or control flow.
-0098 | 
+0098 |
 0099 |     rows = []
      # Calculates or stores the result rows collected for the output table for this stage.
 0100 |     window_ns = window.value
@@ -276,7 +276,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Part of the value, collection, or call spanning several lines.
 0152 |                          int(a0), int(activity[ci])))
      # Continues the current calculation or control flow.
-0153 | 
+0153 |
 0154 |     return pd.DataFrame(rows, columns=[
      # Creates a labelled table from the collected rows.
 0155 |         "exposed", "control", "opening", "colour", "t0",
@@ -287,8 +287,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Part of the value, collection, or call spanning several lines.
 0158 |         "exposed_pre_games", "control_pre_games"])
      # Part of the value, collection, or call spanning several lines.
-0159 | 
-0160 | 
+0159 |
+0160 |
 0161 | def summarise(pairs: pd.DataFrame, bootstrap_reps: int = 400,
      # Summarise pairs, resampling both exposed and control player clusters.
 0162 |               seed: int = config.RANDOM_SEED) -> dict:
@@ -366,8 +366,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Closes the data structure or function call started above.
 0199 |     }
      # Closes the data structure or function call started above.
-0200 | 
-0201 | 
+0200 |
+0201 |
 0202 | def run(games_path: Path):
      # Defines a reusable step; the following indented lines are its body.
 0203 |     df = parse.load_games(games_path)
@@ -382,8 +382,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Creates a labelled table from the collected rows.
 0208 |     return s
      # Hands this result back to the stage that called this function.
-0209 | 
-0210 | 
+0209 |
+0210 |
 0211 | if __name__ == "__main__":
      # Runs the command-line entry point only when this file is executed directly.
 0212 |     ap = argparse.ArgumentParser()

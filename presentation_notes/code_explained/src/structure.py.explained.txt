@@ -4,7 +4,7 @@ Each numbered source line is followed by a plain-English comment.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Objective 4 -- who are the early adopters, structurally?
-0002 | 
+0002 |
 0003 | Builds the aggregate player-interaction graph, computes centrality and
 0004 | Louvain communities, and asks whether the first players to take up an
 0005 | opening sit at the core (hubs) or the periphery, and whether diffusion is
@@ -12,25 +12,25 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0007 | """
 0008 | from __future__ import annotations
      # Imports a library or project module needed below.
-0009 | 
+0009 |
 0010 | import argparse
      # Imports a library or project module needed below.
 0011 | from pathlib import Path
      # Imports a library or project module needed below.
-0012 | 
+0012 |
 0013 | import networkx as nx
      # Imports a library or project module needed below.
 0014 | import pandas as pd
      # Imports a library or project module needed below.
-0015 | 
+0015 |
 0016 | from . import config, events, parse
      # Imports a library or project module needed below.
-0017 | 
-0018 | 
+0017 |
+0018 |
 0019 | def build_graph(df: pd.DataFrame) -> nx.Graph:
      # Make one player node per account and one edge per opponent pair.
 0020 |     """Make one player node per account and one edge per opponent pair.
-0021 | 
+0021 |
 0022 |     Repeated games increase the edge's `games` weight; they do not make extra
 0023 |     nodes or edges. This is the network displayed during the live demo.
 0024 |     """
@@ -50,12 +50,12 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0032 |     return g
      # Hands this result back to the stage that called this function.
-0033 | 
-0034 | 
+0033 |
+0034 |
 0035 | def node_features(g: nx.Graph, betweenness_k: int = 200) -> pd.DataFrame:
      # Describe each player's position and detect groups in the network.
 0036 |     """Describe each player's position and detect groups in the network.
-0037 | 
+0037 |
 0038 |     Degree counts opponents, k-core measures membership in a dense centre,
 0039 |     and betweenness approximates how often a player bridges shortest paths.
 0040 |     Louvain groups players who are more connected to one another.
@@ -96,8 +96,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0059 |     return feats
      # Hands this result back to the stage that called this function.
-0060 | 
-0061 | 
+0060 |
+0061 |
 0062 | def early_adopters(df: pd.DataFrame, quantile: float = 0.1) -> pd.DataFrame:
      # First `quantile` of adopters of each behaviour, by adoption time.
 0063 |     """First `quantile` of adopters of each behaviour, by adoption time."""
@@ -113,12 +113,12 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0069 |     return fp
      # Hands this result back to the stage that called this function.
-0070 | 
-0071 | 
+0070 |
+0071 |
 0072 | def cross_community_flow(df: pd.DataFrame, feats: pd.DataFrame) -> dict:
      # Count pre-adoption encounters within and across detected communities.
 0073 |     """Count pre-adoption encounters within and across detected communities.
-0074 | 
+0074 |
 0075 |     This is descriptive: sharing a community does not prove one opponent
 0076 |     caused another player to choose an opening.
 0077 |     """
@@ -160,8 +160,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Part of the value, collection, or call spanning several lines.
 0096 |             "share_within": round(within / total, 4) if total else None}
      # Part of the value, collection, or call spanning several lines.
-0097 | 
-0098 | 
+0097 |
+0098 |
 0099 | def run(games_path: Path):
      # Defines a reusable step; the following indented lines are its body.
 0100 |     df = parse.load_games(games_path)
@@ -172,7 +172,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Calculates or stores the network features for this stage.
 0103 |     fp = early_adopters(df)
      # Keeps this intermediate result under the name `fp`.
-0104 | 
+0104 |
 0105 |     merged = fp.merge(feats, on="player", how="left")
      # Joins two tables on shared identifiers so their columns can be compared.
 0106 |     by_early = merged.groupby("is_early")[
@@ -183,7 +183,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Writes a result table that can be inspected or downloaded.
 0109 |     feats.to_parquet(config.PROCESSED / "node_features.parquet", index=False)
      # Saves a compact table for later analysis stages.
-0110 | 
+0110 |
 0111 |     summary = {
      # Keeps this intermediate result under the name `summary`.
 0112 |         "nodes": g.number_of_nodes(),
@@ -208,8 +208,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Creates a labelled table from the collected rows.
 0122 |     return g, feats, by_early, summary
      # Hands this result back to the stage that called this function.
-0123 | 
-0124 | 
+0123 |
+0124 |
 0125 | if __name__ == "__main__":
      # Runs the command-line entry point only when this file is executed directly.
 0126 |     ap = argparse.ArgumentParser()

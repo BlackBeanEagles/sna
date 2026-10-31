@@ -4,7 +4,7 @@ Each numbered source line is followed by a plain-English comment.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Step 8 -- animated diffusion of one opening across the player network.
-0002 | 
+0002 |
 0003 | The demo, not the result. Picks the opening with the most adoptions, lays
 0004 | the interaction graph out once, then walks forward in time colouring nodes
 0005 | as they adopt. Writes a GIF plus a static small-multiple panel for the
@@ -12,12 +12,12 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0007 | """
 0008 | from __future__ import annotations
      # Imports a library or project module needed below.
-0009 | 
+0009 |
 0010 | import argparse
      # Imports a library or project module needed below.
 0011 | from pathlib import Path
      # Imports a library or project module needed below.
-0012 | 
+0012 |
 0013 | import matplotlib
      # Imports a library or project module needed below.
 0014 | matplotlib.use("Agg")
@@ -30,18 +30,18 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Imports a library or project module needed below.
 0018 | from matplotlib.animation import FuncAnimation, PillowWriter
      # Imports a library or project module needed below.
-0019 | 
+0019 |
 0020 | from . import config, events, parse, structure
      # Imports a library or project module needed below.
-0021 | 
+0021 |
 0022 | UNADOPTED = "#d9d9d9"
      # Keeps this intermediate result under the name `UNADOPTED`.
 0023 | ADOPTED = "#c2185b"
      # Keeps this intermediate result under the name `ADOPTED`.
 0024 | NEW = "#f9a825"
      # Keeps this intermediate result under the name `NEW`.
-0025 | 
-0026 | 
+0025 |
+0026 |
 0027 | def pick_behaviour(df: pd.DataFrame):
      # Defines a reusable step; the following indented lines are its body.
 0028 |     _, first_perf, _ = events.sweep(df)
@@ -56,14 +56,14 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `sel`.
 0033 |     return best, sel.sort_values("t")
      # Orders the rows by this field before the next calculation.
-0034 | 
-0035 | 
+0034 |
+0035 |
 0036 | def animate(df: pd.DataFrame, out_gif: Path = None, out_png: Path = None,
      # Draw first use of one opening over time on a network subset.
 0037 |             frames: int = 40, max_nodes: int = 400):
      # Keeps this intermediate result under the name `frames`.
 0038 |     """Draw first use of one opening over time on a network subset.
-0039 | 
+0039 |
 0040 |     The animation explains the idea of diffusion visually. The trial curves
 0041 |     and reference checks, rather than this picture, carry the study finding.
 0042 |     """
@@ -71,7 +71,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `out_gif`.
 0044 |     out_png = out_png or (config.FIGURES / "diffusion_panels.png")
      # Keeps this intermediate result under the name `out_png`.
-0045 | 
+0045 |
 0046 |     g = structure.build_graph(df)
      # Calculates or stores the player graph for this stage.
 0047 |     if g.number_of_nodes() > max_nodes:
@@ -84,7 +84,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Part of the value, collection, or call spanning several lines.
 0051 |     adopters = adopters[adopters["player"].isin(g.nodes())]
      # Keeps this intermediate result under the name `adopters`.
-0052 | 
+0052 |
 0053 |     pos = nx.spring_layout(g, seed=config.RANDOM_SEED, k=1.6 / (g.number_of_nodes() ** .5))
      # Keeps this intermediate result under the name `pos`.
 0054 |     t0, t1 = df["ts"].min(), df["ts"].max()
@@ -95,7 +95,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `nodes`.
 0057 |     adopt_t = dict(zip(adopters["player"], adopters["t"]))
      # Keeps this intermediate result under the name `adopt_t`.
-0058 | 
+0058 |
 0059 |     def colours_at(i):
      # Defines a reusable step; the following indented lines are its body.
 0060 |         cut, prev = cuts[i], cuts[max(i - 1, 0)]
@@ -120,12 +120,12 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0070 |         return out
      # Hands this result back to the stage that called this function.
-0071 | 
+0071 |
 0072 |     def sizes_at(i):
      # Defines a reusable step; the following indented lines are its body.
 0073 |         return [70 if c == NEW else 26 for c in colours_at(i)]
      # Hands this result back to the stage that called this function.
-0074 | 
+0074 |
 0075 |     fig, ax = plt.subplots(figsize=(7.5, 7.5))
      # Continues the current calculation or control flow.
 0076 |     nx.draw_networkx_edges(g, pos, ax=ax, alpha=.05, width=.5)
@@ -138,7 +138,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0080 |     title = ax.set_title("")
      # Keeps this intermediate result under the name `title`.
-0081 | 
+0081 |
 0082 |     def update(i):
      # Defines a reusable step; the following indented lines are its body.
 0083 |         scat.set_color(colours_at(i))
@@ -155,14 +155,14 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0089 |         return scat, title
      # Hands this result back to the stage that called this function.
-0090 | 
+0090 |
 0091 |     anim = FuncAnimation(fig, update, frames=len(cuts), blit=False)
      # Keeps this intermediate result under the name `anim`.
 0092 |     anim.save(out_gif, writer=PillowWriter(fps=6))
      # Continues the current calculation or control flow.
 0093 |     plt.close(fig)
      # Continues the current calculation or control flow.
-0094 | 
+0094 |
 0095 |     # static small multiples for the written report
 0096 |     picks = [0, len(cuts) // 3, 2 * len(cuts) // 3, len(cuts) - 1]
      # Keeps this intermediate result under the name `picks`.
@@ -196,14 +196,14 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Hands this result back to the stage that called this function.
 0111 |             "nodes_drawn": len(nodes), "adopters": len(adopt_t)}
      # Part of the value, collection, or call spanning several lines.
-0112 | 
-0113 | 
+0112 |
+0113 |
 0114 | def run(games_path: Path):
      # Defines a reusable step; the following indented lines are its body.
 0115 |     return animate(parse.load_games(games_path))
      # Hands this result back to the stage that called this function.
-0116 | 
-0117 | 
+0116 |
+0117 |
 0118 | if __name__ == "__main__":
      # Runs the command-line entry point only when this file is executed directly.
 0119 |     ap = argparse.ArgumentParser()

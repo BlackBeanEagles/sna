@@ -4,40 +4,40 @@ Each numbered source line is followed by a plain-English comment.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Does STRUCTURAL diversity behave any differently from raw exposer count?
-0002 | 
+0002 |
 0003 | The proposal's headline technique is Ugander et al.'s measure: not how many
 0004 | distinct neighbours exposed you (`d`), but how many *connected components* the
 0005 | exposing neighbourhood breaks into (`sd`). Two exposures from two friends who
 0006 | know each other are one social source; from two strangers, two sources.
-0007 | 
+0007 |
 0008 | The main analysis put `d` through the shuffled-time null and found the excess
 0009 | decaying to 1.0. This runs the identical treatment on `sd`, so the proposal's
 0010 | actual promise is tested rather than a proxy for it.
-0011 | 
+0011 |
 0012 |     python scripts/check_diversity.py --reps 3
 0013 | """
 0014 | from __future__ import annotations
      # Imports a library or project module needed below.
-0015 | 
+0015 |
 0016 | import argparse
      # Imports a library or project module needed below.
 0017 | import sys
      # Imports a library or project module needed below.
 0018 | from pathlib import Path
      # Imports a library or project module needed below.
-0019 | 
+0019 |
 0020 | import pandas as pd
      # Imports a library or project module needed below.
-0021 | 
+0021 |
 0022 | ROOT = Path(__file__).resolve().parents[1]
      # Keeps this intermediate result under the name `ROOT`.
 0023 | sys.path.insert(0, str(ROOT))
      # Continues the current calculation or control flow.
-0024 | 
+0024 |
 0025 | from src import config, curve, events, nulls  # noqa: E402
      # Imports a library or project module needed below.
-0026 | 
-0027 | 
+0026 |
+0027 |
 0028 | def report(name: str, cmp: pd.DataFrame, key: str):
      # Defines a reusable step; the following indented lines are its body.
 0029 |     print(f"\n--- {name} ---")
@@ -58,8 +58,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Compares the observed adoption rate with the shuffled-time reference rate.
 0037 |           f"({'RISES' if last.lift_over_null > first.lift_over_null else 'decays'})")
      # Compares the observed adoption rate with the shuffled-time reference rate.
-0038 | 
-0039 | 
+0038 |
+0039 |
 0040 | def main():
      # Compare the distinct-opponent and structural-diversity readings.
 0041 |     """Compare the distinct-opponent and structural-diversity readings."""
@@ -73,21 +73,21 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Defines a command-line option for this script.
 0046 |     a = ap.parse_args()
      # Keeps this intermediate result under the name `a`.
-0047 | 
+0047 |
 0048 |     df = pd.read_parquet(a.games)
      # Loads a previously prepared game or trial table.
 0049 |     print(f"{len(df):,} games, {a.reps} null replicate(s), "
      # Prints this reading so a command-line run can be followed.
 0050 |           f"window {config.ADOPTION_WINDOW_DAYS}d")
      # Continues the current calculation or control flow.
-0051 | 
+0051 |
 0052 |     trials = events.build_trials(df)
      # Calculates or stores the exposure-trial table for this stage.
 0053 |     tables = curve.analyse(trials)
      # Keeps this intermediate result under the name `tables`.
 0054 |     w = config.ADOPTION_WINDOW_DAYS
      # Keeps this intermediate result under the name `w`.
-0055 | 
+0055 |
 0056 |     out = {}
      # Calculates or stores the output value for this stage.
 0057 |     for key in ("d", "sd"):
@@ -106,7 +106,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0064 |                else "sd (structural diversity, Ugander et al.)", cmp, key)
      # Continues the current calculation or control flow.
-0065 | 
+0065 |
 0066 |     # Does holding k fixed and varying sd separate anything?
 0067 |     hk = tables["held_k_by_sd"]
      # Keeps this intermediate result under the name `hk`.
@@ -122,7 +122,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `sep`.
 0073 |     print(f"\nfixed-k separation on sd: {sep}")
      # Prints this reading so a command-line run can be followed.
-0074 | 
+0074 |
 0075 |     d_last = out["d"].iloc[-1]["lift_over_null"]
      # Compares the observed adoption rate with the shuffled-time reference rate.
 0076 |     s_last = out["sd"].iloc[-1]["lift_over_null"]
@@ -133,8 +133,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0079 |           f"{'sd tells a different story - investigate' if abs(d_last - s_last) > 0.08 else 'Same verdict on both measures.'}")
      # Continues the current calculation or control flow.
-0080 | 
-0081 | 
+0080 |
+0081 |
 0082 | if __name__ == "__main__":
      # Runs the command-line entry point only when this file is executed directly.
 0083 |     main()

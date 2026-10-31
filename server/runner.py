@@ -28,9 +28,13 @@ RUNS_DIR.mkdir(parents=True, exist_ok=True)
 # Months worth offering. Sizes are the compressed archive; a whole month is
 # streamed and decompressed on the fly, never written to disk.
 DEMO_MONTH = "demo-2016-01"
+DEMO_FAST_MONTH = "demo-fast-2016-01"
 DEMO_SLICE = config.ROOT / "data" / "demo" / "january_2016_classroom_sample.parquet"
+DEMO_SIZES = {DEMO_FAST_MONTH: 20_000, DEMO_MONTH: 60_000}
 
 MONTHS = [
+    {"id": DEMO_FAST_MONTH, "label": "January 2016 · fast presentation run", "mb": 2.4,
+     "games": "20,000 sampled real"},
     {"id": DEMO_MONTH, "label": "January 2016 · quick live demo", "mb": 2.4,
      "games": "60,000 sampled real"},
     {"id": "2014-07", "label": "July 2014",    "mb": 200,  "games": "~1.0M"},
@@ -345,12 +349,15 @@ def load_board_data(run_id: str) -> bool:
         return False
     if LAST.get("run_id") == run_id and LAST.get("df") is not None:
         return True
-    cache = (DEMO_SLICE if run.month == DEMO_MONTH else
+    cache = (DEMO_SLICE if run.month in DEMO_SIZES else
              config.INTERIM / f"slice_{run.month}_{run.max_games or 'full'}.parquet")
     trials_path = run.dir / "trials.parquet"
     if not cache.is_file() or not trials_path.is_file():
         return False
-    LAST.update(df=pd.read_parquet(cache), trials=pd.read_parquet(trials_path),
+    games = pd.read_parquet(cache)
+    if run.month == DEMO_FAST_MONTH:
+        games = games.sample(n=DEMO_SIZES[run.month], random_state=config.RANDOM_SEED).sort_values("ts").reset_index(drop=True)
+    LAST.update(df=games, trials=pd.read_parquet(trials_path),
                 month=run.month, run_id=run_id, comm=None)
     graph_path = run.dir / "graph_players.json"
     LAST["graph_players"] = (json.loads(graph_path.read_text(encoding="utf-8"))
@@ -393,14 +400,18 @@ def _pipeline(run: Run):
     import pandas as pd
     from src import parse
 
-    url = "bundled real January 2016 sample" if run.month == DEMO_MONTH else BASE.format(month=run.month)
+    url = "bundled real January 2016 sample" if run.month in DEMO_SIZES else BASE.format(month=run.month)
     run.emit("init", stages=[{"key": k, "label": l} for k, l in STAGES],
              month=run.month, url=url, max_games=run.max_games)
 
     # ---------------- 1. stream & filter ----------------
     run.stage("stream", "running")
-    if run.month == DEMO_MONTH:
+    if run.month in DEMO_SIZES:
         df = pd.read_parquet(DEMO_SLICE)
+        if run.month == DEMO_FAST_MONTH:
+            # A reproducible subset keeps the full month of dates while making
+            # the in-class run shorter; the detailed option still uses 60,000.
+            df = df.sample(n=DEMO_SIZES[run.month], random_state=config.RANDOM_SEED).sort_values("ts").reset_index(drop=True)
         df.attrs["skipped"] = {}
         run.log(f"Loaded {len(df):,} real January 2016 games from the bundled classroom sample.", "ok")
         run.emit("scan", scanned=len(df), kept=len(df), rate=0, game=None)
@@ -512,7 +523,7 @@ def _analyse(run: "Run", df):
     # ---------------- 3. network ----------------
     run.stage("network", "running")
     g = structure.build_graph(df)
-    feats = structure.node_features(g)
+    feats = structure.node_features(g, betweenness_k=40 if run.month == DEMO_FAST_MONTH else 200)
     early = structure.early_adopters(df).merge(feats, on="player", how="left")
     by_early = early.groupby("is_early")[["degree", "kcore", "betweenness"]].mean()
     run.emit("network",
@@ -554,7 +565,7 @@ def _analyse(run: "Run", df):
 
     # ---------------- 6. matched controls ----------------
     run.stage("matched", "running")
-    pairs = matching.build_matched(df, max_trials=60000, window_days=window)
+    pairs = matching.build_matched(df, max_trials=15000 if run.month == DEMO_FAST_MONTH else 60000, window_days=window)
     msum = matching.summarise(pairs)
     run.emit("matched", **msum)
     run.stage("matched", "done",

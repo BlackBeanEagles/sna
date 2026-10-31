@@ -56,13 +56,16 @@ The console's `d`-curve, null overlay and verdict come from the same
 replays saved settings and progress after a page reload; **Retry** restarts an
 interrupted run from its cached slice.
 
-For a classroom presentation, leave **January 2016 · quick live demo** selected
-and click **Run analysis**. The project recomputes every analysis stage from a
-bundled 60,000-game sample of real January 2016 games. It needs no archive
-download. Allow a few minutes for the verdict, then try a line on the playable
-board and open **Findings**. The quick run uses one timing shuffle and is
-exploratory; the published findings use all 249,505 filtered January games and
-20 shuffles.
+For a classroom presentation, leave **January 2016 · fast presentation run**
+selected and click **Run analysis**. It recomputes every analysis stage on a
+reproducible 20,000-game subset of the bundled real January sample, with no
+archive download. On this machine the run completed in about 30 seconds;
+classroom hardware may differ. Click **Try e4 c5** on the board, or click a
+piece and then a highlighted destination square. The opening details update
+from the selected games. Open **Findings** for the full-study result. The
+fast run uses one timing shuffle and is exploratory. The 60,000-game detailed
+demo remains available; the published findings use all 249,505 filtered games
+and 20 shuffles.
 
 The deck, with 12 content slides plus a cover and speaker notes, is in
 [`docs/Chess_Opening_Contagion_Presentation.pptx`](docs/Chess_Opening_Contagion_Presentation.pptx).

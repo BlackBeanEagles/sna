@@ -33,7 +33,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0015 |   --rule:#ddd6c8; --rule-strong:#bfb5a2;
      # Continues the page structure, styling, or browser logic above.
-0016 | 
+0016 |
 0017 |   /* The two board tones, used as STRUCTURE -- alternating rows, the rail --
      # Existing developer note about this section.
 0018 |      not as a texture laid over things. */
@@ -42,7 +42,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0020 |   --row-alt:#f5f1e8;
      # Continues the page structure, styling, or browser logic above.
-0021 | 
+0021 |
 0022 |   /* Chart inks: ink blue, annotation red, violet, gold. Validated against the
      # Existing developer note about this section.
 0023 |      colourblind checks in both themes; do not substitute these by eye. */
@@ -51,12 +51,12 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0025 |   --s-null:#9a9287;
      # Continues the page structure, styling, or browser logic above.
-0026 | 
+0026 |
 0027 |   /* Status is reserved and never reused as a chart series. */
      # Existing developer note about this section.
 0028 |   --ok:#3f7050; --warn:#8a6418; --bad:#a8362c;
      # Continues the page structure, styling, or browser logic above.
-0029 | 
+0029 |
 0030 |   /* names the existing rules still use */
      # Existing developer note about this section.
 0031 |   --s-indigo:#2f5597; --s-vermilion:#b03028; --s-jade:#3f7050; --s-ochre:#b0862a;
@@ -65,7 +65,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0033 |   --wash-blue:rgba(47,85,151,.12); --wash-red:rgba(176,48,40,.10);
      # Continues the page structure, styling, or browser logic above.
-0034 | 
+0034 |
 0035 |   --shadow:0 1px 2px rgba(28,26,23,.05), 0 6px 20px rgba(28,26,23,.06);
      # Continues the page structure, styling, or browser logic above.
 0036 |   --display:'Spectral',Georgia,serif;
@@ -158,7 +158,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0080 | .wrap{max-width:1140px;margin:0 auto;padding-inline:20px;padding-block:0}
      # Continues the page structure, styling, or browser logic above.
-0081 | 
+0081 |
 0082 | header{padding-block:38px 24px}
      # Continues the page structure, styling, or browser logic above.
 0083 | .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
@@ -175,7 +175,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0089 | .sub b{color:var(--ink);font-weight:600}
      # Continues the page structure, styling, or browser logic above.
-0090 | 
+0090 |
 0091 | /* ---- control bar ---- */
      # Existing developer note about this section.
 0092 | .controls{
@@ -228,7 +228,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0116 | button:focus-visible{outline:2px solid var(--s-vermilion);outline-offset:3px}
      # Continues the page structure, styling, or browser logic above.
-0117 | 
+0117 |
 0118 | /* ---- stage rail ---- */
      # Existing developer note about this section.
 0119 | .rail{
@@ -299,7 +299,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0152 | #nullToggleWrap[hidden]{display:none!important}
      # Continues the page structure, styling, or browser logic above.
-0153 | 
+0153 |
 0154 | /* ---- live metrics ---- */
      # Existing developer note about this section.
 0155 | .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:20px}
@@ -316,7 +316,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0161 | .m dd small{font-size:11.5px;color:var(--ink-2);font-weight:400}
      # Continues the page structure, styling, or browser logic above.
-0162 | 
+0162 |
 0163 | /* ---- panels ---- */
      # Existing developer note about this section.
 0164 | .grid{display:grid;grid-template-columns:1.35fr 1fr;gap:18px;align-items:start}
@@ -349,7 +349,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0178 | .dlabel{font-size:10.5px;font-weight:500;font-variant-numeric:tabular-nums}
      # Continues the page structure, styling, or browser logic above.
-0179 | 
+0179 |
 0180 | /* ---- log ---- */
      # Existing developer note about this section.
 0181 | .logwrap{background:var(--surface);border:1px solid var(--rule);border-radius:0;
@@ -374,7 +374,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0191 | .log .lv-hl .msg{color:var(--ink);font-weight:500}
      # Continues the page structure, styling, or browser logic above.
-0192 | 
+0192 |
 0193 | /* ---- verdict ---- */
      # Existing developer note about this section.
 0194 | .verdict{
@@ -407,7 +407,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0208 | .verdict .ev b{color:var(--ink);font-weight:500}
      # Continues the page structure, styling, or browser logic above.
-0209 | 
+0209 |
 0210 | .phead{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
      # Continues the page structure, styling, or browser logic above.
 0211 | .toggle{display:inline-flex;align-items:center;gap:9px;cursor:pointer;margin:14px 18px 0;
@@ -438,7 +438,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0224 | .toggle input:focus-visible + .sw{outline:2px solid var(--s-indigo);outline-offset:3px}
      # Continues the page structure, styling, or browser logic above.
-0225 | 
+0225 |
 0226 | /* ---- chess board + openings ---- */
      # Existing developer note about this section.
 0227 | .boardrow{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
@@ -477,7 +477,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0244 | #board .chk{fill:var(--s-vermilion);opacity:.4}
      # Continues the page structure, styling, or browser logic above.
-0245 | 
+0245 |
 0246 | .turnchip{font-family:var(--mono);font-size:11px;letter-spacing:.07em;
      # Continues the page structure, styling, or browser logic above.
 0247 |   text-transform:uppercase;border:1px solid var(--rule-strong);border-radius:999px;
@@ -492,7 +492,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0252 | .turnchip.over{border-color:var(--s-vermilion);color:var(--s-vermilion)}
      # Continues the page structure, styling, or browser logic above.
-0253 | 
+0253 |
 0254 | .liveopen{flex:1 1 250px;min-width:0}
      # Continues the page structure, styling, or browser logic above.
 0255 | .lo-eco{margin:0;font-size:11px;letter-spacing:.12em;color:var(--s-indigo)}
@@ -519,7 +519,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0266 | .openlist-row li{border:1px solid var(--rule);padding:5px 10px;font-size:11.5px;font-family:var(--mono)}
      # Continues the page structure, styling, or browser logic above.
-0267 | .boardctl{display:flex;align-items:center;gap:8px;margin-top:10px}
+0267 | .boardctl{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
      # Continues the page structure, styling, or browser logic above.
 0268 | .movetext{font-size:12px;color:var(--ink);flex:1;min-width:0;letter-spacing:.01em;
      # Continues the page structure, styling, or browser logic above.
@@ -557,7 +557,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0285 |   flex:none;font-variant-numeric:tabular-nums}
      # Continues the page structure, styling, or browser logic above.
-0286 | 
+0286 |
 0287 | .ticker{list-style:none;margin:0;padding:0;height:180px;overflow:hidden}
      # Continues the page structure, styling, or browser logic above.
 0288 | .ticker li{display:flex;gap:9px;align-items:baseline;padding:4px 4px;
@@ -576,7 +576,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0295 | .ticker .el{color:var(--muted);flex:none}
      # Continues the page structure, styling, or browser logic above.
-0296 | 
+0296 |
 0297 | .netlegend{display:flex;gap:12px;flex-wrap:wrap;padding:8px 6px 2px;
      # Continues the page structure, styling, or browser logic above.
 0298 |   font-family:var(--mono);font-size:10.5px;color:var(--ink-2)}
@@ -593,7 +593,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0304 |   margin-right:6px;vertical-align:-1px}
      # Continues the page structure, styling, or browser logic above.
-0305 | 
+0305 |
 0306 | .tip{position:fixed;pointer-events:none;z-index:60;opacity:0;transform:translateY(4px);
      # Continues the page structure, styling, or browser logic above.
 0307 |   transition:opacity .15s var(--ease),transform .15s var(--ease);
@@ -612,7 +612,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0314 | .tip .t-r b{color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums}
      # Continues the page structure, styling, or browser logic above.
-0315 | 
+0315 |
 0316 | .note{font-size:13px;color:var(--muted);margin:14px 0 0}
      # Continues the page structure, styling, or browser logic above.
 0317 | .note code{font-family:var(--mono);font-size:.92em;background:var(--surface-2);
@@ -723,7 +723,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0370 | @media(max-width:560px){.history summary span{display:block;margin:4px 0 0}}
      # Continues the page structure, styling, or browser logic above.
-0371 | 
+0371 |
 0372 | /* Shared dashboard styling with the findings page. */
      # Existing developer note about this section.
 0373 | :root{
@@ -928,7 +928,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0473 | }
      # Closes the preceding element or code block.
-0474 | 
+0474 |
 0475 | svg.chart:empty{height:0}
      # Continues the page structure, styling, or browser logic above.
 0476 | #netCanvas:not(.ready){display:none!important}
@@ -937,7 +937,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0478 | .logwrap:has(.log:empty){display:none}
      # Continues the page structure, styling, or browser logic above.
-0479 | 
+0479 |
 0480 | /* Match the findings page's chess-club colours. */
      # Existing developer note about this section.
 0481 | :root{
@@ -994,7 +994,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0507 | .verdict.on{background:linear-gradient(125deg,#edf1e7,#fffaf1 68%)}
      # Continues the page structure, styling, or browser logic above.
-0508 | 
+0508 |
 0509 | /* Keep the setup view focused on controls; reveal live data when a run is opened. */
      # Existing developer note about this section.
 0510 | body:not(.has-run) .rail,
@@ -1085,7 +1085,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Adds the `div` page element shown or read by the browser.
 0553 | <div class="wrap">
      # Adds the `div` page element shown or read by the browser.
-0554 | 
+0554 |
 0555 | <header>
      # Adds the `header` page element shown or read by the browser.
 0556 |   <p class="eyebrow">Opening diffusion · Live analysis</p>
@@ -1104,7 +1104,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Adds the `a` page element shown or read by the browser.
 0563 | </header>
      # Closes the preceding element or code block.
-0564 | 
+0564 |
 0565 | <div class="controls">
      # Adds the `div` page element shown or read by the browser.
 0566 |   <div class="ctl">
@@ -1149,14 +1149,14 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Closes the preceding element or code block.
 0586 |   </div>
      # Closes the preceding element or code block.
-0587 | 
+0587 |
 0588 |   <button id="run">Run analysis</button>
      # Adds the `button` page element shown or read by the browser.
 0589 |   <button id="stop" class="ghost" disabled>Cancel</button>
      # Adds the `button` page element shown or read by the browser.
 0590 | </div>
      # Closes the preceding element or code block.
-0591 | <p class="demo-note" id="demoNote">Quick demo: 60,000 sampled real January games are bundled with the project. This run recomputes the analysis; use Findings for the full-study result.</p>
+0591 | <p class="demo-note" id="demoNote">Fast presentation run: 20,000 real January games. It recomputes the analysis; use Findings for the full-study result.</p>
      # Adds the `p` page element shown or read by the browser.
 0592 | <details class="advanced-options">
      # Adds the `details` page element shown or read by the browser.
@@ -1172,7 +1172,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Closes the preceding element or code block.
 0598 | </details>
      # Closes the preceding element or code block.
-0599 | 
+0599 |
 0600 | <details class="history">
      # Adds the `details` page element shown or read by the browser.
 0601 |   <summary>Recent runs <span>Reopen or retry a previous analysis</span></summary>
@@ -1211,7 +1211,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Closes the preceding element or code block.
 0618 | <div class="rail" id="rail"></div>
      # Adds the `div` page element shown or read by the browser.
-0619 | 
+0619 |
 0620 | <dl class="metrics">
      # Adds the `dl` page element shown or read by the browser.
 0621 |   <div class="m"><dt>Scanned</dt><dd id="mScan">—</dd></div>
@@ -1228,7 +1228,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Adds the `div` page element shown or read by the browser.
 0627 | </dl>
      # Closes the preceding element or code block.
-0628 | 
+0628 |
 0629 | <div class="verdict" id="verdict">
      # Adds the `div` page element shown or read by the browser.
 0630 |   <p class="lb">Verdict</p>
@@ -1239,7 +1239,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Adds the `p` page element shown or read by the browser.
 0633 | </div>
      # Closes the preceding element or code block.
-0634 | 
+0634 |
 0635 | <div class="grid">
      # Adds the `div` page element shown or read by the browser.
 0636 |   <div>
@@ -1268,36 +1268,36 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0648 |     </div>
      # Closes the preceding element or code block.
-0649 | 
+0649 |
 0650 |     <div class="panel" id="openPanel">
      # Adds the `div` page element shown or read by the browser.
 0651 |       <div class="phead">
      # Adds the `div` page element shown or read by the browser.
 0652 |         <div><h2>Play it out — the board is live</h2>
      # Adds the `div` page element shown or read by the browser.
-0653 |           <p class="hint" id="openHint">Two players alternate moves. Every move is matched
+0653 |           <p class="hint" id="openHint">Click a piece, then a highlighted square. Try White's e2 pawn to e4, then Black's c7 pawn to c5. The opening details update after each move.</p></div>
      # Adds the `p` page element shown or read by the browser.
-0654 |             against the archive and the numbers below update.</p></div>
-     # Continues the page structure, styling, or browser logic above.
-0655 |         <span class="turnchip" id="turnChip">White to move</span>
+0654 |         <span class="turnchip" id="turnChip">White to move</span>
      # Adds the `span` page element shown or read by the browser.
-0656 |       </div>
+0655 |       </div>
      # Closes the preceding element or code block.
-0657 |       <div class="bd boardrow">
+0656 |       <div class="bd boardrow">
      # Adds the `div` page element shown or read by the browser.
-0658 |         <div class="boardwrap">
+0657 |         <div class="boardwrap">
      # Adds the `div` page element shown or read by the browser.
-0659 |           <svg id="board" viewBox="0 0 200 200" role="img"
+0658 |           <svg id="board" viewBox="0 0 200 200" role="img"
      # Adds the `svg` page element shown or read by the browser.
-0660 |                aria-label="Interactive chess board"></svg>
+0659 |                aria-label="Interactive chess board"></svg>
      # Continues the page structure, styling, or browser logic above.
-0661 |           <div class="boardctl">
+0660 |           <div class="boardctl">
      # Adds the `div` page element shown or read by the browser.
-0662 |             <button class="mini" id="bUndo">Undo</button>
+0661 |             <button class="mini" id="bUndo">Undo</button>
      # Adds the `button` page element shown or read by the browser.
-0663 |             <button class="mini" id="bReset">Reset</button>
+0662 |             <button class="mini" id="bReset">Reset</button>
      # Adds the `button` page element shown or read by the browser.
-0664 |             <button class="mini" id="bPlay">Replay line</button>
+0663 |             <button class="mini" id="bPlay">Replay line</button>
+     # Adds the `button` page element shown or read by the browser.
+0664 |             <button class="mini" id="bTry">Try e4 c5</button>
      # Adds the `button` page element shown or read by the browser.
 0665 |           </div>
      # Closes the preceding element or code block.
@@ -1305,7 +1305,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Adds the `p` page element shown or read by the browser.
 0667 |         </div>
      # Closes the preceding element or code block.
-0668 | 
+0668 |
 0669 |         <div class="liveopen" id="liveOpen">
      # Adds the `div` page element shown or read by the browser.
 0670 |           <p class="lo-eco mono" id="loEco">—</p>
@@ -1330,7 +1330,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Closes the preceding element or code block.
 0680 |     </div>
      # Closes the preceding element or code block.
-0681 | 
+0681 |
 0682 |     <div class="panel">
      # Adds the `div` page element shown or read by the browser.
 0683 |       <h2>Player connections</h2>
@@ -1351,7 +1351,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Closes the preceding element or code block.
 0691 |     </div>
      # Closes the preceding element or code block.
-0692 | 
+0692 |
 0693 |     <div class="panel">
      # Adds the `div` page element shown or read by the browser.
 0694 |       <h2>Excess over the null</h2>
@@ -1364,7 +1364,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0698 |     </div>
      # Closes the preceding element or code block.
-0699 | 
+0699 |
 0700 |     <div class="panel">
      # Adds the `div` page element shown or read by the browser.
 0701 |       <h2>Decisive test — hold k fixed, vary d</h2>
@@ -1393,7 +1393,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0713 |     </div>
      # Closes the preceding element or code block.
-0714 | 
+0714 |
 0715 |     <div class="panel">
      # Adds the `div` page element shown or read by the browser.
 0716 |       <h2>Games streaming past</h2>
@@ -1422,7 +1422,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Closes the preceding element or code block.
 0728 | <div class="tip" id="tip" role="status" aria-live="polite"></div>
      # Adds the `div` page element shown or read by the browser.
-0729 | 
+0729 |
 0730 | <footer>
      # Adds the `footer` page element shown or read by the browser.
 0731 |   Source: Lichess open database · Results describe associations between exposure and play.
@@ -1431,7 +1431,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Closes the preceding element or code block.
 0733 | </div>
      # Closes the preceding element or code block.
-0734 | 
+0734 |
 0735 | <script>
      # Starts the browser-side code for interaction and charts.
 0736 | (function(){
@@ -1454,7 +1454,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps a value used by the page's next steps.
 0745 | var pct=function(x,d){return (x*100).toFixed(d==null?1:d)+"%";};
      # Keeps a value used by the page's next steps.
-0746 | 
+0746 |
 0747 | /* A script error used to fail silently and just leave the UI inert. During a
      # Existing developer note about this section.
 0748 |    live demo that is the worst possible failure mode -- surface it in the log. */
@@ -1465,14 +1465,14 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0751 | });
      # Closes the preceding element or code block.
-0752 | 
+0752 |
 0753 | /* ---------- controls ---------- */
      # Existing developer note about this section.
 0754 | var capEl=$("cap"), capVal=$("capVal");
      # Keeps a value used by the page's next steps.
 0755 | capEl.addEventListener("input",function(){
      # Responds to a user action or browser event.
-0756 |   if($("month").value==="demo-2016-01")return;
+0756 |   if($("month").value.startsWith("demo-"))return;
      # Controls which browser steps run or repeats them for data items.
 0757 |   capVal.textContent=Number(capEl.value).toLocaleString("en-US")+
      # Updates visible text or markup on the page.
@@ -1480,8 +1480,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the page structure, styling, or browser logic above.
 0759 | });
      # Closes the preceding element or code block.
-0760 | 
-0761 | 
+0760 |
+0761 |
 0762 | fetch("/api/months").then(function(r){return r.json();}).then(function(d){
      # Calls a local server API and handles its response.
 0763 |   var sel=$("month");
@@ -1492,7 +1492,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps a value used by the page's next steps.
 0766 |     o.value=m.id; o.textContent=m.label;
      # Updates visible text or markup on the page.
-0767 |     if(m.id==="demo-2016-01") o.selected=true;
+0767 |     if(m.id==="demo-fast-2016-01") o.selected=true;
      # Controls which browser steps run or repeats them for data items.
 0768 |     sel.appendChild(o);
      # Adds a newly built visual element to the page.
@@ -1504,11 +1504,11 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps a value used by the page's next steps.
 0772 |     $("monthMeta").textContent=m?m.mb+" MB · "+m.games+" games":"";
      # Updates visible text or markup on the page.
-0773 |     var demo=sel.value==="demo-2016-01";
+0773 |     var demo=sel.value.startsWith("demo-");
      # Keeps a value used by the page's next steps.
 0774 |     capEl.disabled=demo;
      # Continues the page structure, styling, or browser logic above.
-0775 |     capVal.textContent=demo?"60,000 sampled real games":
+0775 |     capVal.textContent=demo?m.games+" games":
      # Updates visible text or markup on the page.
 0776 |       Number(capEl.value).toLocaleString("en-US")+
      # Continues the page structure, styling, or browser logic above.
@@ -1520,1931 +1520,1937 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Controls which browser steps run or repeats them for data items.
 0780 |     $("demoNote").hidden=!demo;
      # Continues the page structure, styling, or browser logic above.
-0781 |   }
+0781 |     if(demo) $("demoNote").textContent=sel.value==="demo-fast-2016-01"
+     # Updates visible text or markup on the page.
+0782 |       ? "Fast presentation run: 20,000 real January games. It recomputes the analysis; use Findings for the full-study result."
+     # Continues the page structure, styling, or browser logic above.
+0783 |       : "Detailed demo: 60,000 real January games. It recomputes the analysis; use Findings for the full-study result.";
+     # Continues the page structure, styling, or browser logic above.
+0784 |   }
      # Closes the preceding element or code block.
-0782 |   sel.addEventListener("change",updateMonthMeta);
+0785 |   sel.addEventListener("change",updateMonthMeta);
      # Responds to a user action or browser event.
-0783 |   updateMonthMeta();
+0786 |   updateMonthMeta();
      # Continues the page structure, styling, or browser logic above.
-0784 |   buildRail(d.stages);
+0787 |   buildRail(d.stages);
      # Continues the page structure, styling, or browser logic above.
-0785 |   refreshHistory(true);
+0788 |   refreshHistory(true);
      # Continues the page structure, styling, or browser logic above.
-0786 | }).catch(function(){ $("runHistory").textContent="Could not load server options."; });
+0789 | }).catch(function(){ $("runHistory").textContent="Could not load server options."; });
      # Updates visible text or markup on the page.
-0787 | 
-0788 | function buildRail(stages){
+0790 |
+0791 | function buildRail(stages){
      # Defines a browser function used by a chart, control, or live event.
-0789 |   var rail=$("rail"); rail.textContent="";
+0792 |   var rail=$("rail"); rail.textContent="";
      # Updates visible text or markup on the page.
-0790 |   stages.forEach(function(s){
+0793 |   stages.forEach(function(s){
      # Continues the page structure, styling, or browser logic above.
-0791 |     var d=document.createElement("div");
+0794 |     var d=document.createElement("div");
      # Keeps a value used by the page's next steps.
-0792 |     d.className="sg"; d.dataset.state="pending"; d.dataset.key=s.key;
+0795 |     d.className="sg"; d.dataset.state="pending"; d.dataset.key=s.key;
      # Continues the page structure, styling, or browser logic above.
-0793 |     d.innerHTML="<span class='nm'></span><span class='st'>pending</span>";
+0796 |     d.innerHTML="<span class='nm'></span><span class='st'>pending</span>";
      # Updates visible text or markup on the page.
-0794 |     d.querySelector(".nm").textContent=s.label;
+0797 |     d.querySelector(".nm").textContent=s.label;
      # Updates visible text or markup on the page.
-0795 |     rail.appendChild(d);
+0798 |     rail.appendChild(d);
      # Adds a newly built visual element to the page.
-0796 |   });
+0799 |   });
      # Closes the preceding element or code block.
-0797 | }
+0800 | }
      # Closes the preceding element or code block.
-0798 | 
-0799 | /* ---------- log ---------- */
+0801 |
+0802 | /* ---------- log ---------- */
      # Existing developer note about this section.
-0800 | function logLine(t,msg,level){
+0803 | function logLine(t,msg,level){
      # Defines a browser function used by a chart, control, or live event.
-0801 |   var log=$("log");
+0804 |   var log=$("log");
      # Keeps a value used by the page's next steps.
-0802 |   var row=document.createElement("div");
+0805 |   var row=document.createElement("div");
      # Keeps a value used by the page's next steps.
-0803 |   row.className="lv-"+(level||"info");
+0806 |   row.className="lv-"+(level||"info");
      # Continues the page structure, styling, or browser logic above.
-0804 |   var a=document.createElement("span"); a.className="ts";
+0807 |   var a=document.createElement("span"); a.className="ts";
      # Keeps a value used by the page's next steps.
-0805 |   a.textContent=(t==null?"":(t.toFixed(1)+"s").padStart(7," "));
+0808 |   a.textContent=(t==null?"":(t.toFixed(1)+"s").padStart(7," "));
      # Updates visible text or markup on the page.
-0806 |   var b=document.createElement("span"); b.className="msg"; b.textContent=msg;
+0809 |   var b=document.createElement("span"); b.className="msg"; b.textContent=msg;
      # Updates visible text or markup on the page.
-0807 |   row.appendChild(a); row.appendChild(b); log.appendChild(row);
+0810 |   row.appendChild(a); row.appendChild(b); log.appendChild(row);
      # Adds a newly built visual element to the page.
-0808 |   log.scrollTop=log.scrollHeight;
+0811 |   log.scrollTop=log.scrollHeight;
      # Continues the page structure, styling, or browser logic above.
-0809 | }
+0812 | }
      # Closes the preceding element or code block.
-0810 | 
-0811 | /* ---------- svg utils ---------- */
+0813 |
+0814 | /* ---------- svg utils ---------- */
      # Existing developer note about this section.
-0812 | function el(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);return e;}
+0815 | function el(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);return e;}
      # Defines a browser function used by a chart, control, or live event.
-0813 | function spline(pts,t){
+0816 | function spline(pts,t){
      # Defines a browser function used by a chart, control, or live event.
-0814 |   if(pts.length<2) return pts.length?("M"+pts[0][0]+" "+pts[0][1]):"";
+0817 |   if(pts.length<2) return pts.length?("M"+pts[0][0]+" "+pts[0][1]):"";
      # Controls which browser steps run or repeats them for data items.
-0815 |   t=(t==null?0.72:t);
+0818 |   t=(t==null?0.72:t);
      # Continues the page structure, styling, or browser logic above.
-0816 |   var d="M"+pts[0][0].toFixed(2)+" "+pts[0][1].toFixed(2);
+0819 |   var d="M"+pts[0][0].toFixed(2)+" "+pts[0][1].toFixed(2);
      # Keeps a value used by the page's next steps.
-0817 |   for(var i=0;i<pts.length-1;i++){
+0820 |   for(var i=0;i<pts.length-1;i++){
      # Controls which browser steps run or repeats them for data items.
-0818 |     var p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;
+0821 |     var p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;
      # Keeps a value used by the page's next steps.
-0819 |     d+=" C"+(p1[0]+(p2[0]-p0[0])/6*t).toFixed(2)+" "+(p1[1]+(p2[1]-p0[1])/6*t).toFixed(2)
+0822 |     d+=" C"+(p1[0]+(p2[0]-p0[0])/6*t).toFixed(2)+" "+(p1[1]+(p2[1]-p0[1])/6*t).toFixed(2)
      # Continues the page structure, styling, or browser logic above.
-0820 |       +","+(p2[0]-(p3[0]-p1[0])/6*t).toFixed(2)+" "+(p2[1]-(p3[1]-p1[1])/6*t).toFixed(2)
+0823 |       +","+(p2[0]-(p3[0]-p1[0])/6*t).toFixed(2)+" "+(p2[1]-(p3[1]-p1[1])/6*t).toFixed(2)
      # Continues the page structure, styling, or browser logic above.
-0821 |       +","+p2[0].toFixed(2)+" "+p2[1].toFixed(2);
+0824 |       +","+p2[0].toFixed(2)+" "+p2[1].toFixed(2);
      # Continues the page structure, styling, or browser logic above.
-0822 |   }
+0825 |   }
      # Closes the preceding element or code block.
-0823 |   return d;
+0826 |   return d;
      # Hands the calculated value back to the calling function.
-0824 | }
+0827 | }
      # Closes the preceding element or code block.
-0825 | function frame(svg,o){
+0828 | function frame(svg,o){
      # Defines a browser function used by a chart, control, or live event.
-0826 |   for(var i=0;i<=o.yTicks;i++){
+0829 |   for(var i=0;i<=o.yTicks;i++){
      # Controls which browser steps run or repeats them for data items.
-0827 |     var v=o.y0+(o.y1-o.y0)*i/o.yTicks;
+0830 |     var v=o.y0+(o.y1-o.y0)*i/o.yTicks;
      # Keeps a value used by the page's next steps.
-0828 |     var y=o.b-(v-o.y0)/(o.y1-o.y0)*(o.b-o.t);
+0831 |     var y=o.b-(v-o.y0)/(o.y1-o.y0)*(o.b-o.t);
      # Keeps a value used by the page's next steps.
-0829 |     svg.appendChild(el("line",{x1:o.l,x2:o.r,y1:y,y2:y,class:"gridline"}));
+0832 |     svg.appendChild(el("line",{x1:o.l,x2:o.r,y1:y,y2:y,class:"gridline"}));
      # Adds a newly built visual element to the page.
-0830 |     var tx=el("text",{x:o.l-9,y:y+3.5,"text-anchor":"end",class:"ax-label"});
+0833 |     var tx=el("text",{x:o.l-9,y:y+3.5,"text-anchor":"end",class:"ax-label"});
      # Keeps a value used by the page's next steps.
-0831 |     tx.textContent=o.yFmt(v); svg.appendChild(tx);
+0834 |     tx.textContent=o.yFmt(v); svg.appendChild(tx);
      # Updates visible text or markup on the page.
-0832 |   }
+0835 |   }
      # Closes the preceding element or code block.
-0833 |   svg.appendChild(el("line",{x1:o.l,x2:o.r,y1:o.b,y2:o.b,class:"axisline"}));
+0836 |   svg.appendChild(el("line",{x1:o.l,x2:o.r,y1:o.b,y2:o.b,class:"axisline"}));
      # Adds a newly built visual element to the page.
-0834 | }
+0837 | }
      # Closes the preceding element or code block.
-0835 | function drawIn(path,ms){
+0838 | function drawIn(path,ms){
      # Defines a browser function used by a chart, control, or live event.
-0836 |   try{var L=path.getTotalLength();
+0839 |   try{var L=path.getTotalLength();
      # Continues the page structure, styling, or browser logic above.
-0837 |     path.setAttribute("stroke-dasharray",L);
+0840 |     path.setAttribute("stroke-dasharray",L);
      # Sets an element property used for display or accessibility.
-0838 |     path.setAttribute("stroke-dashoffset",L);
+0841 |     path.setAttribute("stroke-dashoffset",L);
      # Sets an element property used for display or accessibility.
-0839 |     path.animate([{strokeDashoffset:L},{strokeDashoffset:0}],
+0842 |     path.animate([{strokeDashoffset:L},{strokeDashoffset:0}],
      # Continues the page structure, styling, or browser logic above.
-0840 |       {duration:ms||1100,easing:"cubic-bezier(.22,.68,.32,1)",fill:"forwards"});
+0843 |       {duration:ms||1100,easing:"cubic-bezier(.22,.68,.32,1)",fill:"forwards"});
      # Continues the page structure, styling, or browser logic above.
-0841 |   }catch(e){}
+0844 |   }catch(e){}
      # Continues the page structure, styling, or browser logic above.
-0842 |   return path;
+0845 |   return path;
      # Hands the calculated value back to the calling function.
-0843 | }
+0846 | }
      # Closes the preceding element or code block.
-0844 | 
-0845 | /* ---------- curve chart ---------- */
+0847 |
+0848 | /* ---------- curve chart ---------- */
      # Existing developer note about this section.
-0846 | var CURVE={rows:[],nullRows:[],held:[],showNull:true};
+0849 | var CURVE={rows:[],nullRows:[],held:[],showNull:true};
      # Keeps a value used by the page's next steps.
-0847 | function drawCurve(){
+0850 | function drawCurve(){
      # Defines a browser function used by a chart, control, or live event.
-0848 |   var svg=$("cCurve"); svg.textContent="";
+0851 |   var svg=$("cCurve"); svg.textContent="";
      # Updates visible text or markup on the page.
-0849 |   var rows=CURVE.rows; if(!rows.length) return;
+0852 |   var rows=CURVE.rows; if(!rows.length) return;
      # Keeps a value used by the page's next steps.
-0850 |   var L=52,R=668,T=20,B=262;
+0853 |   var L=52,R=668,T=20,B=262;
      # Keeps a value used by the page's next steps.
-0851 |   var lo=Math.min.apply(null,rows.map(function(r){return r.lo;}).concat(
+0854 |   var lo=Math.min.apply(null,rows.map(function(r){return r.lo;}).concat(
      # Keeps a value used by the page's next steps.
-0852 |         CURVE.nullRows.map(function(r){return r.rate_null;})));
+0855 |         CURVE.nullRows.map(function(r){return r.rate_null;})));
      # Continues the page structure, styling, or browser logic above.
-0853 |   var hi=Math.max.apply(null,rows.map(function(r){return r.hi;}).concat(
+0856 |   var hi=Math.max.apply(null,rows.map(function(r){return r.hi;}).concat(
      # Keeps a value used by the page's next steps.
-0854 |         CURVE.nullRows.map(function(r){return r.rate_null;})));
+0857 |         CURVE.nullRows.map(function(r){return r.rate_null;})));
      # Continues the page structure, styling, or browser logic above.
-0855 |   var pad=(hi-lo)*0.18||0.01, y0=Math.max(0,lo-pad), y1=hi+pad;
+0858 |   var pad=(hi-lo)*0.18||0.01, y0=Math.max(0,lo-pad), y1=hi+pad;
      # Keeps a value used by the page's next steps.
-0856 |   var dmax=Math.max.apply(null,rows.map(function(r){return r.d;}));
+0859 |   var dmax=Math.max.apply(null,rows.map(function(r){return r.d;}));
      # Keeps a value used by the page's next steps.
-0857 |   var X=function(d){return L+(dmax<=1?0.5:(d-1)/(dmax-1))*(R-L);};
+0860 |   var X=function(d){return L+(dmax<=1?0.5:(d-1)/(dmax-1))*(R-L);};
      # Keeps a value used by the page's next steps.
-0858 |   var Y=function(v){return B-(v-y0)/(y1-y0)*(B-T);};
+0861 |   var Y=function(v){return B-(v-y0)/(y1-y0)*(B-T);};
      # Keeps a value used by the page's next steps.
-0859 |   frame(svg,{l:L,r:R,t:T,b:B,y0:y0,y1:y1,yTicks:4,yFmt:function(v){return pct(v,1);}});
+0862 |   frame(svg,{l:L,r:R,t:T,b:B,y0:y0,y1:y1,yTicks:4,yFmt:function(v){return pct(v,1);}});
      # Continues the page structure, styling, or browser logic above.
-0860 | 
-0861 |   var hiP=rows.map(function(r){return [X(r.d),Y(r.hi)];});
+0863 |
+0864 |   var hiP=rows.map(function(r){return [X(r.d),Y(r.hi)];});
      # Keeps a value used by the page's next steps.
-0862 |   var loP=rows.map(function(r){return [X(r.d),Y(r.lo)];}).reverse();
+0865 |   var loP=rows.map(function(r){return [X(r.d),Y(r.lo)];}).reverse();
      # Keeps a value used by the page's next steps.
-0863 |   svg.appendChild(el("path",{d:spline(hiP)+" L"+loP[0][0].toFixed(2)+" "+loP[0][1].toFixed(2)+
+0866 |   svg.appendChild(el("path",{d:spline(hiP)+" L"+loP[0][0].toFixed(2)+" "+loP[0][1].toFixed(2)+
      # Adds a newly built visual element to the page.
-0864 |     spline(loP).replace(/^M[^C]*/," ")+" Z",fill:"var(--wash-indigo)",stroke:"none"}));
+0867 |     spline(loP).replace(/^M[^C]*/," ")+" Z",fill:"var(--wash-indigo)",stroke:"none"}));
      # Continues the page structure, styling, or browser logic above.
-0865 | 
-0866 |   if(CURVE.nullRows.length && CURVE.showNull!==false){
+0868 |
+0869 |   if(CURVE.nullRows.length && CURVE.showNull!==false){
      # Controls which browser steps run or repeats them for data items.
-0867 |     var np=CURVE.nullRows.map(function(r){return [X(r.d),Y(r.rate_null)];});
+0870 |     var np=CURVE.nullRows.map(function(r){return [X(r.d),Y(r.rate_null)];});
      # Keeps a value used by the page's next steps.
-0868 |     svg.appendChild(drawIn(el("path",{d:spline(np),fill:"none",stroke:"var(--s-null)",
+0871 |     svg.appendChild(drawIn(el("path",{d:spline(np),fill:"none",stroke:"var(--s-null)",
      # Adds a newly built visual element to the page.
-0869 |       "stroke-width":2,"stroke-dasharray":"7 5","stroke-linecap":"round"}),1200));
+0872 |       "stroke-width":2,"stroke-dasharray":"7 5","stroke-linecap":"round"}),1200));
      # Continues the page structure, styling, or browser logic above.
-0870 |     CURVE.nullRows.forEach(function(r){
+0873 |     CURVE.nullRows.forEach(function(r){
      # Continues the page structure, styling, or browser logic above.
-0871 |       svg.appendChild(el("circle",{cx:X(r.d),cy:Y(r.rate_null),r:3.6,fill:"var(--surface)",
+0874 |       svg.appendChild(el("circle",{cx:X(r.d),cy:Y(r.rate_null),r:3.6,fill:"var(--surface)",
      # Adds a newly built visual element to the page.
-0872 |         stroke:"var(--s-null)","stroke-width":2}));
+0875 |         stroke:"var(--s-null)","stroke-width":2}));
      # Continues the page structure, styling, or browser logic above.
-0873 |     });
+0876 |     });
      # Closes the preceding element or code block.
-0874 |   }
+0877 |   }
      # Closes the preceding element or code block.
-0875 |   var rp=rows.map(function(r){return [X(r.d),Y(r.rate)];});
+0878 |   var rp=rows.map(function(r){return [X(r.d),Y(r.rate)];});
      # Keeps a value used by the page's next steps.
-0876 |   svg.appendChild(drawIn(el("path",{d:spline(rp),fill:"none",stroke:"var(--s-indigo)",
+0879 |   svg.appendChild(drawIn(el("path",{d:spline(rp),fill:"none",stroke:"var(--s-indigo)",
      # Adds a newly built visual element to the page.
-0877 |     "stroke-width":2.6,"stroke-linejoin":"round","stroke-linecap":"round"}),900));
+0880 |     "stroke-width":2.6,"stroke-linejoin":"round","stroke-linecap":"round"}),900));
      # Continues the page structure, styling, or browser logic above.
-0878 |   rows.forEach(function(r,i){
+0881 |   rows.forEach(function(r,i){
      # Continues the page structure, styling, or browser logic above.
-0879 |     svg.appendChild(el("circle",{cx:X(r.d),cy:Y(r.rate),r:4.6,fill:"var(--s-indigo)",
+0882 |     svg.appendChild(el("circle",{cx:X(r.d),cy:Y(r.rate),r:4.6,fill:"var(--s-indigo)",
      # Adds a newly built visual element to the page.
-0880 |       stroke:"var(--surface)","stroke-width":2}));
+0883 |       stroke:"var(--surface)","stroke-width":2}));
      # Continues the page structure, styling, or browser logic above.
-0881 |     var t=el("text",{x:X(r.d),y:B+19,"text-anchor":"middle",class:"ax-label"});
+0884 |     var t=el("text",{x:X(r.d),y:B+19,"text-anchor":"middle",class:"ax-label"});
      # Keeps a value used by the page's next steps.
-0882 |     t.textContent=r.d; svg.appendChild(t);
+0885 |     t.textContent=r.d; svg.appendChild(t);
      # Updates visible text or markup on the page.
-0883 |     var nr=CURVE.nullRows[i];
+0886 |     var nr=CURVE.nullRows[i];
      # Keeps a value used by the page's next steps.
-0884 |     hotspot(svg,X(r.d),Y(r.rate),16,
+0887 |     hotspot(svg,X(r.d),Y(r.rate),16,
      # Continues the page structure, styling, or browser logic above.
-0885 |       "<div class='t-h'>d = "+r.d+"</div>"+
+0888 |       "<div class='t-h'>d = "+r.d+"</div>"+
      # Continues the page structure, styling, or browser logic above.
-0886 |       "<div class='t-r'><span>observed</span><b>"+pct(r.rate,2)+"</b></div>"+
+0889 |       "<div class='t-r'><span>observed</span><b>"+pct(r.rate,2)+"</b></div>"+
      # Continues the page structure, styling, or browser logic above.
-0887 |       ((nr&&CURVE.showNull!==false)?
+0890 |       ((nr&&CURVE.showNull!==false)?
      # Continues the page structure, styling, or browser logic above.
-0888 |         "<div class='t-r'><span>null</span><b>"+pct(nr.rate_null,2)+"</b></div>"+
+0891 |         "<div class='t-r'><span>null</span><b>"+pct(nr.rate_null,2)+"</b></div>"+
      # Continues the page structure, styling, or browser logic above.
-0889 |         "<div class='t-r'><span>lift</span><b>"+(nr.lift_over_null!=null?
+0892 |         "<div class='t-r'><span>lift</span><b>"+(nr.lift_over_null!=null?
      # Continues the page structure, styling, or browser logic above.
-0890 |           nr.lift_over_null.toFixed(3):"—")+"</b></div>":"")+
+0893 |           nr.lift_over_null.toFixed(3):"—")+"</b></div>":"")+
      # Continues the page structure, styling, or browser logic above.
-0891 |       "<div class='t-r'><span>n</span><b>"+fmt(r.n)+"</b></div>");
+0894 |       "<div class='t-r'><span>n</span><b>"+fmt(r.n)+"</b></div>");
      # Continues the page structure, styling, or browser logic above.
-0892 |   });
+0895 |   });
      # Closes the preceding element or code block.
-0893 |   var xt=el("text",{x:(L+R)/2,y:B+44,"text-anchor":"middle",class:"ax-title"});
+0896 |   var xt=el("text",{x:(L+R)/2,y:B+44,"text-anchor":"middle",class:"ax-title"});
      # Keeps a value used by the page's next steps.
-0894 |   xt.textContent="d — distinct exposers"; svg.appendChild(xt);
+0897 |   xt.textContent="d — distinct exposers"; svg.appendChild(xt);
      # Updates visible text or markup on the page.
-0895 |   var mid=(T+B)/2;
+0898 |   var mid=(T+B)/2;
      # Keeps a value used by the page's next steps.
-0896 |   var yt=el("text",{x:13,y:mid,"text-anchor":"middle",class:"ax-title",
+0899 |   var yt=el("text",{x:13,y:mid,"text-anchor":"middle",class:"ax-title",
      # Keeps a value used by the page's next steps.
-0897 |     transform:"rotate(-90 13 "+mid+")"});
+0900 |     transform:"rotate(-90 13 "+mid+")"});
      # Continues the page structure, styling, or browser logic above.
-0898 |   yt.textContent="P(adopt)"; svg.appendChild(yt);
+0901 |   yt.textContent="P(adopt)"; svg.appendChild(yt);
      # Updates visible text or markup on the page.
-0899 | 
-0900 |   if(CURVE.nullRows.length){
+0902 |
+0903 |   if(CURVE.nullRows.length){
      # Controls which browser steps run or repeats them for data items.
-0901 |     var lg=el("g",{});
+0904 |     var lg=el("g",{});
      # Keeps a value used by the page's next steps.
-0902 |     [["Observed","var(--s-indigo)",0],["Shuffled null","var(--s-null)",128]].forEach(function(s){
+0905 |     [["Observed","var(--s-indigo)",0],["Shuffled null","var(--s-null)",128]].forEach(function(s){
      # Continues the page structure, styling, or browser logic above.
-0903 |       lg.appendChild(el("rect",{x:L+s[2],y:T-8,width:15,height:3,fill:s[1],rx:2}));
+0906 |       lg.appendChild(el("rect",{x:L+s[2],y:T-8,width:15,height:3,fill:s[1],rx:2}));
      # Adds a newly built visual element to the page.
-0904 |       var t=el("text",{x:L+s[2]+21,y:T-4,class:"ax-label"}); t.textContent=s[0];
+0907 |       var t=el("text",{x:L+s[2]+21,y:T-4,class:"ax-label"}); t.textContent=s[0];
      # Updates visible text or markup on the page.
-0905 |       lg.appendChild(t);
+0908 |       lg.appendChild(t);
      # Adds a newly built visual element to the page.
-0906 |     });
+0909 |     });
      # Closes the preceding element or code block.
-0907 |     svg.appendChild(lg);
+0910 |     svg.appendChild(lg);
      # Adds a newly built visual element to the page.
-0908 |   }
+0911 |   }
      # Closes the preceding element or code block.
-0909 | }
+0912 | }
      # Closes the preceding element or code block.
-0910 | 
-0911 | function drawExcess(rows){
+0913 |
+0914 | function drawExcess(rows){
      # Defines a browser function used by a chart, control, or live event.
-0912 |   var svg=$("cExcess"); svg.textContent="";
+0915 |   var svg=$("cExcess"); svg.textContent="";
      # Updates visible text or markup on the page.
-0913 |   if(!rows.length) return;
+0916 |   if(!rows.length) return;
      # Controls which browser steps run or repeats them for data items.
-0914 |   var vals=rows.map(function(r){return r.lift_over_null;}).filter(function(v){return v!=null;});
+0917 |   var vals=rows.map(function(r){return r.lift_over_null;}).filter(function(v){return v!=null;});
      # Keeps a value used by the page's next steps.
-0915 |   if(!vals.length) return;
+0918 |   if(!vals.length) return;
      # Controls which browser steps run or repeats them for data items.
-0916 |   var L=56,R=668,T=20,B=190;
+0919 |   var L=56,R=668,T=20,B=190;
      # Keeps a value used by the page's next steps.
-0917 |   var y0=Math.min(0.97,Math.min.apply(null,vals)-0.03);
+0920 |   var y0=Math.min(0.97,Math.min.apply(null,vals)-0.03);
      # Keeps a value used by the page's next steps.
-0918 |   var y1=Math.max(1.03,Math.max.apply(null,vals)+0.03);
+0921 |   var y1=Math.max(1.03,Math.max.apply(null,vals)+0.03);
      # Keeps a value used by the page's next steps.
-0919 |   var dmax=Math.max.apply(null,rows.map(function(r){return r.d;}));
+0922 |   var dmax=Math.max.apply(null,rows.map(function(r){return r.d;}));
      # Keeps a value used by the page's next steps.
-0920 |   var X=function(d){return L+(dmax<=1?0.5:(d-1)/(dmax-1))*(R-L);};
+0923 |   var X=function(d){return L+(dmax<=1?0.5:(d-1)/(dmax-1))*(R-L);};
      # Keeps a value used by the page's next steps.
-0921 |   var Y=function(v){return B-(v-y0)/(y1-y0)*(B-T);};
+0924 |   var Y=function(v){return B-(v-y0)/(y1-y0)*(B-T);};
      # Keeps a value used by the page's next steps.
-0922 |   frame(svg,{l:L,r:R,t:T,b:B,y0:y0,y1:y1,yTicks:4,yFmt:function(v){return v.toFixed(2)+"×";}});
+0925 |   frame(svg,{l:L,r:R,t:T,b:B,y0:y0,y1:y1,yTicks:4,yFmt:function(v){return v.toFixed(2)+"×";}});
      # Continues the page structure, styling, or browser logic above.
-0923 |   var yl=Y(1);
+0926 |   var yl=Y(1);
      # Keeps a value used by the page's next steps.
-0924 |   svg.appendChild(el("line",{x1:L,x2:R,y1:yl,y2:yl,stroke:"var(--s-null)",
+0927 |   svg.appendChild(el("line",{x1:L,x2:R,y1:yl,y2:yl,stroke:"var(--s-null)",
      # Adds a newly built visual element to the page.
-0925 |     "stroke-width":1.5,"stroke-dasharray":"5 4"}));
+0928 |     "stroke-width":1.5,"stroke-dasharray":"5 4"}));
      # Continues the page structure, styling, or browser logic above.
-0926 |   var nl=el("text",{x:R,y:yl-7,"text-anchor":"end",class:"dlabel",fill:"var(--muted)"});
+0929 |   var nl=el("text",{x:R,y:yl-7,"text-anchor":"end",class:"dlabel",fill:"var(--muted)"});
      # Keeps a value used by the page's next steps.
-0927 |   nl.textContent="no effect"; svg.appendChild(nl);
+0930 |   nl.textContent="no effect"; svg.appendChild(nl);
      # Updates visible text or markup on the page.
-0928 | 
-0929 |   var pts=rows.filter(function(r){return r.lift_over_null!=null;})
+0931 |
+0932 |   var pts=rows.filter(function(r){return r.lift_over_null!=null;})
      # Keeps a value used by the page's next steps.
-0930 |               .map(function(r){return [X(r.d),Y(r.lift_over_null)];});
+0933 |               .map(function(r){return [X(r.d),Y(r.lift_over_null)];});
      # Continues the page structure, styling, or browser logic above.
-0931 |   svg.appendChild(el("path",{d:spline(pts)+" L"+pts[pts.length-1][0].toFixed(2)+" "+yl.toFixed(2)+
+0934 |   svg.appendChild(el("path",{d:spline(pts)+" L"+pts[pts.length-1][0].toFixed(2)+" "+yl.toFixed(2)+
      # Adds a newly built visual element to the page.
-0932 |     " L"+pts[0][0].toFixed(2)+" "+yl.toFixed(2)+" Z",fill:"var(--wash-vermilion)",stroke:"none"}));
+0935 |     " L"+pts[0][0].toFixed(2)+" "+yl.toFixed(2)+" Z",fill:"var(--wash-vermilion)",stroke:"none"}));
      # Continues the page structure, styling, or browser logic above.
-0933 |   svg.appendChild(drawIn(el("path",{d:spline(pts),fill:"none",stroke:"var(--s-vermilion)",
+0936 |   svg.appendChild(drawIn(el("path",{d:spline(pts),fill:"none",stroke:"var(--s-vermilion)",
      # Adds a newly built visual element to the page.
-0934 |     "stroke-width":2.6,"stroke-linecap":"round","stroke-linejoin":"round"}),1000));
+0937 |     "stroke-width":2.6,"stroke-linecap":"round","stroke-linejoin":"round"}),1000));
      # Continues the page structure, styling, or browser logic above.
-0935 |   rows.forEach(function(r){
+0938 |   rows.forEach(function(r){
      # Continues the page structure, styling, or browser logic above.
-0936 |     if(r.lift_over_null==null) return;
+0939 |     if(r.lift_over_null==null) return;
      # Controls which browser steps run or repeats them for data items.
-0937 |     svg.appendChild(el("circle",{cx:X(r.d),cy:Y(r.lift_over_null),r:4.6,
+0940 |     svg.appendChild(el("circle",{cx:X(r.d),cy:Y(r.lift_over_null),r:4.6,
      # Adds a newly built visual element to the page.
-0938 |       fill:"var(--s-vermilion)",stroke:"var(--surface)","stroke-width":2}));
+0941 |       fill:"var(--s-vermilion)",stroke:"var(--surface)","stroke-width":2}));
      # Continues the page structure, styling, or browser logic above.
-0939 |     var t=el("text",{x:X(r.d),y:B+19,"text-anchor":"middle",class:"ax-label"});
+0942 |     var t=el("text",{x:X(r.d),y:B+19,"text-anchor":"middle",class:"ax-label"});
      # Keeps a value used by the page's next steps.
-0940 |     t.textContent=r.d; svg.appendChild(t);
+0943 |     t.textContent=r.d; svg.appendChild(t);
      # Updates visible text or markup on the page.
-0941 |     hotspot(svg,X(r.d),Y(r.lift_over_null),16,
+0944 |     hotspot(svg,X(r.d),Y(r.lift_over_null),16,
      # Continues the page structure, styling, or browser logic above.
-0942 |       "<div class='t-h'>d = "+r.d+"</div>"+
+0945 |       "<div class='t-h'>d = "+r.d+"</div>"+
      # Continues the page structure, styling, or browser logic above.
-0943 |       "<div class='t-r'><span>lift over null</span><b>"+r.lift_over_null.toFixed(3)+"×</b></div>"+
+0946 |       "<div class='t-r'><span>lift over null</span><b>"+r.lift_over_null.toFixed(3)+"×</b></div>"+
      # Continues the page structure, styling, or browser logic above.
-0944 |       (r.z!=null?"<div class='t-r'><span>z</span><b>"+Number(r.z).toFixed(1)+"</b></div>":""));
+0947 |       (r.z!=null?"<div class='t-r'><span>z</span><b>"+Number(r.z).toFixed(1)+"</b></div>":""));
      # Continues the page structure, styling, or browser logic above.
-0945 |   });
+0948 |   });
      # Closes the preceding element or code block.
-0946 |   var xt=el("text",{x:(L+R)/2,y:B+44,"text-anchor":"middle",class:"ax-title"});
+0949 |   var xt=el("text",{x:(L+R)/2,y:B+44,"text-anchor":"middle",class:"ax-title"});
      # Keeps a value used by the page's next steps.
-0947 |   xt.textContent="d — distinct exposers"; svg.appendChild(xt);
+0950 |   xt.textContent="d — distinct exposers"; svg.appendChild(xt);
      # Updates visible text or markup on the page.
-0948 | }
+0951 | }
      # Closes the preceding element or code block.
-0949 | 
-0950 | /* ---------- tooltip ---------- */
+0952 |
+0953 | /* ---------- tooltip ---------- */
      # Existing developer note about this section.
-0951 | var tip=$("tip");
+0954 | var tip=$("tip");
      # Keeps a value used by the page's next steps.
-0952 | function showTip(ev,html){
+0955 | function showTip(ev,html){
      # Defines a browser function used by a chart, control, or live event.
-0953 |   tip.innerHTML=html; tip.classList.add("on");
+0956 |   tip.innerHTML=html; tip.classList.add("on");
      # Updates visible text or markup on the page.
-0954 |   var r=tip.getBoundingClientRect();
+0957 |   var r=tip.getBoundingClientRect();
      # Keeps a value used by the page's next steps.
-0955 |   var x=ev.clientX+15, y=ev.clientY-r.height-12;
+0958 |   var x=ev.clientX+15, y=ev.clientY-r.height-12;
      # Keeps a value used by the page's next steps.
-0956 |   if(x+r.width>innerWidth-10) x=ev.clientX-r.width-15;
+0959 |   if(x+r.width>innerWidth-10) x=ev.clientX-r.width-15;
      # Controls which browser steps run or repeats them for data items.
-0957 |   if(y<8) y=ev.clientY+18;
+0960 |   if(y<8) y=ev.clientY+18;
      # Controls which browser steps run or repeats them for data items.
-0958 |   tip.style.left=x+"px"; tip.style.top=y+"px";
+0961 |   tip.style.left=x+"px"; tip.style.top=y+"px";
      # Continues the page structure, styling, or browser logic above.
-0959 | }
+0962 | }
      # Closes the preceding element or code block.
-0960 | function hideTip(){tip.classList.remove("on");}
+0963 | function hideTip(){tip.classList.remove("on");}
      # Defines a browser function used by a chart, control, or live event.
-0961 | function hotspot(parent,x,y,r,html){
+0964 | function hotspot(parent,x,y,r,html){
      # Defines a browser function used by a chart, control, or live event.
-0962 |   var h=el("circle",{cx:x,cy:y,r:r,fill:"transparent","pointer-events":"all"});
+0965 |   var h=el("circle",{cx:x,cy:y,r:r,fill:"transparent","pointer-events":"all"});
      # Keeps a value used by the page's next steps.
-0963 |   h.addEventListener("mousemove",function(e){showTip(e,html);});
+0966 |   h.addEventListener("mousemove",function(e){showTip(e,html);});
      # Responds to a user action or browser event.
-0964 |   h.addEventListener("mouseleave",hideTip);
+0967 |   h.addEventListener("mouseleave",hideTip);
      # Responds to a user action or browser event.
-0965 |   parent.appendChild(h);
+0968 |   parent.appendChild(h);
      # Adds a newly built visual element to the page.
-0966 | }
+0969 | }
      # Closes the preceding element or code block.
-0967 | addEventListener("scroll",hideTip,{passive:true});
+0970 | addEventListener("scroll",hideTip,{passive:true});
      # Responds to a user action or browser event.
-0968 | 
-0969 | /* ---------- throughput sparkline ---------- */
+0971 |
+0972 | /* ---------- throughput sparkline ---------- */
      # Existing developer note about this section.
-0970 | var SPARK=[];
+0973 | var SPARK=[];
      # Keeps a value used by the page's next steps.
-0971 | function drawSpark(){
+0974 | function drawSpark(){
      # Defines a browser function used by a chart, control, or live event.
-0972 |   var svg=$("cSpark"); svg.textContent="";
+0975 |   var svg=$("cSpark"); svg.textContent="";
      # Updates visible text or markup on the page.
-0973 |   if(SPARK.length<2) return;
+0976 |   if(SPARK.length<2) return;
      # Controls which browser steps run or repeats them for data items.
-0974 |   var L=8,R=332,T=10,B=76;
+0977 |   var L=8,R=332,T=10,B=76;
      # Keeps a value used by the page's next steps.
-0975 |   var mx=Math.max.apply(null,SPARK)||1;
+0978 |   var mx=Math.max.apply(null,SPARK)||1;
      # Keeps a value used by the page's next steps.
-0976 |   var X=function(i){return L+i/(SPARK.length-1)*(R-L);};
+0979 |   var X=function(i){return L+i/(SPARK.length-1)*(R-L);};
      # Keeps a value used by the page's next steps.
-0977 |   var Y=function(v){return B-(v/mx)*(B-T);};
+0980 |   var Y=function(v){return B-(v/mx)*(B-T);};
      # Keeps a value used by the page's next steps.
-0978 |   var pts=SPARK.map(function(v,i){return [X(i),Y(v)];});
+0981 |   var pts=SPARK.map(function(v,i){return [X(i),Y(v)];});
      # Keeps a value used by the page's next steps.
-0979 |   svg.appendChild(el("path",{d:spline(pts,0.5)+" L"+R+" "+B+" L"+L+" "+B+" Z",
+0982 |   svg.appendChild(el("path",{d:spline(pts,0.5)+" L"+R+" "+B+" L"+L+" "+B+" Z",
      # Adds a newly built visual element to the page.
-0980 |     fill:"var(--wash-indigo)",stroke:"none"}));
+0983 |     fill:"var(--wash-indigo)",stroke:"none"}));
      # Continues the page structure, styling, or browser logic above.
-0981 |   svg.appendChild(el("path",{d:spline(pts,0.5),fill:"none",stroke:"var(--s-indigo)",
+0984 |   svg.appendChild(el("path",{d:spline(pts,0.5),fill:"none",stroke:"var(--s-indigo)",
      # Adds a newly built visual element to the page.
-0982 |     "stroke-width":2,"stroke-linecap":"round","stroke-linejoin":"round"}));
+0985 |     "stroke-width":2,"stroke-linecap":"round","stroke-linejoin":"round"}));
      # Continues the page structure, styling, or browser logic above.
-0983 |   var last=pts[pts.length-1];
+0986 |   var last=pts[pts.length-1];
      # Keeps a value used by the page's next steps.
-0984 |   svg.appendChild(el("circle",{cx:last[0],cy:last[1],r:3.5,fill:"var(--s-indigo)"}));
+0987 |   svg.appendChild(el("circle",{cx:last[0],cy:last[1],r:3.5,fill:"var(--s-indigo)"}));
      # Adds a newly built visual element to the page.
-0985 |   var t=el("text",{x:L,y:T-1,class:"dlabel",fill:"var(--muted)"});
+0988 |   var t=el("text",{x:L,y:T-1,class:"dlabel",fill:"var(--muted)"});
      # Keeps a value used by the page's next steps.
-0986 |   t.textContent="peak "+fmt(Math.round(mx))+"/s"; svg.appendChild(t);
+0989 |   t.textContent="peak "+fmt(Math.round(mx))+"/s"; svg.appendChild(t);
      # Updates visible text or markup on the page.
-0987 | }
+0990 | }
      # Closes the preceding element or code block.
-0988 | 
-0989 | /* ---------- interactive chess board ---------- */
+0991 |
+0992 | /* ---------- interactive chess board ---------- */
      # Existing developer note about this section.
-0990 | var GLYPH={K:"♔",Q:"♕",R:"♖",B:"♗",N:"♘",P:"♙",
+0993 | var GLYPH={K:"♔",Q:"♕",R:"♖",B:"♗",N:"♘",P:"♙",
      # Keeps a value used by the page's next steps.
-0991 |            k:"♚",q:"♛",r:"♜",b:"♝",n:"♞",p:"♟"};
+0994 |            k:"♚",q:"♛",r:"♜",b:"♝",n:"♞",p:"♟"};
      # Continues the page structure, styling, or browser logic above.
-0992 | var SQ=25, FILES="abcdefgh";
+0995 | var SQ=25, FILES="abcdefgh";
      # Keeps a value used by the page's next steps.
-0993 | var GAME={sans:[],fen:null,legal:{},turn:"white",sel:null,prevFen:null,
+0996 | var GAME={sans:[],fen:null,legal:{},turn:"white",sel:null,prevFen:null,
      # Keeps a value used by the page's next steps.
-0994 |           openings:[],lineSans:[],busy:false,timer:0};
+0997 |           openings:[],lineSans:[],busy:false,timer:0};
      # Continues the page structure, styling, or browser logic above.
-0995 | 
-0996 | function sqName(f,r){ return FILES[f]+(8-r); }
+0998 |
+0999 | function sqName(f,r){ return FILES[f]+(8-r); }
      # Defines a browser function used by a chart, control, or live event.
-0997 | function expandRow(rowStr){
+1000 | function expandRow(rowStr){
      # Defines a browser function used by a chart, control, or live event.
-0998 |   var out=[];
+1001 |   var out=[];
      # Keeps a value used by the page's next steps.
-0999 |   for(var i=0;i<rowStr.length;i++){
+1002 |   for(var i=0;i<rowStr.length;i++){
      # Controls which browser steps run or repeats them for data items.
-1000 |     var c=rowStr[i];
+1003 |     var c=rowStr[i];
      # Keeps a value used by the page's next steps.
-1001 |     if(c>="1"&&c<="8"){ for(var j=0;j<+c;j++) out.push(null); }
+1004 |     if(c>="1"&&c<="8"){ for(var j=0;j<+c;j++) out.push(null); }
      # Controls which browser steps run or repeats them for data items.
-1002 |     else out.push(c);
+1005 |     else out.push(c);
      # Controls which browser steps run or repeats them for data items.
-1003 |   }
+1006 |   }
      # Closes the preceding element or code block.
-1004 |   return out;
-     # Hands the calculated value back to the calling function.
-1005 | }
-     # Closes the preceding element or code block.
-1006 | function fenGrid(fen){
-     # Defines a browser function used by a chart, control, or live event.
-1007 |   return fen ? fen.split(" ")[0].split("/").map(expandRow) : null;
+1007 |   return out;
      # Hands the calculated value back to the calling function.
 1008 | }
      # Closes the preceding element or code block.
-1009 | 
-1010 | function drawBoard(){
+1009 | function fenGrid(fen){
      # Defines a browser function used by a chart, control, or live event.
-1011 |   var svg=$("board"); svg.textContent="";
+1010 |   return fen ? fen.split(" ")[0].split("/").map(expandRow) : null;
+     # Hands the calculated value back to the calling function.
+1011 | }
+     # Closes the preceding element or code block.
+1012 |
+1013 | function drawBoard(){
+     # Defines a browser function used by a chart, control, or live event.
+1014 |   var svg=$("board"); svg.textContent="";
      # Updates visible text or markup on the page.
-1012 |   var grid=fenGrid(GAME.fen), prev=fenGrid(GAME.prevFen);
+1015 |   var grid=fenGrid(GAME.fen), prev=fenGrid(GAME.prevFen);
      # Keeps a value used by the page's next steps.
-1013 | 
-1014 |   for(var r=0;r<8;r++) for(var f=0;f<8;f++){
+1016 |
+1017 |   for(var r=0;r<8;r++) for(var f=0;f<8;f++){
      # Controls which browser steps run or repeats them for data items.
-1015 |     svg.appendChild(el("rect",{x:f*SQ,y:r*SQ,width:SQ,height:SQ,
+1018 |     svg.appendChild(el("rect",{x:f*SQ,y:r*SQ,width:SQ,height:SQ,
      # Adds a newly built visual element to the page.
-1016 |       class:(r+f)%2===0?"sq-l":"sq-d"}));
+1019 |       class:(r+f)%2===0?"sq-l":"sq-d"}));
      # Continues the page structure, styling, or browser logic above.
-1017 |   }
+1020 |   }
      # Closes the preceding element or code block.
-1018 |   if(!grid) return;
+1021 |   if(!grid) return;
      # Controls which browser steps run or repeats them for data items.
-1019 | 
-1020 |   // squares that changed since the previous position = the move just played
+1022 |
+1023 |   // squares that changed since the previous position = the move just played
      # Existing developer note about this section.
-1021 |   if(prev){
+1024 |   if(prev){
      # Controls which browser steps run or repeats them for data items.
-1022 |     for(var r2=0;r2<8;r2++) for(var f2=0;f2<8;f2++){
+1025 |     for(var r2=0;r2<8;r2++) for(var f2=0;f2<8;f2++){
      # Controls which browser steps run or repeats them for data items.
-1023 |       if(grid[r2][f2]!==prev[r2][f2])
+1026 |       if(grid[r2][f2]!==prev[r2][f2])
      # Controls which browser steps run or repeats them for data items.
-1024 |         svg.appendChild(el("rect",{x:f2*SQ,y:r2*SQ,width:SQ,height:SQ,class:"last"}));
+1027 |         svg.appendChild(el("rect",{x:f2*SQ,y:r2*SQ,width:SQ,height:SQ,class:"last"}));
      # Adds a newly built visual element to the page.
-1025 |     }
+1028 |     }
      # Closes the preceding element or code block.
-1026 |   }
+1029 |   }
      # Closes the preceding element or code block.
-1027 |   if(GAME.sel){
+1030 |   if(GAME.sel){
      # Controls which browser steps run or repeats them for data items.
-1028 |     var sf=FILES.indexOf(GAME.sel[0]), sr=8-(+GAME.sel[1]);
+1031 |     var sf=FILES.indexOf(GAME.sel[0]), sr=8-(+GAME.sel[1]);
      # Keeps a value used by the page's next steps.
-1029 |     svg.appendChild(el("rect",{x:sf*SQ,y:sr*SQ,width:SQ,height:SQ,class:"sel"}));
+1032 |     svg.appendChild(el("rect",{x:sf*SQ,y:sr*SQ,width:SQ,height:SQ,class:"sel"}));
      # Adds a newly built visual element to the page.
-1030 |   }
+1033 |   }
      # Closes the preceding element or code block.
-1031 | 
-1032 |   for(var r3=0;r3<8;r3++){
+1034 |
+1035 |   for(var r3=0;r3<8;r3++){
      # Controls which browser steps run or repeats them for data items.
-1033 |     for(var f3=0;f3<8;f3++){
+1036 |     for(var f3=0;f3<8;f3++){
      # Controls which browser steps run or repeats them for data items.
-1034 |       var p=grid[r3][f3]; if(!p) continue;
+1037 |       var p=grid[r3][f3]; if(!p) continue;
      # Keeps a value used by the page's next steps.
-1035 |       var t=el("text",{x:f3*SQ+SQ/2,y:r3*SQ+SQ/2+0.5,
+1038 |       var t=el("text",{x:f3*SQ+SQ/2,y:r3*SQ+SQ/2+0.5,
      # Keeps a value used by the page's next steps.
-1036 |         class:"pc "+(p===p.toUpperCase()?"w":"b")});
+1039 |         class:"pc "+(p===p.toUpperCase()?"w":"b")});
      # Continues the page structure, styling, or browser logic above.
-1037 |       t.textContent=GLYPH[p]||""; svg.appendChild(t);
+1040 |       t.textContent=GLYPH[p]||""; svg.appendChild(t);
      # Updates visible text or markup on the page.
-1038 |     }
+1041 |     }
      # Closes the preceding element or code block.
-1039 |   }
+1042 |   }
      # Closes the preceding element or code block.
-1040 | 
-1041 |   // legal destinations for the selected piece
+1043 |
+1044 |   // legal destinations for the selected piece
      # Existing developer note about this section.
-1042 |   if(GAME.sel && GAME.legal[GAME.sel]){
+1045 |   if(GAME.sel && GAME.legal[GAME.sel]){
      # Controls which browser steps run or repeats them for data items.
-1043 |     GAME.legal[GAME.sel].forEach(function(dest){
+1046 |     GAME.legal[GAME.sel].forEach(function(dest){
      # Continues the page structure, styling, or browser logic above.
-1044 |       var df=FILES.indexOf(dest[0]), dr=8-(+dest[1]);
+1047 |       var df=FILES.indexOf(dest[0]), dr=8-(+dest[1]);
      # Keeps a value used by the page's next steps.
-1045 |       if(grid[dr][df])
+1048 |       if(grid[dr][df])
      # Controls which browser steps run or repeats them for data items.
-1046 |         svg.appendChild(el("circle",{cx:df*SQ+SQ/2,cy:dr*SQ+SQ/2,r:SQ*0.42,class:"cap"}));
+1049 |         svg.appendChild(el("circle",{cx:df*SQ+SQ/2,cy:dr*SQ+SQ/2,r:SQ*0.42,class:"cap"}));
      # Adds a newly built visual element to the page.
-1047 |       else
+1050 |       else
      # Controls which browser steps run or repeats them for data items.
-1048 |         svg.appendChild(el("circle",{cx:df*SQ+SQ/2,cy:dr*SQ+SQ/2,r:3.4,class:"dot"}));
+1051 |         svg.appendChild(el("circle",{cx:df*SQ+SQ/2,cy:dr*SQ+SQ/2,r:3.4,class:"dot"}));
      # Adds a newly built visual element to the page.
-1049 |     });
+1052 |     });
      # Closes the preceding element or code block.
-1050 |   }
+1053 |   }
      # Closes the preceding element or code block.
-1051 | 
-1052 |   // Rank and file coordinates, as a real board carries them -- and useful
+1054 |
+1055 |   // Rank and file coordinates, as a real board carries them -- and useful
      # Existing developer note about this section.
-1053 |   // when you are calling a move out loud to a room.
+1056 |   // when you are calling a move out loud to a room.
      # Existing developer note about this section.
-1054 |   for(var f5=0;f5<8;f5++){
+1057 |   for(var f5=0;f5<8;f5++){
      # Controls which browser steps run or repeats them for data items.
-1055 |     var fl=el("text",{x:f5*SQ+SQ-3,y:8*SQ-2.5,"text-anchor":"end",class:"coord"});
+1058 |     var fl=el("text",{x:f5*SQ+SQ-3,y:8*SQ-2.5,"text-anchor":"end",class:"coord"});
      # Keeps a value used by the page's next steps.
-1056 |     fl.textContent=FILES[f5]; svg.appendChild(fl);
+1059 |     fl.textContent=FILES[f5]; svg.appendChild(fl);
      # Updates visible text or markup on the page.
-1057 |   }
+1060 |   }
      # Closes the preceding element or code block.
-1058 |   for(var r5=0;r5<8;r5++){
+1061 |   for(var r5=0;r5<8;r5++){
      # Controls which browser steps run or repeats them for data items.
-1059 |     var rk=el("text",{x:2,y:r5*SQ+7,class:"coord"});
+1062 |     var rk=el("text",{x:2,y:r5*SQ+7,class:"coord"});
      # Keeps a value used by the page's next steps.
-1060 |     rk.textContent=8-r5; svg.appendChild(rk);
+1063 |     rk.textContent=8-r5; svg.appendChild(rk);
      # Updates visible text or markup on the page.
-1061 |   }
+1064 |   }
      # Closes the preceding element or code block.
-1062 | 
-1063 |   // transparent click targets, drawn last so they sit on top
+1065 |
+1066 |   // transparent click targets, drawn last so they sit on top
      # Existing developer note about this section.
-1064 |   for(var r4=0;r4<8;r4++) for(var f4=0;f4<8;f4++){
+1067 |   for(var r4=0;r4<8;r4++) for(var f4=0;f4<8;f4++){
      # Controls which browser steps run or repeats them for data items.
-1065 |     var hit=el("rect",{x:f4*SQ,y:r4*SQ,width:SQ,height:SQ,
+1068 |     var hit=el("rect",{x:f4*SQ,y:r4*SQ,width:SQ,height:SQ,
      # Keeps a value used by the page's next steps.
-1066 |       fill:"transparent",class:"sq-hit"});
+1069 |       fill:"transparent",class:"sq-hit"});
      # Continues the page structure, styling, or browser logic above.
-1067 |     (function(nm){ hit.addEventListener("click",function(){onSquare(nm);}); })(sqName(f4,r4));
+1070 |     (function(nm){ hit.addEventListener("click",function(){onSquare(nm);}); })(sqName(f4,r4));
      # Responds to a user action or browser event.
-1068 |     svg.appendChild(hit);
+1071 |     svg.appendChild(hit);
      # Adds a newly built visual element to the page.
-1069 |   }
+1072 |   }
      # Closes the preceding element or code block.
-1070 | }
+1073 | }
      # Closes the preceding element or code block.
-1071 | 
-1072 | /* Chess literature writes the piece, not its initial: 1.e4 c5 2.♘f3.
+1074 |
+1075 | /* Chess literature writes the piece, not its initial: 1.e4 c5 2.♘f3.
      # Existing developer note about this section.
-1073 |    One symbol serves both sides -- the move number says whose it is -- and
+1076 |    One symbol serves both sides -- the move number says whose it is -- and
      # Continues the page structure, styling, or browser logic above.
-1074 |    pawn moves carry no symbol at all. */
+1077 |    pawn moves carry no symbol at all. */
      # Continues the page structure, styling, or browser logic above.
-1075 | var FIGURINE={K:"♔",Q:"♕",R:"♖",B:"♗",N:"♘"};
+1078 | var FIGURINE={K:"♔",Q:"♕",R:"♖",B:"♗",N:"♘"};
      # Keeps a value used by the page's next steps.
-1076 | function figurine(san){
+1079 | function figurine(san){
      # Defines a browser function used by a chart, control, or live event.
-1077 |   var m=/^([KQRBN])/.exec(san);
+1080 |   var m=/^([KQRBN])/.exec(san);
      # Keeps a value used by the page's next steps.
-1078 |   return m ? FIGURINE[m[1]] + san.slice(1) : san;
+1081 |   return m ? FIGURINE[m[1]] + san.slice(1) : san;
      # Hands the calculated value back to the calling function.
-1079 | }
+1082 | }
      # Closes the preceding element or code block.
-1080 | 
-1081 | function onSquare(name){
+1083 |
+1084 | function onSquare(name){
      # Defines a browser function used by a chart, control, or live event.
-1082 |   if(GAME.busy) return;
+1085 |   if(GAME.busy) return;
      # Controls which browser steps run or repeats them for data items.
-1083 |   if(GAME.sel && GAME.legal[GAME.sel] && GAME.legal[GAME.sel].indexOf(name)>=0){
+1086 |   if(GAME.sel && GAME.legal[GAME.sel] && GAME.legal[GAME.sel].indexOf(name)>=0){
      # Controls which browser steps run or repeats them for data items.
-1084 |     var uci=GAME.sel+name;
+1087 |     var uci=GAME.sel+name;
      # Keeps a value used by the page's next steps.
-1085 |     // auto-queen: the opening phase never needs another promotion piece
+1088 |     // auto-queen: the opening phase never needs another promotion piece
      # Existing developer note about this section.
-1086 |     var grid=fenGrid(GAME.fen);
+1089 |     var grid=fenGrid(GAME.fen);
      # Keeps a value used by the page's next steps.
-1087 |     var sf=FILES.indexOf(GAME.sel[0]), sr=8-(+GAME.sel[1]);
+1090 |     var sf=FILES.indexOf(GAME.sel[0]), sr=8-(+GAME.sel[1]);
      # Keeps a value used by the page's next steps.
-1088 |     var piece=grid?grid[sr][sf]:null;
+1091 |     var piece=grid?grid[sr][sf]:null;
      # Keeps a value used by the page's next steps.
-1089 |     if(piece && piece.toLowerCase()==="p" && (name[1]==="8"||name[1]==="1")) uci+="q";
+1092 |     if(piece && piece.toLowerCase()==="p" && (name[1]==="8"||name[1]==="1")) uci+="q";
      # Controls which browser steps run or repeats them for data items.
-1090 |     GAME.sel=null;
+1093 |     GAME.sel=null;
      # Continues the page structure, styling, or browser logic above.
-1091 |     sendMove(uci);
+1094 |     sendMove(uci);
      # Continues the page structure, styling, or browser logic above.
-1092 |     return;
+1095 |     return;
      # Continues the page structure, styling, or browser logic above.
-1093 |   }
+1096 |   }
      # Closes the preceding element or code block.
-1094 |   GAME.sel = GAME.legal[name] ? name : null;
+1097 |   GAME.sel = GAME.legal[name] ? name : null;
      # Continues the page structure, styling, or browser logic above.
-1095 |   drawBoard();
+1098 |   drawBoard();
      # Continues the page structure, styling, or browser logic above.
-1096 | }
+1099 | }
      # Closes the preceding element or code block.
-1097 | 
-1098 | function applyState(st){
+1100 |
+1101 | function applyState(st){
      # Defines a browser function used by a chart, control, or live event.
-1099 |   GAME.fen=st.fen; GAME.legal=st.legal||{}; GAME.turn=st.turn;
+1102 |   GAME.fen=st.fen; GAME.legal=st.legal||{}; GAME.turn=st.turn;
      # Continues the page structure, styling, or browser logic above.
-1100 |   GAME.sans=st.sans||[]; GAME.sel=null;
+1103 |   GAME.sans=st.sans||[]; GAME.sel=null;
      # Continues the page structure, styling, or browser logic above.
-1101 |   drawBoard();
+1104 |   drawBoard();
      # Continues the page structure, styling, or browser logic above.
-1102 | 
-1103 |   var chip=$("turnChip");
+1105 |
+1106 |   var chip=$("turnChip");
      # Keeps a value used by the page's next steps.
-1104 |   chip.className="turnchip "+(st.turn==="white"?"w":"b");
+1107 |   chip.className="turnchip "+(st.turn==="white"?"w":"b");
      # Continues the page structure, styling, or browser logic above.
-1105 |   var label=(st.turn==="white"?"White":"Black")+" to move";
+1108 |   var label=(st.turn==="white"?"White":"Black")+" to move";
      # Keeps a value used by the page's next steps.
-1106 |   if(st.status==="check") label+=" · check";
+1109 |   if(st.status==="check") label+=" · check";
      # Controls which browser steps run or repeats them for data items.
-1107 |   if(st.status==="checkmate"){ label="Checkmate"; chip.className="turnchip over"; }
+1110 |   if(st.status==="checkmate"){ label="Checkmate"; chip.className="turnchip over"; }
      # Controls which browser steps run or repeats them for data items.
-1108 |   if(st.status==="stalemate"){ label="Stalemate"; chip.className="turnchip over"; }
+1111 |   if(st.status==="stalemate"){ label="Stalemate"; chip.className="turnchip over"; }
      # Controls which browser steps run or repeats them for data items.
-1109 |   chip.textContent=label;
+1112 |   chip.textContent=label;
      # Updates visible text or markup on the page.
-1110 | 
-1111 |   var txt=GAME.sans.map(function(s,i){
+1113 |
+1114 |   var txt=GAME.sans.map(function(s,i){
      # Keeps a value used by the page's next steps.
-1112 |     return (i%2===0?(i/2+1)+". ":"")+figurine(s); }).join(" ");
+1115 |     return (i%2===0?(i/2+1)+". ":"")+figurine(s); }).join(" ");
      # Hands the calculated value back to the calling function.
-1113 |   $("moveText").textContent=txt||"Start position — White to move.";
+1116 |   $("moveText").textContent=txt||"Start position — White to move.";
      # Updates visible text or markup on the page.
-1114 |   if(st.error) $("moveText").textContent=(txt+"   ("+st.error+")");
+1117 |   if(st.error) $("moveText").textContent=(txt+"   ("+st.error+")");
      # Updates visible text or markup on the page.
-1115 | 
-1116 |   showLiveOpening(st.opening, st.has_data);
+1118 |
+1119 |   showLiveOpening(st.opening, st.has_data);
      # Continues the page structure, styling, or browser logic above.
-1117 |   lightUpNetwork(st.opening);
+1120 |   lightUpNetwork(st.opening);
      # Continues the page structure, styling, or browser logic above.
-1118 | }
+1121 | }
      # Closes the preceding element or code block.
-1119 | 
-1120 | /* Light up the players in the network who actually played the line on the
+1122 |
+1123 | /* Light up the players in the network who actually played the line on the
      # Existing developer note about this section.
-1121 |    board. This is the point of the whole project made visible: the openings
+1124 |    board. This is the point of the whole project made visible: the openings
      # Continues the page structure, styling, or browser logic above.
-1122 |    cluster inside communities rather than scattering across the graph. */
+1125 |    cluster inside communities rather than scattering across the graph. */
      # Continues the page structure, styling, or browser logic above.
-1123 | function lightUpNetwork(o){
+1126 | function lightUpNetwork(o){
      # Defines a browser function used by a chart, control, or live event.
-1124 |   if(!NET.nodes.length) return;
+1127 |   if(!NET.nodes.length) return;
      # Controls which browser steps run or repeats them for data items.
-1125 |   var hint=$("netHint");
+1128 |   var hint=$("netHint");
      # Keeps a value used by the page's next steps.
-1126 |   if(o && o.matched && o.graph_adopters && o.graph_adopters.length){
+1129 |   if(o && o.matched && o.graph_adopters && o.graph_adopters.length){
      # Controls which browser steps run or repeats them for data items.
-1127 |     // Adopters, not everyone who ever played it: the top-degree players have
+1130 |     // Adopters, not everyone who ever played it: the top-degree players have
      # Existing developer note about this section.
-1128 |     // played nearly every line, so "played" lights the whole graph and says
+1131 |     // played nearly every line, so "played" lights the whole graph and says
      # Existing developer note about this section.
-1129 |     // nothing. Adoption is the contagion event.
+1132 |     // nothing. Adoption is the contagion event.
      # Existing developer note about this section.
-1130 |     NET.lit=new Set(o.graph_adopters);
+1133 |     NET.lit=new Set(o.graph_adopters);
      # Continues the page structure, styling, or browser logic above.
-1131 |     var total=o.graph_total||1;
+1134 |     var total=o.graph_total||1;
      # Keeps a value used by the page's next steps.
-1132 |     hint.innerHTML="<b>"+fmt(o.graph_adopters.length)+" of "+fmt(total)+
+1135 |     hint.innerHTML="<b>"+fmt(o.graph_adopters.length)+" of "+fmt(total)+
      # Updates visible text or markup on the page.
-1133 |       "</b> drawn players took up <b>"+(o.settled?o.eco+" "+o.name:"this line")+
+1136 |       "</b> drawn players took up <b>"+(o.settled?o.eco+" "+o.name:"this line")+
      # Continues the page structure, styling, or browser logic above.
-1134 |       "</b> after being exposed to it"+
+1137 |       "</b> after being exposed to it"+
      # Continues the page structure, styling, or browser logic above.
-1135 |       (o.graph_hits?" ("+fmt(o.graph_hits.length)+" have played it at all)":"")+
+1138 |       (o.graph_hits?" ("+fmt(o.graph_hits.length)+" have played it at all)":"")+
      # Continues the page structure, styling, or browser logic above.
-1136 |       ". Do the adopters cluster inside communities?";
+1139 |       ". Do the adopters cluster inside communities?";
      # Continues the page structure, styling, or browser logic above.
-1137 |   } else if(o && o.matched && o.graph_hits && o.graph_hits.length){
+1140 |   } else if(o && o.matched && o.graph_hits && o.graph_hits.length){
      # Continues the page structure, styling, or browser logic above.
-1138 |     NET.lit=new Set(o.graph_hits);
+1141 |     NET.lit=new Set(o.graph_hits);
      # Continues the page structure, styling, or browser logic above.
-1139 |     hint.innerHTML="<b>"+fmt(o.graph_hits.length)+" of "+fmt(o.graph_total)+
+1142 |     hint.innerHTML="<b>"+fmt(o.graph_hits.length)+" of "+fmt(o.graph_total)+
      # Updates visible text or markup on the page.
-1140 |       "</b> drawn players have played this line. No first-time adoption of it "+
+1143 |       "</b> drawn players have played this line. No first-time adoption of it "+
      # Continues the page structure, styling, or browser logic above.
-1141 |       "was recorded in this slice.";
+1144 |       "was recorded in this slice.";
      # Continues the page structure, styling, or browser logic above.
-1142 |   } else if(o && o.matched===0){
+1145 |   } else if(o && o.matched===0){
      # Continues the page structure, styling, or browser logic above.
-1143 |     NET.lit=new Set();
+1146 |     NET.lit=new Set();
      # Continues the page structure, styling, or browser logic above.
-1144 |     hint.textContent="No drawn player reached that position.";
+1147 |     hint.textContent="No drawn player reached that position.";
      # Updates visible text or markup on the page.
-1145 |   } else {
+1148 |   } else {
      # Continues the page structure, styling, or browser logic above.
-1146 |     NET.lit=null;
+1149 |     NET.lit=null;
      # Continues the page structure, styling, or browser logic above.
-1147 |     hint.textContent="Colour is the Louvain community, size is degree, "+
+1150 |     hint.textContent="Colour is the Louvain community, size is degree, "+
      # Updates visible text or markup on the page.
-1148 |       "white ring marks an early adopter. Play a move to light up who played it.";
+1151 |       "white ring marks an early adopter. Play a move to light up who played it.";
      # Continues the page structure, styling, or browser logic above.
-1149 |   }
+1152 |   }
      # Closes the preceding element or code block.
-1150 |   if(NET.draw) NET.draw();
+1153 |   if(NET.draw) NET.draw();
      # Controls which browser steps run or repeats them for data items.
-1151 | }
+1154 | }
      # Closes the preceding element or code block.
-1152 | 
-1153 | function showLiveOpening(o,hasData){
+1155 |
+1156 | function showLiveOpening(o,hasData){
      # Defines a browser function used by a chart, control, or live event.
-1154 |   var stats=$("loStats");
+1157 |   var stats=$("loStats");
      # Keeps a value used by the page's next steps.
-1155 |   if(!hasData){
+1158 |   if(!hasData){
      # Controls which browser steps run or repeats them for data items.
-1156 |     $("loEco").textContent="—";
+1159 |     $("loEco").textContent="—";
      # Updates visible text or markup on the page.
-1157 |     $("loName").textContent="Run analysis first, then each move is compared with the selected games.";
+1160 |     $("loName").textContent="Run analysis first, then each move is compared with the selected games.";
      # Updates visible text or markup on the page.
-1158 |     stats.textContent=""; $("loVars").textContent=""; return;
+1161 |     stats.textContent=""; $("loVars").textContent=""; return;
      # Updates visible text or markup on the page.
-1159 |   }
+1162 |   }
      # Closes the preceding element or code block.
-1160 |   if(!o){
+1163 |   if(!o){
      # Controls which browser steps run or repeats them for data items.
-1161 |     $("loEco").textContent="—";
+1164 |     $("loEco").textContent="—";
      # Updates visible text or markup on the page.
-1162 |     $("loName").textContent="Make a move to identify the opening.";
+1165 |     $("loName").textContent="Make a move to identify the opening.";
      # Updates visible text or markup on the page.
-1163 |     stats.textContent=""; $("loVars").textContent=""; return;
+1166 |     stats.textContent=""; $("loVars").textContent=""; return;
      # Updates visible text or markup on the page.
-1164 |   }
+1167 |   }
      # Closes the preceding element or code block.
-1165 |   if(!o.matched){
+1168 |   if(!o.matched){
      # Controls which browser steps run or repeats them for data items.
-1166 |     $("loEco").textContent="ply "+o.ply;
+1169 |     $("loEco").textContent="ply "+o.ply;
      # Updates visible text or markup on the page.
-1167 |     $("loName").textContent="No game in this slice played that line.";
+1170 |     $("loName").textContent="No game in this slice played that line.";
      # Updates visible text or markup on the page.
-1168 |     stats.textContent="";
+1171 |     stats.textContent="";
      # Updates visible text or markup on the page.
-1169 |     $("loVars").textContent="Out of book for this sample — try a more common move, or scan more games.";
+1172 |     $("loVars").textContent="Out of book for this sample — try a more common move, or scan more games.";
      # Updates visible text or markup on the page.
-1170 |     return;
+1173 |     return;
      # Continues the page structure, styling, or browser logic above.
-1171 |   }
+1174 |   }
      # Closes the preceding element or code block.
-1172 |   // Only name the position once one ECO actually dominates the continuations.
+1175 |   // Only name the position once one ECO actually dominates the continuations.
      # Existing developer note about this section.
-1173 |   if(o.settled){
+1176 |   if(o.settled){
      # Controls which browser steps run or repeats them for data items.
-1174 |     $("loEco").textContent=o.eco+"  ·  ply "+o.ply;
+1177 |     $("loEco").textContent=o.eco+"  ·  ply "+o.ply;
      # Updates visible text or markup on the page.
-1175 |     $("loName").textContent=o.name;
+1178 |     $("loName").textContent=o.name;
      # Updates visible text or markup on the page.
-1176 |   } else {
+1179 |   } else {
      # Continues the page structure, styling, or browser logic above.
-1177 |     $("loEco").textContent="ply "+o.ply+"  ·  still branching";
+1180 |     $("loEco").textContent="ply "+o.ply+"  ·  still branching";
      # Updates visible text or markup on the page.
-1178 |     $("loName").textContent="Leading line: "+o.name+
+1181 |     $("loName").textContent="Leading line: "+o.name+
      # Updates visible text or markup on the page.
-1179 |       " ("+(o.top_share*100).toFixed(0)+"% of games from here)";
+1182 |       " ("+(o.top_share*100).toFixed(0)+"% of games from here)";
      # Continues the page structure, styling, or browser logic above.
-1180 |   }
+1183 |   }
      # Closes the preceding element or code block.
-1181 |   var rows=[
+1184 |   var rows=[
      # Keeps a value used by the page's next steps.
-1182 |     ["games in slice",fmt(o.matched)],
+1185 |     ["games in slice",fmt(o.matched)],
      # Continues the page structure, styling, or browser logic above.
-1183 |     ["share of slice",(o.share*100).toFixed(2)+"%"],
+1186 |     ["share of slice",(o.share*100).toFixed(2)+"%"],
      # Continues the page structure, styling, or browser logic above.
-1184 |     ["white wins",(o.white_win*100).toFixed(1)+"%"],
+1187 |     ["white wins",(o.white_win*100).toFixed(1)+"%"],
      # Continues the page structure, styling, or browser logic above.
-1185 |     ["mean Elo",fmt(o.mean_elo)],
+1188 |     ["mean Elo",fmt(o.mean_elo)],
      # Continues the page structure, styling, or browser logic above.
-1186 |     ["exposure trials",fmt(o.trials)],
+1189 |     ["exposure trials",fmt(o.trials)],
      # Continues the page structure, styling, or browser logic above.
-1187 |     ["adoptions",fmt(o.adoptions)+(o.adoption_rate!=null?
+1190 |     ["adoptions",fmt(o.adoptions)+(o.adoption_rate!=null?
      # Continues the page structure, styling, or browser logic above.
-1188 |       "  ("+(o.adoption_rate*100).toFixed(1)+"%)":"")]
+1191 |       "  ("+(o.adoption_rate*100).toFixed(1)+"%)":"")]
      # Continues the page structure, styling, or browser logic above.
-1189 |   ];
+1192 |   ];
      # Continues the page structure, styling, or browser logic above.
-1190 |   stats.textContent="";
+1193 |   stats.textContent="";
      # Updates visible text or markup on the page.
-1191 |   rows.forEach(function(r){
+1194 |   rows.forEach(function(r){
      # Continues the page structure, styling, or browser logic above.
-1192 |     var d=document.createElement("div");
+1195 |     var d=document.createElement("div");
      # Keeps a value used by the page's next steps.
-1193 |     d.innerHTML="<dt></dt><dd></dd>";
+1196 |     d.innerHTML="<dt></dt><dd></dd>";
      # Updates visible text or markup on the page.
-1194 |     d.querySelector("dt").textContent=r[0];
+1197 |     d.querySelector("dt").textContent=r[0];
      # Updates visible text or markup on the page.
-1195 |     d.querySelector("dd").textContent=r[1];
+1198 |     d.querySelector("dd").textContent=r[1];
      # Updates visible text or markup on the page.
-1196 |     stats.appendChild(d);
+1199 |     stats.appendChild(d);
      # Adds a newly built visual element to the page.
-1197 |   });
+1200 |   });
      # Closes the preceding element or code block.
-1198 |   $("loVars").textContent = (o.variations && o.variations.length>1)
+1201 |   $("loVars").textContent = (o.variations && o.variations.length>1)
      # Updates visible text or markup on the page.
-1199 |     ? "also here: "+o.variations.slice(1,4).map(function(v){
+1202 |     ? "also here: "+o.variations.slice(1,4).map(function(v){
      # Continues the page structure, styling, or browser logic above.
-1200 |         return v.eco+" "+v.name+" ("+fmt(v.games)+")"; }).join("  ·  ")
+1203 |         return v.eco+" "+v.name+" ("+fmt(v.games)+")"; }).join("  ·  ")
      # Hands the calculated value back to the calling function.
-1201 |     : "";
+1204 |     : "";
      # Continues the page structure, styling, or browser logic above.
-1202 | }
+1205 | }
      # Closes the preceding element or code block.
-1203 | 
-1204 | function sendMove(uci){
+1206 |
+1207 | function sendMove(uci){
      # Defines a browser function used by a chart, control, or live event.
-1205 |   GAME.busy=true;
+1208 |   GAME.busy=true;
      # Continues the page structure, styling, or browser logic above.
-1206 |   fetch("/api/board",{method:"POST",headers:{"Content-Type":"application/json"},
+1209 |   fetch("/api/board",{method:"POST",headers:{"Content-Type":"application/json"},
      # Calls a local server API and handles its response.
-1207 |     body:JSON.stringify({sans:GAME.sans,uci:uci||null,run_id:runId})})
+1210 |     body:JSON.stringify({sans:GAME.sans,uci:uci||null,run_id:runId})})
      # Continues the page structure, styling, or browser logic above.
-1208 |     .then(function(r){return r.json();})
+1211 |     .then(function(r){return r.json();})
      # Continues the page structure, styling, or browser logic above.
-1209 |     .then(function(st){ GAME.busy=false; if(st.fen) applyState(st); })
+1212 |     .then(function(st){ GAME.busy=false; if(st.fen) applyState(st); })
      # Continues the page structure, styling, or browser logic above.
-1210 |     .catch(function(){ GAME.busy=false;
+1213 |     .catch(function(){ GAME.busy=false;
      # Continues the page structure, styling, or browser logic above.
-1211 |       $("moveText").textContent="Could not reach the server."; });
+1214 |       $("moveText").textContent="Could not reach the server."; });
      # Updates visible text or markup on the page.
-1212 | }
+1215 | }
      # Closes the preceding element or code block.
-1213 | 
-1214 | function resetBoard(){
+1216 |
+1217 | function resetBoard(){
      # Defines a browser function used by a chart, control, or live event.
-1215 |   clearInterval(GAME.timer);
+1218 |   clearInterval(GAME.timer);
      # Continues the page structure, styling, or browser logic above.
-1216 |   GAME.sans=[]; GAME.prevFen=null; GAME.fen=null;
+1219 |   GAME.sans=[]; GAME.prevFen=null; GAME.fen=null;
      # Continues the page structure, styling, or browser logic above.
-1217 |   sendMove(null);
+1220 |   sendMove(null);
      # Continues the page structure, styling, or browser logic above.
-1218 | }
+1221 | }
      # Closes the preceding element or code block.
-1219 | function undoMove(){
+1222 | function undoMove(){
      # Defines a browser function used by a chart, control, or live event.
-1220 |   clearInterval(GAME.timer);
+1223 |   clearInterval(GAME.timer);
      # Continues the page structure, styling, or browser logic above.
-1221 |   GAME.sans=GAME.sans.slice(0,-1); GAME.prevFen=null;
+1224 |   GAME.sans=GAME.sans.slice(0,-1); GAME.prevFen=null;
      # Continues the page structure, styling, or browser logic above.
-1222 |   sendMove(null);
+1225 |   sendMove(null);
      # Continues the page structure, styling, or browser logic above.
-1223 | }
+1226 | }
      # Closes the preceding element or code block.
-1224 | 
-1225 | function replayLine(sans){
+1227 |
+1228 | function replayLine(sans){
      # Defines a browser function used by a chart, control, or live event.
-1226 |   clearInterval(GAME.timer);
+1229 |   clearInterval(GAME.timer);
      # Continues the page structure, styling, or browser logic above.
-1227 |   GAME.sans=[]; GAME.prevFen=null; GAME.fen=null;
+1230 |   GAME.sans=[]; GAME.prevFen=null; GAME.fen=null;
      # Continues the page structure, styling, or browser logic above.
-1228 |   sendMove(null);
+1231 |   sendMove(null);
      # Continues the page structure, styling, or browser logic above.
-1229 |   var i=0;
+1232 |   var i=0;
      # Keeps a value used by the page's next steps.
-1230 |   GAME.timer=setInterval(function(){
+1233 |   GAME.timer=setInterval(function(){
      # Continues the page structure, styling, or browser logic above.
-1231 |     if(i>=sans.length){ clearInterval(GAME.timer); return; }
+1234 |     if(i>=sans.length){ clearInterval(GAME.timer); return; }
      # Controls which browser steps run or repeats them for data items.
-1232 |     var next=sans.slice(0,i+1); i++;
+1235 |     var next=sans.slice(0,i+1); i++;
      # Keeps a value used by the page's next steps.
-1233 |     fetch("/api/board",{method:"POST",headers:{"Content-Type":"application/json"},
+1236 |     fetch("/api/board",{method:"POST",headers:{"Content-Type":"application/json"},
      # Calls a local server API and handles its response.
-1234 |       body:JSON.stringify({sans:next,run_id:runId})})
+1237 |       body:JSON.stringify({sans:next,run_id:runId})})
      # Continues the page structure, styling, or browser logic above.
-1235 |       .then(function(r){return r.json();})
+1238 |       .then(function(r){return r.json();})
      # Continues the page structure, styling, or browser logic above.
-1236 |       .then(function(st){ if(st.fen){ GAME.prevFen=GAME.fen; applyState(st); } })
+1239 |       .then(function(st){ if(st.fen){ GAME.prevFen=GAME.fen; applyState(st); } })
      # Continues the page structure, styling, or browser logic above.
-1237 |       .catch(function(){});
+1240 |       .catch(function(){});
      # Continues the page structure, styling, or browser logic above.
-1238 |   },700);
+1241 |   },700);
      # Continues the page structure, styling, or browser logic above.
-1239 | }
+1242 | }
      # Closes the preceding element or code block.
-1240 | 
-1241 | function showOpenings(list){
+1243 |
+1244 | function showOpenings(list){
      # Defines a browser function used by a chart, control, or live event.
-1242 |   GAME.openings=list||[];
+1245 |   GAME.openings=list||[];
      # Continues the page structure, styling, or browser logic above.
-1243 |   var ol=$("openList"); ol.textContent="";
+1246 |   var ol=$("openList"); ol.textContent="";
      # Updates visible text or markup on the page.
-1244 |   GAME.openings.forEach(function(o){
+1247 |   GAME.openings.forEach(function(o){
      # Continues the page structure, styling, or browser logic above.
-1245 |     var li=document.createElement("li");
+1248 |     var li=document.createElement("li");
      # Keeps a value used by the page's next steps.
-1246 |     li.innerHTML="<span class='eco'></span><span class='nm'></span>";
+1249 |     li.innerHTML="<span class='eco'></span><span class='nm'></span>";
      # Updates visible text or markup on the page.
-1247 |     li.querySelector(".eco").textContent=o.eco;
+1250 |     li.querySelector(".eco").textContent=o.eco;
      # Updates visible text or markup on the page.
-1248 |     li.querySelector(".nm").textContent=o.name;
+1251 |     li.querySelector(".nm").textContent=o.name;
      # Updates visible text or markup on the page.
-1249 |     li.title=o.sans.join(" ");
+1252 |     li.title=o.sans.join(" ");
      # Continues the page structure, styling, or browser logic above.
-1250 |     li.addEventListener("click",function(){
+1253 |     li.addEventListener("click",function(){
      # Responds to a user action or browser event.
-1251 |       var kids=ol.children;
+1254 |       var kids=ol.children;
      # Keeps a value used by the page's next steps.
-1252 |       for(var i=0;i<kids.length;i++) kids[i].classList.remove("on");
+1255 |       for(var i=0;i<kids.length;i++) kids[i].classList.remove("on");
      # Controls which browser steps run or repeats them for data items.
-1253 |       li.classList.add("on");
+1256 |       li.classList.add("on");
      # Continues the page structure, styling, or browser logic above.
-1254 |       GAME.lineSans=o.sans;
+1257 |       GAME.lineSans=o.sans;
      # Continues the page structure, styling, or browser logic above.
-1255 |       replayLine(o.sans);
+1258 |       replayLine(o.sans);
      # Continues the page structure, styling, or browser logic above.
-1256 |     });
+1259 |     });
      # Closes the preceding element or code block.
-1257 |     ol.appendChild(li);
+1260 |     ol.appendChild(li);
      # Adds a newly built visual element to the page.
-1258 |   });
+1261 |   });
      # Closes the preceding element or code block.
-1259 |   $("openHint").textContent="Two players alternate moves on the board. Every move is "+
+1262 |   $("openHint").textContent="Click a piece, then a highlighted square. Try e2 to e4, then c7 to c5; or click an opening below to replay it. Moves are compared with the selected games.";
      # Updates visible text or markup on the page.
-1260 |     "matched against the "+fmt(GAME.openings.length)+" most common lines in this slice.";
-     # Continues the page structure, styling, or browser logic above.
-1261 | }
+1263 | }
      # Closes the preceding element or code block.
-1262 | 
-1263 | $("bReset").addEventListener("click",resetBoard);
+1264 |
+1265 | $("bReset").addEventListener("click",resetBoard);
      # Responds to a user action or browser event.
-1264 | $("bUndo").addEventListener("click",undoMove);
+1266 | $("bUndo").addEventListener("click",undoMove);
      # Responds to a user action or browser event.
-1265 | $("bPlay").addEventListener("click",function(){ replayLine(GAME.lineSans||[]); });
+1267 | $("bPlay").addEventListener("click",function(){ replayLine(GAME.lineSans||[]); });
      # Responds to a user action or browser event.
-1266 | 
-1267 | // Track the previous position so the "last move" highlight works on human moves.
+1268 | $("bTry").addEventListener("click",function(){ GAME.lineSans=["e4","c5"]; replayLine(GAME.lineSans); });
+     # Responds to a user action or browser event.
+1269 |
+1270 | // Track the previous position so the "last move" highlight works on human moves.
      # Existing developer note about this section.
-1268 | (function(){
+1271 | (function(){
      # Continues the page structure, styling, or browser logic above.
-1269 |   var _apply=applyState;
+1272 |   var _apply=applyState;
      # Keeps a value used by the page's next steps.
-1270 |   applyState=function(st){
+1273 |   applyState=function(st){
      # Continues the page structure, styling, or browser logic above.
-1271 |     if(GAME.fen && st.fen!==GAME.fen) GAME.prevFen=GAME.fen;
+1274 |     if(GAME.fen && st.fen!==GAME.fen) GAME.prevFen=GAME.fen;
      # Controls which browser steps run or repeats them for data items.
-1272 |     _apply(st);
+1275 |     _apply(st);
      # Continues the page structure, styling, or browser logic above.
-1273 |   };
+1276 |   };
      # Closes the preceding element or code block.
-1274 | })();
+1277 | })();
      # Continues the page structure, styling, or browser logic above.
-1275 | 
-1276 | resetBoard();
+1278 |
+1279 | resetBoard();
      # Continues the page structure, styling, or browser logic above.
-1277 | 
-1278 | /* ---------- live game ticker ---------- */
+1280 |
+1281 | /* ---------- live game ticker ---------- */
      # Existing developer note about this section.
-1279 | function pushTicker(g){
+1282 | function pushTicker(g){
      # Defines a browser function used by a chart, control, or live event.
-1280 |   if(!g) return;
+1283 |   if(!g) return;
      # Controls which browser steps run or repeats them for data items.
-1281 |   var ul=$("ticker");
+1284 |   var ul=$("ticker");
      # Keeps a value used by the page's next steps.
-1282 |   var li=document.createElement("li");
+1285 |   var li=document.createElement("li");
      # Keeps a value used by the page's next steps.
-1283 |   li.innerHTML="<span class='eco'></span><span class='nm'></span><span class='el'></span>";
+1286 |   li.innerHTML="<span class='eco'></span><span class='nm'></span><span class='el'></span>";
      # Updates visible text or markup on the page.
-1284 |   li.querySelector(".eco").textContent=g.eco;
+1287 |   li.querySelector(".eco").textContent=g.eco;
      # Updates visible text or markup on the page.
-1285 |   li.querySelector(".nm").textContent=g.opening||g.moves||"";
+1288 |   li.querySelector(".nm").textContent=g.opening||g.moves||"";
      # Updates visible text or markup on the page.
-1286 |   li.querySelector(".el").textContent=g.white_elo+"/"+g.black_elo;
+1289 |   li.querySelector(".el").textContent=g.white_elo+"/"+g.black_elo;
      # Updates visible text or markup on the page.
-1287 |   ul.insertBefore(li,ul.firstChild);
+1290 |   ul.insertBefore(li,ul.firstChild);
      # Continues the page structure, styling, or browser logic above.
-1288 |   while(ul.children.length>14) ul.removeChild(ul.lastChild);
+1291 |   while(ul.children.length>14) ul.removeChild(ul.lastChild);
      # Continues the page structure, styling, or browser logic above.
-1289 | }
+1292 | }
      # Closes the preceding element or code block.
-1290 | 
-1291 | /* ---------- live network canvas ---------- */
+1293 |
+1294 | /* ---------- live network canvas ---------- */
      # Existing developer note about this section.
-1292 | var NET={nodes:[],edges:[],hidden:{},raf:0,hover:-1,lit:null,draw:null};
+1295 | var NET={nodes:[],edges:[],hidden:{},raf:0,hover:-1,lit:null,draw:null};
      # Keeps a value used by the page's next steps.
-1293 | var PAL=["--s-indigo","--s-jade","--s-ochre","--s-vermilion","--s-null"];
+1296 | var PAL=["--s-indigo","--s-jade","--s-ochre","--s-vermilion","--s-null"];
      # Keeps a value used by the page's next steps.
-1294 | function communityColour(c){
+1297 | function communityColour(c){
      # Defines a browser function used by a chart, control, or live event.
-1295 |   return getComputedStyle(document.documentElement)
+1298 |   return getComputedStyle(document.documentElement)
      # Hands the calculated value back to the calling function.
-1296 |     .getPropertyValue(PAL[c%PAL.length]).trim()||"#888";
+1299 |     .getPropertyValue(PAL[c%PAL.length]).trim()||"#888";
      # Continues the page structure, styling, or browser logic above.
-1297 | }
+1300 | }
      # Closes the preceding element or code block.
-1298 | function startNetwork(payload){
+1301 | function startNetwork(payload){
      # Defines a browser function used by a chart, control, or live event.
-1299 |   var cv=$("netCanvas"), ctx=cv.getContext("2d");
+1302 |   var cv=$("netCanvas"), ctx=cv.getContext("2d");
      # Keeps a value used by the page's next steps.
-1300 |   cv.classList.add("ready");
+1303 |   cv.classList.add("ready");
      # Continues the page structure, styling, or browser logic above.
-1301 |   var dpr=Math.min(2,devicePixelRatio||1);
+1304 |   var dpr=Math.min(2,devicePixelRatio||1);
      # Keeps a value used by the page's next steps.
-1302 |   function size(){
+1305 |   function size(){
      # Defines a browser function used by a chart, control, or live event.
-1303 |     cv.width=cv.clientWidth*dpr; cv.height=cv.clientHeight*dpr;
+1306 |     cv.width=cv.clientWidth*dpr; cv.height=cv.clientHeight*dpr;
      # Continues the page structure, styling, or browser logic above.
-1304 |     ctx.setTransform(dpr,0,0,dpr,0,0);
+1307 |     ctx.setTransform(dpr,0,0,dpr,0,0);
      # Continues the page structure, styling, or browser logic above.
-1305 |   }
+1308 |   }
      # Closes the preceding element or code block.
-1306 |   // A resize clears the canvas buffer. The simulation stops after it settles,
+1309 |   // A resize clears the canvas buffer. The simulation stops after it settles,
      # Existing developer note about this section.
-1307 |   // so without an explicit repaint the network would simply vanish when the
+1310 |   // so without an explicit repaint the network would simply vanish when the
      # Existing developer note about this section.
-1308 |   // window changes size (plugging in a projector, say).
+1311 |   // window changes size (plugging in a projector, say).
      # Existing developer note about this section.
-1309 |   size();
+1312 |   size();
      # Continues the page structure, styling, or browser logic above.
-1310 |   addEventListener("resize",function(){ size(); if(NET.draw) NET.draw(); });
+1313 |   addEventListener("resize",function(){ size(); if(NET.draw) NET.draw(); });
      # Responds to a user action or browser event.
-1311 | 
-1312 |   var W=function(){return cv.clientWidth;}, H=function(){return cv.clientHeight;};
+1314 |
+1315 |   var W=function(){return cv.clientWidth;}, H=function(){return cv.clientHeight;};
      # Keeps a value used by the page's next steps.
-1313 |   var n=payload.nodes.length;
+1316 |   var n=payload.nodes.length;
      # Keeps a value used by the page's next steps.
-1314 |   NET.lit=null;
+1317 |   NET.lit=null;
      # Continues the page structure, styling, or browser logic above.
-1315 |   var nodes=payload.nodes.map(function(d,i){
+1318 |   var nodes=payload.nodes.map(function(d,i){
      # Keeps a value used by the page's next steps.
-1316 |     var a=i/n*Math.PI*2, rad=Math.min(W(),H())*0.32;
+1319 |     var a=i/n*Math.PI*2, rad=Math.min(W(),H())*0.32;
      # Keeps a value used by the page's next steps.
-1317 |     return {x:W()/2+Math.cos(a)*rad*(0.55+Math.random()*0.5),
+1320 |     return {x:W()/2+Math.cos(a)*rad*(0.55+Math.random()*0.5),
      # Hands the calculated value back to the calling function.
-1318 |             y:H()/2+Math.sin(a)*rad*(0.55+Math.random()*0.5),
+1321 |             y:H()/2+Math.sin(a)*rad*(0.55+Math.random()*0.5),
      # Continues the page structure, styling, or browser logic above.
-1319 |             vx:0,vy:0,deg:d.d,comm:d.c,early:d.e};
+1322 |             vx:0,vy:0,deg:d.d,comm:d.c,early:d.e};
      # Continues the page structure, styling, or browser logic above.
-1320 |   });
+1323 |   });
      # Closes the preceding element or code block.
-1321 |   var edges=payload.edges;
+1324 |   var edges=payload.edges;
      # Keeps a value used by the page's next steps.
-1322 |   NET.nodes=nodes; NET.edges=edges; NET.hidden={};
+1325 |   NET.nodes=nodes; NET.edges=edges; NET.hidden={};
      # Continues the page structure, styling, or browser logic above.
-1323 | 
-1324 |   // legend / community filter — click a community to dim it
+1326 |
+1327 |   // legend / community filter — click a community to dim it
      # Existing developer note about this section.
-1325 |   var comms=[...new Set(payload.nodes.map(function(d){return d.c;}))].sort();
+1328 |   var comms=[...new Set(payload.nodes.map(function(d){return d.c;}))].sort();
      # Keeps a value used by the page's next steps.
-1326 |   var lg=$("netLegend"); lg.textContent="";
+1329 |   var lg=$("netLegend"); lg.textContent="";
      # Updates visible text or markup on the page.
-1327 |   comms.forEach(function(c){
+1330 |   comms.forEach(function(c){
      # Continues the page structure, styling, or browser logic above.
-1328 |     var b=document.createElement("button");
+1331 |     var b=document.createElement("button");
      # Keeps a value used by the page's next steps.
-1329 |     b.innerHTML="<i style='background:"+communityColour(c)+"'></i>community "+c;
+1332 |     b.innerHTML="<i style='background:"+communityColour(c)+"'></i>community "+c;
      # Updates visible text or markup on the page.
-1330 |     b.addEventListener("click",function(){
+1333 |     b.addEventListener("click",function(){
      # Responds to a user action or browser event.
-1331 |       NET.hidden[c]=!NET.hidden[c]; b.classList.toggle("off",!!NET.hidden[c]);
+1334 |       NET.hidden[c]=!NET.hidden[c]; b.classList.toggle("off",!!NET.hidden[c]);
      # Continues the page structure, styling, or browser logic above.
-1332 |       if(NET.draw) NET.draw();
+1335 |       if(NET.draw) NET.draw();
      # Controls which browser steps run or repeats them for data items.
-1333 |     });
+1336 |     });
      # Closes the preceding element or code block.
-1334 |     lg.appendChild(b);
+1337 |     lg.appendChild(b);
      # Adds a newly built visual element to the page.
-1335 |   });
+1338 |   });
      # Closes the preceding element or code block.
-1336 |   var meta=document.createElement("span");
+1339 |   var meta=document.createElement("span");
      # Keeps a value used by the page's next steps.
-1337 |   meta.textContent="showing "+fmt(n)+" of "+fmt(payload.total_nodes)+
+1340 |   meta.textContent="showing "+fmt(n)+" of "+fmt(payload.total_nodes)+
      # Updates visible text or markup on the page.
-1338 |     " players · "+fmt(edges.length)+" of "+fmt(payload.total_edges)+" edges";
+1341 |     " players · "+fmt(edges.length)+" of "+fmt(payload.total_edges)+" edges";
      # Continues the page structure, styling, or browser logic above.
-1339 |   lg.appendChild(meta);
+1342 |   lg.appendChild(meta);
      # Adds a newly built visual element to the page.
-1340 | 
-1341 |   cv.onmousemove=function(e){
+1343 |
+1344 |   cv.onmousemove=function(e){
      # Continues the page structure, styling, or browser logic above.
-1342 |     var r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top;
+1345 |     var r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top;
      # Keeps a value used by the page's next steps.
-1343 |     var best=-1,bd=1e9;
+1346 |     var best=-1,bd=1e9;
      # Keeps a value used by the page's next steps.
-1344 |     for(var i=0;i<nodes.length;i++){
+1347 |     for(var i=0;i<nodes.length;i++){
      # Controls which browser steps run or repeats them for data items.
-1345 |       if(NET.hidden[nodes[i].comm]) continue;
+1348 |       if(NET.hidden[nodes[i].comm]) continue;
      # Controls which browser steps run or repeats them for data items.
-1346 |       var dx=nodes[i].x-mx, dy=nodes[i].y-my, d2=dx*dx+dy*dy;
+1349 |       var dx=nodes[i].x-mx, dy=nodes[i].y-my, d2=dx*dx+dy*dy;
      # Keeps a value used by the page's next steps.
-1347 |       if(d2<bd){bd=d2;best=i;}
+1350 |       if(d2<bd){bd=d2;best=i;}
      # Controls which browser steps run or repeats them for data items.
-1348 |     }
+1351 |     }
      # Closes the preceding element or code block.
-1349 |     if(bd<220){ NET.hover=best;
+1352 |     if(bd<220){ NET.hover=best;
      # Controls which browser steps run or repeats them for data items.
-1350 |       var nd=nodes[best];
+1353 |       var nd=nodes[best];
      # Keeps a value used by the page's next steps.
-1351 |       showTip(e,"<div class='t-h'>player</div>"+
+1354 |       showTip(e,"<div class='t-h'>player</div>"+
      # Continues the page structure, styling, or browser logic above.
-1352 |         "<div class='t-r'><span>degree</span><b>"+nd.deg+"</b></div>"+
+1355 |         "<div class='t-r'><span>degree</span><b>"+nd.deg+"</b></div>"+
      # Continues the page structure, styling, or browser logic above.
-1353 |         "<div class='t-r'><span>community</span><b>"+nd.comm+"</b></div>"+
+1356 |         "<div class='t-r'><span>community</span><b>"+nd.comm+"</b></div>"+
      # Continues the page structure, styling, or browser logic above.
-1354 |         "<div class='t-r'><span>early adopter</span><b>"+(nd.early?"yes":"no")+"</b></div>");
+1357 |         "<div class='t-r'><span>early adopter</span><b>"+(nd.early?"yes":"no")+"</b></div>");
      # Continues the page structure, styling, or browser logic above.
-1355 |     } else { NET.hover=-1; hideTip(); }
+1358 |     } else { NET.hover=-1; hideTip(); }
      # Continues the page structure, styling, or browser logic above.
-1356 |     if(NET.draw) NET.draw();     // the sim stops once settled; repaint the highlight
+1359 |     if(NET.draw) NET.draw();     // the sim stops once settled; repaint the highlight
      # Controls which browser steps run or repeats them for data items.
-1357 |   };
+1360 |   };
      # Closes the preceding element or code block.
-1358 |   cv.onmouseleave=function(){NET.hover=-1;hideTip();if(NET.draw)NET.draw();};
+1361 |   cv.onmouseleave=function(){NET.hover=-1;hideTip();if(NET.draw)NET.draw();};
      # Continues the page structure, styling, or browser logic above.
-1359 | 
-1360 |   var deg=nodes.map(function(d){return d.deg;});
+1362 |
+1363 |   var deg=nodes.map(function(d){return d.deg;});
      # Keeps a value used by the page's next steps.
-1361 |   var dmax=Math.max.apply(null,deg)||1;
+1364 |   var dmax=Math.max.apply(null,deg)||1;
      # Keeps a value used by the page's next steps.
-1362 |   var alive=0;
+1365 |   var alive=0;
      # Keeps a value used by the page's next steps.
-1363 |   cancelAnimationFrame(NET.raf);
+1366 |   cancelAnimationFrame(NET.raf);
      # Continues the page structure, styling, or browser logic above.
-1364 | 
-1365 |   function physics(){
+1367 |
+1368 |   function physics(){
      # Defines a browser function used by a chart, control, or live event.
-1366 |     var k=Math.max(6,Math.min(W(),H())/Math.sqrt(nodes.length))*1.1;
+1369 |     var k=Math.max(6,Math.min(W(),H())/Math.sqrt(nodes.length))*1.1;
      # Keeps a value used by the page's next steps.
-1367 |     // repulsion, sampled: O(n*9) rather than O(n^2), enough to separate at this size
+1370 |     // repulsion, sampled: O(n*9) rather than O(n^2), enough to separate at this size
      # Existing developer note about this section.
-1368 |     for(var i=0;i<nodes.length;i++){
+1371 |     for(var i=0;i<nodes.length;i++){
      # Controls which browser steps run or repeats them for data items.
-1369 |       var a=nodes[i];
+1372 |       var a=nodes[i];
      # Keeps a value used by the page's next steps.
-1370 |       for(var s=0;s<9;s++){
+1373 |       for(var s=0;s<9;s++){
      # Controls which browser steps run or repeats them for data items.
-1371 |         var b=nodes[(Math.random()*nodes.length)|0];
+1374 |         var b=nodes[(Math.random()*nodes.length)|0];
      # Keeps a value used by the page's next steps.
-1372 |         if(a===b) continue;
+1375 |         if(a===b) continue;
      # Controls which browser steps run or repeats them for data items.
-1373 |         var dx=a.x-b.x, dy=a.y-b.y, d2=dx*dx+dy*dy+0.01;
+1376 |         var dx=a.x-b.x, dy=a.y-b.y, d2=dx*dx+dy*dy+0.01;
      # Keeps a value used by the page's next steps.
-1374 |         var f=(k*k)/d2*0.45;
+1377 |         var f=(k*k)/d2*0.45;
      # Keeps a value used by the page's next steps.
-1375 |         a.vx+=dx*f*0.01; a.vy+=dy*f*0.01;
+1378 |         a.vx+=dx*f*0.01; a.vy+=dy*f*0.01;
      # Continues the page structure, styling, or browser logic above.
-1376 |       }
+1379 |       }
      # Closes the preceding element or code block.
-1377 |     }
+1380 |     }
      # Closes the preceding element or code block.
-1378 |     // attraction along edges
+1381 |     // attraction along edges
      # Existing developer note about this section.
-1379 |     for(var e2=0;e2<edges.length;e2++){
+1382 |     for(var e2=0;e2<edges.length;e2++){
      # Controls which browser steps run or repeats them for data items.
-1380 |       var u=nodes[edges[e2][0]], v=nodes[edges[e2][1]];
+1383 |       var u=nodes[edges[e2][0]], v=nodes[edges[e2][1]];
      # Keeps a value used by the page's next steps.
-1381 |       if(!u||!v) continue;
+1384 |       if(!u||!v) continue;
      # Controls which browser steps run or repeats them for data items.
-1382 |       var dx2=v.x-u.x, dy2=v.y-u.y, d=Math.sqrt(dx2*dx2+dy2*dy2)+0.01;
+1385 |       var dx2=v.x-u.x, dy2=v.y-u.y, d=Math.sqrt(dx2*dx2+dy2*dy2)+0.01;
      # Keeps a value used by the page's next steps.
-1383 |       var f2=(d*d)/k*0.00035;
+1386 |       var f2=(d*d)/k*0.00035;
      # Keeps a value used by the page's next steps.
-1384 |       u.vx+=dx2*f2; u.vy+=dy2*f2; v.vx-=dx2*f2; v.vy-=dy2*f2;
+1387 |       u.vx+=dx2*f2; u.vy+=dy2*f2; v.vx-=dx2*f2; v.vy-=dy2*f2;
      # Continues the page structure, styling, or browser logic above.
-1385 |     }
+1388 |     }
      # Closes the preceding element or code block.
-1386 |     var cxp=W()/2, cyp=H()/2, damp=0.86;
+1389 |     var cxp=W()/2, cyp=H()/2, damp=0.86;
      # Keeps a value used by the page's next steps.
-1387 |     for(var i3=0;i3<nodes.length;i3++){
+1390 |     for(var i3=0;i3<nodes.length;i3++){
      # Controls which browser steps run or repeats them for data items.
-1388 |       var p=nodes[i3];
+1391 |       var p=nodes[i3];
      # Keeps a value used by the page's next steps.
-1389 |       p.vx+=(cxp-p.x)*0.0016; p.vy+=(cyp-p.y)*0.0016;
+1392 |       p.vx+=(cxp-p.x)*0.0016; p.vy+=(cyp-p.y)*0.0016;
      # Continues the page structure, styling, or browser logic above.
-1390 |       p.vx*=damp; p.vy*=damp;
+1393 |       p.vx*=damp; p.vy*=damp;
      # Continues the page structure, styling, or browser logic above.
-1391 |       p.x+=Math.max(-6,Math.min(6,p.vx)); p.y+=Math.max(-6,Math.min(6,p.vy));
+1394 |       p.x+=Math.max(-6,Math.min(6,p.vx)); p.y+=Math.max(-6,Math.min(6,p.vy));
      # Continues the page structure, styling, or browser logic above.
-1392 |       p.x=Math.max(8,Math.min(W()-8,p.x)); p.y=Math.max(8,Math.min(H()-8,p.y));
+1395 |       p.x=Math.max(8,Math.min(W()-8,p.x)); p.y=Math.max(8,Math.min(H()-8,p.y));
      # Continues the page structure, styling, or browser logic above.
-1393 |     }
+1396 |     }
      # Closes the preceding element or code block.
-1394 |   }
+1397 |   }
      # Closes the preceding element or code block.
-1395 | 
-1396 |   function draw(){
+1398 |
+1399 |   function draw(){
      # Defines a browser function used by a chart, control, or live event.
-1397 |     var css=getComputedStyle(document.documentElement);
+1400 |     var css=getComputedStyle(document.documentElement);
      # Keeps a value used by the page's next steps.
-1398 |     ctx.clearRect(0,0,W(),H());
+1401 |     ctx.clearRect(0,0,W(),H());
      # Continues the page structure, styling, or browser logic above.
-1399 |     ctx.lineWidth=0.5;
+1402 |     ctx.lineWidth=0.5;
      # Continues the page structure, styling, or browser logic above.
-1400 |     ctx.strokeStyle=css.getPropertyValue("--rule-strong").trim();
+1403 |     ctx.strokeStyle=css.getPropertyValue("--rule-strong").trim();
      # Continues the page structure, styling, or browser logic above.
-1401 |     ctx.globalAlpha=NET.lit?0.12:0.28;   // recede while players are lit up
+1404 |     ctx.globalAlpha=NET.lit?0.12:0.28;   // recede while players are lit up
      # Continues the page structure, styling, or browser logic above.
-1402 |     ctx.beginPath();
+1405 |     ctx.beginPath();
      # Continues the page structure, styling, or browser logic above.
-1403 |     for(var e3=0;e3<edges.length;e3++){
+1406 |     for(var e3=0;e3<edges.length;e3++){
      # Controls which browser steps run or repeats them for data items.
-1404 |       var u2=nodes[edges[e3][0]], v2=nodes[edges[e3][1]];
+1407 |       var u2=nodes[edges[e3][0]], v2=nodes[edges[e3][1]];
      # Keeps a value used by the page's next steps.
-1405 |       if(!u2||!v2||NET.hidden[u2.comm]||NET.hidden[v2.comm]) continue;
+1408 |       if(!u2||!v2||NET.hidden[u2.comm]||NET.hidden[v2.comm]) continue;
      # Controls which browser steps run or repeats them for data items.
-1406 |       ctx.moveTo(u2.x,u2.y); ctx.lineTo(v2.x,v2.y);
+1409 |       ctx.moveTo(u2.x,u2.y); ctx.lineTo(v2.x,v2.y);
      # Continues the page structure, styling, or browser logic above.
-1407 |     }
+1410 |     }
      # Closes the preceding element or code block.
-1408 |     ctx.stroke(); ctx.globalAlpha=1;
+1411 |     ctx.stroke(); ctx.globalAlpha=1;
      # Continues the page structure, styling, or browser logic above.
-1409 | 
-1410 |     var lit=NET.lit;                 // players who played the line on the board
+1412 |
+1413 |     var lit=NET.lit;                 // players who played the line on the board
      # Keeps a value used by the page's next steps.
-1411 |     for(var i4=0;i4<nodes.length;i4++){
+1414 |     for(var i4=0;i4<nodes.length;i4++){
      # Controls which browser steps run or repeats them for data items.
-1412 |       var q=nodes[i4];
+1415 |       var q=nodes[i4];
      # Keeps a value used by the page's next steps.
-1413 |       if(NET.hidden[q.comm]) continue;
+1416 |       if(NET.hidden[q.comm]) continue;
      # Controls which browser steps run or repeats them for data items.
-1414 |       var on=!lit || lit.has(i4);
+1417 |       var on=!lit || lit.has(i4);
      # Keeps a value used by the page's next steps.
-1415 |       var r=2.2+Math.sqrt(q.deg/dmax)*7;
+1418 |       var r=2.2+Math.sqrt(q.deg/dmax)*7;
      # Keeps a value used by the page's next steps.
-1416 |       if(lit && on) r+=1.6;          // lift the matching players off the field
+1419 |       if(lit && on) r+=1.6;          // lift the matching players off the field
      # Controls which browser steps run or repeats them for data items.
-1417 |       ctx.beginPath(); ctx.arc(q.x,q.y,r,0,6.2832);
+1420 |       ctx.beginPath(); ctx.arc(q.x,q.y,r,0,6.2832);
      # Continues the page structure, styling, or browser logic above.
-1418 |       ctx.fillStyle=communityColour(q.comm);
+1421 |       ctx.fillStyle=communityColour(q.comm);
      # Continues the page structure, styling, or browser logic above.
-1419 |       ctx.globalAlpha = (NET.hover>=0 && NET.hover!==i4) ? 0.45
+1422 |       ctx.globalAlpha = (NET.hover>=0 && NET.hover!==i4) ? 0.45
      # Continues the page structure, styling, or browser logic above.
-1420 |                       : (on ? 1 : 0.12);
+1423 |                       : (on ? 1 : 0.12);
      # Continues the page structure, styling, or browser logic above.
-1421 |       ctx.fill();
+1424 |       ctx.fill();
      # Continues the page structure, styling, or browser logic above.
-1422 |       if(lit && on){                 // halo so they read at a glance
+1425 |       if(lit && on){                 // halo so they read at a glance
      # Controls which browser steps run or repeats them for data items.
-1423 |         ctx.lineWidth=2; ctx.strokeStyle=css.getPropertyValue("--ink").trim();
+1426 |         ctx.lineWidth=2; ctx.strokeStyle=css.getPropertyValue("--ink").trim();
      # Continues the page structure, styling, or browser logic above.
-1424 |         ctx.globalAlpha=0.55; ctx.stroke();
+1427 |         ctx.globalAlpha=0.55; ctx.stroke();
      # Continues the page structure, styling, or browser logic above.
-1425 |       } else if(q.early){
+1428 |       } else if(q.early){
      # Continues the page structure, styling, or browser logic above.
-1426 |         ctx.lineWidth=1.6; ctx.strokeStyle="#fff";
+1429 |         ctx.lineWidth=1.6; ctx.strokeStyle="#fff";
      # Continues the page structure, styling, or browser logic above.
-1427 |         ctx.globalAlpha=on?0.85:0.1; ctx.stroke();
+1430 |         ctx.globalAlpha=on?0.85:0.1; ctx.stroke();
      # Continues the page structure, styling, or browser logic above.
-1428 |       }
+1431 |       }
      # Closes the preceding element or code block.
-1429 |       if(NET.hover===i4){ ctx.lineWidth=2.4;
+1432 |       if(NET.hover===i4){ ctx.lineWidth=2.4;
      # Controls which browser steps run or repeats them for data items.
-1430 |         ctx.strokeStyle=css.getPropertyValue("--ink").trim();
+1433 |         ctx.strokeStyle=css.getPropertyValue("--ink").trim();
      # Continues the page structure, styling, or browser logic above.
-1431 |         ctx.globalAlpha=1; ctx.stroke(); }
+1434 |         ctx.globalAlpha=1; ctx.stroke(); }
      # Continues the page structure, styling, or browser logic above.
-1432 |     }
+1435 |     }
      # Closes the preceding element or code block.
-1433 |     ctx.globalAlpha=1;
+1436 |     ctx.globalAlpha=1;
      # Continues the page structure, styling, or browser logic above.
-1434 |   }
+1437 |   }
      # Closes the preceding element or code block.
-1435 |   NET.draw=draw;          // so a resize or a hover can repaint after the sim ends
+1438 |   NET.draw=draw;          // so a resize or a hover can repaint after the sim ends
      # Continues the page structure, styling, or browser logic above.
-1436 | 
-1437 |   function step(){
+1439 |
+1440 |   function step(){
      # Defines a browser function used by a chart, control, or live event.
-1438 |     alive++;
+1441 |     alive++;
      # Continues the page structure, styling, or browser logic above.
-1439 |     physics();
+1442 |     physics();
      # Continues the page structure, styling, or browser logic above.
-1440 |     draw();
+1443 |     draw();
      # Continues the page structure, styling, or browser logic above.
-1441 |     if(alive<900) NET.raf=requestAnimationFrame(step);
+1444 |     if(alive<900) NET.raf=requestAnimationFrame(step);
      # Controls which browser steps run or repeats them for data items.
-1442 |   }
+1445 |   }
      # Closes the preceding element or code block.
-1443 | 
-1444 |   step();
+1446 |
+1447 |   step();
      # Continues the page structure, styling, or browser logic above.
-1445 | }
+1448 | }
      # Closes the preceding element or code block.
-1446 | 
-1447 | /* ---------- held-k chart ---------- */
+1449 |
+1450 | /* ---------- held-k chart ---------- */
      # Existing developer note about this section.
-1448 | function drawHeld(rows){
+1451 | function drawHeld(rows){
      # Defines a browser function used by a chart, control, or live event.
-1449 |   var svg=$("cHeld"); svg.textContent="";
+1452 |   var svg=$("cHeld"); svg.textContent="";
      # Updates visible text or markup on the page.
-1450 |   if(!rows||!rows.length) return;
+1453 |   if(!rows||!rows.length) return;
      # Controls which browser steps run or repeats them for data items.
-1451 |   var ks=[...new Set(rows.map(function(r){return r.k;}))].sort(function(a,b){return a-b;}).slice(0,3);
+1454 |   var ks=[...new Set(rows.map(function(r){return r.k;}))].sort(function(a,b){return a-b;}).slice(0,3);
      # Keeps a value used by the page's next steps.
-1452 |   var use=rows.filter(function(r){return ks.indexOf(r.k)>=0 && r.n>=20;});
+1455 |   var use=rows.filter(function(r){return ks.indexOf(r.k)>=0 && r.n>=20;});
      # Keeps a value used by the page's next steps.
-1453 |   if(use.length<2) return;
+1456 |   if(use.length<2) return;
      # Controls which browser steps run or repeats them for data items.
-1454 |   var L=54,R=660,T=20,B=200;
+1457 |   var L=54,R=660,T=20,B=200;
      # Keeps a value used by the page's next steps.
-1455 |   var lo=Math.min.apply(null,use.map(function(r){return r.lo;}));
+1458 |   var lo=Math.min.apply(null,use.map(function(r){return r.lo;}));
      # Keeps a value used by the page's next steps.
-1456 |   var hi=Math.max.apply(null,use.map(function(r){return r.hi;}));
+1459 |   var hi=Math.max.apply(null,use.map(function(r){return r.hi;}));
      # Keeps a value used by the page's next steps.
-1457 |   var pad=(hi-lo)*0.12||0.01, y0=Math.max(0,lo-pad), y1=hi+pad;
+1460 |   var pad=(hi-lo)*0.12||0.01, y0=Math.max(0,lo-pad), y1=hi+pad;
      # Keeps a value used by the page's next steps.
-1458 |   var dmax=Math.max.apply(null,use.map(function(r){return r.d;}));
+1461 |   var dmax=Math.max.apply(null,use.map(function(r){return r.d;}));
      # Keeps a value used by the page's next steps.
-1459 |   var X=function(d){return L+(dmax<=1?0.5:(d-1)/(dmax-1))*(R-L);};
+1462 |   var X=function(d){return L+(dmax<=1?0.5:(d-1)/(dmax-1))*(R-L);};
      # Keeps a value used by the page's next steps.
-1460 |   var Y=function(v){return B-(v-y0)/(y1-y0)*(B-T);};
+1463 |   var Y=function(v){return B-(v-y0)/(y1-y0)*(B-T);};
      # Keeps a value used by the page's next steps.
-1461 |   frame(svg,{l:L,r:R,t:T,b:B,y0:y0,y1:y1,yTicks:4,yFmt:function(v){return pct(v,1);}});
+1464 |   frame(svg,{l:L,r:R,t:T,b:B,y0:y0,y1:y1,yTicks:4,yFmt:function(v){return pct(v,1);}});
      # Continues the page structure, styling, or browser logic above.
-1462 |   var cols=["var(--s-indigo)","var(--s-ochre)","var(--s-jade)"];
+1465 |   var cols=["var(--s-indigo)","var(--s-ochre)","var(--s-jade)"];
      # Keeps a value used by the page's next steps.
-1463 |   ks.forEach(function(k,ki){
+1466 |   ks.forEach(function(k,ki){
      # Continues the page structure, styling, or browser logic above.
-1464 |     var rs=use.filter(function(r){return r.k===k;}).sort(function(a,b){return a.d-b.d;});
+1467 |     var rs=use.filter(function(r){return r.k===k;}).sort(function(a,b){return a.d-b.d;});
      # Keeps a value used by the page's next steps.
-1465 |     if(rs.length<2) return;
+1468 |     if(rs.length<2) return;
      # Controls which browser steps run or repeats them for data items.
-1466 |     var col=cols[ki%cols.length];
+1469 |     var col=cols[ki%cols.length];
      # Keeps a value used by the page's next steps.
-1467 |     rs.forEach(function(r){
+1470 |     rs.forEach(function(r){
      # Continues the page structure, styling, or browser logic above.
-1468 |       svg.appendChild(el("line",{x1:X(r.d),x2:X(r.d),y1:Y(r.lo),y2:Y(r.hi),
+1471 |       svg.appendChild(el("line",{x1:X(r.d),x2:X(r.d),y1:Y(r.lo),y2:Y(r.hi),
      # Adds a newly built visual element to the page.
-1469 |         stroke:col,"stroke-width":1.4,opacity:.4,"stroke-linecap":"round"}));
+1472 |         stroke:col,"stroke-width":1.4,opacity:.4,"stroke-linecap":"round"}));
      # Continues the page structure, styling, or browser logic above.
-1470 |     });
+1473 |     });
      # Closes the preceding element or code block.
-1471 |     svg.appendChild(el("path",{d:spline(rs.map(function(r){return [X(r.d),Y(r.rate)];})),
+1474 |     svg.appendChild(el("path",{d:spline(rs.map(function(r){return [X(r.d),Y(r.rate)];})),
      # Adds a newly built visual element to the page.
-1472 |       fill:"none",stroke:col,"stroke-width":2.1,"stroke-linejoin":"round","stroke-linecap":"round"}));
+1475 |       fill:"none",stroke:col,"stroke-width":2.1,"stroke-linejoin":"round","stroke-linecap":"round"}));
      # Continues the page structure, styling, or browser logic above.
-1473 |     rs.forEach(function(r){
+1476 |     rs.forEach(function(r){
      # Continues the page structure, styling, or browser logic above.
-1474 |       svg.appendChild(el("circle",{cx:X(r.d),cy:Y(r.rate),r:4.2,fill:col,
+1477 |       svg.appendChild(el("circle",{cx:X(r.d),cy:Y(r.rate),r:4.2,fill:col,
      # Adds a newly built visual element to the page.
-1475 |         stroke:"var(--surface)","stroke-width":2}));
+1478 |         stroke:"var(--surface)","stroke-width":2}));
      # Continues the page structure, styling, or browser logic above.
-1476 |       hotspot(svg,X(r.d),Y(r.rate),14,
+1479 |       hotspot(svg,X(r.d),Y(r.rate),14,
      # Continues the page structure, styling, or browser logic above.
-1477 |         "<div class='t-h'>k = "+k+", d = "+r.d+"</div>"+
+1480 |         "<div class='t-h'>k = "+k+", d = "+r.d+"</div>"+
      # Continues the page structure, styling, or browser logic above.
-1478 |         "<div class='t-r'><span>adoption</span><b>"+pct(r.rate,2)+"</b></div>"+
+1481 |         "<div class='t-r'><span>adoption</span><b>"+pct(r.rate,2)+"</b></div>"+
      # Continues the page structure, styling, or browser logic above.
-1479 |         "<div class='t-r'><span>n</span><b>"+fmt(r.n)+"</b></div>");
+1482 |         "<div class='t-r'><span>n</span><b>"+fmt(r.n)+"</b></div>");
      # Continues the page structure, styling, or browser logic above.
-1480 |     });
+1483 |     });
      # Closes the preceding element or code block.
-1481 |     var last=rs[rs.length-1];
+1484 |     var last=rs[rs.length-1];
      # Keeps a value used by the page's next steps.
-1482 |     var lb=el("text",{x:X(last.d)+10,y:Y(last.rate)+4,class:"dlabel",fill:col});
+1485 |     var lb=el("text",{x:X(last.d)+10,y:Y(last.rate)+4,class:"dlabel",fill:col});
      # Keeps a value used by the page's next steps.
-1483 |     lb.textContent="k="+k; svg.appendChild(lb);
+1486 |     lb.textContent="k="+k; svg.appendChild(lb);
      # Updates visible text or markup on the page.
-1484 |   });
+1487 |   });
      # Closes the preceding element or code block.
-1485 |   for(var d=1;d<=dmax;d++){
+1488 |   for(var d=1;d<=dmax;d++){
      # Controls which browser steps run or repeats them for data items.
-1486 |     var t=el("text",{x:X(d),y:B+18,"text-anchor":"middle",class:"ax-label"});
+1489 |     var t=el("text",{x:X(d),y:B+18,"text-anchor":"middle",class:"ax-label"});
      # Keeps a value used by the page's next steps.
-1487 |     t.textContent=d; svg.appendChild(t);
+1490 |     t.textContent=d; svg.appendChild(t);
      # Updates visible text or markup on the page.
-1488 |   }
+1491 |   }
      # Closes the preceding element or code block.
-1489 |   var xt=el("text",{x:(L+R)/2,y:B+42,"text-anchor":"middle",class:"ax-title"});
+1492 |   var xt=el("text",{x:(L+R)/2,y:B+42,"text-anchor":"middle",class:"ax-title"});
      # Keeps a value used by the page's next steps.
-1490 |   xt.textContent="d — distinct exposers (k fixed)"; svg.appendChild(xt);
+1493 |   xt.textContent="d — distinct exposers (k fixed)"; svg.appendChild(xt);
      # Updates visible text or markup on the page.
-1491 | }
+1494 | }
      # Closes the preceding element or code block.
-1492 | 
-1493 | /* ---------- event handling ---------- */
+1495 |
+1496 | /* ---------- event handling ---------- */
      # Existing developer note about this section.
-1494 | function setStage(key,state,detail){
+1497 | function setStage(key,state,detail){
      # Defines a browser function used by a chart, control, or live event.
-1495 |   var n=document.querySelector('.sg[data-key="'+key+'"]'); if(!n) return;
+1498 |   var n=document.querySelector('.sg[data-key="'+key+'"]'); if(!n) return;
      # Keeps a value used by the page's next steps.
-1496 |   n.dataset.state=state;
+1499 |   n.dataset.state=state;
      # Continues the page structure, styling, or browser logic above.
-1497 |   n.querySelector(".st").textContent=detail?detail:state;
+1500 |   n.querySelector(".st").textContent=detail?detail:state;
      # Updates visible text or markup on the page.
-1498 | }
+1501 | }
      # Closes the preceding element or code block.
-1499 | function reset(){
+1502 | function reset(){
      # Defines a browser function used by a chart, control, or live event.
-1500 |   ["mScan","mKept","mRate","mPlayers","mTrials","mAdopt"].forEach(function(i){$(i).textContent="—";});
+1503 |   ["mScan","mKept","mRate","mPlayers","mTrials","mAdopt"].forEach(function(i){$(i).textContent="—";});
      # Updates visible text or markup on the page.
-1501 |   $("log").textContent=""; $("cCurve").textContent=""; $("cExcess").textContent="";
+1504 |   $("log").textContent=""; $("cCurve").textContent=""; $("cExcess").textContent="";
      # Updates visible text or markup on the page.
-1502 |   $("cHeld").textContent=""; $("cSpark").textContent="";
+1505 |   $("cHeld").textContent=""; $("cSpark").textContent="";
      # Updates visible text or markup on the page.
-1503 |   SPARK=[]; NET.nodes=[]; NET.edges=[]; cancelAnimationFrame(NET.raf);
+1506 |   SPARK=[]; NET.nodes=[]; NET.edges=[]; cancelAnimationFrame(NET.raf);
      # Continues the page structure, styling, or browser logic above.
-1504 |   $("netCanvas").classList.remove("ready");
+1507 |   $("netCanvas").classList.remove("ready");
      # Continues the page structure, styling, or browser logic above.
-1505 |   $("netCanvas").getContext("2d").clearRect(0,0,9999,9999);
+1508 |   $("netCanvas").getContext("2d").clearRect(0,0,9999,9999);
      # Continues the page structure, styling, or browser logic above.
-1506 |   $("netLegend").textContent=""; $("nullToggleWrap").hidden=true;
+1509 |   $("netLegend").textContent=""; $("nullToggleWrap").hidden=true;
      # Updates visible text or markup on the page.
-1507 |   $("ticker").textContent=""; $("openList").textContent="";
+1510 |   $("ticker").textContent=""; $("openList").textContent="";
      # Updates visible text or markup on the page.
-1508 |   clearInterval(GAME.timer); GAME.openings=[]; GAME.lineSans=[];
+1511 |   clearInterval(GAME.timer); GAME.openings=[]; GAME.lineSans=[];
      # Continues the page structure, styling, or browser logic above.
-1509 |   resetBoard();
+1512 |   resetBoard();
      # Continues the page structure, styling, or browser logic above.
-1510 |   $("nullToggle").checked=true;
+1513 |   $("nullToggle").checked=true;
      # Continues the page structure, styling, or browser logic above.
-1511 |   CURVE={rows:[],nullRows:[],held:[],showNull:true};
+1514 |   CURVE={rows:[],nullRows:[],held:[],showNull:true};
      # Continues the page structure, styling, or browser logic above.
-1512 |   $("verdict").classList.remove("on");
+1515 |   $("verdict").classList.remove("on");
      # Continues the page structure, styling, or browser logic above.
-1513 |   $("vClaim").textContent="Running…"; $("vEvidence").textContent="";
+1516 |   $("vClaim").textContent="Running…"; $("vEvidence").textContent="";
      # Updates visible text or markup on the page.
-1514 |   $("curveHint").textContent="Waiting for the curve stage…";
+1517 |   $("curveHint").textContent="Waiting for the curve stage…";
      # Updates visible text or markup on the page.
-1515 |   document.querySelectorAll(".sg").forEach(function(n){
+1518 |   document.querySelectorAll(".sg").forEach(function(n){
      # Continues the page structure, styling, or browser logic above.
-1516 |     n.dataset.state="pending"; n.querySelector(".st").textContent="pending";});
+1519 |     n.dataset.state="pending"; n.querySelector(".st").textContent="pending";});
      # Updates visible text or markup on the page.
-1517 | }
+1520 | }
      # Closes the preceding element or code block.
-1518 | 
-1519 | function handle(e){
+1521 |
+1522 | function handle(e){
      # Defines a browser function used by a chart, control, or live event.
-1520 |   /* Every event is a small JSON snapshot from runner.py. The kind selects the
+1523 |   /* Every event is a small JSON snapshot from runner.py. The kind selects the
      # Existing developer note about this section.
-1521 |      matching panel, so the page can update while the worker is still running. */
+1524 |      matching panel, so the page can update while the worker is still running. */
      # Continues the page structure, styling, or browser logic above.
-1522 |   switch(e.kind){
+1525 |   switch(e.kind){
      # Continues the page structure, styling, or browser logic above.
-1523 |     case "init":
+1526 |     case "init":
      # Handles one type of progress event sent by the Python runner.
-1524 |       runMonth=e.month;
+1527 |       runMonth=e.month;
      # Continues the page structure, styling, or browser logic above.
-1525 |       buildRail(e.stages);
+1528 |       buildRail(e.stages);
      # Continues the page structure, styling, or browser logic above.
-1526 |       logLine(e.t,"Run started · "+(e.month==="demo-2016-01"?"classroom sample":"month "+e.month)+
+1529 |       logLine(e.t,"Run started · "+(e.month.startsWith("demo-")?"classroom sample":"month "+e.month)+
      # Continues the page structure, styling, or browser logic above.
-1527 |         (e.max_games?(" · cap "+fmt(e.max_games)+" games"):" · full month"),"hl");
+1530 |         (e.max_games?(" · cap "+fmt(e.max_games)+" games"):" · full month"),"hl");
      # Continues the page structure, styling, or browser logic above.
-1528 |       break;
+1531 |       break;
      # Continues the page structure, styling, or browser logic above.
-1529 |     case "log": if(e.level!=="trace")logLine(e.t,e.msg,e.level); break;
+1532 |     case "log": if(e.level!=="trace")logLine(e.t,e.msg,e.level); break;
      # Handles one type of progress event sent by the Python runner.
-1530 |     case "stage": setStage(e.key,e.state,e.detail); break;
+1533 |     case "stage": setStage(e.key,e.state,e.detail); break;
      # Handles one type of progress event sent by the Python runner.
-1531 |     case "scan":
+1534 |     case "scan":
      # Handles one type of progress event sent by the Python runner.
-1532 |       $("mScan").textContent=fmt(e.scanned);
+1535 |       $("mScan").textContent=fmt(e.scanned);
      # Updates visible text or markup on the page.
-1533 |       $("mKept").textContent=fmt(e.kept);
+1536 |       $("mKept").textContent=fmt(e.kept);
      # Updates visible text or markup on the page.
-1534 |       $("mRate").textContent=fmt(e.rate);
+1537 |       $("mRate").textContent=fmt(e.rate);
      # Updates visible text or markup on the page.
-1535 |       SPARK.push(e.rate); if(SPARK.length>90) SPARK.shift();
+1538 |       SPARK.push(e.rate); if(SPARK.length>90) SPARK.shift();
      # Continues the page structure, styling, or browser logic above.
-1536 |       drawSpark(); pushTicker(e.game);
-     # Continues the page structure, styling, or browser logic above.
-1537 |       break;
-     # Continues the page structure, styling, or browser logic above.
-1538 |     case "openings":
-     # Handles one type of progress event sent by the Python runner.
-1539 |       showOpenings(e.openings);
+1539 |       drawSpark(); pushTicker(e.game);
      # Continues the page structure, styling, or browser logic above.
 1540 |       break;
      # Continues the page structure, styling, or browser logic above.
-1541 |     case "graph":
+1541 |     case "openings":
      # Handles one type of progress event sent by the Python runner.
-1542 |       startNetwork(e);
+1542 |       showOpenings(e.openings);
      # Continues the page structure, styling, or browser logic above.
-1543 |       $("netHint").textContent="Top "+fmt(e.nodes.length)+" players by degree. "+
-     # Updates visible text or markup on the page.
-1544 |         "Colour groups connected players, size shows their number of connections, and a white ring marks an early adopter. "+
+1543 |       break;
      # Continues the page structure, styling, or browser logic above.
-1545 |         "Click a community below to dim it.";
-     # Continues the page structure, styling, or browser logic above.
-1546 |       break;
-     # Continues the page structure, styling, or browser logic above.
-1547 |     case "sample":
+1544 |     case "graph":
      # Handles one type of progress event sent by the Python runner.
-1548 |       $("mScan").textContent=fmt(e.games)+"";
-     # Updates visible text or markup on the page.
-1549 |       $("mKept").textContent=fmt(e.games);
-     # Updates visible text or markup on the page.
-1550 |       $("mPlayers").textContent=fmt(e.players);
-     # Updates visible text or markup on the page.
-1551 |       logLine(e.t,"Kept "+fmt(e.games)+" games · "+fmt(e.players)+" players · "+
+1545 |       startNetwork(e);
      # Continues the page structure, styling, or browser logic above.
-1552 |         e.openings+" ECO codes · spans "+e.span_days+" days","ok");
+1546 |       $("netHint").textContent="Top "+fmt(e.nodes.length)+" players by degree. "+
+     # Updates visible text or markup on the page.
+1547 |         "Colour groups connected players, size shows their number of connections, and a white ring marks an early adopter. "+
      # Continues the page structure, styling, or browser logic above.
-1553 |       var sk=e.skipped||{};
+1548 |         "Click a community below to dim it.";
+     # Continues the page structure, styling, or browser logic above.
+1549 |       break;
+     # Continues the page structure, styling, or browser logic above.
+1550 |     case "sample":
+     # Handles one type of progress event sent by the Python runner.
+1551 |       $("mScan").textContent=fmt(e.games)+"";
+     # Updates visible text or markup on the page.
+1552 |       $("mKept").textContent=fmt(e.games);
+     # Updates visible text or markup on the page.
+1553 |       $("mPlayers").textContent=fmt(e.players);
+     # Updates visible text or markup on the page.
+1554 |       logLine(e.t,"Kept "+fmt(e.games)+" games · "+fmt(e.players)+" players · "+
+     # Continues the page structure, styling, or browser logic above.
+1555 |         e.openings+" ECO codes · spans "+e.span_days+" days","ok");
+     # Continues the page structure, styling, or browser logic above.
+1556 |       var sk=e.skipped||{};
      # Keeps a value used by the page's next steps.
-1554 |       var dropped=Object.keys(sk).reduce(function(n,k){return n+Number(sk[k]||0);},0);
+1557 |       var dropped=Object.keys(sk).reduce(function(n,k){return n+Number(sk[k]||0);},0);
      # Keeps a value used by the page's next steps.
-1555 |       if(dropped) logLine(null,fmt(dropped)+" games excluded by study filters.","info");
+1558 |       if(dropped) logLine(null,fmt(dropped)+" games excluded by study filters.","info");
      # Controls which browser steps run or repeats them for data items.
-1556 |       break;
+1559 |       break;
      # Continues the page structure, styling, or browser logic above.
-1557 |     case "window":
+1560 |     case "window":
      # Handles one type of progress event sent by the Python runner.
-1558 |       logLine(e.t,"Adoption window: "+e.days+" day(s)"+(e.auto?" (auto-fitted)":""),
+1561 |       logLine(e.t,"Adoption window: "+e.days+" day(s)"+(e.auto?" (auto-fitted)":""),
      # Continues the page structure, styling, or browser logic above.
-1559 |         e.auto?"warn":"info");
+1562 |         e.auto?"warn":"info");
      # Continues the page structure, styling, or browser logic above.
-1560 |       break;
+1563 |       break;
      # Continues the page structure, styling, or browser logic above.
-1561 |     case "trials":
+1564 |     case "trials":
      # Handles one type of progress event sent by the Python runner.
-1562 |       $("mTrials").textContent=fmt(e.n);
+1565 |       $("mTrials").textContent=fmt(e.n);
      # Updates visible text or markup on the page.
-1563 |       $("mAdopt").textContent=fmt(e.adoptions)+" ";
+1566 |       $("mAdopt").textContent=fmt(e.adoptions)+" ";
      # Updates visible text or markup on the page.
-1564 |       var s=document.createElement("small"); s.textContent=pct(e.rate,1);
+1567 |       var s=document.createElement("small"); s.textContent=pct(e.rate,1);
      # Updates visible text or markup on the page.
-1565 |       $("mAdopt").appendChild(s);
+1568 |       $("mAdopt").appendChild(s);
      # Adds a newly built visual element to the page.
-1566 |       break;
+1569 |       break;
      # Continues the page structure, styling, or browser logic above.
-1567 |     case "network":
+1570 |     case "network":
      # Handles one type of progress event sent by the Python runner.
-1568 |       logLine(e.t,"Graph: "+fmt(e.nodes)+" nodes, "+fmt(e.edges)+" edges, "+
+1571 |       logLine(e.t,"Graph: "+fmt(e.nodes)+" nodes, "+fmt(e.edges)+" edges, "+
      # Continues the page structure, styling, or browser logic above.
-1569 |         e.communities+" communities, modularity "+e.modularity,"info");
+1572 |         e.communities+" communities, modularity "+e.modularity,"info");
      # Continues the page structure, styling, or browser logic above.
-1570 |       if(e.early&&e.early.early&&e.early.rest)
+1573 |       if(e.early&&e.early.early&&e.early.rest)
      # Controls which browser steps run or repeats them for data items.
-1571 |         logLine(null,"  early adopters degree "+e.early.early.degree+
+1574 |         logLine(null,"  early adopters degree "+e.early.early.degree+
      # Continues the page structure, styling, or browser logic above.
-1572 |           " vs "+e.early.rest.degree,"info");
+1575 |           " vs "+e.early.rest.degree,"info");
      # Continues the page structure, styling, or browser logic above.
-1573 |       break;
+1576 |       break;
      # Continues the page structure, styling, or browser logic above.
-1574 |     case "curve":
+1577 |     case "curve":
      # Handles one type of progress event sent by the Python runner.
-1575 |       CURVE.rows=e.by_d||[]; CURVE.held=e.held_k||[]; drawCurve(); drawHeld(CURVE.held);
+1578 |       CURVE.rows=e.by_d||[]; CURVE.held=e.held_k||[]; drawCurve(); drawHeld(CURVE.held);
      # Continues the page structure, styling, or browser logic above.
-1576 |       $("curveHint").textContent="Observed curve only. The shuffled-time comparison is still running.";
+1579 |       $("curveHint").textContent="Observed curve only. The shuffled-time comparison is still running.";
      # Updates visible text or markup on the page.
-1577 |       break;
-     # Continues the page structure, styling, or browser logic above.
-1578 |     case "null_progress":
-     # Handles one type of progress event sent by the Python runner.
-1579 |       setStage("null","running",e.done+" / "+e.total+" shuffles");
-     # Continues the page structure, styling, or browser logic above.
 1580 |       break;
      # Continues the page structure, styling, or browser logic above.
-1581 |     case "null":
+1581 |     case "null_progress":
      # Handles one type of progress event sent by the Python runner.
-1582 |       CURVE.nullRows=(e.rows||[]).map(function(r){
+1582 |       setStage("null","running",e.done+" / "+e.total+" shuffles");
      # Continues the page structure, styling, or browser logic above.
-1583 |         return {d:r.d,rate_null:r.rate_null,lift_over_null:r.lift_over_null,z:r.z_vs_null};});
+1583 |       break;
+     # Continues the page structure, styling, or browser logic above.
+1584 |     case "null":
+     # Handles one type of progress event sent by the Python runner.
+1585 |       CURVE.nullRows=(e.rows||[]).map(function(r){
+     # Continues the page structure, styling, or browser logic above.
+1586 |         return {d:r.d,rate_null:r.rate_null,lift_over_null:r.lift_over_null,z:r.z_vs_null};});
      # Hands the calculated value back to the calling function.
-1584 |       drawCurve(); drawExcess(CURVE.nullRows);
+1587 |       drawCurve(); drawExcess(CURVE.nullRows);
      # Continues the page structure, styling, or browser logic above.
-1585 |       $("nullToggleWrap").hidden=false;
+1588 |       $("nullToggleWrap").hidden=false;
      # Continues the page structure, styling, or browser logic above.
-1586 |       $("curveHint").textContent="Observed and shuffled-time curves are ready for comparison.";
+1589 |       $("curveHint").textContent="Observed and shuffled-time curves are ready for comparison.";
      # Updates visible text or markup on the page.
-1587 |       var first=CURVE.nullRows[0], last=CURVE.nullRows[CURVE.nullRows.length-1];
+1590 |       var first=CURVE.nullRows[0], last=CURVE.nullRows[CURVE.nullRows.length-1];
      # Keeps a value used by the page's next steps.
-1588 |       if(first&&last&&first.lift_over_null!=null&&last.lift_over_null!=null){
+1591 |       if(first&&last&&first.lift_over_null!=null&&last.lift_over_null!=null){
      # Controls which browser steps run or repeats them for data items.
-1589 |         logLine(e.t,"Excess over null: "+first.lift_over_null.toFixed(3)+"× at d=1 → "+
+1592 |         logLine(e.t,"Excess over null: "+first.lift_over_null.toFixed(3)+"× at d=1 → "+
      # Continues the page structure, styling, or browser logic above.
-1590 |           last.lift_over_null.toFixed(3)+"× at d="+last.d,"hl");
+1593 |           last.lift_over_null.toFixed(3)+"× at d="+last.d,"hl");
      # Continues the page structure, styling, or browser logic above.
-1591 |       }
+1594 |       }
      # Closes the preceding element or code block.
-1592 |       break;
+1595 |       break;
      # Continues the page structure, styling, or browser logic above.
-1593 |     case "matched":
+1596 |     case "matched":
      # Handles one type of progress event sent by the Python runner.
-1594 |       if(e.n_pairs) logLine(e.t,"Matched controls: exposed "+pct(e.exposed_adoption_rate,2)+
+1597 |       if(e.n_pairs) logLine(e.t,"Matched controls: exposed "+pct(e.exposed_adoption_rate,2)+
      # Controls which browser steps run or repeats them for data items.
-1595 |         " vs control "+pct(e.control_adoption_rate,2)+
+1598 |         " vs control "+pct(e.control_adoption_rate,2)+
      # Continues the page structure, styling, or browser logic above.
-1596 |         "  (diff "+(e.difference*100).toFixed(2)+" pp, CI ["+
+1599 |         "  (diff "+(e.difference*100).toFixed(2)+" pp, CI ["+
      # Continues the page structure, styling, or browser logic above.
-1597 |         (e.ci95[0]*100).toFixed(2)+", "+(e.ci95[1]*100).toFixed(2)+"])","hl");
+1600 |         (e.ci95[0]*100).toFixed(2)+", "+(e.ci95[1]*100).toFixed(2)+"])","hl");
      # Continues the page structure, styling, or browser logic above.
-1598 |       else logLine(e.t,"Matched controls: no usable pairs at this sample size","warn");
+1601 |       else logLine(e.t,"Matched controls: no usable pairs at this sample size","warn");
      # Controls which browser steps run or repeats them for data items.
-1599 |       window.__matched=e;
+1602 |       window.__matched=e;
      # Continues the page structure, styling, or browser logic above.
-1600 |       break;
+1603 |       break;
      # Continues the page structure, styling, or browser logic above.
-1601 |     case "predict":
+1604 |     case "predict":
      # Handles one type of progress event sent by the Python runner.
-1602 |       if(e.error){ logLine(e.t,"Prediction: "+e.error,"warn"); break; }
+1605 |       if(e.error){ logLine(e.t,"Prediction: "+e.error,"warn"); break; }
      # Controls which browser steps run or repeats them for data items.
-1603 |       logLine(e.t,"Held-out AUC — baseline "+e.auc_baseline+
+1606 |       logLine(e.t,"Held-out AUC — baseline "+e.auc_baseline+
      # Continues the page structure, styling, or browser logic above.
-1604 |         " → +repertoire "+e.auc_repertoire+" → +network "+e.auc_network,"info");
+1607 |         " → +repertoire "+e.auc_repertoire+" → +network "+e.auc_network,"info");
      # Continues the page structure, styling, or browser logic above.
-1605 |       logLine(null,"  "+e.reading,"hl");
+1608 |       logLine(null,"  "+e.reading,"hl");
      # Continues the page structure, styling, or browser logic above.
-1606 |       logLine(null,"  Training and held-out scores differ; interpret the model comparison cautiously.","info");
+1609 |       logLine(null,"  Training and held-out scores differ; interpret the model comparison cautiously.","info");
      # Continues the page structure, styling, or browser logic above.
-1607 |       break;
+1610 |       break;
      # Continues the page structure, styling, or browser logic above.
-1608 |     case "verdict": showVerdict(e); break;
+1611 |     case "verdict": showVerdict(e); break;
      # Handles one type of progress event sent by the Python runner.
-1609 |     case "done":
+1612 |     case "done":
      # Handles one type of progress event sent by the Python runner.
-1610 |       $("run").disabled=false; $("stop").disabled=true;
+1613 |       $("run").disabled=false; $("stop").disabled=true;
      # Continues the page structure, styling, or browser logic above.
-1611 |       if(!e.ok){
+1614 |       if(!e.ok){
      # Controls which browser steps run or repeats them for data items.
-1612 |         $("verdict").classList.add("on");
+1615 |         $("verdict").classList.add("on");
      # Continues the page structure, styling, or browser logic above.
-1613 |         $("vClaim").textContent=e.cancelled?"Run cancelled.":e.interrupted?
+1616 |         $("vClaim").textContent=e.cancelled?"Run cancelled.":e.interrupted?
      # Updates visible text or markup on the page.
-1614 |           "Run interrupted. Choose Retry in Recent runs.":
+1617 |           "Run interrupted. Choose Retry in Recent runs.":
      # Continues the page structure, styling, or browser logic above.
-1615 |           "Run stopped before results were available. Choose Retry in Recent runs.";
+1618 |           "Run stopped before results were available. Choose Retry in Recent runs.";
      # Continues the page structure, styling, or browser logic above.
-1616 |       }
+1619 |       }
      # Closes the preceding element or code block.
-1617 |       if(e.ok) logLine(e.t,"Done in "+e.seconds+"s.","ok");
+1620 |       if(e.ok) logLine(e.t,"Done in "+e.seconds+"s.","ok");
      # Controls which browser steps run or repeats them for data items.
-1618 |       else if(e.cancelled) logLine(e.t,"Run cancelled.","warn");
+1621 |       else if(e.cancelled) logLine(e.t,"Run cancelled.","warn");
      # Controls which browser steps run or repeats them for data items.
-1619 |       else if(e.interrupted) logLine(e.t,"Run interrupted. Choose Retry in Recent runs to restart from the cached slice.","warn");
+1622 |       else if(e.interrupted) logLine(e.t,"Run interrupted. Choose Retry in Recent runs to restart from the cached slice.","warn");
      # Controls which browser steps run or repeats them for data items.
-1620 |       break;
+1623 |       break;
      # Continues the page structure, styling, or browser logic above.
-1621 |   }
+1624 |   }
      # Closes the preceding element or code block.
-1622 | }
+1625 | }
      # Closes the preceding element or code block.
-1623 | 
-1624 | function showVerdict(v){
+1626 |
+1627 | function showVerdict(v){
      # Defines a browser function used by a chart, control, or live event.
-1625 |   var box=$("verdict"); box.classList.add("on");
+1628 |   var box=$("verdict"); box.classList.add("on");
      # Keeps a value used by the page's next steps.
-1626 |   $("vClaim").textContent=v.verdict.charAt(0).toUpperCase()+v.verdict.slice(1);
+1629 |   $("vClaim").textContent=v.verdict.charAt(0).toUpperCase()+v.verdict.slice(1);
      # Updates visible text or markup on the page.
-1627 |   var ev=$("vEvidence"); ev.textContent="";
+1630 |   var ev=$("vEvidence"); ev.textContent="";
      # Updates visible text or markup on the page.
-1628 |   var bits=[];
+1631 |   var bits=[];
      # Keeps a value used by the page's next steps.
-1629 |   if(v.raw_lift_d_last_over_first!=null) bits.push(["raw lift","×"+v.raw_lift_d_last_over_first]);
+1632 |   if(v.raw_lift_d_last_over_first!=null) bits.push(["raw lift","×"+v.raw_lift_d_last_over_first]);
      # Controls which browser steps run or repeats them for data items.
-1630 |   if(v.lift_over_null_at_min_d!=null) bits.push(["excess at d=1","×"+v.lift_over_null_at_min_d]);
+1633 |   if(v.lift_over_null_at_min_d!=null) bits.push(["excess at d=1","×"+v.lift_over_null_at_min_d]);
      # Controls which browser steps run or repeats them for data items.
-1631 |   if(v.lift_over_null_at_max_d!=null) bits.push(["excess at d=max","×"+v.lift_over_null_at_max_d]);
+1634 |   if(v.lift_over_null_at_max_d!=null) bits.push(["excess at d=max","×"+v.lift_over_null_at_max_d]);
      # Controls which browser steps run or repeats them for data items.
-1632 |   if(v.separated_at_fixed_k!=null) bits.push(["fixed-k separation",v.separated_at_fixed_k?"yes":"no"]);
+1635 |   if(v.separated_at_fixed_k!=null) bits.push(["fixed-k separation",v.separated_at_fixed_k?"yes":"no"]);
      # Controls which browser steps run or repeats them for data items.
-1633 |   var m=window.__matched;
+1636 |   var m=window.__matched;
      # Keeps a value used by the page's next steps.
-1634 |   if(m&&m.n_pairs) bits.push(["matched diff",(m.difference*100).toFixed(2)+" pp"]);
+1637 |   if(m&&m.n_pairs) bits.push(["matched diff",(m.difference*100).toFixed(2)+" pp"]);
      # Controls which browser steps run or repeats them for data items.
-1635 |   if(runMonth==="demo-2016-01")bits.push(["sample","60,000 real games / exploratory"]);
+1638 |   if(runMonth&&runMonth.startsWith("demo-"))bits.push(["sample",(runMonth==="demo-fast-2016-01"?"20,000":"60,000")+" real games / exploratory"]);
      # Controls which browser steps run or repeats them for data items.
-1636 |   bits.forEach(function(b){
+1639 |   bits.forEach(function(b){
      # Continues the page structure, styling, or browser logic above.
-1637 |     var s=document.createElement("span");
+1640 |     var s=document.createElement("span");
      # Keeps a value used by the page's next steps.
-1638 |     s.innerHTML=b[0]+" <b>"+b[1]+"</b>"; ev.appendChild(s);
+1641 |     s.innerHTML=b[0]+" <b>"+b[1]+"</b>"; ev.appendChild(s);
      # Updates visible text or markup on the page.
-1639 |   });
+1642 |   });
      # Closes the preceding element or code block.
-1640 | }
+1643 | }
      # Closes the preceding element or code block.
-1641 | 
-1642 | /* ---------- saved runs ---------- */
+1644 |
+1645 | /* ---------- saved runs ---------- */
      # Existing developer note about this section.
-1643 | function refreshHistory(restore){
+1646 | function refreshHistory(restore){
      # Defines a browser function used by a chart, control, or live event.
-1644 |   return fetch("/api/runs").then(function(r){if(!r.ok)throw Error("history unavailable");return r.json();})
+1647 |   return fetch("/api/runs").then(function(r){if(!r.ok)throw Error("history unavailable");return r.json();})
      # Calls a local server API and handles its response.
-1645 |     .then(function(d){
+1648 |     .then(function(d){
      # Continues the page structure, styling, or browser logic above.
-1646 |       var list=$("runHistory"); list.textContent="";
+1649 |       var list=$("runHistory"); list.textContent="";
      # Updates visible text or markup on the page.
-1647 |       if(!d.runs.length){list.textContent="No saved runs yet.";return;}
+1650 |       if(!d.runs.length){list.textContent="No saved runs yet.";return;}
      # Updates visible text or markup on the page.
-1648 |       var wrap=document.createElement("div"); wrap.className="history-list";
+1651 |       var wrap=document.createElement("div"); wrap.className="history-list";
      # Keeps a value used by the page's next steps.
-1649 |       d.runs.forEach(function(r){
+1652 |       d.runs.forEach(function(r){
      # Continues the page structure, styling, or browser logic above.
-1650 |         var b=document.createElement("button"); b.type="button";
+1653 |         var b=document.createElement("button"); b.type="button";
      # Keeps a value used by the page's next steps.
-1651 |         b.dataset.runId=r.id;
+1654 |         b.dataset.runId=r.id;
      # Continues the page structure, styling, or browser logic above.
-1652 |         b.dataset.month=r.month;
+1655 |         b.dataset.month=r.month;
      # Continues the page structure, styling, or browser logic above.
-1653 |         b.dataset.reps=r.null_reps;
+1656 |         b.dataset.reps=r.null_reps;
      # Continues the page structure, styling, or browser logic above.
-1654 |         b.dataset.maxGames=r.max_games||"";
+1657 |         b.dataset.maxGames=r.max_games||"";
      # Continues the page structure, styling, or browser logic above.
-1655 |         b.setAttribute("aria-current",r.id===runId?"true":"false");
+1658 |         b.setAttribute("aria-current",r.id===runId?"true":"false");
      # Sets an element property used for display or accessibility.
-1656 |         var monthOption=Array.from($("month").options).find(function(o){return o.value===r.month;});
+1659 |         var monthOption=Array.from($("month").options).find(function(o){return o.value===r.month;});
      # Keeps a value used by the page's next steps.
-1657 |         var monthLabel=monthOption?monthOption.textContent:r.month;
+1660 |         var monthLabel=monthOption?monthOption.textContent:r.month;
      # Updates visible text or markup on the page.
-1658 |         b.textContent=monthLabel+" · "+r.status;
+1661 |         b.textContent=monthLabel+" · "+r.status;
      # Updates visible text or markup on the page.
-1659 |         var sm=document.createElement("small");
+1662 |         var sm=document.createElement("small");
      # Keeps a value used by the page's next steps.
-1660 |         sm.textContent=new Date(r.started*1000).toLocaleString()+" · "+
+1663 |         sm.textContent=new Date(r.started*1000).toLocaleString()+" · "+
      # Updates visible text or markup on the page.
-1661 |           (r.month==="demo-2016-01"?"60,000-game sample":
+1664 |           (r.month.startsWith("demo-")?(r.month==="demo-fast-2016-01"?"20,000":"60,000")+"-game sample":
      # Continues the page structure, styling, or browser logic above.
-1662 |             (r.max_games?fmt(r.max_games)+" scanned cap":"full month"))+
+1665 |             (r.max_games?fmt(r.max_games)+" scanned cap":"full month"))+
      # Continues the page structure, styling, or browser logic above.
-1663 |           " · "+r.null_reps+" shuffles";
+1666 |           " · "+r.null_reps+" shuffles";
      # Continues the page structure, styling, or browser logic above.
-1664 |         b.appendChild(sm);
+1667 |         b.appendChild(sm);
      # Adds a newly built visual element to the page.
-1665 |         b.addEventListener("click",function(){attachRun(r.id);});
+1668 |         b.addEventListener("click",function(){attachRun(r.id);});
      # Responds to a user action or browser event.
-1666 |         wrap.appendChild(b);
+1669 |         wrap.appendChild(b);
      # Adds a newly built visual element to the page.
-1667 |         if(r.status==="interrupted"||r.status==="failed"){
+1670 |         if(r.status==="interrupted"||r.status==="failed"){
      # Controls which browser steps run or repeats them for data items.
-1668 |           var retry=document.createElement("button");retry.type="button";
+1671 |           var retry=document.createElement("button");retry.type="button";
      # Keeps a value used by the page's next steps.
-1669 |           retry.textContent="Retry "+monthLabel;
+1672 |           retry.textContent="Retry "+monthLabel;
      # Updates visible text or markup on the page.
-1670 |           retry.addEventListener("click",function(){
+1673 |           retry.addEventListener("click",function(){
      # Responds to a user action or browser event.
-1671 |             fetch("/api/resume?run="+encodeURIComponent(r.id),{method:"POST"})
+1674 |             fetch("/api/resume?run="+encodeURIComponent(r.id),{method:"POST"})
      # Calls a local server API and handles its response.
-1672 |               .then(function(res){return res.json();}).then(function(data){
+1675 |               .then(function(res){return res.json();}).then(function(data){
      # Continues the page structure, styling, or browser logic above.
-1673 |                 if(data.error)throw Error(data.error);
+1676 |                 if(data.error)throw Error(data.error);
      # Controls which browser steps run or repeats them for data items.
-1674 |                 attachRun(data.run_id);refreshHistory(false);
+1677 |                 attachRun(data.run_id);refreshHistory(false);
      # Continues the page structure, styling, or browser logic above.
-1675 |               }).catch(function(){logLine(null,"Could not retry this run. Try again shortly.","error");});
+1678 |               }).catch(function(){logLine(null,"Could not retry this run. Try again shortly.","error");});
      # Continues the page structure, styling, or browser logic above.
-1676 |           });
+1679 |           });
      # Closes the preceding element or code block.
-1677 |           wrap.appendChild(retry);
+1680 |           wrap.appendChild(retry);
      # Adds a newly built visual element to the page.
-1678 |         }
+1681 |         }
      # Closes the preceding element or code block.
-1679 |       });
+1682 |       });
      # Closes the preceding element or code block.
-1680 |       list.appendChild(wrap);
+1683 |       list.appendChild(wrap);
      # Adds a newly built visual element to the page.
-1681 |       if(restore){
+1684 |       if(restore){
      # Controls which browser steps run or repeats them for data items.
-1682 |         var saved=localStorage.getItem("sna:lastRun");
+1685 |         var saved=localStorage.getItem("sna:lastRun");
      # Keeps a value used by the page's next steps.
-1683 |         var chosen=d.runs.find(function(r){return r.id===saved&&(r.status==="running"||r.status==="completed");})||
+1686 |         var chosen=d.runs.find(function(r){return r.id===saved&&(r.status==="running"||r.status==="completed");})||
      # Keeps a value used by the page's next steps.
-1684 |           d.runs.find(function(r){return r.status==="completed";});
+1687 |           d.runs.find(function(r){return r.status==="completed";});
      # Continues the page structure, styling, or browser logic above.
-1685 |         if(chosen)attachRun(chosen.id);
+1688 |         if(chosen)attachRun(chosen.id);
      # Controls which browser steps run or repeats them for data items.
-1686 |       }
+1689 |       }
      # Closes the preceding element or code block.
-1687 |     }).catch(function(){$("runHistory").textContent="Recent runs are unavailable right now.";});
+1690 |     }).catch(function(){$("runHistory").textContent="Recent runs are unavailable right now.";});
      # Updates visible text or markup on the page.
-1688 | }
+1691 | }
      # Closes the preceding element or code block.
-1689 | function attachRun(id){
+1692 | function attachRun(id){
      # Defines a browser function used by a chart, control, or live event.
-1690 |   /* Replaying a saved run uses the same stream as a fresh run. This is why a
+1693 |   /* Replaying a saved run uses the same stream as a fresh run. This is why a
      # Existing developer note about this section.
-1691 |      browser refresh does not erase the readings collected in the demo. */
+1694 |      browser refresh does not erase the readings collected in the demo. */
      # Continues the page structure, styling, or browser logic above.
-1692 |   if(es)es.close();
+1695 |   if(es)es.close();
      # Controls which browser steps run or repeats them for data items.
-1693 |   runId=id; streamWarned=false;
+1696 |   runId=id; streamWarned=false;
      # Continues the page structure, styling, or browser logic above.
-1694 |   var savedButton=document.querySelector('#runHistory button[data-run-id="'+id+'"]');
+1697 |   var savedButton=document.querySelector('#runHistory button[data-run-id="'+id+'"]');
      # Keeps a value used by the page's next steps.
-1695 |   if(savedButton){
+1698 |   if(savedButton){
      # Controls which browser steps run or repeats them for data items.
-1696 |     $("month").value=savedButton.dataset.month;
+1699 |     $("month").value=savedButton.dataset.month;
      # Continues the page structure, styling, or browser logic above.
-1697 |     $("month").dispatchEvent(new Event("change"));
+1700 |     $("month").dispatchEvent(new Event("change"));
      # Continues the page structure, styling, or browser logic above.
-1698 |     $("reps").value=savedButton.dataset.reps;
+1701 |     $("reps").value=savedButton.dataset.reps;
      # Continues the page structure, styling, or browser logic above.
-1699 |     if(savedButton.dataset.maxGames){
+1702 |     if(savedButton.dataset.maxGames){
      # Controls which browser steps run or repeats them for data items.
-1700 |       $("cap").value=savedButton.dataset.maxGames;
+1703 |       $("cap").value=savedButton.dataset.maxGames;
      # Continues the page structure, styling, or browser logic above.
-1701 |       $("cap").dispatchEvent(new Event("input"));
+1704 |       $("cap").dispatchEvent(new Event("input"));
      # Continues the page structure, styling, or browser logic above.
-1702 |     }
+1705 |     }
      # Closes the preceding element or code block.
-1703 |   }
+1706 |   }
      # Closes the preceding element or code block.
-1704 |   document.querySelectorAll("#runHistory button[data-run-id]").forEach(function(b){
+1707 |   document.querySelectorAll("#runHistory button[data-run-id]").forEach(function(b){
      # Continues the page structure, styling, or browser logic above.
-1705 |     b.setAttribute("aria-current",b.dataset.runId===id?"true":"false");
+1708 |     b.setAttribute("aria-current",b.dataset.runId===id?"true":"false");
      # Sets an element property used for display or accessibility.
-1706 |   });
+1709 |   });
      # Closes the preceding element or code block.
-1707 |   document.body.classList.add("has-run");
+1710 |   document.body.classList.add("has-run");
      # Continues the page structure, styling, or browser logic above.
-1708 |   $("runMessage").hidden=true;
+1711 |   $("runMessage").hidden=true;
      # Continues the page structure, styling, or browser logic above.
-1709 |   localStorage.setItem("sna:lastRun",id);
+1712 |   localStorage.setItem("sna:lastRun",id);
      # Continues the page structure, styling, or browser logic above.
-1710 |   reset();
+1713 |   reset();
      # Continues the page structure, styling, or browser logic above.
-1711 |   $("run").disabled=true; $("stop").disabled=false;
+1714 |   $("run").disabled=true; $("stop").disabled=false;
      # Continues the page structure, styling, or browser logic above.
-1712 |   es=new EventSource("/api/stream?run="+encodeURIComponent(id));
+1715 |   es=new EventSource("/api/stream?run="+encodeURIComponent(id));
      # Continues the page structure, styling, or browser logic above.
-1713 |   es.onmessage=function(m){
+1716 |   es.onmessage=function(m){
      # Continues the page structure, styling, or browser logic above.
-1714 |     try{handle(JSON.parse(m.data));}
+1717 |     try{handle(JSON.parse(m.data));}
      # Continues the page structure, styling, or browser logic above.
-1715 |     catch(err){logLine(null,"Could not display part of this run. Try reopening it.","error");}
+1718 |     catch(err){logLine(null,"Could not display part of this run. Try reopening it.","error");}
      # Continues the page structure, styling, or browser logic above.
-1716 |   };
+1719 |   };
      # Closes the preceding element or code block.
-1717 |   es.addEventListener("end",function(){
+1720 |   es.addEventListener("end",function(){
      # Responds to a user action or browser event.
-1718 |     es.close();es=null;$("run").disabled=false;$("stop").disabled=true;
+1721 |     es.close();es=null;$("run").disabled=false;$("stop").disabled=true;
      # Continues the page structure, styling, or browser logic above.
-1719 |     refreshHistory(false);
+1722 |     refreshHistory(false);
      # Continues the page structure, styling, or browser logic above.
-1720 |   });
+1723 |   });
      # Closes the preceding element or code block.
-1721 |   es.onerror=function(){
+1724 |   es.onerror=function(){
      # Continues the page structure, styling, or browser logic above.
-1722 |     if(!streamWarned){
+1725 |     if(!streamWarned){
      # Controls which browser steps run or repeats them for data items.
-1723 |       logLine(null,"Connection interrupted. Reconnecting to the saved run…","warn");
+1726 |       logLine(null,"Connection interrupted. Reconnecting to the saved run…","warn");
      # Continues the page structure, styling, or browser logic above.
-1724 |       streamWarned=true;
+1727 |       streamWarned=true;
      # Continues the page structure, styling, or browser logic above.
-1725 |     }
+1728 |     }
      # Closes the preceding element or code block.
-1726 |   };
+1729 |   };
      # Closes the preceding element or code block.
-1727 | }
+1730 | }
      # Closes the preceding element or code block.
-1728 | $("refreshHistory").addEventListener("click",function(){refreshHistory(false);});
+1731 | $("refreshHistory").addEventListener("click",function(){refreshHistory(false);});
      # Responds to a user action or browser event.
-1729 | 
-1730 | /* ---------- run control ---------- */
+1732 |
+1733 | /* ---------- run control ---------- */
      # Existing developer note about this section.
-1731 | $("run").addEventListener("click",function(){
+1734 | $("run").addEventListener("click",function(){
      # Responds to a user action or browser event.
-1732 |   $("run").disabled=true; $("stop").disabled=false;
+1735 |   $("run").disabled=true; $("stop").disabled=false;
      # Continues the page structure, styling, or browser logic above.
-1733 |   $("runMessage").hidden=true;
+1736 |   $("runMessage").hidden=true;
      # Continues the page structure, styling, or browser logic above.
-1734 |   started=Date.now();
+1737 |   started=Date.now();
      # Continues the page structure, styling, or browser logic above.
-1735 |   fetch("/api/run",{method:"POST",headers:{"Content-Type":"application/json"},
+1738 |   fetch("/api/run",{method:"POST",headers:{"Content-Type":"application/json"},
      # Calls a local server API and handles its response.
-1736 |     body:JSON.stringify({
+1739 |     body:JSON.stringify({
      # Continues the page structure, styling, or browser logic above.
-1737 |       month:$("month").value,
+1740 |       month:$("month").value,
      # Continues the page structure, styling, or browser logic above.
-1738 |       max_games:$("month").value==="demo-2016-01"||Number(capEl.value)>=Number(capEl.max)?null:Number(capEl.value),
+1741 |       max_games:$("month").value.startsWith("demo-")||Number(capEl.value)>=Number(capEl.max)?null:Number(capEl.value),
      # Continues the page structure, styling, or browser logic above.
-1739 |       null_reps:Number($("reps").value),
+1742 |       null_reps:Number($("reps").value),
      # Continues the page structure, styling, or browser logic above.
-1740 |       window_days:14,
+1743 |       window_days:14,
      # Continues the page structure, styling, or browser logic above.
-1741 |       refresh:$("refresh").checked
+1744 |       refresh:$("refresh").checked
      # Continues the page structure, styling, or browser logic above.
-1742 |     })}).then(function(r){return r.json();}).then(function(d){
+1745 |     })}).then(function(r){return r.json();}).then(function(d){
      # Continues the page structure, styling, or browser logic above.
-1743 |       if(d.error){$("runMessage").textContent="Could not start: "+d.error;$("runMessage").hidden=false;
+1746 |       if(d.error){$("runMessage").textContent="Could not start: "+d.error;$("runMessage").hidden=false;
      # Updates visible text or markup on the page.
-1744 |         $("run").disabled=false;$("stop").disabled=true;return;}
+1747 |         $("run").disabled=false;$("stop").disabled=true;return;}
      # Continues the page structure, styling, or browser logic above.
-1745 |       attachRun(d.run_id);
+1748 |       attachRun(d.run_id);
      # Continues the page structure, styling, or browser logic above.
-1746 |       refreshHistory(false);
+1749 |       refreshHistory(false);
      # Continues the page structure, styling, or browser logic above.
-1747 |     }).catch(function(){
+1750 |     }).catch(function(){
      # Continues the page structure, styling, or browser logic above.
-1748 |       $("runMessage").textContent="Could not start the analysis. Check the connection and try again.";$("runMessage").hidden=false;
+1751 |       $("runMessage").textContent="Could not start the analysis. Check the connection and try again.";$("runMessage").hidden=false;
      # Updates visible text or markup on the page.
-1749 |       $("run").disabled=false; $("stop").disabled=true;
+1752 |       $("run").disabled=false; $("stop").disabled=true;
      # Continues the page structure, styling, or browser logic above.
-1750 |     });
+1753 |     });
      # Closes the preceding element or code block.
-1751 | });
+1754 | });
      # Closes the preceding element or code block.
-1752 | 
-1753 | /* Toggle the shuffled-time reference. */
+1755 |
+1756 | /* Toggle the shuffled-time reference. */
      # Existing developer note about this section.
-1754 | $("nullToggle").addEventListener("change",function(){
+1757 | $("nullToggle").addEventListener("change",function(){
      # Responds to a user action or browser event.
-1755 |   CURVE.showNull=this.checked;
+1758 |   CURVE.showNull=this.checked;
      # Continues the page structure, styling, or browser logic above.
-1756 |   drawCurve();
+1759 |   drawCurve();
      # Continues the page structure, styling, or browser logic above.
-1757 |   $("curveHint").textContent=this.checked
+1760 |   $("curveHint").textContent=this.checked
      # Updates visible text or markup on the page.
-1758 |     ? "Observed and shuffled-time curves shown together."
+1761 |     ? "Observed and shuffled-time curves shown together."
      # Continues the page structure, styling, or browser logic above.
-1759 |     : "Showing the observed curve alone.";
+1762 |     : "Showing the observed curve alone.";
      # Continues the page structure, styling, or browser logic above.
-1760 | });
+1763 | });
      # Closes the preceding element or code block.
-1761 | 
-1762 | $("stop").addEventListener("click",function(){
+1764 |
+1765 | $("stop").addEventListener("click",function(){
      # Responds to a user action or browser event.
-1763 |   if(!runId) return;
+1766 |   if(!runId) return;
      # Controls which browser steps run or repeats them for data items.
-1764 |   $("stop").disabled=true;
+1767 |   $("stop").disabled=true;
      # Continues the page structure, styling, or browser logic above.
-1765 |   fetch("/api/cancel?run="+runId,{method:"POST"});
+1768 |   fetch("/api/cancel?run="+runId,{method:"POST"});
      # Calls a local server API and handles its response.
-1766 |   logLine(null,"Cancelling…","warn");
+1769 |   logLine(null,"Cancelling…","warn");
      # Continues the page structure, styling, or browser logic above.
-1767 | });
+1770 | });
      # Closes the preceding element or code block.
-1768 | })();
+1771 | })();
      # Continues the page structure, styling, or browser logic above.
-1769 | </script>
+1772 | </script>
      # Closes the preceding element or code block.
-1770 | </body>
+1773 | </body>
      # Closes the preceding element or code block.
-1771 | </html>
+1774 | </html>
      # Closes the preceding element or code block.

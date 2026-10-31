@@ -4,7 +4,7 @@ Each numbered source line is followed by a plain-English comment.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Step 5 -- the adoption-probability curve. This is the whole project.
-0002 | 
+0002 |
 0003 | Simple contagion  -> the curve saturates after the first exposure.
 0004 | Complex contagion -> adoption keeps rising with the number of distinct
 0005 |                      exposers d (or with structural diversity sd) even when
@@ -12,14 +12,14 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0007 | """
 0008 | from __future__ import annotations
      # Imports a library or project module needed below.
-0009 | 
+0009 |
 0010 | import argparse
      # Imports a library or project module needed below.
 0011 | import math
      # Imports a library or project module needed below.
 0012 | from pathlib import Path
      # Imports a library or project module needed below.
-0013 | 
+0013 |
 0014 | import matplotlib
      # Imports a library or project module needed below.
 0015 | matplotlib.use("Agg")
@@ -28,11 +28,11 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Imports a library or project module needed below.
 0017 | import pandas as pd
      # Imports a library or project module needed below.
-0018 | 
+0018 |
 0019 | from . import config
      # Imports a library or project module needed below.
-0020 | 
-0021 | 
+0020 |
+0021 |
 0022 | def wilson(successes: int, n: int, z: float = 1.96):
      # Wilson score interval -- behaves at the small cell counts in the tail.
 0023 |     """Wilson score interval -- behaves at the small cell counts in the tail."""
@@ -50,12 +50,12 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `half`.
 0030 |     return p, max(0.0, centre - half), min(1.0, centre + half)
      # Hands this result back to the stage that called this function.
-0031 | 
-0032 | 
+0031 |
+0032 |
 0033 | def rate_table(trials: pd.DataFrame, by: str) -> pd.DataFrame:
      # Group trials by exposure count/diversity and estimate adoption rates.
 0034 |     """Group trials by exposure count/diversity and estimate adoption rates.
-0035 | 
+0035 |
 0036 |     The error bounds are Wilson intervals, which remain sensible for the
 0037 |     smaller groups at the right-hand end of the chart.
 0038 |     """
@@ -71,8 +71,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0044 |     return pd.DataFrame(out, columns=[by, "n", "adopted", "rate", "lo", "hi"])
      # Creates a labelled table from the collected rows.
-0045 | 
-0046 | 
+0045 |
+0046 |
 0047 | def held_k_table(trials: pd.DataFrame, k_values=(2, 3, 4), by: str = "d"
      # The decisive comparison: k fixed, d varying.
 0048 |                  ) -> pd.DataFrame:
@@ -98,8 +98,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Hands this result back to the stage that called this function.
 0059 |             else pd.DataFrame(columns=["k", by, "n", "adopted", "rate", "lo", "hi"]))
      # Creates a labelled table from the collected rows.
-0060 | 
-0061 | 
+0060 |
+0061 |
 0062 | def _clip(trials: pd.DataFrame) -> pd.DataFrame:
      # Defines a reusable step; the following indented lines are its body.
 0063 |     t = trials.copy()
@@ -112,8 +112,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Caps large counts into the final chart bucket, such as six or more opponents.
 0067 |     return t
      # Hands this result back to the stage that called this function.
-0068 | 
-0069 | 
+0068 |
+0069 |
 0070 | def analyse(trials: pd.DataFrame) -> dict[str, pd.DataFrame]:
      # Build the raw curves and fixed-k checks used by charts and verdicts.
 0071 |     """Build the raw curves and fixed-k checks used by charts and verdicts."""
@@ -133,8 +133,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Part of the value, collection, or call spanning several lines.
 0079 |     }
      # Closes the data structure or function call started above.
-0080 | 
-0081 | 
+0080 |
+0081 |
 0082 | def _yerr(tb: pd.DataFrame):
      # Wilson's centre is shifted from the point estimate, so rate-lo and hi-rate can go slightly negative at extreme p.
 0083 |     """Wilson's centre is shifted from the point estimate, so rate-lo and
@@ -143,8 +143,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Caps large counts into the final chart bucket, such as six or more opponents.
 0086 |             (tb["hi"] - tb["rate"]).clip(lower=0).to_numpy()]
      # Caps large counts into the final chart bucket, such as six or more opponents.
-0087 | 
-0088 | 
+0087 |
+0088 |
 0089 | def plot(tables: dict[str, pd.DataFrame], out: Path,
      # Defines a reusable step; the following indented lines are its body.
 0090 |          null_cmp: pd.DataFrame = None):
@@ -153,7 +153,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `n_panels`.
 0092 |     fig, axes = plt.subplots(1, n_panels, figsize=(6 * n_panels, 4.6))
      # Continues the current calculation or control flow.
-0093 | 
+0093 |
 0094 |     ax = axes[0]
      # Keeps this intermediate result under the name `ax`.
 0095 |     for name, lbl, mk in (("by_k", "k  (total exposures)", "o"),
@@ -194,7 +194,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0114 |     ax.grid(alpha=.3)
      # Continues the current calculation or control flow.
-0115 | 
+0115 |
 0116 |     ax = axes[1]
      # Keeps this intermediate result under the name `ax`.
 0117 |     hk = tables["held_k_by_d"]
@@ -221,7 +221,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0128 |     ax.grid(alpha=.3)
      # Continues the current calculation or control flow.
-0129 | 
+0129 |
 0130 |     if n_panels == 3:
      # Checks this condition before running the next indented block.
 0131 |         ax = axes[2]
@@ -242,7 +242,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0139 |         ax.grid(alpha=.3)
      # Continues the current calculation or control flow.
-0140 | 
+0140 |
 0141 |     fig.tight_layout()
      # Continues the current calculation or control flow.
 0142 |     fig.savefig(out, dpi=150)
@@ -251,14 +251,14 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0144 |     return out
      # Hands this result back to the stage that called this function.
-0145 | 
-0146 | 
+0145 |
+0146 |
 0147 | def verdict(tables: dict[str, pd.DataFrame], null_cmp: pd.DataFrame = None,
      # Simple vs complex, read off the curve AND the null.
 0148 |             min_n: int = 20) -> dict:
      # Keeps this intermediate result under the name `min_n`.
 0149 |     """Simple vs complex, read off the curve AND the null.
-0150 | 
+0150 |
 0151 |     A rising raw d-curve is NOT sufficient. High-d players are high-activity
 0152 |     players, and activity alone produces a rising curve -- the timestamp-
 0153 |     shuffled null reproduces it. Complex contagion requires the EXCESS over
@@ -289,7 +289,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Part of the value, collection, or call spanning several lines.
 0168 |     }
      # Closes the data structure or function call started above.
-0169 | 
+0169 |
 0170 |     # (a) does the rise survive with k held fixed?
 0171 |     hk = tables["held_k_by_d"]
      # Keeps this intermediate result under the name `hk`.
@@ -307,7 +307,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Ends the current loop.
 0178 |     out["separated_at_fixed_k"] = held
      # Continues the current calculation or control flow.
-0179 | 
+0179 |
 0180 |     # (b) does the EXCESS over the shuffled null grow with d?
 0181 |     excess_grows = None
      # Keeps this intermediate result under the name `excess_grows`.
@@ -330,7 +330,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0190 |             # any influence at all? the null must be beaten somewhere
 0191 |             out["beats_null_anywhere"] = bool((nc["z_vs_null"] > 3).any())
      # Continues the current calculation or control flow.
-0192 | 
+0192 |
 0193 |     if excess_grows is None:
      # Checks this condition before running the next indented block.
 0194 |         out["verdict"] = ("raw curve rises, but no null model supplied -- "
@@ -355,8 +355,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0204 |     return out
      # Hands this result back to the stage that called this function.
-0205 | 
-0206 | 
+0205 |
+0206 |
 0207 | def run(trials_path: Path, null_cmp: pd.DataFrame = None):
      # Defines a reusable step; the following indented lines are its body.
 0208 |     trials = pd.read_parquet(trials_path)
@@ -373,8 +373,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `null_cmp`.
 0214 |     return tables, verdict(tables, null_cmp), fig
      # Hands this result back to the stage that called this function.
-0215 | 
-0216 | 
+0215 |
+0216 |
 0217 | if __name__ == "__main__":
      # Runs the command-line entry point only when this file is executed directly.
 0218 |     ap = argparse.ArgumentParser()

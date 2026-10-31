@@ -4,21 +4,21 @@ Each numbered source line is followed by a plain-English comment.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Draw the methodology workflow figure for the proposal.
-0002 | 
+0002 |
 0003 | The proposal template leaves a placeholder box for a workflow diagram. This
 0004 | renders the real pipeline as a PNG that \\includegraphics can pick up, so the
 0005 | preamble in Sample.tex does not have to change (graphicx is already loaded).
-0006 | 
+0006 |
 0007 |     python scripts/make_workflow_figure.py
 0008 | """
 0009 | from __future__ import annotations
      # Imports a library or project module needed below.
-0010 | 
+0010 |
 0011 | import sys
      # Imports a library or project module needed below.
 0012 | from pathlib import Path
      # Imports a library or project module needed below.
-0013 | 
+0013 |
 0014 | import matplotlib
      # Imports a library or project module needed below.
 0015 | matplotlib.use("Agg")
@@ -27,12 +27,12 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Imports a library or project module needed below.
 0017 | from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
      # Imports a library or project module needed below.
-0018 | 
+0018 |
 0019 | ROOT = Path(__file__).resolve().parents[1]
      # Keeps this intermediate result under the name `ROOT`.
 0020 | sys.path.insert(0, str(ROOT))
      # Continues the current calculation or control flow.
-0021 | 
+0021 |
 0022 | INK = "#1a1722"
      # Keeps this intermediate result under the name `INK`.
 0023 | MUTED = "#5c5670"
@@ -45,7 +45,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0028 |     "out": "#efeadf",
 0029 | }
      # Closes the data structure or function call started above.
-0030 | 
+0030 |
 0031 | # Laid out as a serpentine: each row runs in the opposite direction to the one
 0032 | # above it, so every edge joins neighbouring boxes and none has to cut across
 0033 | # the figure -- or through another box -- to reach its target.
@@ -55,7 +55,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0036 | COL = [0.02, 0.27, 0.52, 0.77]
      # Keeps this intermediate result under the name `COL`.
-0037 | 
+0037 |
 0038 | # (x, y, w, h, label, kind)
 0039 | NODES = [
      # Keeps this intermediate result under the name `NODES`.
@@ -68,7 +68,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Part of the value, collection, or call spanning several lines.
 0044 |     (COL[3], ROW_A, W, H, "Player interaction\nnetwork G = (V, E, T)", "build"),
      # Part of the value, collection, or call spanning several lines.
-0045 | 
+0045 |
 0046 |     # row B, right to left
 0047 |     (COL[3], ROW_B, W, H, "Exposure events\nA plays X against B", "build"),
      # Part of the value, collection, or call spanning several lines.
@@ -78,13 +78,13 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Part of the value, collection, or call spanning several lines.
 0050 |     (COL[0], ROW_B, W, H, "Structural diversity\n(components)", "build"),
      # Part of the value, collection, or call spanning several lines.
-0051 | 
+0051 |
 0052 |     # row C
 0053 |     (COL[0], ROW_C, W, H, "Adoption-probability\ncurve  P(adopt | k, d)", "build"),
      # Part of the value, collection, or call spanning several lines.
 0054 |     (COL[3], ROW_C, W, H, "Centrality, communities,\ndiffusion animation", "out"),
      # Part of the value, collection, or call spanning several lines.
-0055 | 
+0055 |
 0056 |     # row D, the three validity checks
 0057 |     (COL[0], ROW_D, W, H, "Shuffled-time\nnull model", "test"),
      # Part of the value, collection, or call spanning several lines.
@@ -92,13 +92,13 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Part of the value, collection, or call spanning several lines.
 0059 |     (COL[2], ROW_D, W, H, "Held-out\npredictive AUC", "test"),
      # Part of the value, collection, or call spanning several lines.
-0060 | 
+0060 |
 0061 |     # row E, the verdict
 0062 |     (COL[1], ROW_E, W, H, "Simple vs complex\ncontagion verdict", "out"),
      # Part of the value, collection, or call spanning several lines.
 0063 | ]
      # Closes the data structure or function call started above.
-0064 | 
+0064 |
 0065 | EDGES = [
      # Keeps this intermediate result under the name `EDGES`.
 0066 |     (0, 1), (1, 2), (2, 3),          # row A
@@ -115,14 +115,14 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Part of the value, collection, or call spanning several lines.
 0072 | ]
      # Closes the data structure or function call started above.
-0073 | 
+0073 |
 0074 | # The network also drives the structural work, but that box sits two rows down
 0075 | # in the same column, so a straight drop would run through the row between.
 0076 | # This one edge is routed out around the right margin instead.
 0077 | MARGIN_EDGES = [(3, 9)]
      # Keeps this intermediate result under the name `MARGIN_EDGES`.
-0078 | 
-0079 | 
+0078 |
+0079 |
 0080 | def main():
      # Draw the methodology flow used in the written project material.
 0081 |     """Draw the methodology flow used in the written project material."""
@@ -134,7 +134,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0085 |     ax.axis("off")
      # Continues the current calculation or control flow.
-0086 | 
+0086 |
 0087 |     centres = []
      # Keeps this intermediate result under the name `centres`.
 0088 |     for x, y, w, h, label, kind in NODES:
@@ -151,7 +151,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `fontsize`.
 0094 |         centres.append((x + w / 2, y + h / 2, w, h))
      # Continues the current calculation or control flow.
-0095 | 
+0095 |
 0096 |     for a, b in EDGES:
      # Processes each item from this collection in turn.
 0097 |         x0, y0, w0, h0 = centres[a]
@@ -182,7 +182,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `linewidth`.
 0110 |             connectionstyle=f"arc3,rad={rad}"))
      # Keeps this intermediate result under the name `connectionstyle`.
-0111 | 
+0111 |
 0112 |     for a, b in MARGIN_EDGES:
      # Processes each item from this collection in turn.
 0113 |         x0, y0, w0, h0 = centres[a]
@@ -203,7 +203,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Part of the value, collection, or call spanning several lines.
 0121 |             mutation_scale=9, linewidth=0.9, color=MUTED, shrinkA=0, shrinkB=3))
      # Keeps this intermediate result under the name `mutation_scale`.
-0122 | 
+0122 |
 0123 |     out = ROOT / "docs" / "figures"
      # Calculates or stores the output value for this stage.
 0124 |     out.mkdir(parents=True, exist_ok=True)
@@ -216,8 +216,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0128 |     print(f"wrote {path}")
      # Prints this reading so a command-line run can be followed.
-0129 | 
-0130 | 
+0129 |
+0130 |
 0131 | if __name__ == "__main__":
      # Runs the command-line entry point only when this file is executed directly.
 0132 |     main()

@@ -4,24 +4,24 @@ Each numbered source line is followed by a plain-English comment.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Compile the proposal to PDF without altering the submitted source.
-0002 | 
+0002 |
 0003 | The proposal must keep the course template's preamble byte for byte. That
 0004 | preamble relies on pdfLaTeX: `\\usepackage{times}` maps to the Type-1 Times
 0005 | fonts through OT1/T1 encoding. A Unicode engine (XeTeX, which is what the
 0006 | portable Tectonic binary runs) never selects those mappings, so every \\textbf
 0007 | and \\textit silently falls back to the regular face -- headings, the title
 0008 | table labels, the methodology sub-headings, every journal name.
-0009 | 
+0009 |
 0010 | So: compile a throwaway copy with `\\usepackage[T1]{fontenc}` inserted. That
 0011 | single line only restores the font mapping pdfLaTeX would have used anyway,
 0012 | so the PDF matches what the unmodified source produces on Overleaf, and the
 0013 | file that gets submitted is untouched.
-0014 | 
+0014 |
 0015 |     python scripts/build_proposal_pdf.py --tex ../SNA_Proposal/SNA_Proposal.tex
 0016 | """
 0017 | from __future__ import annotations
      # Imports a library or project module needed below.
-0018 | 
+0018 |
 0019 | import argparse
      # Imports a library or project module needed below.
 0020 | import shutil
@@ -34,13 +34,13 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Imports a library or project module needed below.
 0024 | from pathlib import Path
      # Imports a library or project module needed below.
-0025 | 
+0025 |
 0026 | SHIM = "\\usepackage[T1]{fontenc}\n"
      # Keeps this intermediate result under the name `SHIM`.
 0027 | ANCHOR = "\\usepackage{times}"
      # Keeps this intermediate result under the name `ANCHOR`.
-0028 | 
-0029 | 
+0028 |
+0029 |
 0030 | def build(tex: Path, engine: Path) -> Path:
      # Compile a temporary copy so the submitted LaTeX source stays intact.
 0031 |     """Compile a temporary copy so the submitted LaTeX source stays intact."""
@@ -60,7 +60,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Handles the alternative when the preceding condition was false.
 0039 |         shimmed = src.replace(ANCHOR, SHIM + ANCHOR, 1)
      # Keeps this intermediate result under the name `shimmed`.
-0040 | 
+0040 |
 0041 |     with tempfile.TemporaryDirectory() as td:
      # Opens a resource and guarantees cleanup when the block ends.
 0042 |         work = Path(td)
@@ -73,7 +73,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Checks this condition before running the next indented block.
 0046 |             shutil.copytree(figs, work / "figures")
      # Continues the current calculation or control flow.
-0047 | 
+0047 |
 0048 |         r = subprocess.run(
      # Keeps this intermediate result under the name `r`.
 0049 |             [str(engine), "-X", "compile", tex.name, "--outdir", "."],
@@ -96,15 +96,15 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Prints this reading so a command-line run can be followed.
 0058 |             sys.exit("compile failed")
      # Continues the current calculation or control flow.
-0059 | 
+0059 |
 0060 |         dest = tex.with_suffix(".pdf")
      # Keeps this intermediate result under the name `dest`.
 0061 |         shutil.copy(pdf, dest)
      # Continues the current calculation or control flow.
 0062 |         return dest
      # Hands this result back to the stage that called this function.
-0063 | 
-0064 | 
+0063 |
+0064 |
 0065 | def check_fonts(pdf: Path):
      # Defines a reusable step; the following indented lines are its body.
 0066 |     try:
@@ -141,8 +141,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Checks this condition before running the next indented block.
 0082 |         sys.exit("!! bold/italic missing -- the document would render flat")
      # Continues the current calculation or control flow.
-0083 | 
-0084 | 
+0083 |
+0084 |
 0085 | if __name__ == "__main__":
      # Runs the command-line entry point only when this file is executed directly.
 0086 |     ap = argparse.ArgumentParser()

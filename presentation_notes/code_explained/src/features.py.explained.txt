@@ -4,14 +4,14 @@ Each numbered source line is followed by a plain-English comment.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Features for the held-out prediction check, built without leakage.
-0002 | 
+0002 |
 0003 | Two problems with the original check, both fixed here.
-0004 | 
+0004 |
 0005 | **Leakage.** The original model computed summary features over the whole
 0006 | month. Here fixed background features are computed before the first evaluated
 0007 | trial; exposure features are measured at each trial. Whole player-behaviour
 0008 | spells are assigned to one side of the held-out split.
-0009 | 
+0009 |
 0010 | **A missing explanation.** The original feature set asked only "who played this
 0011 | opening at you?". De Marzo and Servedio [4] showed that a player's next opening
 0012 | is largely predicted by how close it sits to what they already play -- an
@@ -19,32 +19,32 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0014 | Leaving that out makes the social features look better than they are, because
 0015 | they are the only candidate on offer. `repertoire_density` puts the competing
 0016 | explanation in the model.
-0017 | 
+0017 |
 0018 | Three feature blocks are produced, so the three can be compared directly:
-0019 | 
+0019 |
 0020 |     BASELINE    popularity, rating, activity        "popular openings get played"
 0021 |     REPERTOIRE  + density, repertoire size          "you learn what is near what you know"
 0022 |     NETWORK     + k, d, sd, degree, kcore, between  "who played it at you"
 0023 | """
 0024 | from __future__ import annotations
      # Imports a library or project module needed below.
-0025 | 
+0025 |
 0026 | import numpy as np
      # Imports a library or project module needed below.
 0027 | import pandas as pd
      # Imports a library or project module needed below.
-0028 | 
+0028 |
 0029 | from . import structure
      # Imports a library or project module needed below.
-0030 | 
+0030 |
 0031 | BASELINE = ["popularity", "rating", "activity"]
      # Keeps this intermediate result under the name `BASELINE`.
 0032 | REPERTOIRE = BASELINE + ["repertoire_density", "repertoire_size"]
      # Keeps this intermediate result under the name `REPERTOIRE`.
 0033 | NETWORK = REPERTOIRE + ["k", "d", "sd", "degree", "kcore", "betweenness"]
      # Keeps this intermediate result under the name `NETWORK`.
-0034 | 
-0035 | 
+0034 |
+0035 |
 0036 | def _repertoires(df: pd.DataFrame) -> dict[str, set]:
      # Which openings each player actually plays, by colour-agnostic ECO.
 0037 |     """Which openings each player actually plays, by colour-agnostic ECO."""
@@ -58,12 +58,12 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0042 |     return rep
      # Hands this result back to the stage that called this function.
-0043 | 
-0044 | 
+0043 |
+0044 |
 0045 | def relatedness(rep: dict[str, set], openings: list[str]) -> pd.DataFrame:
      # Opening-to-opening proximity from co-play, following De Marzo & Servedio.
 0046 |     """Opening-to-opening proximity from co-play, following De Marzo & Servedio.
-0047 | 
+0047 |
 0048 |     Two openings are related when the same players tend to play both. Using
 0049 |     min() in the denominator keeps a rare opening that is always played
 0050 |     alongside a common one from being scored as unrelated to it.
@@ -76,7 +76,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `co`.
 0055 |     count = np.zeros(n, dtype=float)
      # Keeps this intermediate result under the name `count`.
-0056 | 
+0056 |
 0057 |     for played in rep.values():
      # Processes each item from this collection in turn.
 0058 |         ids = [idx[o] for o in played if o in idx]
@@ -93,7 +93,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0064 |                 co[ids[b], ids[a]] += 1
      # Continues the current calculation or control flow.
-0065 | 
+0065 |
 0066 |     denom = np.minimum.outer(count, count)
      # Keeps this intermediate result under the name `denom`.
 0067 |     with np.errstate(divide="ignore", invalid="ignore"):
@@ -104,18 +104,18 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0070 |     return pd.DataFrame(phi, index=openings, columns=openings)
      # Creates a labelled table from the collected rows.
-0071 | 
-0072 | 
+0071 |
+0072 |
 0073 | def density_matrix(rep: dict[str, set], phi: pd.DataFrame,
      # Density for every (opening, player) pair at once.
 0074 |                    players: list[str]) -> np.ndarray:
      # Continues the current calculation or control flow.
 0075 |     """Density for every (opening, player) pair at once.
-0076 | 
+0076 |
 0077 |     How close an opening sits to what a player already plays: the share of that
 0078 |     opening's total relatedness pointing at openings already in the repertoire.
 0079 |     1.0 means everything related to it is already known, 0.0 means none of it.
-0080 | 
+0080 |
 0081 |     Done as a single matrix product. The obvious per-trial version costs a
 0082 |     pandas label lookup and a fancy-index sum for each of ~224k trials, which
 0083 |     took over ten minutes; this takes a fraction of a second and is the same
@@ -137,7 +137,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Checks this condition before running the next indented block.
 0093 |                 mask[pi, j] = 1.0
      # Continues the current calculation or control flow.
-0094 | 
+0094 |
 0095 |     phi_v = phi.to_numpy()
      # Keeps this intermediate result under the name `phi_v`.
 0096 |     totals = phi_v.sum(axis=1)                 # per opening
@@ -148,14 +148,14 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Opens a resource and guarantees cleanup when the block ends.
 0099 |         return np.where(totals[:, None] > 0, reach / totals[:, None], 0.0)
      # Hands this result back to the stage that called this function.
-0100 | 
-0101 | 
+0100 |
+0101 |
 0102 | def build(games: pd.DataFrame, trials: pd.DataFrame,
      # Attach features computed ONLY from games before `split_ts`.
 0103 |           split_ts) -> pd.DataFrame:
      # Continues the current calculation or control flow.
 0104 |     """Attach features computed ONLY from games before `split_ts`.
-0105 | 
+0105 |
 0106 |     Explain the three blocks as activity/popularity, closeness to existing
 0107 |     openings, and exposure/network position. Earlier games prevent future
 0108 |     outcomes leaking into the model's predictors.
@@ -166,7 +166,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Checks whether enough records exist for a trustworthy next step.
 0112 |         raise ValueError("no games before the split; cannot build features")
      # Stops with an explicit error when this requirement is violated.
-0113 | 
+0113 |
 0114 |     # --- who plays what, and how openings relate, as of the split ---------
 0115 |     rep = _repertoires(past)
      # Keeps this intermediate result under the name `rep`.
@@ -174,7 +174,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `openings`.
 0117 |     phi = relatedness(rep, openings)
      # Keeps this intermediate result under the name `phi`.
-0118 | 
+0118 |
 0119 |     # --- player-level attributes from the training window -----------------
 0120 |     activity = pd.concat([past["white"], past["black"]]).value_counts()
      # Counts how often each player or opening occurs.
@@ -192,7 +192,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Groups rows sharing these keys before counting or averaging them.
 0127 |     popularity = past["eco"].value_counts(normalize=True)
      # Counts how often each player or opening occurs.
-0128 | 
+0128 |
 0129 |     # --- network position as of the split ---------------------------------
 0130 |     g = structure.build_graph(past)
      # Calculates or stores the player graph for this stage.
@@ -200,7 +200,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Calculates or stores the network features for this stage.
 0132 |         ["player", "degree", "kcore", "betweenness"]]
      # Part of the value, collection, or call spanning several lines.
-0133 | 
+0133 |
 0134 |     out = trials.copy()
      # Calculates or stores the output value for this stage.
 0135 |     out["rating"] = out["player"].map(rating).fillna(rating.mean())
@@ -213,7 +213,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Part of the value, collection, or call spanning several lines.
 0139 |         {p: len(s) for p, s in rep.items()}).fillna(0.0)
      # Part of the value, collection, or call spanning several lines.
-0140 | 
+0140 |
 0141 |     players = sorted(rep)
      # Keeps this intermediate result under the name `players`.
 0142 |     dens = density_matrix(rep, phi, players)

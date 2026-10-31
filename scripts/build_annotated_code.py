@@ -272,7 +272,7 @@ def main() -> None:
                      "Each numbered source line is followed by a plain-English comment.",
                      "These files are speaking references; run the originals in src/, server/, site/ and scripts/.", ""]
             for number, line in enumerate(raw.splitlines(), 1):
-                lines.append(f"{number:04d} | {line}")
+                lines.append(f"{number:04d} | {line}".rstrip())
                 if line.strip() and number not in documented:
                     explanation = (describe_python(line, number, summaries)
                                    if source.suffix == ".py"

@@ -4,15 +4,15 @@ Each numbered source line is followed by a plain-English comment.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Create line-by-line speaking copies of the source for a code presentation.
-0002 | 
+0002 |
 0003 | The .explained.txt files are reference copies, never imported or served. Run
 0004 | `python scripts/build_annotated_code.py` after changing source code so their
 0005 | line numbers and explanations stay aligned with the working files.
 0006 | """
-0007 | 
+0007 |
 0008 | from __future__ import annotations
      # Imports a library or project module needed below.
-0009 | 
+0009 |
 0010 | import ast
      # Imports a library or project module needed below.
 0011 | import re
@@ -23,8 +23,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Imports a library or project module needed below.
 0014 | from pathlib import Path
      # Imports a library or project module needed below.
-0015 | 
-0016 | 
+0015 |
+0016 |
 0017 | ROOT = Path(__file__).resolve().parents[1]
      # Keeps this intermediate result under the name `ROOT`.
 0018 | OUT = ROOT / "presentation_notes" / "code_explained"
@@ -33,7 +33,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `FOLDERS`.
 0020 | EXTENSIONS = {".py", ".html", ".css"}
      # Keeps this intermediate result under the name `EXTENSIONS`.
-0021 | 
+0021 |
 0022 | # These are the short sentences to say before opening each important file.
 0023 | OVERVIEW = {
      # Keeps this intermediate result under the name `OVERVIEW`.
@@ -54,7 +54,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0038 |     "tests/test_events.py": "These small known cases check that the trial and comparison logic counts correctly.",
 0039 | }
      # Closes the data structure or function call started above.
-0040 | 
+0040 |
 0041 | TERMS = {
      # Keeps this intermediate result under the name `TERMS`.
 0042 |     "df": "game table", "trials": "exposure-trial table", "g": "player graph",
@@ -75,8 +75,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0057 |     "t": "current game or exposure time",
 0058 | }
      # Closes the data structure or function call started above.
-0059 | 
-0060 | 
+0059 |
+0060 |
 0061 | def function_summaries(source: str) -> dict[int, str]:
      # Use the source's own docstrings when explaining function definitions.
 0062 |     """Use the source's own docstrings when explaining function definitions."""
@@ -104,8 +104,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0074 |     return result
      # Hands this result back to the stage that called this function.
-0075 | 
-0076 | 
+0075 |
+0076 |
 0077 | def documentation_lines(source: str) -> set[int]:
      # Docstrings and comments explain themselves; annotate executable lines.
 0078 |     """Docstrings and comments explain themselves; annotate executable lines."""
@@ -135,8 +135,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Leaves this branch intentionally without extra work.
 0092 |     return covered
      # Hands this result back to the stage that called this function.
-0093 | 
-0094 | 
+0093 |
+0094 |
 0095 | def describe_python(line: str, number: int, summaries: dict[int, str]) -> str:
      # Defines a reusable step; the following indented lines are its body.
 0096 |     s = line.strip()
@@ -375,8 +375,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Hands this result back to the stage that called this function.
 0213 |     return "Continues the current calculation or control flow."
      # Hands this result back to the stage that called this function.
-0214 | 
-0215 | 
+0214 |
+0215 |
 0216 | def describe_web(line: str, suffix: str) -> str:
      # Defines a reusable step; the following indented lines are its body.
 0217 |     s = line.strip()
@@ -459,8 +459,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Hands this result back to the stage that called this function.
 0256 |     return "Continues the page structure, styling, or browser logic above."
      # Hands this result back to the stage that called this function.
-0257 | 
-0258 | 
+0257 |
+0258 |
 0259 | def main() -> None:
      # Defines a reusable step; the following indented lines are its body.
 0260 |     count = 0
@@ -493,7 +493,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Part of the value, collection, or call spanning several lines.
 0274 |             for number, line in enumerate(raw.splitlines(), 1):
      # Processes each item from this collection in turn.
-0275 |                 lines.append(f"{number:04d} | {line}")
+0275 |                 lines.append(f"{number:04d} | {line}".rstrip())
      # Continues the current calculation or control flow.
 0276 |                 if line.strip() and number not in documented:
      # Checks this condition before running the next indented block.
@@ -515,8 +515,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0285 |     print(f"Built line-by-line references for {count} source files in {OUT}")
      # Prints this reading so a command-line run can be followed.
-0286 | 
-0287 | 
+0286 |
+0287 |
 0288 | if __name__ == "__main__":
      # Runs the command-line entry point only when this file is executed directly.
 0289 |     main()

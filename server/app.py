@@ -98,7 +98,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json({"error": "unknown month"}, 400)
             cap = cfg.get("max_games")
             cap = int(cap) if cap else None
-            if month == runner.DEMO_MONTH:
+            if month in runner.DEMO_SIZES:
                 cap = None
                 cfg["refresh"] = False
             run = runner.start(month, cap,
@@ -117,10 +117,13 @@ class Handler(BaseHTTPRequestHandler):
             sans = body.get("sans") or []
             if not isinstance(sans, list) or len(sans) > 200:
                 return self._json({"error": "bad move list"}, 400)
-            runner.load_board_data(str(body.get("run_id") or ""))
+            selected_run = str(body.get("run_id") or "")
+            has_data = runner.load_board_data(selected_run) if selected_run else False
             state = runner.board_state([str(s) for s in sans], body.get("uci"))
-            state["has_data"] = runner.LAST.get("df") is not None
-            state["month"] = runner.LAST.get("month")
+            if not has_data:
+                state["opening"] = None  # moves still work before a run is selected
+            state["has_data"] = has_data
+            state["month"] = runner.LAST.get("month") if has_data else None
             return self._json(state)
         if path == "/api/cancel":
             rid = (self._query().get("run") or [""])[0]
@@ -195,7 +198,7 @@ class Handler(BaseHTTPRequestHandler):
                     self.wfile.flush()
                     last_ping = time.monotonic()
                 time.sleep(0.35)
-        except (BrokenPipeError, ConnectionResetError):
+        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
             return
         finally:
             if stream is not None:

@@ -4,22 +4,22 @@ Each numbered source line is followed by a plain-English comment.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Wrap the artifact fragment (site/page.html) into a standalone HTML document.
-0002 | 
+0002 |
 0003 | The published Artifact supplies its own <!doctype>/<head>/reset at publish time,
 0004 | so page.html is a fragment: it starts at <title> and has no document shell. To
 0005 | serve the same page from localhost we add that shell back, reproducing the
 0006 | publish skeleton so the page looks identical either way.
-0007 | 
+0007 |
 0008 |     python site/build.py        # regenerates site/index.html
 0009 | """
 0010 | import json
      # Imports a library or project module needed below.
 0011 | from pathlib import Path
      # Imports a library or project module needed below.
-0012 | 
+0012 |
 0013 | SITE = Path(__file__).resolve().parent
      # Keeps this intermediate result under the name `SITE`.
-0014 | 
+0014 |
 0015 | # Mirrors what the Artifact publish skeleton injects, so local and published
 0016 | # renders match: light color-scheme, zero body margin, 14px system stack,
 0017 | # responsive images, and a [hidden] that actually wins.
@@ -44,12 +44,12 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0036 | </body>
 0037 | </html>
 0038 | """
-0039 | 
-0040 | 
+0039 |
+0040 |
 0041 | def build() -> Path:
      # Combine page, stylesheet and saved report into the static findings page.
 0042 |     """Combine page, stylesheet and saved report into the static findings page.
-0043 | 
+0043 |
 0044 |     This is a build step, not a new analysis: numbers come from report.json.
 0045 |     Re-run it after editing page.html or style.css for the local /findings view.
 0046 |     """
@@ -64,7 +64,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Encodes Python values as JSON for saving or sending to the browser.
 0052 |     fragment = fragment.replace("__REPORT_JSON__", embedded)
      # Keeps this intermediate result under the name `fragment`.
-0053 | 
+0053 |
 0054 |     # The fragment mixes head content with body content.
 0055 |     marker = fragment.find('<div class="topbar"')
      # Keeps this intermediate result under the name `marker`.
@@ -74,21 +74,21 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Stops with an explicit error when this requirement is violated.
 0058 |     head_part, body_part = fragment[:marker], fragment[marker:]
      # Continues the current calculation or control flow.
-0059 | 
+0059 |
 0060 |     # plain replace, not %-formatting: the skeleton's CSS contains "100%"
 0061 |     out = SKELETON.replace("__FRAGMENT__", head_part.strip())
      # Calculates or stores the output value for this stage.
 0062 |     out = out.replace("<body>\n</body>", "<body>\n" + body_part.strip() + "\n</body>")
      # Calculates or stores the output value for this stage.
-0063 | 
+0063 |
 0064 |     dest = SITE / "index.html"
      # Keeps this intermediate result under the name `dest`.
 0065 |     dest.write_text(out, encoding="utf-8")
      # Continues the current calculation or control flow.
 0066 |     return dest
      # Hands this result back to the stage that called this function.
-0067 | 
-0068 | 
+0067 |
+0068 |
 0069 | if __name__ == "__main__":
      # Runs the command-line entry point only when this file is executed directly.
 0070 |     p = build()

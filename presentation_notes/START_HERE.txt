@@ -28,8 +28,9 @@ Useful answers to remember:
 - An opening played as White and as Black counts as two behaviours.
 - A trial needs a complete 14-day follow-up. Late trials are excluded whether
   their outcome would be positive or negative.
-- The classroom demo recomputes on a real 60,000-game sample. The reported
-  January findings use the larger filtered study slice.
+- The fast classroom run recomputes on 20,000 real games. A 60,000-game
+  detailed demo is also available; the reported January findings use the
+  larger filtered study slice.
 - A rise in the raw curve alone is insufficient. Compare it with shuffled
   time to see whether the excess grows with different opponents.
 - Matching and held-out prediction are checks on the pattern. They do not

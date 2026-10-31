@@ -16,7 +16,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Imports a library or project module needed below.
 0007 | from src import config
      # Imports a library or project module needed below.
-0008 | 
+0008 |
 0009 | trials = pd.read_parquet(config.PROCESSED / "trials.parquet")
      # Loads a previously prepared game or trial table.
 0010 | # The findings filters need pre-aggregated opening/colour cells; this script

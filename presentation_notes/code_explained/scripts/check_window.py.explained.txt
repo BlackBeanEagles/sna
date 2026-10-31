@@ -4,36 +4,36 @@ Each numbered source line is followed by a plain-English comment.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Does the verdict depend on the 14-day adoption window?
-0002 | 
+0002 |
 0003 | The window is a researcher's choice, not a property of the data. The Build
 0004 | Guide says to pick one and state it, which the project does — but an unstated
 0005 | sensitivity is a free parameter an examiner can push on. This reruns the whole
 0006 | comparison at several windows.
-0007 | 
+0007 |
 0008 |     python scripts/check_window.py --windows 7 14 28 --reps 2
 0009 | """
 0010 | from __future__ import annotations
      # Imports a library or project module needed below.
-0011 | 
+0011 |
 0012 | import argparse
      # Imports a library or project module needed below.
 0013 | import sys
      # Imports a library or project module needed below.
 0014 | from pathlib import Path
      # Imports a library or project module needed below.
-0015 | 
+0015 |
 0016 | import pandas as pd
      # Imports a library or project module needed below.
-0017 | 
+0017 |
 0018 | ROOT = Path(__file__).resolve().parents[1]
      # Keeps this intermediate result under the name `ROOT`.
 0019 | sys.path.insert(0, str(ROOT))
      # Continues the current calculation or control flow.
-0020 | 
+0020 |
 0021 | from src import config, curve, events, nulls  # noqa: E402
      # Imports a library or project module needed below.
-0022 | 
-0023 | 
+0022 |
+0023 |
 0024 | def main():
      # Defines a reusable step; the following indented lines are its body.
 0025 |     ap = argparse.ArgumentParser()
@@ -48,12 +48,12 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Defines a command-line option for this script.
 0030 |     a = ap.parse_args()
      # Keeps this intermediate result under the name `a`.
-0031 | 
+0031 |
 0032 |     df = pd.read_parquet(a.games)
      # Loads a previously prepared game or trial table.
 0033 |     print(f"{len(df):,} games · windows {a.windows} · {a.reps} replicate(s)\n")
      # Prints this reading so a command-line run can be followed.
-0034 | 
+0034 |
 0035 |     rows = []
      # Calculates or stores the result rows collected for the output table for this stage.
 0036 |     for w in a.windows:
@@ -106,7 +106,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Compares the observed adoption rate with the shuffled-time reference rate.
 0061 |               f"{rows[-1]['verdict']}")
      # Continues the current calculation or control flow.
-0062 | 
+0062 |
 0063 |     out = pd.DataFrame(rows)
      # Creates a labelled table from the collected rows.
 0064 |     p = config.TABLES / "window_sensitivity.csv"
@@ -119,8 +119,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Prints this reading so a command-line run can be followed.
 0068 |     print(f"wrote {p}")
      # Prints this reading so a command-line run can be followed.
-0069 | 
-0070 | 
+0069 |
+0070 |
 0071 | if __name__ == "__main__":
      # Runs the command-line entry point only when this file is executed directly.
 0072 |     main()

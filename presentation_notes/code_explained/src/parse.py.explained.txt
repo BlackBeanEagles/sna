@@ -4,19 +4,19 @@ Each numbered source line is followed by a plain-English comment.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Step 2 -- PGN -> one Parquet event table. Nothing downstream re-reads PGN.
-0002 | 
+0002 |
 0003 | A hand-rolled header scanner, not python-chess's full game parser: on a real
 0004 | Lichess month we need millions of games/minute, and we only ever want the
 0005 | headers plus the first few plies. Handles plain .pgn and zstd-compressed
 0006 | .pgn.zst transparently.
-0007 | 
+0007 |
 0008 | Row schema:
 0009 |     game_id, ts, white, black, white_rating, black_rating,
 0010 |     eco, opening, ply_key, speed, result
 0011 | """
 0012 | from __future__ import annotations
      # Imports a library or project module needed below.
-0013 | 
+0013 |
 0014 | import argparse
      # Imports a library or project module needed below.
 0015 | import io
@@ -31,25 +31,25 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Imports a library or project module needed below.
 0020 | from pathlib import Path
      # Imports a library or project module needed below.
-0021 | 
+0021 |
 0022 | import pandas as pd
      # Imports a library or project module needed below.
-0023 | 
+0023 |
 0024 | from . import config
      # Imports a library or project module needed below.
-0025 | 
+0025 |
 0026 | TAG_RE = re.compile(r'^\[([A-Za-z0-9_]+)\s+"(.*)"\]\s*$')
      # Keeps this intermediate result under the name `TAG_RE`.
 0027 | # strip move numbers, clock comments, NAGs, evals and result tokens
 0028 | CLEAN_RE = re.compile(r"\{[^}]*\}|\$\d+|\d+\.(\.\.)?|[?!]+|1-0|0-1|1/2-1/2|\*")
      # Keeps this intermediate result under the name `CLEAN_RE`.
-0029 | 
+0029 |
 0030 | WANTED = ("Event", "Site", "White", "Black", "Result", "UTCDate", "UTCTime",
      # Keeps this intermediate result under the name `WANTED`.
 0031 |           "WhiteElo", "BlackElo", "ECO", "Opening", "TimeControl", "Termination")
      # Part of the value, collection, or call spanning several lines.
-0032 | 
-0033 | 
+0032 |
+0033 |
 0034 | def _open(path):
      # Text stream over a local .pgn, a local .pgn.zst, or a remote .pgn.zst URL.
 0035 |     """Text stream over a local .pgn, a local .pgn.zst, or a remote .pgn.zst
@@ -89,16 +89,16 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `errors`.
 0054 |     return open(path, "r", encoding="utf-8", errors="replace")
      # Hands this result back to the stage that called this function.
-0055 | 
-0056 | 
+0055 |
+0056 |
 0057 | def _ply_key(movetext: str, depth: int) -> str:
      # Defines a reusable step; the following indented lines are its body.
 0058 |     toks = [t for t in CLEAN_RE.sub(" ", movetext).split() if t]
      # Keeps this intermediate result under the name `toks`.
 0059 |     return " ".join(toks[:depth])
      # Hands this result back to the stage that called this function.
-0060 | 
-0061 | 
+0060 |
+0061 |
 0062 | def _speed(event: str) -> str | None:
      # Defines a reusable step; the following indented lines are its body.
 0063 |     for s in ("Bullet", "Blitz", "Rapid", "Classical", "Correspondence"):
@@ -109,8 +109,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Hands this result back to the stage that called this function.
 0066 |     return None
      # Hands this result back to the stage that called this function.
-0067 | 
-0068 | 
+0067 |
+0068 |
 0069 | def iter_games(path, limit: int | None = None):
      # Yield header dicts + movetext, one per game, streaming.
 0070 |     """Yield header dicts + movetext, one per game, streaming."""
@@ -164,8 +164,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Checks this condition before running the next indented block.
 0097 |         yield tags, " ".join(moves)
      # Continues the current calculation or control flow.
-0098 | 
-0099 | 
+0098 |
+0099 |
 0100 | def parse(path, limit: int | None = None, ply_depth: int | None = None,
      # Scan PGN into the filtered game table used throughout the project.
 0101 |           apply_filters: bool = True, progress: int = 0,
@@ -173,7 +173,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0102 |           on_progress=None, should_stop=None) -> pd.DataFrame:
      # Keeps this intermediate result under the name `on_progress`.
 0103 |     """Scan PGN into the filtered game table used throughout the project.
-0104 | 
+0104 |
 0105 |     The input is streamed, so a compressed month need not fit in memory as
 0106 |     text. `on_progress` updates the live UI; `should_stop` lets it cancel.
 0107 |     Filtering here fixes the study population before network analysis.
@@ -184,7 +184,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0111 |     seen = 0
      # Calculates or stores the set of opponents already counted for this stage.
-0112 | 
+0112 |
 0113 |     for tags, movetext in iter_games(path, limit=limit):
      # Processes each item from this collection in turn.
 0114 |         seen += 1
@@ -273,14 +273,14 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Handles this specific failure without hiding other errors.
 0157 |             skipped["error"] += 1
      # Continues the current calculation or control flow.
-0158 | 
+0158 |
 0159 |     df = pd.DataFrame(rows, columns=[
      # Creates a labelled table from the collected rows.
 0160 |         "game_id", "ts", "white", "black", "white_rating", "black_rating",
      # Part of the value, collection, or call spanning several lines.
 0161 |         "eco", "opening", "ply_key", "speed", "result"])
      # Part of the value, collection, or call spanning several lines.
-0162 | 
+0162 |
 0163 |     if apply_filters and len(df):
      # Checks this condition before running the next indented block.
 0164 |         top = df["eco"].value_counts().head(config.TOP_N_OPENINGS).index
@@ -300,19 +300,19 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Calculates or stores the game table for this stage.
 0172 |         skipped["low_activity"] = before - len(df)
      # Continues the current calculation or control flow.
-0173 | 
+0173 |
 0174 |     df = df.sort_values("ts").reset_index(drop=True)
      # Orders the rows by this field before the next calculation.
 0175 |     df.attrs["skipped"] = dict(skipped)
      # Continues the current calculation or control flow.
 0176 |     return df
      # Hands this result back to the stage that called this function.
-0177 | 
-0178 | 
+0177 |
+0178 |
 0179 | def load_games(path) -> pd.DataFrame:
      # Read a parsed games table, refusing simulated data.
 0180 |     """Read a parsed games table, refusing simulated data.
-0181 | 
+0181 |
 0182 |     src/simulate.py writes players named `sim_00001`. A synthetic table left
 0183 |     sitting at the default path is silently analysed as though it were real --
 0184 |     which is exactly what happened once, and the numbers looked plausible.
@@ -337,8 +337,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0196 |     return df
      # Hands this result back to the stage that called this function.
-0197 | 
-0198 | 
+0197 |
+0198 |
 0199 | def run(src, out: Path, limit=None, apply_filters=True,
      # Defines a reusable step; the following indented lines are its body.
 0200 |         progress: int = 0) -> pd.DataFrame:
@@ -349,8 +349,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Saves a compact table for later analysis stages.
 0203 |     return df
      # Hands this result back to the stage that called this function.
-0204 | 
-0205 | 
+0204 |
+0205 |
 0206 | if __name__ == "__main__":
      # Runs the command-line entry point only when this file is executed directly.
 0207 |     ap = argparse.ArgumentParser()

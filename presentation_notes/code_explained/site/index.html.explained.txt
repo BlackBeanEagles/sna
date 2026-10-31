@@ -579,7 +579,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Adds the `div` page element shown or read by the browser.
 0288 |   </dl>
      # Closes the preceding element or code block.
-0289 | 
+0289 |
 0290 |   <section class="section" id="evidence">
      # Adds the `section` page element shown or read by the browser.
 0291 |     <div class="section-head"><span class="section-index">01 / Explore</span><div>
@@ -630,7 +630,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Adds the `p` page element shown or read by the browser.
 0314 |   </section>
      # Closes the preceding element or code block.
-0315 | 
+0315 |
 0316 |   <section class="section" id="controls">
      # Adds the `section` page element shown or read by the browser.
 0317 |     <div class="section-head"><span class="section-index">02 / Compare</span><div>
@@ -681,7 +681,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Closes the preceding element or code block.
 0340 |   </section>
      # Closes the preceding element or code block.
-0341 | 
+0341 |
 0342 |   <section class="section" id="method">
      # Adds the `section` page element shown or read by the browser.
 0343 |     <div class="section-head"><span class="section-index">03 / Method</span><div>

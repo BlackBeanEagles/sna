@@ -4,36 +4,36 @@ Each numbered source line is followed by a plain-English comment.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Step 7b -- the held-out predictive check.
-0002 | 
+0002 |
 0003 | Use an initial observation period to build fixed background features, then
 0004 | hold out entire player-opening-colour spells. A 14-day outcome window in a
 0005 | 31-day archive leaves too little time for a clean temporal train/test split;
 0006 | grouping spells prevents one adoption from appearing in both sets.
-0007 | 
+0007 |
 0008 | The question is not "can adoption be predicted?" but "what explains it?", so
 0009 | the models are nested and the gaps are the result:
-0010 | 
+0010 |
 0011 |     BASELINE    popularity, rating, activity
 0012 |     REPERTOIRE  + how close the opening sits to what the player already plays
 0013 |     NETWORK     + exposure counts, diversity, and centrality
-0014 | 
+0014 |
 0015 | and then the network block is taken apart, because it bundles two claims that
 0016 | mean opposite things here: how MANY opponents played it at you (exposure,
 0017 | which simple contagion says matters) versus how DIVERSE they were (which is
 0018 | what complex contagion requires).
-0019 | 
+0019 |
 0020 | Gradient boosting is the primary model. Logistic regression is reported
 0021 | alongside as a simpler comparison. The held-out model gaps are descriptive:
 0022 | they do not establish that an opponent caused adoption.
 0023 | """
 0024 | from __future__ import annotations
      # Imports a library or project module needed below.
-0025 | 
+0025 |
 0026 | import argparse
      # Imports a library or project module needed below.
 0027 | from pathlib import Path
      # Imports a library or project module needed below.
-0028 | 
+0028 |
 0029 | import pandas as pd
      # Imports a library or project module needed below.
 0030 | from sklearn.ensemble import HistGradientBoostingClassifier
@@ -48,10 +48,10 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Imports a library or project module needed below.
 0035 | from sklearn.preprocessing import StandardScaler
      # Imports a library or project module needed below.
-0036 | 
+0036 |
 0037 | from . import config, features, parse
      # Imports a library or project module needed below.
-0038 | 
+0038 |
 0039 | NESTED = {
      # Keeps this intermediate result under the name `NESTED`.
 0040 |     "baseline": features.BASELINE,
@@ -59,7 +59,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0042 |     "network": features.NETWORK,
 0043 | }
      # Closes the data structure or function call started above.
-0044 | 
+0044 |
 0045 | # what each part of the network block is worth on its own
 0046 | DECOMPOSE = {
      # Keeps this intermediate result under the name `DECOMPOSE`.
@@ -68,8 +68,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0049 |     "plus_centrality_only": features.REPERTOIRE + ["degree", "kcore", "betweenness"],
 0050 | }
      # Closes the data structure or function call started above.
-0051 | 
-0052 | 
+0051 |
+0052 |
 0053 | def _gbm(train, test, cols):
      # Defines a reusable step; the following indented lines are its body.
 0054 |     m = HistGradientBoostingClassifier(max_iter=300, learning_rate=0.06,
@@ -82,8 +82,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Measures how well the model ranks adopters above non-adopters on held-out data.
 0058 |             roc_auc_score(train["adopted"], m.predict_proba(train[cols])[:, 1]))
      # Measures how well the model ranks adopters above non-adopters on held-out data.
-0059 | 
-0060 | 
+0059 |
+0060 |
 0061 | def _logistic(train, test, cols):
      # Defines a reusable step; the following indented lines are its body.
 0062 |     m = make_pipeline(StandardScaler(),
@@ -98,24 +98,24 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Measures how well the model ranks adopters above non-adopters on held-out data.
 0067 |                          m.predict_proba(test[cols].fillna(0.0))[:, 1])
      # Gets each trial's predicted probability of later adoption.
-0068 | 
-0069 | 
+0068 |
+0069 |
 0070 | def evaluate(games: pd.DataFrame, trials: pd.DataFrame,
      # The whole check, on data already in memory.
 0071 |              full: bool = True) -> dict:
      # Keeps this intermediate result under the name `full`.
 0072 |     """The whole check, on data already in memory.
-0073 | 
+0073 |
 0074 |     `run()` is the file-based entry point; the live console holds the frames
 0075 |     already and calls this directly, so both go through identical code.
-0076 | 
+0076 |
 0077 |     `full=False` fits only the three nested models, skipping the network-block
 0078 |     decomposition and the logistic comparison. That is nine model fits down to
 0079 |     three. The console runs inside a process already holding the games, the
 0080 |     trials, the graph and the cached slice, and the full version pushed it to
 0081 |     9 GB and into the pagefile; the decomposition belongs in the CLI, where
 0082 |     nothing else is resident.
-0083 | 
+0083 |
 0084 |     Presentation point: compare held-out AUC for baseline, then repertoire,
 0085 |     then network features. An AUC gain shows predictive signal, not causation.
 0086 |     """
@@ -149,7 +149,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Checks this condition before running the next indented block.
 0102 |         return {"error": "not enough class variation in one of the splits"}
      # Hands this result back to the stage that called this function.
-0103 | 
+0103 |
 0104 |     out = {
      # Calculates or stores the output value for this stage.
 0105 |         "n_train": int(len(train)), "n_test": int(len(test)),
@@ -164,7 +164,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Part of the value, collection, or call spanning several lines.
 0110 |     }
      # Closes the data structure or function call started above.
-0111 | 
+0111 |
 0112 |     auc = {}
      # Keeps this intermediate result under the name `auc`.
 0113 |     for name, cols in NESTED.items():
@@ -181,12 +181,12 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Checks this condition before running the next indented block.
 0119 |             out[f"logistic_{name}"] = round(float(_logistic(train, test, cols)), 4)
      # Continues the current calculation or control flow.
-0120 | 
+0120 |
 0121 |     out["gain_repertoire_over_baseline"] = round(auc["repertoire"] - auc["baseline"], 4)
      # Continues the current calculation or control flow.
 0122 |     out["gain_network_over_repertoire"] = round(auc["network"] - auc["repertoire"], 4)
      # Continues the current calculation or control flow.
-0123 | 
+0123 |
 0124 |     if full:
      # Checks this condition before running the next indented block.
 0125 |         for name, cols in DECOMPOSE.items():
@@ -217,11 +217,11 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0138 |             f"{out['gain_network_over_repertoire']:+.4f} on top of it")
      # Continues the current calculation or control flow.
-0139 | 
+0139 |
 0140 |     return out
      # Hands this result back to the stage that called this function.
-0141 | 
-0142 | 
+0141 |
+0142 |
 0143 | def run(trials_path: Path, games_path: Path) -> dict:
      # Defines a reusable step; the following indented lines are its body.
 0144 |     out = evaluate(parse.load_games(games_path), pd.read_parquet(trials_path))
@@ -230,8 +230,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Creates a labelled table from the collected rows.
 0146 |     return out
      # Hands this result back to the stage that called this function.
-0147 | 
-0148 | 
+0147 |
+0148 |
 0149 | if __name__ == "__main__":
      # Runs the command-line entry point only when this file is executed directly.
 0150 |     ap = argparse.ArgumentParser()

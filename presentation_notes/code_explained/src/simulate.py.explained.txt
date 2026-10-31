@@ -4,18 +4,18 @@ Each numbered source line is followed by a plain-English comment.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Synthetic Lichess-format PGN with a KNOWN contagion rule.
-0002 | 
+0002 |
 0003 | Build Guide Step 1: prove the pipeline end to end on a small slice before
 0004 | touching a 30 GB dump. This generator is also the pipeline's unit test --
 0005 | it plants a complex-contagion signal (adoption hazard rises with the number
 0006 | of DISTINCT exposers) and the analysis should recover it, while the
 0007 | timestamp-shuffled null should destroy it.
-0008 | 
+0008 |
 0009 | Usage:  python -m src.simulate --players 600 --games 40000
 0010 | """
 0011 | from __future__ import annotations
      # Imports a library or project module needed below.
-0012 | 
+0012 |
 0013 | import argparse
      # Imports a library or project module needed below.
 0014 | import math
@@ -24,15 +24,15 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Imports a library or project module needed below.
 0016 | from datetime import datetime, timedelta
      # Imports a library or project module needed below.
-0017 | 
+0017 |
 0018 | import chess
      # Imports a library or project module needed below.
 0019 | import chess.pgn
      # Imports a library or project module needed below.
-0020 | 
+0020 |
 0021 | from . import config
      # Imports a library or project module needed below.
-0022 | 
+0022 |
 0023 | # (ECO, name, SAN move list) -- real openings, legal from the start position.
 0024 | OPENINGS = [
      # Keeps this intermediate result under the name `OPENINGS`.
@@ -66,13 +66,13 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `ECOS`.
 0039 | BY_ECO = {o[0]: o for o in OPENINGS}
      # Keeps this intermediate result under the name `BY_ECO`.
-0040 | 
+0040 |
 0041 | SPEEDS = ["Rapid", "Blitz", "Classical"]
      # Keeps this intermediate result under the name `SPEEDS`.
 0042 | TIME_CONTROLS = {"Rapid": "600+0", "Blitz": "180+2", "Classical": "1800+0"}
      # Keeps this intermediate result under the name `TIME_CONTROLS`.
-0043 | 
-0044 | 
+0043 |
+0044 |
 0045 | def adoption_hazard(d: int, *, base: float, gain: float, lam: float) -> float:
      # Complex contagion: probability rises with DISTINCT exposers d.
 0046 |     """Complex contagion: probability rises with DISTINCT exposers d."""
@@ -82,8 +82,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Hands this result back to the stage that called this function.
 0049 |     return min(1.0, base + gain * (1.0 - math.exp(-lam * d)))
      # Hands this result back to the stage that called this function.
-0050 | 
-0051 | 
+0050 |
+0051 |
 0052 | def build_population(n_players: int, n_communities: int, rng: random.Random):
      # Defines a reusable step; the following indented lines are its body.
 0053 |     players, community = [], {}
@@ -107,8 +107,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `weight`.
 0063 |     return players, community, rating, weight
      # Hands this result back to the stage that called this function.
-0064 | 
-0065 | 
+0064 |
+0065 |
 0066 | def pick_opponent(u, players, community, weight, rng, p_within=0.8):
      # Defines a reusable step; the following indented lines are its body.
 0067 |     for _ in range(40):
@@ -131,8 +131,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Hands this result back to the stage that called this function.
 0076 |     return v
      # Hands this result back to the stage that called this function.
-0077 | 
-0078 | 
+0077 |
+0078 |
 0079 | def play_out(eco: str, rng: random.Random, extra_plies: int = 12) -> str:
      # SAN movetext: the book line plus random legal continuation.
 0080 |     """SAN movetext: the book line plus random legal continuation."""
@@ -162,8 +162,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0093 |     return " ".join(sans)
      # Hands this result back to the stage that called this function.
-0094 | 
-0095 | 
+0094 |
+0095 |
 0096 | def simulate(n_players=600, n_games=40000, days=30, n_communities=6,
      # Write PGN with a planted distinct-opponent adoption rule.
 0097 |              base=0.0015, gain=0.06, lam=0.55, seed=config.RANDOM_SEED,
@@ -171,7 +171,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0098 |              out_path=None):
      # Keeps this intermediate result under the name `out_path`.
 0099 |     """Write PGN with a planted distinct-opponent adoption rule.
-0100 | 
+0100 |
 0101 |     Use this to check whether the pipeline can detect a rule we know was put
 0102 |     into the data. It is separate from the real January 2016 study.
 0103 |     """
@@ -179,7 +179,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `rng`.
 0105 |     players, community, rating, weight = build_population(n_players, n_communities, rng)
      # Continues the current calculation or control flow.
-0106 | 
+0106 |
 0107 |     # repertoire[(player, colour)] -> set of ECOs the player will actually play
 0108 |     repertoire = {}
      # Keeps this intermediate result under the name `repertoire`.
@@ -192,14 +192,14 @@ These files are speaking references; run the originals in src/, server/, site/ a
 0112 |     # exposers[(player, eco, colour)] -> set of distinct opponents seen playing it
 0113 |     exposers: dict[tuple[str, str, str], set[str]] = {}
      # Keeps this intermediate result under the name `exposers`.
-0114 | 
+0114 |
 0115 |     start = datetime(2026, 3, 1, 0, 0, 0)
      # Keeps this intermediate result under the name `start`.
 0116 |     out_path = out_path or (config.RAW / "simulated.pgn")
      # Keeps this intermediate result under the name `out_path`.
 0117 |     n_written = 0
      # Keeps this intermediate result under the name `n_written`.
-0118 | 
+0118 |
 0119 |     with open(out_path, "w", encoding="utf-8") as fh:
      # Opens a resource and guarantees cleanup when the block ends.
 0120 |         for g in range(n_games):
@@ -214,13 +214,13 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `v`.
 0125 |             white, black = (u, v) if rng.random() < 0.5 else (v, u)
      # Continues the current calculation or control flow.
-0126 | 
+0126 |
 0127 |             # the ECO of a game is jointly produced: whoever "leads" it here
 0128 |             chooser, chooser_colour = (white, "W") if rng.random() < 0.5 else (black, "B")
      # Continues the current calculation or control flow.
 0129 |             eco = rng.choice(sorted(repertoire[(chooser, chooser_colour)]))
      # Keeps this intermediate result under the name `eco`.
-0130 | 
+0130 |
 0131 |             # --- exposure + adoption (ground truth) ------------------------
 0132 |             for actor, observer, colour in ((white, black, "W"), (black, white, "B")):
      # Processes both sides of each game as a performance and an exposure.
@@ -238,7 +238,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `gain`.
 0139 |                         repertoire[(observer, colour)].add(eco)
      # Continues the current calculation or control flow.
-0140 | 
+0140 |
 0141 |             speed = rng.choices(SPEEDS, weights=[0.5, 0.35, 0.15], k=1)[0]
      # Keeps this intermediate result under the name `speed`.
 0142 |             result = rng.choices(["1-0", "0-1", "1/2-1/2"], weights=[.49, .46, .05], k=1)[0]
@@ -271,15 +271,15 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Closes the data structure or function call started above.
 0156 |             n_written += 1
      # Continues the current calculation or control flow.
-0157 | 
+0157 |
 0158 |     return {"path": out_path, "games": n_written, "players": n_players,
      # Hands this result back to the stage that called this function.
 0159 |             "ground_truth": {"base": base, "gain": gain, "lam": lam,
      # Part of the value, collection, or call spanning several lines.
 0160 |                              "rule": "complex contagion in distinct exposers d"}}
      # Part of the value, collection, or call spanning several lines.
-0161 | 
-0162 | 
+0161 |
+0162 |
 0163 | if __name__ == "__main__":
      # Runs the command-line entry point only when this file is executed directly.
 0164 |     ap = argparse.ArgumentParser()

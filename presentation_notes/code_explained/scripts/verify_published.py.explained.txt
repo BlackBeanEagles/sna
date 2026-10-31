@@ -4,21 +4,21 @@ Each numbered source line is followed by a plain-English comment.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Re-derive the published core metrics and check results/report.json.
-0002 | 
+0002 |
 0003 | The committed results were produced at one point in time; the code has changed
 0004 | since. This re-runs the analysis stages on the cached slice with whatever the
 0005 | code says *today* and compares, so "the published numbers are reproducible" is
 0006 | a thing that gets checked rather than assumed.
-0007 | 
+0007 |
 0008 | It deliberately does not re-parse the archive -- that needs the network -- so
 0009 | it verifies the analysis, not the parser. Anything the parser changed is out of
 0010 | its reach and has to be re-run from the raw month.
-0011 | 
+0011 |
 0012 |     python scripts/verify_published.py
 0013 | """
 0014 | from __future__ import annotations
      # Imports a library or project module needed below.
-0015 | 
+0015 |
 0016 | import argparse
      # Imports a library or project module needed below.
 0017 | import json
@@ -27,19 +27,19 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Imports a library or project module needed below.
 0019 | from pathlib import Path
      # Imports a library or project module needed below.
-0020 | 
+0020 |
 0021 | import pandas as pd
      # Imports a library or project module needed below.
-0022 | 
+0022 |
 0023 | ROOT = Path(__file__).resolve().parents[1]
      # Keeps this intermediate result under the name `ROOT`.
 0024 | sys.path.insert(0, str(ROOT))
      # Continues the current calculation or control flow.
-0025 | 
+0025 |
 0026 | from src import config, curve, events, matching, nulls, parse  # noqa: E402
      # Imports a library or project module needed below.
-0027 | 
-0028 | 
+0027 |
+0028 |
 0029 | def close(a, b, tol):
      # Defines a reusable step; the following indented lines are its body.
 0030 |     if a is None or b is None:
@@ -48,12 +48,12 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Hands this result back to the stage that called this function.
 0032 |     return abs(float(a) - float(b)) <= tol
      # Hands this result back to the stage that called this function.
-0033 | 
-0034 | 
+0033 |
+0034 |
 0035 | def main():
      # Recompute selected saved metrics before claiming reproducibility.
 0036 |     """Recompute selected saved metrics before claiming reproducibility.
-0037 | 
+0037 |
 0038 |     This reads the cached filtered games, so archive parsing itself remains
 0039 |     outside this check.
 0040 |     """
@@ -67,7 +67,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Defines a command-line option for this script.
 0045 |     a = ap.parse_args()
      # Keeps this intermediate result under the name `a`.
-0046 | 
+0046 |
 0047 |     published = json.loads(Path(a.report).read_text())
      # Decodes saved JSON text into Python data.
 0048 |     a.reps = a.reps or published.get("null_replicates", 3)
@@ -78,17 +78,17 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Prints this reading so a command-line run can be followed.
 0051 |           f"{len(set(df.white) | set(df.black)):,} players\n")
      # Continues the current calculation or control flow.
-0052 | 
+0052 |
 0053 |     checks: list[tuple[str, object, object, float]] = []
      # Keeps this intermediate result under the name `checks`.
-0054 | 
+0054 |
 0055 |     # Prediction and network summaries are intentionally outside this check.
 0056 |     # Refit prediction separately and reparse the archive to audit its source.
-0057 | 
+0057 |
 0058 |     # ---- sample -------------------------------------------------------
 0059 |     checks.append(("games parsed", len(df), published["parse"]["games"], 0))
      # Continues the current calculation or control flow.
-0060 | 
+0060 |
 0061 |     # ---- trials -------------------------------------------------------
 0062 |     trials = events.build_trials(df)
      # Calculates or stores the exposure-trial table for this stage.
@@ -98,7 +98,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Part of the value, collection, or call spanning several lines.
 0065 |                    published["trials"]["adoptions"], 0))
      # Continues the current calculation or control flow.
-0066 | 
+0066 |
 0067 |     # ---- curve --------------------------------------------------------
 0068 |     tables = curve.analyse(trials)
      # Keeps this intermediate result under the name `tables`.
@@ -116,7 +116,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Part of the value, collection, or call spanning several lines.
 0075 |                            pub_curve[d]["rate"], 0.0005))
      # Continues the current calculation or control flow.
-0076 | 
+0076 |
 0077 |     # ---- null ---------------------------------------------------------
 0078 |     null = nulls.run_null(df, n_reps=a.reps, kind="shuffle",
      # Calculates or stores the shuffled reference for this stage.
@@ -138,7 +138,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Compares the observed adoption rate with the shuffled-time reference rate.
 0087 |                            pub_null[d]["lift_over_null"], 0.02))
      # Compares the observed adoption rate with the shuffled-time reference rate.
-0088 | 
+0088 |
 0089 |     # ---- matched controls ---------------------------------------------
 0090 |     msum = matching.summarise(matching.build_matched(df))
      # Keeps this intermediate result under the name `msum`.
@@ -150,7 +150,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Part of the value, collection, or call spanning several lines.
 0094 |         checks.append((f"matched {key}", msum.get(key), pub_m.get(key), tol))
      # Continues the current calculation or control flow.
-0095 | 
+0095 |
 0096 |     # ---- verdict -------------------------------------------------------
 0097 |     v = curve.verdict(tables, cmp)
      # Keeps this intermediate result under the name `v`.
@@ -158,7 +158,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Keeps this intermediate result under the name `same_verdict`.
 0099 |         published["verdict"]["verdict"].split(":")[0]
      # Continues the current calculation or control flow.
-0100 | 
+0100 |
 0101 |     # ---- report --------------------------------------------------------
 0102 |     width = max(len(n) for n, _, _, _ in checks)
      # Keeps this intermediate result under the name `width`.
@@ -176,7 +176,7 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0109 |     print(f"\n  {'OK  ' if same_verdict else 'FAIL'}  verdict: {v['verdict'][:60]}")
      # Prints this reading so a command-line run can be followed.
-0110 | 
+0110 |
 0111 |     print(f"\n{len(checks) + 1 - failed - (not same_verdict)}/{len(checks) + 1} "
      # Prints this reading so a command-line run can be followed.
 0112 |           f"checks pass")
@@ -187,8 +187,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Continues the current calculation or control flow.
 0115 |     print("all checked core numbers are reproducible by the current code")
      # Prints this reading so a command-line run can be followed.
-0116 | 
-0117 | 
+0116 |
+0117 |
 0118 | if __name__ == "__main__":
      # Runs the command-line entry point only when this file is executed directly.
 0119 |     main()

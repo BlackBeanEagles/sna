@@ -4,38 +4,38 @@ Each numbered source line is followed by a plain-English comment.
 These files are speaking references; run the originals in src/, server/, site/ and scripts/.
 
 0001 | """Robustness check at ply granularity (proposal, Section 4 / Build Guide).
-0002 | 
+0002 |
 0003 | The main analysis defines a behaviour by ECO code, which is coarse: many
 0004 | distinct ideas share one code. Defining it by the first k plies is sharper but
 0005 | fragments the data, so it is a robustness check rather than the main result.
-0006 | 
+0006 |
 0007 | If the verdict flips between the two granularities, the ECO-level finding is an
 0008 | artefact of the coding scheme and must be reported as such.
-0009 | 
+0009 |
 0010 |     python scripts/check_ply.py --reps 3
 0011 | """
 0012 | from __future__ import annotations
      # Imports a library or project module needed below.
-0013 | 
+0013 |
 0014 | import argparse
      # Imports a library or project module needed below.
 0015 | import sys
      # Imports a library or project module needed below.
 0016 | from pathlib import Path
      # Imports a library or project module needed below.
-0017 | 
+0017 |
 0018 | import pandas as pd
      # Imports a library or project module needed below.
-0019 | 
+0019 |
 0020 | ROOT = Path(__file__).resolve().parents[1]
      # Keeps this intermediate result under the name `ROOT`.
 0021 | sys.path.insert(0, str(ROOT))
      # Continues the current calculation or control flow.
-0022 | 
+0022 |
 0023 | from src import config, curve, events, nulls  # noqa: E402
      # Imports a library or project module needed below.
-0024 | 
-0025 | 
+0024 |
+0025 |
 0026 | def analyse(df: pd.DataFrame, granularity: str, reps: int) -> dict:
      # Repeat the core comparison with one opening definition at a time.
 0027 |     """Repeat the core comparison with one opening definition at a time."""
@@ -76,8 +76,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Part of the value, collection, or call spanning several lines.
 0046 |     }
      # Closes the data structure or function call started above.
-0047 | 
-0048 | 
+0047 |
+0048 |
 0049 | def show(r: dict):
      # Defines a reusable step; the following indented lines are its body.
 0050 |     print(f"\n=== {r['granularity']} ===")
@@ -108,8 +108,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Compares the observed adoption rate with the shuffled-time reference rate.
 0063 |     print(f"  VERDICT: {v['verdict']}")
      # Prints this reading so a command-line run can be followed.
-0064 | 
-0065 | 
+0064 |
+0065 |
 0066 | def main():
      # Defines a reusable step; the following indented lines are its body.
 0067 |     ap = argparse.ArgumentParser()
@@ -124,21 +124,21 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Defines a command-line option for this script.
 0072 |     a = ap.parse_args()
      # Keeps this intermediate result under the name `a`.
-0073 | 
+0073 |
 0074 |     config.PLY_KEY_DEPTH = a.depth
      # Keeps this intermediate result under the name `PLY_KEY_DEPTH`.
 0075 |     df = pd.read_parquet(a.games)
      # Loads a previously prepared game or trial table.
 0076 |     print(f"{len(df):,} games · ply depth {a.depth} · {a.reps} null replicate(s)")
      # Prints this reading so a command-line run can be followed.
-0077 | 
+0077 |
 0078 |     results = [analyse(df, g, a.reps) for g in ("eco", "ply")]
      # Keeps this intermediate result under the name `results`.
 0079 |     for r in results:
      # Processes each item from this collection in turn.
 0080 |         show(r)
      # Continues the current calculation or control flow.
-0081 | 
+0081 |
 0082 |     ok = [r for r in results if "error" not in r]
      # Keeps this intermediate result under the name `ok`.
 0083 |     if len(ok) == 2:
@@ -161,8 +161,8 @@ These files are speaking references; run the originals in src/, server/, site/ a
      # Part of the value, collection, or call spanning several lines.
 0092 |                 index=False)
      # Keeps this intermediate result under the name `index`.
-0093 | 
-0094 | 
+0093 |
+0094 |
 0095 | if __name__ == "__main__":
      # Runs the command-line entry point only when this file is executed directly.
 0096 |     main()
